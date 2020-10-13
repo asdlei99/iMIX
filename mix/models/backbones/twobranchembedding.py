@@ -301,12 +301,8 @@ class MovieBottleneck(nn.Module):
         if self.cond_planes:
             self.cond = Modulation(
                 self.inplanes, self.cond_planes, compressed=self.compressed)
-            if self.use_se:
-                self.se = SEModule(self.planes * self.expansion, 4)
-            else:
-                self.se = None
-            # self.se = SEModule(self.planes *
-            #                    self.expansion, 4) if self.use_se else None
+            self.se = SEModule(self.planes *
+                               self.expansion, 4) if self.use_se else None
 
     def forward(
         self,
