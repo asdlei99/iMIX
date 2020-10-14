@@ -1,13 +1,11 @@
-import json
-import math
-from typing import Optional, Tuple, Type
-
-import numpy as np
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
+import torch
 from ..builder import EMBEDDING
+import numpy as np
+import json
+import torch.nn.functional as F
+from typing import Optional, Tuple, Type
+import math
 
 
 @EMBEDDING.register_module()

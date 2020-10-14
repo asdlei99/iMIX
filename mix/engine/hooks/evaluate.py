@@ -1,6 +1,6 @@
-import mix.utils.comm as comm
 from .base_hook import HookBase
 from .builder import HOOKS
+import mix.utils.comm as comm
 
 
 @HOOKS.register_module()

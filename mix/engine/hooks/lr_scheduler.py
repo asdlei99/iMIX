@@ -1,6 +1,6 @@
+from .base_hook import HookBase
 from collections import Counter
 
-from .base_hook import HookBase
 from .builder import HOOKS
 
 

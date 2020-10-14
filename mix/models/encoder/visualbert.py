@@ -1,16 +1,15 @@
-import logging
-import os
-import pickle
-
-import torch
 import torch.nn as nn
-from transformers.modeling_bert import (BertConfig, BertEmbeddings,
-                                        BertEncoder, BertLayerNorm, BertPooler,
-                                        BertPredictionHeadTransform,
-                                        BertPreTrainedModel)
-
-from mix.models.embedding import BertVisioLinguisticEmbeddings
+import torch
 from ..builder import ENCODER
+import os
+import logging
+import pickle
+from transformers.modeling_bert import (BertConfig, BertEmbeddings,
+                                        BertEncoder, BertLayerNorm,
+                                        BertPreTrainedModel,
+                                        BertPredictionHeadTransform,
+                                        BertPooler)
+from mix.models.embedding import BertVisioLinguisticEmbeddings
 
 logger = logging.getLogger(__name__)
 

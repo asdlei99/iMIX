@@ -1,17 +1,17 @@
-import logging
-import os
-from collections import OrderedDict
-
-import mix.engine.hooks as hooks
-import mix.utils.comm as comm
-from mix.evaluation import (DatasetEvaluator, VQAEvaluator,
-                            inference_on_dataset, print_csv_format)
-from mix.models import build_model
-from mix.solver import build_lr_scheduler, build_optimizer
+from ..data import build_mix_test_loader, build_mix_train_loader
 from mix.utils.logger import setup_logger
 from mix.utils.mix_checkpoint import MixCheckpointer
+from mix.models import build_model
+from mix.solver import build_lr_scheduler, build_optimizer
+import mix.engine.hooks as hooks
 from mix.utils.precise_bn import get_bn_modules
-from ..data import build_mix_test_loader, build_mix_train_loader
+import mix.utils.comm as comm
+from mix.evaluation import DatasetEvaluator, inference_on_dataset, print_csv_format
+from collections import OrderedDict
+from mix.evaluation import VQAEvaluator
+
+import logging
+import os
 
 
 class Organizer:
@@ -176,10 +176,12 @@ class Organizer:
                     results_i)
                 logger.info('Evaluation results for {} in csv format:'.format(
                     dataset_name))
-                print_csv_format(results_i)
+                # print_csv_format(results_i)
 
         if len(results) == 1:
             results = list(results.values())[0]
+
+        logger.info('test finish')
         return results
 
     def add_evaluate_hook(self):

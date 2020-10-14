@@ -1,14 +1,15 @@
-import math
-
-import torch
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
 import torch.nn as nn
+import torch
+import math
 import torch.nn.functional as F
-from transformers.modeling_bert import (BertConfig, BertEmbeddings,
-                                        BertEncoder, BertLayerNorm,
-                                        BertPreTrainedModel)
-
-from ..builder import (VQA_MODELS, build_backbone, build_combine_layer,
-                       build_embedding, build_encoder, build_head)
+from transformers.modeling_bert import (
+    BertConfig,
+    BertEmbeddings,
+    BertEncoder,
+    BertLayerNorm,
+    BertPreTrainedModel,
+)
 
 
 def _get_mask(nums, max_num):

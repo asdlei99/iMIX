@@ -1,12 +1,9 @@
-from collections import OrderedDict
-
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
+import torch.nn as nn
 import torch
 import torch.distributed as dist
-import torch.nn as nn
+from collections import OrderedDict
 import torch.nn.functional as func
-
-from ..builder import (VQA_MODELS, build_backbone, build_combine_layer,
-                       build_embedding, build_encoder, build_head)
 
 
 def filter_grads(parameters):
@@ -125,11 +122,11 @@ class MCAN(nn.Module):
                                              text_embedding_vec[:, 1])
 
         model_output = {'scores': self.head(joint_embedding)}
-        #return model_output
-
-        trip_loss = TripleLogitBinaryCrossEntropy().cuda()
-        losses = trip_loss(targets, model_output)
-        return dict(bce_loss=losses)
+        return model_output
+        #
+        # trip_loss = TripleLogitBinaryCrossEntropy().cuda()
+        # losses = trip_loss(targets, model_output)
+        # return dict(bce_loss=losses)
 
     def preprocess_data(self, batched_inputs):
 
@@ -185,7 +182,11 @@ class MCAN(nn.Module):
                 averaging the logs.
         """
         #losses = self(**data)
-        losses = self(data)
+        model_output = self(data)
+        targets = data['answers_scores']
+        trip_loss = TripleLogitBinaryCrossEntropy().cuda()
+        loss = trip_loss(targets, model_output)
+        losses = dict(bce_loss=loss)
         loss, log_vars = self._parse_losses(losses)
 
         outputs = dict(

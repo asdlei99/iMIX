@@ -1,19 +1,16 @@
-import allennlp
-import torch
 import torch.nn as nn
-from allennlp.modules import (FeedForward, InputVariationalDropout,
-                              Seq2SeqEncoder, TextFieldEmbedder,
-                              TimeDistributed)
-from allennlp.modules.matrix_attention import BilinearMatrixAttention
-from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import \
-    PytorchSeq2SeqWrapper
-from allennlp.nn import InitializerApplicator
-from allennlp.nn.util import (masked_softmax, replace_masked_values,
-                              weighted_sum)
-from torch.nn.utils.weight_norm import weight_norm
-
+import torch
 from ..builder import BACKBONES
 from ..combine_layers import ModalCombineLayer
+from torch.nn.utils.weight_norm import weight_norm
+import allennlp
+from allennlp.modules import TextFieldEmbedder, Seq2SeqEncoder, FeedForward, InputVariationalDropout, TimeDistributed
+from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
+
+from allennlp.modules.matrix_attention import BilinearMatrixAttention
+from allennlp.nn import InitializerApplicator
+
+from allennlp.nn.util import masked_softmax, weighted_sum, replace_masked_values
 
 
 @BACKBONES.register_module()

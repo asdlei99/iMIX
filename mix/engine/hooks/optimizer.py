@@ -1,6 +1,6 @@
+from .base_hook import HookBase
 from torch.nn.utils import clip_grad
 
-from .base_hook import HookBase
 from .builder import HOOKS
 
 

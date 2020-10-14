@@ -1,8 +1,7 @@
+from ..builder import COMBINE_LAYERS
 import torch
 import torch.nn as nn
 from torch.nn.utils.weight_norm import weight_norm
-
-from ..builder import COMBINE_LAYERS
 
 
 @COMBINE_LAYERS.register_module()

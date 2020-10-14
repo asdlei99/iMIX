@@ -7,12 +7,10 @@ import os
 import shutil
 import traceback
 from collections import OrderedDict
-from typing import (IO, Any, Callable, Dict, List, MutableMapping, Optional,
-                    Union)
+from typing import IO, Any, Callable, Dict, List, MutableMapping, Optional, Union
 from urllib.parse import urlparse
 
 import portalocker  # type: ignore
-
 from mix.utils.download import download
 
 __all__ = ['LazyPath', 'PathManager', 'get_cache_dir', 'file_lock']

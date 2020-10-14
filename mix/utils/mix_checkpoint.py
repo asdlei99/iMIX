@@ -1,9 +1,8 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import pickle
-
-import mix.utils.comm as comm
 from mix.utils.checkpoint import Checkpointer
 from mix.utils.file_io import PathManager
+import mix.utils.comm as comm
 
 # from .c2_model_loading import align_and_update_state_dicts #TODO(jinliang)
 

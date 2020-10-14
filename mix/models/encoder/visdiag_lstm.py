@@ -1,18 +1,19 @@
-import logging
-import os
-import pickle
-
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-from transformers.modeling_bert import (BertConfig, BertEmbeddings,
-                                        BertEncoder, BertLayerNorm,
-                                        BertPreTrainedModel)
-
+import torch
 from ..builder import ENCODER
-
+import os
+import logging
+from torch.autograd import Variable
+import torch.nn.functional as F
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+import pickle
+from transformers.modeling_bert import (
+    BertConfig,
+    BertEmbeddings,
+    BertEncoder,
+    BertLayerNorm,
+    BertPreTrainedModel,
+)
 logger = logging.getLogger(__name__)
 
 TEXT_BERT_HIDDEN_SIZE = 768

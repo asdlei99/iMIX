@@ -1,10 +1,8 @@
-import datetime
-import logging
-import time
-
-import torch
-
 from .log_buffer import LogBufferWriter, get_log_buffer
+import logging
+import datetime
+import time
+import torch
 
 
 class CommonMetricLoggerHook(LogBufferWriter):

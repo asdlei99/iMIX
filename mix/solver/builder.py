@@ -1,8 +1,7 @@
 import copy
 import inspect
-import logging
-
 import torch
+import logging
 
 from ..utils.registry import Registry, build_from_cfg
 

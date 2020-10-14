@@ -1,11 +1,9 @@
-from collections import defaultdict
-
 import torch
-from mmf.utils.configuration import get_mmf_cache_dir
-from mmf.utils.distributed import is_master, synchronize
 from mmf.utils.file_io import PathManager
+from mmf.utils.distributed import is_master, synchronize
+from mmf.utils.configuration import get_mmf_cache_dir
 from torchtext import vocab
-
+from collections import defaultdict
 from ..builder import EMBEDDING
 
 

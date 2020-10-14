@@ -6,7 +6,6 @@ import os
 import time
 from collections import defaultdict
 from contextlib import contextmanager
-
 import torch
 from fvcore.common.file_io import PathManager
 from fvcore.common.history_buffer import HistoryBuffer

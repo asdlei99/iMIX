@@ -1,11 +1,9 @@
-import datetime
-import logging
-import time
-
-from mix.utils.timer import Timer
 from .base_hook import HookBase
+import logging
+import datetime
+from mix.utils.timer import Timer
+import time
 from .builder import HOOKS
-
 # class IterationTimeHook(HookBase):
 #     """
 #     统计每次迭代时间、训练过程中总耗时及其单次平均耗时

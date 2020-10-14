@@ -1,13 +1,11 @@
-import logging
-import time
-
-import numpy as np
-import torch
-
-import mix.utils.comm as comm
-from mix.evaluation import verify_results
 from .base_engine import EngineBase
 from .organizer import Organizer
+import time
+import logging
+import torch
+import mix.utils.comm as comm
+import numpy as np
+from mix.evaluation import verify_results
 
 
 class CommonEngine(EngineBase):

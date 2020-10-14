@@ -1,5 +1,5 @@
-from mix.utils.checkpoint import PeriodicCheckpointer
 from ..base_hook import HookBase
+from mix.utils.checkpoint import PeriodicCheckpointer
 from ..builder import HOOKS
 
 

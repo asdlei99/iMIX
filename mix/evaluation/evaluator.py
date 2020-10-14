@@ -4,7 +4,6 @@ import logging
 import time
 from collections import OrderedDict
 from contextlib import contextmanager
-
 import torch
 
 from mix.utils.comm import get_world_size, is_main_process
@@ -135,6 +134,8 @@ def inference_on_dataset(model, data_loader, evaluator):
                 start_time = time.perf_counter()
                 total_compute_time = 0
 
+            logger.info('idx:{} batch_data_shape:{}'.format(
+                idx, inputs['input_ids'].shape))
             start_compute_time = time.perf_counter()
             outputs = model(inputs)
             if torch.cuda.is_available():

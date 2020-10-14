@@ -1,13 +1,13 @@
+from .builder import (ENCODER, EMBEDDING, HEADS, BACKBONES, COMBINE_LAYERS,
+                      VQA_MODELS, build_vqa_models, build_backbone, build_head,
+                      build_combine_layer, build_encoder, build_embedding,
+                      build_model)
 from .backbones import *
-from .builder import (BACKBONES, COMBINE_LAYERS, EMBEDDING, ENCODER, HEADS,
-                      VQA_MODELS, build_backbone, build_combine_layer,
-                      build_embedding, build_encoder, build_head, build_model,
-                      build_vqa_models)
-from .combine_layers import *
 from .embedding import *
 from .encoder import *
 from .heads import *
 from .vqa_models import *
+from .combine_layers import *
 
 __all__ = [
     'ENCODER',

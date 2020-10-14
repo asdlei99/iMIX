@@ -62,8 +62,8 @@ train_data = dict(
 
 #evaluation = dict(metric=['bbox', 'segm']) TODO(jinliang) mix-evaluation
 test_data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=2,
+    samples_per_gpu=16,
+    workers_per_gpu=4,
     # metric='',
     data=dict(
         type=dataset_type,

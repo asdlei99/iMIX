@@ -1,11 +1,9 @@
 from .imageencoder import ImageFeatureEncoder
-from .lcgnencoder import LCGNEncoder
 from .textbert import TextBertBase
-from .vilbert import (ViLBERTBase, ViLBERTForClassification,
-                      ViLBERTForPretraining)
-from .visdiag_lstm import VisDialANSEncoder, VisDialLSTM, VisDialPrincipleLSTM
-from .visualbert import (VisualBERTBase, VisualBERTForClassification,
-                         VisualBERTForPretraining)
+from .visdiag_lstm import VisDialLSTM, VisDialANSEncoder, VisDialPrincipleLSTM
+from .visualbert import VisualBERTBase, VisualBERTForClassification, VisualBERTForPretraining
+from .lcgnencoder import LCGNEncoder
+from .vilbert import ViLBERTBase, ViLBERTForClassification, ViLBERTForPretraining
 
 __all__ = [
     'ImageFeatureEncoder', 'TextBertBase', 'VisDialLSTM', 'VisDialANSEncoder',

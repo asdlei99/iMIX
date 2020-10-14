@@ -1,10 +1,8 @@
-import os
-import tempfile
-
-import torch
-
-from mix.utils.file_io import PathManager
 from .base_hook import HookBase
+from mix.utils.file_io import PathManager
+import os
+import torch
+import tempfile
 from .builder import HOOKS
 
 

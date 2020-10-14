@@ -1,13 +1,11 @@
-import json
-from copy import deepcopy
-
-import numpy as np
-import torch
 import torch.nn as nn
+import torch
+from ..builder import EMBEDDING
+from copy import deepcopy
+import numpy as np
+import json
 import torch.nn.functional as F
 from transformers.modeling_bert import BertEmbeddings, BertLayerNorm
-
-from ..builder import EMBEDDING
 
 
 @EMBEDDING.register_module()

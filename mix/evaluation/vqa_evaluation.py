@@ -5,18 +5,19 @@ import io
 import itertools
 import json
 import logging
+import numpy as np
 import os
 import pickle
 from collections import OrderedDict
 
-import numpy as np
 import torch
-from tabulate import tabulate
-
-import mix.utils.comm as comm
-from mix.utils.file_io import PathManager
-from mix.utils.logger import create_small_table
 from .evaluator import DatasetEvaluator
+
+from tabulate import tabulate
+from mix.utils.file_io import PathManager
+import mix.utils.comm as comm
+
+from mix.utils.logger import create_small_table
 
 
 class VQAEvaluator(DatasetEvaluator):
@@ -78,17 +79,26 @@ class VQAEvaluator(DatasetEvaluator):
         """
 
         # TODO(jinliang) prediction = {image_id=xxx,question=xxx,pred_score=xxx}
-        for input, output in zip(inputs, outputs):
-            prediction = {
-                'image_id': input['image_id'],
-                'answers_scores': input['answers_scores']
-            }
+        # for input, output in zip(inputs, outputs):
+        #     prediction = {
+        #         "input_ids": input["input_ids"],
+        #         "answers_scores": input["answers_scores"]
+        #     }
+        #
+        #     # TODO this is ugly
+        #     if "scores" in output:
+        #         scores = output["scores"].to(self._cpu_device)
+        #         prediction["scores"] = _get_accuracy(scores)
+        #
+        #     self._predictions.append(prediction)
 
-            # TODO this is ugly
-            if 'scores' in output:
-                scores = output['scores'].to(self._cpu_device)
-                prediction['scores'] = _get_accuracy(scores)
-
+        prediction = dict()
+        for idx in range(outputs['scores'].shape[0]):
+            prediction['input_ids'] = inputs['input_ids'][idx]
+            prediction['answers_scores'] = inputs['answers_scores'][idx]
+            score = outputs['scores'][idx].to(self._cpu_device)
+            prediction['scores'] = _get_accuracy(
+                score.view(-1, score.shape[0]))
             self._predictions.append(prediction)
 
     def evaluate(self):
@@ -115,7 +125,7 @@ class VQAEvaluator(DatasetEvaluator):
                 torch.save(predictions, f)
 
         self._results = OrderedDict()
-        if 'classification' in predictions[0]:
+        if 'classification' in self._tasks:
             self._eval_predictions(set(self._tasks), predictions)
         # Copy so the caller can do whatever with results
         return copy.deepcopy(self._results)
@@ -126,22 +136,32 @@ class VQAEvaluator(DatasetEvaluator):
         Fill self._results with the metrics of the tasks.
         """
         self._logger.info('Preparing results for COCO format ...')
-        vqa_results = list(
-            itertools.chain(*[x['scores'] for x in predictions]))
-        vqa_gt = list(
-            itertools.chain(*[x['answers_scores'] for x in predictions]))
+        # vqa_results = list(
+        #     itertools.chain([x["scores"] for x in predictions]))
+        # vqa_gt = list(
+        #     itertools.chain([x["answers_scores"] for x in predictions]))
+        pred_length = len(predictions)
+        results_size = (pred_length, predictions[0]['scores'].shape[0])
+        vqa_results = torch.zeros(results_size, dtype=torch.int64)
 
-        if self._output_dir:
-            file_path = os.path.join(self._output_dir,
-                                     'VQA_classification_results.json')
-            self._logger.info('Saving results to {}'.format(file_path))
-            with PathManager.open(file_path, 'w') as f:
-                f.write(json.dumps(vqa_results))
-                f.flush()
+        vqa_gt_size = (pred_length, predictions[0]['answers_scores'].shape[0])
+        vqa_gt = torch.zeros(vqa_gt_size, dtype=torch.float32)
 
-        if not self._do_evaluation:
-            self._logger.info('Annotations are not available for evaluation.')
-            return
+        for idx in range(pred_length):
+            vqa_results[idx] = predictions[idx]['scores']
+            vqa_gt[idx] = predictions[idx]['answers_scores']
+
+        # if self._output_dir:
+        #     file_path = os.path.join(self._output_dir,
+        #                              "VQA_classification_results.json")
+        #     self._logger.info("Saving results to {}".format(file_path))
+        #     with PathManager.open(file_path, "w") as f:
+        #         f.write(json.dumps(vqa_results))
+        #         f.flush()
+
+        # if not self._do_evaluation:
+        #     self._logger.info("Annotations are not available for evaluation.")
+        #     return
 
         self._logger.info('Evaluating predictions ...')
         for task in sorted(tasks):
@@ -152,7 +172,7 @@ class VQAEvaluator(DatasetEvaluator):
 
 def _get_accuracy(output):
     output = _masked_unk_softmax(output, 1, 0)
-    output = output.argmax(dim=1)  #argmax
+    output = output.argmax(dim=1)  # argmax
     return output
 
 
@@ -172,5 +192,6 @@ def _evaluate_predictions_on_vqa(vqa_gt, vqa_results):
     one_hots.scatter_(1, vqa_results.view(-1, 1), 1)
     scores = one_hots * vqa_gt
     vqa_accuracy = torch.sum(scores) / vqa_gt.size(0)
+    logging.info('vqa_accuracy:{}'.format(vqa_accuracy))
 
     return vqa_accuracy

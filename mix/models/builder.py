@@ -1,9 +1,8 @@
-import torch
 from torch import nn
-
-from mix.data.parallel.data_parallel import MMDataParallel
-from mix.data.parallel.distributed import MMDistributedDataParallel
+import torch
 from mix.utils.registry import Registry, build_from_cfg
+from mix.data.parallel.distributed import MMDistributedDataParallel
+from mix.data.parallel.data_parallel import MMDataParallel
 
 EMBEDDING = Registry('embedding')
 ENCODER = Registry('encoder')
@@ -85,7 +84,8 @@ def build_model(cfg):
             broadcast_buffers=False,
             find_unused_parameters=find_unused_parameters)
     else:
-        model = MMDataParallel(
-            model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+        # model = MMDataParallel(
+        #     model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+        model = model.cuda(cfg.gpu_ids[0])
 
     return model

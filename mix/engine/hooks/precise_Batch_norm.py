@@ -1,10 +1,9 @@
-import itertools
 import logging
-
 from mix.utils.precise_bn import get_bn_modules, update_bn_stats
 from .base_hook import HookBase
-from .builder import HOOKS
+import itertools
 from .periods.log_buffer import LogBufferStorage
+from .builder import HOOKS
 
 
 @HOOKS.register_module()

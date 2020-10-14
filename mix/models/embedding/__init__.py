@@ -1,7 +1,6 @@
-from .bertimgembedding import (BertImageFeatureEmbeddings,
-                               BertVisioLinguisticEmbeddings)
-from .textembedding import TextEmbedding
 from .wordembedding import WordEmbedding
+from .textembedding import TextEmbedding
+from .bertimgembedding import BertVisioLinguisticEmbeddings, BertImageFeatureEmbeddings
 
 __all__ = [
     'WordEmbedding', 'TextEmbedding', 'BertVisioLinguisticEmbeddings',

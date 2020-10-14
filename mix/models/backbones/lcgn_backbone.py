@@ -1,12 +1,11 @@
-import numpy as np
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-from torch.nn.utils.weight_norm import weight_norm
-
+import torch
 from ..builder import BACKBONES
+import torch.nn.functional as F
+import numpy as np
 from ..combine_layers import ModalCombineLayer
+from torch.nn.utils.weight_norm import weight_norm
+from torch.autograd import Variable
 
 
 class Linear(nn.Linear):

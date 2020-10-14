@@ -2,9 +2,7 @@
 import math
 from bisect import bisect_right
 from typing import List
-
 import torch
-
 from .builder import LR_SCHEDULERS
 
 # NOTE: PyTorch's LR scheduler interface uses names that assume the LR changes

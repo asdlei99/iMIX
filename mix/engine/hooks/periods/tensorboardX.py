@@ -1,5 +1,5 @@
-from ..builder import HOOKS
 from .log_buffer import LogBufferWriter, get_log_buffer
+from ..builder import HOOKS
 
 # @HOOKS.register_module()
 # class TensorboardXLoggerHook(LogBufferWriter):

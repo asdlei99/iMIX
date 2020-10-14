@@ -1,12 +1,9 @@
-import math
-
-import torch
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
 import torch.nn as nn
+import torch
+import math
 import torch.nn.functional as F
-
 from mix.models.backbones.lcgn_backbone import Linear, apply_mask1d
-from ..builder import (VQA_MODELS, build_backbone, build_combine_layer,
-                       build_embedding, build_encoder, build_head)
 
 
 @VQA_MODELS.register_module()

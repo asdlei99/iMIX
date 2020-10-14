@@ -6,9 +6,10 @@ import time
 from getpass import getuser
 from socket import gethostname
 
-import mmcv
 import numpy as np
 import torch
+
+import mmcv
 
 
 def get_host_info():

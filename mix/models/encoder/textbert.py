@@ -1,15 +1,16 @@
-import logging
-import os
-import pickle
-
-import torch
 import torch.nn as nn
-from transformers.modeling_bert import (BertConfig, BertEmbeddings,
-                                        BertEncoder, BertLayerNorm,
-                                        BertPreTrainedModel)
-
+import torch
 from ..builder import ENCODER
-
+import os
+import logging
+import pickle
+from transformers.modeling_bert import (
+    BertConfig,
+    BertEmbeddings,
+    BertEncoder,
+    BertLayerNorm,
+    BertPreTrainedModel,
+)
 logger = logging.getLogger(__name__)
 
 TEXT_BERT_HIDDEN_SIZE = 768

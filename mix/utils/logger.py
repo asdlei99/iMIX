@@ -5,10 +5,8 @@ import os
 import sys
 import time
 from collections import Counter
-
 from tabulate import tabulate
 from termcolor import colored
-
 from .file_io import PathManager
 
 

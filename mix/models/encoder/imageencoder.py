@@ -1,10 +1,8 @@
+import torch.nn as nn
+import torch
+from ..builder import ENCODER
 import os
 import pickle
-
-import torch
-import torch.nn as nn
-
-from ..builder import ENCODER
 
 
 @ENCODER.register_module()

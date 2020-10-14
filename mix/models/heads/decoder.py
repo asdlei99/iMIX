@@ -1,13 +1,11 @@
+import torch.nn as nn
+import torch
+from ..builder import HEADS
 import os
 import pickle
-
-import torch
-import torch.nn as nn
-
-from mix.models.backbones.lcgn_backbone import Linear
 from mix.models.combine_layers import ReLUWithWeightNormFC
+from mix.models.backbones.lcgn_backbone import Linear
 from mix.models.encoder.visdiag_lstm import DynamicRNN
-from ..builder import HEADS
 
 
 @HEADS.register_module()

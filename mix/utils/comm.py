@@ -6,9 +6,8 @@ This is useful when doing distributed training.
 
 import functools
 import logging
-import pickle
-
 import numpy as np
+import pickle
 import torch
 import torch.distributed as dist
 

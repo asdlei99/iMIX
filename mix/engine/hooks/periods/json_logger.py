@@ -1,9 +1,8 @@
-import json
-import os
-
+from .log_buffer import LogBufferWriter, get_log_buffer
 from mix.utils.file_io import PathManager
 from ..builder import HOOKS
-from .log_buffer import LogBufferWriter, get_log_buffer
+import json
+import os
 
 # @HOOKS.register_module()
 # class JSONLoggerHook(LogBufferWriter):

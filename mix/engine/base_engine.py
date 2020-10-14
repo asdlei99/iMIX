@@ -1,9 +1,8 @@
-import logging
-import weakref
 from abc import ABCMeta, abstractmethod
-
 import mix.engine.hooks as hooks
+import weakref
 from mix.engine.hooks.periods import LogBufferStorage
+import logging
 
 
 class EngineBase:

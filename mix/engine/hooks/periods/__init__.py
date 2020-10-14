@@ -1,8 +1,8 @@
 from .checkpoint import CheckPointHook
 from .common_metric import CommonMetricLoggerHook
 from .json_logger import JSONLoggerHook
-from .log_buffer import LogBufferStorage, LogBufferWriter, get_log_buffer
 from .tensorboardX import TensorboardXLoggerHook
+from .log_buffer import LogBufferWriter, LogBufferStorage, get_log_buffer
 
 __all__ = [
     'CheckPointHook', 'CommonMetricLoggerHook', 'JSONLoggerHook',

@@ -1,18 +1,17 @@
 import argparse
-import os
-import warnings
-
 import torch
-
+import os
+from mix.utils.config import Config
 from mix.engine.mix_engine import MixEngine
 from mix.engine.organizer import Organizer
-from mix.evaluation import verify_results
-from mix.utils import comm
-from mix.utils.collect_env import collect_env_info
-from mix.utils.config import Config
-from mix.utils.env import seed_all_rng
 from mix.utils.file_io import PathManager
+from mix.utils import comm
 from mix.utils.logger import setup_logger
+from mix.utils.env import seed_all_rng
+from mix.utils.collect_env import collect_env_info
+from mix.evaluation import verify_results
+import warnings
+from mix.utils.mix_checkpoint import MixCheckpointer
 
 
 def parse_args():
@@ -150,10 +149,12 @@ def init_set():
 
 def test(cfg):
     model = Organizer.build_model(cfg)
+    mix_ck = MixCheckpointer(model, save_dir=cfg.work_dir)
+    mix_ck.resume_or_load(cfg.load_from, resume=False)
     #TODO(jinliang): add to load the trained model
     result = Organizer.test(cfg, model)
-    if comm.is_main_process():
-        verify_results(cfg, result)
+    # if comm.is_main_process():
+    #     verify_results(cfg, result)
     return result
 
 

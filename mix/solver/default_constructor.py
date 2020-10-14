@@ -2,11 +2,10 @@ import warnings
 
 import torch
 from torch.nn import GroupNorm, LayerNorm
-
-from ..utils.misc import is_list_of
-from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
-from ..utils.registry import Registry, build_from_cfg
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
+from ..utils.registry import build_from_cfg, Registry
+from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
+from ..utils.misc import is_list_of
 
 
 @OPTIMIZER_BUILDERS.register_module()

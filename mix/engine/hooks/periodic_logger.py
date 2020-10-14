@@ -1,7 +1,7 @@
 from .base_hook import HookBase
-from .builder import HOOKS
 # from mix.utils.events import EventWriter
 from .periods import LogBufferWriter
+from .builder import HOOKS
 
 
 @HOOKS.register_module()

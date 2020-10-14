@@ -2,12 +2,11 @@
 import importlib
 import importlib.util
 import logging
+import numpy as np
 import os
 import random
 import sys
 from datetime import datetime
-
-import numpy as np
 import torch
 
 __all__ = ['seed_all_rng']
