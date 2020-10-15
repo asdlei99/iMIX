@@ -17,13 +17,14 @@ class OptimizerHook(HookBase):
             return clip_grad.clip_grad_norm_(params, **self._grad_clip)
 
     def after_iter(self):
-        self.trainer.optimizer.zero_grad()
-        self.trainer.output['loss'].backward()
-        if self._grad_clip is not None:
-            grad_norm = self._grad_clip(self.trainer.parameters())
-            if grad_norm is not None:
-                self.trainer.log_buffer.push_scalar(
-                    'grad_norm',
-                    float(grad_norm))  #TODO(jinliang) 缺少num_samples
-
-        self.trainer.optimizer.step()
+        pass
+        # self.trainer.optimizer.zero_grad()
+        # self.trainer.output['loss'].backward()
+        # if self._grad_clip is not None:
+        #     grad_norm = self._grad_clip(self.trainer.parameters())
+        #     if grad_norm is not None:
+        #         self.trainer.log_buffer.push_scalar(
+        #             'grad_norm',
+        #             float(grad_norm))  #TODO(jinliang) 缺少num_samples
+        #
+        # self.trainer.optimizer.step()

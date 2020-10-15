@@ -32,7 +32,7 @@ class CommonEngine(EngineBase):
             self.output = self.batch_processor(
                 batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
         else:
-            self.output = self.model.train_step(batch_data, self.optimizer)
+            self.output = self.model(batch_data)
 
         # TODO(jinliang) 缺少forward结果检查  -> utils模块内   -->simpleTrainer detect_anomaly
         # TODO(jinliang) 缺少backward -> optimizer 做backward
@@ -41,6 +41,17 @@ class CommonEngine(EngineBase):
         metrics_dict = self.output
         metrics_dict['data_time'] = data_time
         self._write_metrics(metrics_dict)
+
+        self.optimizer.zero_grad()
+        self.output['loss'].backward()
+        # if self._grad_clip is not None:
+        #     grad_norm = self._grad_clip(self.trainer.parameters())
+        #     if grad_norm is not None:
+        #         self.trainer.log_buffer.push_scalar(
+        #             'grad_norm',
+        #             float(grad_norm))  #TODO(jinliang) 缺少num_samples
+        #
+        self.optimizer.step()
 
     def _detect_anomaly(self, losses, loss_dict):
         if not torch.isfinite(losses).all():

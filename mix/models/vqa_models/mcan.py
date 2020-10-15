@@ -101,8 +101,46 @@ class MCAN(nn.Module):
     #
     #     return model_output
 
-    def forward(self, batched_inputs):
-        batch_data = self.preprocess_data(batched_inputs)
+    def forward(self, batch_data):  #TODO(jinliang): imitate Det2
+        if not self.training:
+            return self.inference(batch_data)
+
+        batch_data = self.preprocess_data(batch_data)
+
+        img_feat = batch_data['feature']
+        input_ids = batch_data['input_ids']
+        text_mask = batch_data['input_mask']
+        targets = batch_data['answers_scores']
+
+        ques_feat = self.embedding_model[0](input_ids)
+        # text_mask = ques_feat.eq(0)
+        text_embedding_total, text_embedding_vec = self.process_text_embedding(
+            ques_feat, text_mask)
+
+        feature_sga, feature_cbn = self.process_feature_embedding(
+            img_feat, text_embedding_total, text_embedding_vec[:, 0],
+            text_mask)
+
+        joint_embedding = self.combine_model(feature_sga, feature_cbn,
+                                             text_embedding_vec[:, 1])
+
+        model_output = {'scores': self.head(joint_embedding)}
+        trip_loss = TripleLogitBinaryCrossEntropy().cuda()
+        loss = trip_loss(targets, model_output)
+        losses = dict(bce_loss=loss)
+
+        loss, log_vars = self._parse_losses(losses)
+
+        outputs = dict(
+            loss=loss,
+            log_vars=log_vars,
+            num_samples=len(batch_data['feature']))
+        return outputs
+
+    def inference(self, batch_data):
+        assert not self.training
+
+        batch_data = self.preprocess_data(batch_data)
 
         img_feat = batch_data['feature']
         input_ids = batch_data['input_ids']
@@ -123,10 +161,6 @@ class MCAN(nn.Module):
 
         model_output = {'scores': self.head(joint_embedding)}
         return model_output
-        #
-        # trip_loss = TripleLogitBinaryCrossEntropy().cuda()
-        # losses = trip_loss(targets, model_output)
-        # return dict(bce_loss=losses)
 
     def preprocess_data(self, batched_inputs):
 
@@ -154,45 +188,45 @@ class MCAN(nn.Module):
 
         return batched_inputs
 
-    def train_step(self, data, optimizer):
-        """The iteration step during training.
-
-        This method defines an iteration step during training, except for the
-        back propagation and optimizer updating, which are done in an optimizer
-        hook. Note that in some complicated cases or models, the whole process
-        including back propagation and optimizer updating is also defined in
-        this method, such as GAN.
-
-        Args:
-            data (dict): The output of dataloader.
-            optimizer (:obj:`torch.optim.Optimizer` | dict): The optimizer of
-                runner is passed to ``train_step()``. This argument is unused
-                and reserved.
-
-        Returns:
-            dict: It should contain at least 3 keys: ``loss``, ``log_vars``, \
-                ``num_samples``.
-
-                - ``loss`` is a tensor for back propagation, which can be a \
-                weighted sum of multiple losses.
-                - ``log_vars`` contains all the variables to be sent to the
-                logger.
-                - ``num_samples`` indicates the batch size (when the model is \
-                DDP, it means the batch size on each GPU), which is used for \
-                averaging the logs.
-        """
-        #losses = self(**data)
-        model_output = self(data)
-        targets = data['answers_scores']
-        trip_loss = TripleLogitBinaryCrossEntropy().cuda()
-        loss = trip_loss(targets, model_output)
-        losses = dict(bce_loss=loss)
-        loss, log_vars = self._parse_losses(losses)
-
-        outputs = dict(
-            loss=loss, log_vars=log_vars, num_samples=len(data['feature']))
-
-        return outputs
+    # def train_step(self, data, optimizer):
+    #     """The iteration step during training.
+    #
+    #     This method defines an iteration step during training, except for the
+    #     back propagation and optimizer updating, which are done in an optimizer
+    #     hook. Note that in some complicated cases or models, the whole process
+    #     including back propagation and optimizer updating is also defined in
+    #     this method, such as GAN.
+    #
+    #     Args:
+    #         data (dict): The output of dataloader.
+    #         optimizer (:obj:`torch.optim.Optimizer` | dict): The optimizer of
+    #             runner is passed to ``train_step()``. This argument is unused
+    #             and reserved.
+    #
+    #     Returns:
+    #         dict: It should contain at least 3 keys: ``loss``, ``log_vars``, \
+    #             ``num_samples``.
+    #
+    #             - ``loss`` is a tensor for back propagation, which can be a \
+    #             weighted sum of multiple losses.
+    #             - ``log_vars`` contains all the variables to be sent to the
+    #             logger.
+    #             - ``num_samples`` indicates the batch size (when the model is \
+    #             DDP, it means the batch size on each GPU), which is used for \
+    #             averaging the logs.
+    #     """
+    #     # losses = self(**data)
+    #     model_output = self(data)
+    #     targets = data['answers_scores']
+    #     trip_loss = TripleLogitBinaryCrossEntropy().cuda()
+    #     loss = trip_loss(targets, model_output)
+    #     losses = dict(bce_loss=loss)
+    #     loss, log_vars = self._parse_losses(losses)
+    #
+    #     outputs = dict(
+    #         loss=loss, log_vars=log_vars, num_samples=len(data['feature']))
+    #
+    #     return outputs
 
     def _parse_losses(self, losses):
         """Parse the raw outputs (losses) of the network.

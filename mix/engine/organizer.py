@@ -9,6 +9,7 @@ import mix.utils.comm as comm
 from mix.evaluation import DatasetEvaluator, inference_on_dataset, print_csv_format
 from collections import OrderedDict
 from mix.evaluation import VQAEvaluator
+from torch.nn.parallel import DistributedDataParallel
 
 import logging
 import os
@@ -28,6 +29,13 @@ class Organizer:
         self.model = self.build_model(cfg)
         self.optimizer = self.build_optimizer(cfg, self.model)
         self.train_data_loader = self.build_train_loader(cfg)
+
+        if comm.get_world_size() > 1:
+            self.model = DistributedDataParallel(
+                self.model,
+                device_ids=[comm.get_local_rank()],
+                broadcast_buffers=False,
+                find_unused_parameters=True)
 
         self.scheduler = self.build_lr_scheduler(cfg, self.optimizer)
         self.checkpointer = MixCheckpointer(
@@ -79,7 +87,7 @@ class Organizer:
         if evaluator_type == 'VQA':
             return VQAEvaluator(dataset_name, cfg, True, output_folder)
 
-    def build_hooks(self):  #TODO(jinliang)
+    def build_hooks(self):  # TODO(jinliang)
         '''
         MIX框架hook初始化流程：
         1. 默认hook配置文件——默认且必须
@@ -119,7 +127,7 @@ class Organizer:
 
         return hook_list
 
-    def build_writers(self):  #TODO(jinliang) Modify based on cfg file
+    def build_writers(self):  # TODO(jinliang) Modify based on cfg file
         return [
             hooks.CommonMetricLoggerHook(self.max_iter),
             hooks.JSONLoggerHook(
