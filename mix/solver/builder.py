@@ -4,6 +4,7 @@ import torch
 import logging
 
 from ..utils.registry import Registry, build_from_cfg
+import mix.utils.comm as comm
 
 OPTIMIZERS = Registry('optimizer')
 OPTIMIZER_BUILDERS = Registry('optimizer builder')
@@ -47,6 +48,7 @@ def build_optimizer(optimizer_config, model):
 def build_lr_scheduler(
         lr_config, optimizer
 ):  #TODO(jinliang): The config file of LR does not match the code
+
     logger = logging.getLogger(__name__)
     try:
         assert 'policy' in lr_config
@@ -60,10 +62,11 @@ def build_lr_scheduler(
     except Exception as e:  #TODO(jinliang) capture build_from_cfg exception
         logger.error(e)
     else:
-        logger.info('Success in building learn rate scheduler')
+        #logger.info('Success in building learn rate scheduler')
         return lr_scheduler
     finally:
-        logger.info('build_lr_scheduler completion')
+        #logger.info('build_lr_scheduler completion')
+        pass
 
 
 def modify_lr_config(lr_config, optimizer):

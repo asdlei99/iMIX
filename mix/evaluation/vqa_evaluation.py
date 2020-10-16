@@ -18,6 +18,7 @@ from mix.utils.file_io import PathManager
 import mix.utils.comm as comm
 
 from mix.utils.logger import create_small_table
+from mix.models.vqa_models.mcan import list2dict
 
 
 class VQAEvaluator(DatasetEvaluator):
@@ -91,7 +92,7 @@ class VQAEvaluator(DatasetEvaluator):
         #         prediction["scores"] = _get_accuracy(scores)
         #
         #     self._predictions.append(prediction)
-
+        inputs = list2dict(inputs)  #TODO(jinliang)
         prediction = dict()
         for idx in range(outputs['scores'].shape[0]):
             prediction['input_ids'] = inputs['input_ids'][idx]

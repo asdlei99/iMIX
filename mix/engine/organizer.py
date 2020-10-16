@@ -31,11 +31,16 @@ class Organizer:
         self.train_data_loader = self.build_train_loader(cfg)
 
         if comm.get_world_size() > 1:
+            # self.model = DistributedDataParallel(
+            #     self.model,
+            #     device_ids=[comm.get_local_rank()],
+            #     broadcast_buffers=False,
+            #     find_unused_parameters=True)
             self.model = DistributedDataParallel(
                 self.model,
                 device_ids=[comm.get_local_rank()],
                 broadcast_buffers=False,
-                find_unused_parameters=True)
+                find_unused_parameters=cfg.find_unused_parameters)
 
         self.scheduler = self.build_lr_scheduler(cfg, self.optimizer)
         self.checkpointer = MixCheckpointer(

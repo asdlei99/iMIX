@@ -1,7 +1,7 @@
 # optimizer  transform.AdamW
 optimizer = dict(
-    type='AdamW', lr=0.0001, weight_decay=0,
-    eps=1e-9)  #mix_model_zrz_jin get_optimizer_parmeters??
+    type='AdamW', lr=0.00005, weight_decay=0, eps=1e-9,
+    betas=[0.9, 0.98])  # mix_model_zrz_jin get_optimizer_parmeters??
 optimizer_config = dict(grad_clip=None)  # ??
 # learning policy
 lr_config = dict(

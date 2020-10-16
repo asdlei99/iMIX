@@ -25,6 +25,7 @@ class MCAN(nn.Module):
             head)  ###包括 classification head， generation head
 
         # self.init_weights()
+        self.trip_loss = TripleLogitBinaryCrossEntropy()
 
     def get_optimizer_parameters(self, optimizer_params_lr,
                                  training_encoder_lr_multiply):
@@ -60,7 +61,6 @@ class MCAN(nn.Module):
         return params
 
     def process_text_embedding(self, text, text_mask):
-
         # Get embedding models
         text_embedding_model = self.embedding_model[-1]
         text_embedding_total, text_embedding_vec = text_embedding_model(
@@ -74,7 +74,6 @@ class MCAN(nn.Module):
                                   text_mask,
                                   vextra=None,
                                   batch_size_t=None):
-
         image_feature_0 = img_feat
         encoded_feature = self.encoder_model(image_feature_0)
         feature_sga, feature_cbn = self.backbone(encoded_feature,
@@ -101,7 +100,7 @@ class MCAN(nn.Module):
     #
     #     return model_output
 
-    def forward(self, batch_data):  #TODO(jinliang): imitate Det2
+    def forward(self, batch_data):  # TODO(jinliang): imitate Det2
         if not self.training:
             return self.inference(batch_data)
 
@@ -125,16 +124,22 @@ class MCAN(nn.Module):
                                              text_embedding_vec[:, 1])
 
         model_output = {'scores': self.head(joint_embedding)}
-        trip_loss = TripleLogitBinaryCrossEntropy().cuda()
-        loss = trip_loss(targets, model_output)
+
+        loss = self.trip_loss(targets, model_output)
         losses = dict(bce_loss=loss)
 
-        loss, log_vars = self._parse_losses(losses)
+        # loss, log_vars = self._parse_losses(losses)
+        #
+        # outputs = dict(
+        #     loss=loss,
+        #     log_vars=log_vars,
+        #     num_samples=len(batch_data['feature']))
 
         outputs = dict(
             loss=loss,
-            log_vars=log_vars,
+            # log_vars=losses,
             num_samples=len(batch_data['feature']))
+        outputs.update(losses)
         return outputs
 
     def inference(self, batch_data):
@@ -162,7 +167,8 @@ class MCAN(nn.Module):
         model_output = {'scores': self.head(joint_embedding)}
         return model_output
 
-    def preprocess_data(self, batched_inputs):
+    def preprocess_data(cls, batched_inputs):
+        batched_inputs = list2dict(batched_inputs)
 
         img_feat = batched_inputs['feature']
         input_ids = batched_inputs['input_ids']
@@ -187,6 +193,70 @@ class MCAN(nn.Module):
         batched_inputs['input_mask'] = input_mask
 
         return batched_inputs
+
+    def _parse_losses(self, losses):
+        """Parse the raw outputs (losses) of the network.
+
+        Args:
+            losses (dict): Raw output of the network, which usually contain
+                losses and other necessary infomation.
+
+        Returns:
+            tuple[Tensor, dict]: (loss, log_vars), loss is the loss tensor \
+                which may be a weighted sum of all losses, log_vars contains \
+                all the variables to be sent to the logger.
+        """
+        log_vars = OrderedDict()
+        for loss_name, loss_value in losses.items():
+            if isinstance(loss_value, torch.Tensor):
+                log_vars[loss_name] = loss_value.mean()
+            elif isinstance(loss_value, list):
+                log_vars[loss_name] = sum(_loss.mean() for _loss in loss_value)
+            else:
+                raise TypeError(
+                    f'{loss_name} is not a tensor or list of tensors')
+
+        loss = sum(_value for _key, _value in log_vars.items()
+                   if 'loss' in _key)
+
+        log_vars['loss'] = loss
+        for loss_name, loss_value in log_vars.items():
+            # reduce loss when distributed training
+            if dist.is_available() and dist.is_initialized():
+                loss_value = loss_value.data.clone()
+                dist.all_reduce(loss_value.div_(dist.get_world_size()))
+            log_vars[loss_name] = loss_value.item()
+
+        return loss, log_vars
+
+
+def list2dict(batched_inputs):  # TODO(jinliang):
+    batch_size = len(batched_inputs)
+    img_feats = torch.zeros((batch_size, *batched_inputs[0]['feature'].shape),
+                            dtype=batched_inputs[0]['feature'].dtype)
+    input_ids = torch.zeros(
+        (batch_size, *batched_inputs[0]['input_ids'].shape),
+        dtype=batched_inputs[0]['input_ids'].dtype)
+    answers_scores = torch.zeros(
+        (batch_size, *batched_inputs[0]['answers_scores'].shape),
+        dtype=batched_inputs[0]['answers_scores'].dtype)
+    input_mask = torch.zeros(
+        (batch_size, *batched_inputs[0]['input_mask'].shape),
+        dtype=batched_inputs[0]['input_mask'].dtype)
+    for idx in range(batch_size):
+        img_feats[idx] = batched_inputs[idx]['feature']
+        input_ids[idx] = batched_inputs[idx]['input_ids']
+        answers_scores[idx] = batched_inputs[idx]['answers_scores']
+        input_mask[idx] = batched_inputs[idx]['input_mask']
+
+    batch_data = dict()
+
+    batch_data['feature'] = img_feats
+    batch_data['input_ids'] = input_ids
+    batch_data['answers_scores'] = answers_scores
+    batch_data['input_mask'] = input_mask
+
+    return batch_data
 
     # def train_step(self, data, optimizer):
     #     """The iteration step during training.
@@ -227,41 +297,6 @@ class MCAN(nn.Module):
     #         loss=loss, log_vars=log_vars, num_samples=len(data['feature']))
     #
     #     return outputs
-
-    def _parse_losses(self, losses):
-        """Parse the raw outputs (losses) of the network.
-
-        Args:
-            losses (dict): Raw output of the network, which usually contain
-                losses and other necessary infomation.
-
-        Returns:
-            tuple[Tensor, dict]: (loss, log_vars), loss is the loss tensor \
-                which may be a weighted sum of all losses, log_vars contains \
-                all the variables to be sent to the logger.
-        """
-        log_vars = OrderedDict()
-        for loss_name, loss_value in losses.items():
-            if isinstance(loss_value, torch.Tensor):
-                log_vars[loss_name] = loss_value.mean()
-            elif isinstance(loss_value, list):
-                log_vars[loss_name] = sum(_loss.mean() for _loss in loss_value)
-            else:
-                raise TypeError(
-                    f'{loss_name} is not a tensor or list of tensors')
-
-        loss = sum(_value for _key, _value in log_vars.items()
-                   if 'loss' in _key)
-
-        log_vars['loss'] = loss
-        for loss_name, loss_value in log_vars.items():
-            # reduce loss when distributed training
-            if dist.is_available() and dist.is_initialized():
-                loss_value = loss_value.data.clone()
-                dist.all_reduce(loss_value.div_(dist.get_world_size()))
-            log_vars[loss_name] = loss_value.item()
-
-        return loss, log_vars
 
 
 class TripleLogitBinaryCrossEntropy(nn.Module):
