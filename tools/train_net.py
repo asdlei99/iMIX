@@ -1,3 +1,5 @@
+# TODO(jinliang):jinliang_imitate
+
 import argparse
 import torch
 import os
@@ -55,7 +57,7 @@ def test(cfg):
 
 def train(cfg):
     mix_trainer = MixEngine(cfg)
-    return mix_trainer.train_iter()
+    return mix_trainer.train()
 
 
 def main(args):

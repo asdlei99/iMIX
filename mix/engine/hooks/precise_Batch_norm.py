@@ -1,3 +1,4 @@
+# TODO(jinliang):jinliang_copy
 import logging
 from mix.utils.precise_bn import get_bn_modules, update_bn_stats
 from .base_hook import HookBase
@@ -45,7 +46,7 @@ class PreciseBNHook(HookBase):
 
         self._data_iter = None
 
-    def after_iter(self):
+    def after_train_iter(self):
         next_iter = self.trainer.iter + 1
         is_final = next_iter == self.trainer.max_iter
         if is_final or (self._period > 0 and next_iter % self._period == 0):

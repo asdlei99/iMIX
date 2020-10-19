@@ -52,10 +52,12 @@ def build_lr_scheduler(
     logger = logging.getLogger(__name__)
     try:
         assert 'policy' in lr_config
-        # policy_type = lr_config.pop('policy')
+        policy_type = lr_config.pop('policy')
         # lr_type = policy_type + ''
-        # lr_config['type'] = lr_type
-        lr_config = modify_lr_config(lr_config, optimizer)
+        lr_config['type'] = policy_type
+        lr_config['optimizer'] = optimizer
+        #lr_config = modify_lr_config(lr_config, optimizer)#TODO(jinliang):modify
+
         lr_scheduler = build_from_cfg(lr_config, LR_SCHEDULERS)
     except AssertionError:
         logger.error('policy is not in {}'.format(lr_config))

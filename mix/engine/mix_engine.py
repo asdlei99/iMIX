@@ -22,10 +22,13 @@ class CommonEngine(EngineBase):
         self.data_loader = data_loader
         self.__data_loader_iter = iter(data_loader)
 
-    def run_iter(self):
+    def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
         start_time = time.perf_counter()
-        batch_data = next(self.__data_loader_iter)
+
+        if (self.by_epoch is False) and (batch_data is None):
+            batch_data = next(self.__data_loader_iter)
+
         data_time = time.perf_counter() - start_time
 
         if self.batch_processor is not None:
@@ -34,34 +37,21 @@ class CommonEngine(EngineBase):
         else:
             self.output = self.model(batch_data)
 
-        # TODO(jinliang) 缺少forward结果检查  -> utils模块内   -->simpleTrainer detect_anomaly
-        # TODO(jinliang) 缺少backward -> optimizer 做backward
-        # TODO(jinliang) 缺少forward结果保存+获取数据时间  ->logger   --> write_metrics
-
         self.output['loss'] /= comm.get_world_size()
 
         metrics_dict = self.output
         metrics_dict['data_time'] = data_time
         self._write_metrics(metrics_dict)
 
-        # self.optimizer.zero_grad()
-        # self.output['loss'].backward()
-        # if self._grad_clip is not None:
-        #     grad_norm = self._grad_clip(self.trainer.parameters())
-        #     if grad_norm is not None:
-        #         self.trainer.log_buffer.push_scalar(
-        #             'grad_norm',
-        #             float(grad_norm))  #TODO(jinliang) 缺少num_samples
-        #
-        # self.optimizer.step()
-
-    def _detect_anomaly(self, losses, loss_dict):
+    def _detect_anomaly(self, losses,
+                        loss_dict):  # TODO(jinliang):jinliang_copy
         if not torch.isfinite(losses).all():
             raise FloatingPointError(
                 'Loss became infinite or NaN at iteration={}!\nloss_dict = {}'.
                 format(self.iter, loss_dict))
 
-    def _write_metrics(self, metrics_dict: dict):
+    def _write_metrics(self,
+                       metrics_dict: dict):  # TODO(jinliang):jinliang_copy
         """
         Args:
             metrics_dict (dict): dict of scalar metrics
@@ -100,6 +90,18 @@ class CommonEngine(EngineBase):
             if len(metrics_dict) > 1:
                 self.log_buffer.put_scalars(**metrics_dict)
 
+    def run_train_epoch(self):
+        assert self.model.training, '[CommonEngine] model was changed to eval model!'
+        time.sleep(2)  # prevent possible deadlockduring epoch transition
+        for i, batch_data in enumerate(self.data_loader):
+            self.inner_iter = i
+            self.before_train_iter()
+            self.run_train_iter(batch_data)
+            self.after_train_iter()
+            self.iter += 1
+
+        a = 1
+
 
 class MixEngine(CommonEngine):
 
@@ -111,14 +113,26 @@ class MixEngine(CommonEngine):
 
         self.start_iter = self.organizer.start_iter
         self.max_iter = self.organizer.max_iter
+        self.start_epoch = self.organizer.start_epoch
+        self.max_epoch = self.organizer.max_epoch
         self.cfg = self.organizer.cfg
+        self.by_epoch = self.organizer.by_epoch
 
         self.register_hooks(self.organizer.hooks)
 
-    def train_iter(self):
-        super(MixEngine, self).train_iter(self.start_iter, self.max_iter)
-        if len(self.cfg.TEST.EXPECTED_RESULTS) and comm.is_main_process():
-            assert hasattr(self, '_last_eval_results'
-                           ), 'No evaluation results obtained during training!'
-            verify_results(self.cfg, self.organizer._last_eval_results)
-            return self.organizer._last_eval_results
+    def train_by_iter(self):
+        super(MixEngine, self).train_by_iter(self.start_iter, self.max_iter)
+        # if len(self.cfg.TEST.EXPECTED_RESULTS) and comm.is_main_process():
+        #     assert hasattr(self, '_last_eval_results'
+        #                    ), 'No evaluation results obtained during training!'
+        #     verify_results(self.cfg, self.organizer._last_eval_results)
+        #     return self.organizer._last_eval_results
+
+    def train_by_epoch(self):
+        super(MixEngine, self).train_by_epoch(self.start_epoch, self.max_epoch)
+
+    def train(self):
+        if self.by_epoch:
+            self.train_by_epoch()
+        else:
+            self.train_by_iter()

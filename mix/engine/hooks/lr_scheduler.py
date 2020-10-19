@@ -1,3 +1,4 @@
+# TODO(jinliang):jinliang_copy
 from .base_hook import HookBase
 from collections import Counter
 
@@ -40,7 +41,7 @@ class LRSchedulerHook(HookBase):
                     self._best_param_group_id = i
                     break
 
-    def after_iter(self):
+    def after_train_iter(self):
         lr = self._optimizer.param_groups[self._best_param_group_id]['lr']
         self.trainer.log_buffer.put_scalar('lr', lr, smoothing_hint=False)
         self._scheduler.step()

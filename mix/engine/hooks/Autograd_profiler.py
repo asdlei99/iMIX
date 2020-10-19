@@ -1,3 +1,4 @@
+# TODO(jinliang):jinliang_copy
 from .base_hook import HookBase
 from mix.utils.file_io import PathManager
 import os
@@ -44,7 +45,7 @@ class AutogradProfilerHook(HookBase):
         self._use_cuda = use_cuda
         self._output_dir = output_dir
 
-    def before_iter(self):
+    def before_train_iter(self):
         if self._enable_predicate(self.trainer):
             self._profiler = torch.autograd.profiler.profile(
                 use_cuda=self._use_cuda)
@@ -52,7 +53,7 @@ class AutogradProfilerHook(HookBase):
         else:
             self._profiler = None
 
-    def after_iter(self):
+    def after_train_iter(self):
         if self._profiler is None:
             return
         self._profiler.__exit__(None, None, None)

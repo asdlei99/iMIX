@@ -5,9 +5,9 @@ class HookBase:
     ::
         hook.before_train()
         for iter in range(start_iter,max_iter):
-            hook.before_iter()
-            train.run_iter()
-            hook.after_iter()
+            hook.before_train_iter()
+            train.run_train_iter()
+            hook.after_train_iter()
         hook.after_epoch()
         hook.after_train()
     Notes:
@@ -20,8 +20,14 @@ class HookBase:
     def after_train(self):
         pass
 
-    def before_iter(self):
+    def before_train_iter(self):
         pass
 
-    def after_iter(self):
+    def after_train_iter(self):
+        pass
+
+    def before_train_epoch(self):
+        pass
+
+    def after_train_epoch(self):
         pass

@@ -1,6 +1,8 @@
+# TODO(jinliang):jinliang_imitate
 from .base_hook import HookBase
 from .builder import HOOKS
 import mix.utils.comm as comm
+import logging
 
 
 @HOOKS.register_module()
@@ -49,14 +51,23 @@ class EvaluateHook(HookBase):
         # Evaluation may take different time among workers.
         # A barrier make them start the next iteration together.
         comm.synchronize()
+        return results
 
-    def after_iter(self):
-        next_iter = self.trainer.iter + 1
-        is_final = next_iter == self.trainer.max_iter
-        if is_final or (self._period > 0 and next_iter % self._period == 0):
-            self._do_eval()
+    def after_train_iter(self):
+        if self.trainer.by_epoch is False:
+            next_iter = self.trainer.iter + 1
+            is_final = next_iter == self.trainer.max_iter
+            if is_final or (self._period > 0
+                            and next_iter % self._period == 0):
+                self._do_eval()
 
     def after_train(self):
         # func is likely a closure that holds reference to the trainer
         # therefore we clean it to avoid circular reference in the end
         del self._func
+
+    def after_train_epoch(self):
+        logger = logging.getLogger(__name__)
+        results = self._do_eval()
+        logger.info('epoch_{} evaluate accuracy :'.format(
+            self.trainer.epoch, float(results['classification'])))

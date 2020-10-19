@@ -9,5 +9,9 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
     def before_train(self):
         self.max_iter = self.trainer.max_iter
 
-    def after_iter(self):
-        self.step(self.trainer.iter)
+    def after_train_iter(self):  # TODO(jinliang):modify
+        if self.trainer.by_epoch is False:
+            self.step(self.trainer.iter)
+
+    def after_train_epoch(self):
+        self.save(name='epoch_{}'.format(self.trainer.epoch))

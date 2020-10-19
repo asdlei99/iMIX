@@ -168,7 +168,7 @@ class MCAN(nn.Module):
         return model_output
 
     def preprocess_data(cls, batched_inputs):
-        batched_inputs = list2dict(batched_inputs)
+        #batched_inputs = list2dict(batched_inputs)
 
         img_feat = batched_inputs['feature']
         input_ids = batched_inputs['input_ids']

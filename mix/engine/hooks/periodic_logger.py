@@ -1,3 +1,4 @@
+# TODO(jinliang):jinliang_copy_and_imitate
 from .base_hook import HookBase
 # from mix.utils.events import EventWriter
 from .periods import LogBufferWriter
@@ -17,11 +18,11 @@ class PeriodicLogger(HookBase):
         self._loggers = loggers
         self._period_iter = log_config_period
 
-    def before_train(self):  #TODO(jinliang) delete?
+    def before_train(self):  # TODO(jinliang) delete?
         # TODO(jinliang) 通过self.trainer.cfg(EngineBase)获取iter间隔次数和epoch间隔次数
         self._period_iter = self.trainer.cfg.log_config.period
 
-    def after_iter(self):
+    def after_train_iter(self):
         assert self._period_iter, self._period_iter
         if (self.trainer.iter + 1) % self._period_iter == 0 or (
                 self.trainer.iter == self.trainer.max_iter - 1):
@@ -31,3 +32,7 @@ class PeriodicLogger(HookBase):
     def after_train(self):
         for logger in self._loggers:
             logger.close()
+
+    def after_train_epoch(self):  # TODO(jinliang): modify:write epoch log
+        for logger in self._loggers:
+            logger.write()

@@ -1,3 +1,4 @@
+# TODO(jinliang):jinliang_copy
 from .log_buffer import LogBufferWriter, get_log_buffer
 from mix.utils.file_io import PathManager
 from ..builder import HOOKS
@@ -77,7 +78,7 @@ class JSONLoggerHook(LogBufferWriter):
         self._file_handle = PathManager.open(json_file, 'a')
         self._window_size = window_size
 
-    def write(self):
+    def write(self):  # TODO(jinliang):modify
         storage = get_log_buffer()
         to_save = {'iteration': storage.iter}
         to_save.update(storage.latest_with_smoothing_hint(self._window_size))

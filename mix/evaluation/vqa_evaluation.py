@@ -1,4 +1,5 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+# TODO(jinliang):jinliang_imitate
 import contextlib
 import copy
 import io
@@ -92,7 +93,7 @@ class VQAEvaluator(DatasetEvaluator):
         #         prediction["scores"] = _get_accuracy(scores)
         #
         #     self._predictions.append(prediction)
-        inputs = list2dict(inputs)  #TODO(jinliang)
+        # inputs = list2dict(inputs)  #TODO(jinliang)
         prediction = dict()
         for idx in range(outputs['scores'].shape[0]):
             prediction['input_ids'] = inputs['input_ids'][idx]

@@ -1,3 +1,5 @@
+# TODO(jinliang):jinliang_imitate
+
 from ..data import build_mix_test_loader, build_mix_train_loader
 from mix.utils.logger import setup_logger
 from mix.utils.mix_checkpoint import MixCheckpointer
@@ -49,11 +51,16 @@ class Organizer:
             optimizer=self.optimizer,
             scheduler=self.scheduler)
 
-        self.max_iter = self.cfg.max_iter
+        self._by_epoch = False if hasattr(cfg, 'by_iter') else True
+        self.start_epoch = 0
         self.start_iter = 0
+        self.max_iter = cfg.total_epochs * len(
+            self.train_data_loader) if self.by_epoch else cfg.max_iter
+        self.max_epoch = cfg.total_epochs if self.by_epoch else 0
 
         self.hooks = self.build_hooks()
-        if hasattr(cfg, 'test_data') and cfg.test_data.eval_period is not 0:
+        if comm.is_main_process() and hasattr(
+                cfg, 'test_data') and cfg.test_data.eval_period is not 0:
             self.hooks.append(self.add_evaluate_hook())
 
     @classmethod
@@ -205,3 +212,7 @@ class Organizer:
 
         return hooks.EvaluateHook(self.cfg.test_data.eval_period,
                                   test_and_save_results)
+
+    @property
+    def by_epoch(self):
+        return self._by_epoch

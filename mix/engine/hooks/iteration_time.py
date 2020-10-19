@@ -1,14 +1,16 @@
+# TODO(jinliang):jinliang_copy_and imitate
 from .base_hook import HookBase
 import logging
 import datetime
 from mix.utils.timer import Timer
 import time
 from .builder import HOOKS
+
 # class IterationTimeHook(HookBase):
 #     """
 #     统计每次迭代时间、训练过程中总耗时及其单次平均耗时
 #
-#     单次跌代时间=after_iter-before_iter,但IterationTimeHook.after_iter必须在optimizerHook之后调用
+#     单次跌代时间=after_train_iter-before_train_iter,但IterationTimeHook.after_train_iter必须在optimizerHook之后调用
 #
 #     """
 #
@@ -21,10 +23,10 @@ from .builder import HOOKS
 #     def before_train(self):
 #         self._total_start_time = time.time()
 #
-#     def before_iter(self):
+#     def before_train_iter(self):
 #         self._iter_start_time = time.time()
 #
-#     def after_iter(self):
+#     def after_train_iter(self):
 #         iter_num = self.trainer.iter - self.trainer.start_iter - 1
 #         if iter_num > self._warmup_iter:
 #             self.trainer.log_buffer.put_scalars(iter_time=time.time() -
@@ -65,9 +67,10 @@ class IterationTimerHook(HookBase):
                 from timing.
         """
         self._warmup_iter = warmup_iter
-        self._step_timer = Timer()
+        self._iter_timer = Timer()
         self._start_time = time.perf_counter()
         self._total_timer = Timer()
+        self._epoch_timer = Timer()
 
     def before_train(self):
         self._start_time = time.perf_counter()
@@ -100,18 +103,25 @@ class IterationTimerHook(HookBase):
             str(datetime.timedelta(seconds=int(hook_time))),
         ))
 
-    def before_step(self):
-        self._step_timer.reset()
+    def before_train_iter(self):
+        self._iter_timer.reset()
         self._total_timer.resume()
 
-    def after_step(self):
+    def after_train_iter(self):
         # +1 because we're in after_step
         iter_done = self.trainer.iter - self.trainer.start_iter + 1
         if iter_done >= self._warmup_iter:
-            sec = self._step_timer.seconds()
+            sec = self._iter_timer.seconds()
             self.trainer.log_buffer.put_scalars(time=sec)
         else:
             self._start_time = time.perf_counter()
             self._total_timer.reset()
 
         self._total_timer.pause()
+
+    def before_train_epoch(self):
+        self._epoch_timer.reset()
+
+    def after_train_epoch(self):
+        epoch_sec = self._epoch_timer.seconds()
+        self.trainer.log_buffer.put_scalars(epoch_time=epoch_sec)

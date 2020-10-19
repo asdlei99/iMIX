@@ -1,3 +1,4 @@
+# TODO(jinliang):jinliang_copy
 from .log_buffer import LogBufferWriter, get_log_buffer
 import logging
 import datetime
@@ -20,7 +21,7 @@ class CommonMetricLoggerHook(LogBufferWriter):
     #     """
     #     pass
 
-    def write(self):
+    def write(self):  # TODO(jinliang):modify
         storage = get_log_buffer()
         iteration = storage.iter
 

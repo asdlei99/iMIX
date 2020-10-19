@@ -10,14 +10,13 @@ class OptimizerHook(HookBase):
     def __init__(self, grad_clip=None):
         self._grad_clip = grad_clip
 
-    def __clip_grads(self, params):
+    def __clip_grads(self, params):  # TODO(jinliang):jinliang_copy
         params = list(
             filter(lambda p: p.requires_grad and p.grad is not None, params))
         if len(params) > 0:
             return clip_grad.clip_grad_norm_(params, **self._grad_clip)
 
-    def after_iter(self):
-        pass
+    def after_train_iter(self):  # TODO(jinliang):jinliang_imitate
         self.trainer.optimizer.zero_grad()
         self.trainer.output['loss'].backward()
         if self._grad_clip is not None:
@@ -25,6 +24,6 @@ class OptimizerHook(HookBase):
             if grad_norm is not None:
                 self.trainer.log_buffer.push_scalar(
                     'grad_norm',
-                    float(grad_norm))  #TODO(jinliang) 缺少num_samples
+                    float(grad_norm))  # TODO(jinliang) 缺少num_samples
 
         self.trainer.optimizer.step()
