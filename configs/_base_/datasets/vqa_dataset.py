@@ -6,6 +6,7 @@ vocab_path = 'data/datasets/vqa2/defaults/extras/vocabs/'
 
 train_datasets = ['train', 'val', 'visualgenome']
 test_datasets = ['oneval']
+#test_datasets = ["test"]
 
 vqa_reader_train_cfg = dict(
     type='VQAReader',
@@ -53,17 +54,18 @@ vqa_info_cpler_cfg = dict(
         vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'))
 
 train_data = dict(
-    samples_per_gpu=16,
+    samples_per_gpu=4,
     workers_per_gpu=2,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
         vqa_reader=vqa_reader_train_cfg,
-        vqa_info_cpler=vqa_info_cpler_cfg))
+        vqa_info_cpler=vqa_info_cpler_cfg,
+        limit_nums=400))
 
 # evaluation = dict(metric=['bbox', 'segm']) TODO(jinliang) mix-evaluation
 test_data = dict(
-    samples_per_gpu=16,
+    samples_per_gpu=2,
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric='',
@@ -71,6 +73,6 @@ test_data = dict(
         type=dataset_type,
         vqa_reader=vqa_reader_test_cfg,
         vqa_info_cpler=vqa_info_cpler_cfg),
-    eval_period=100)  # eval_period set to 0 to disable
+    eval_period=50)  # eval_period set to 0 to disable
 
 evaluator_type = 'VQA'  # TODO(jinliang)

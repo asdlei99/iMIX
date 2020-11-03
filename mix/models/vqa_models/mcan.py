@@ -4,6 +4,7 @@ import torch
 import torch.distributed as dist
 from collections import OrderedDict
 import torch.nn.functional as func
+from torch.cuda.amp.autocast_mode import autocast  # TODO(jinliang)
 
 
 def filter_grads(parameters):
@@ -104,28 +105,53 @@ class MCAN(nn.Module):
         if not self.training:
             return self.inference(batch_data)
 
-        batch_data = self.preprocess_data(batch_data)
+        from mix.engine.organizer import is_multi_gpus_mixed_precision
+        with autocast(enabled=is_multi_gpus_mixed_precision()):
+            batch_data = self.preprocess_data(batch_data)
 
-        img_feat = batch_data['feature']
-        input_ids = batch_data['input_ids']
-        text_mask = batch_data['input_mask']
-        targets = batch_data['answers_scores']
+            img_feat = batch_data['feature']
+            input_ids = batch_data['input_ids']
+            text_mask = batch_data['input_mask']
+            targets = batch_data['answers_scores']
 
-        ques_feat = self.embedding_model[0](input_ids)
-        # text_mask = ques_feat.eq(0)
-        text_embedding_total, text_embedding_vec = self.process_text_embedding(
-            ques_feat, text_mask)
+            ques_feat = self.embedding_model[0](input_ids)
+            # text_mask = ques_feat.eq(0)
+            text_embedding_total, text_embedding_vec = self.process_text_embedding(
+                ques_feat, text_mask)
 
-        feature_sga, feature_cbn = self.process_feature_embedding(
-            img_feat, text_embedding_total, text_embedding_vec[:, 0],
-            text_mask)
+            feature_sga, feature_cbn = self.process_feature_embedding(
+                img_feat, text_embedding_total, text_embedding_vec[:, 0],
+                text_mask)
 
-        joint_embedding = self.combine_model(feature_sga, feature_cbn,
-                                             text_embedding_vec[:, 1])
+            joint_embedding = self.combine_model(feature_sga, feature_cbn,
+                                                 text_embedding_vec[:, 1])
 
-        model_output = {'scores': self.head(joint_embedding)}
+            model_output = {
+                'scores': self.head(joint_embedding),
+                'target': targets
+            }
 
-        loss = self.trip_loss(targets, model_output)
+            return model_output
+
+        # loss = self.trip_loss(targets, model_output)
+        # losses = dict(bce_loss=loss)
+        #
+        # # loss, log_vars = self._parse_losses(losses)
+        # #
+        # # outputs = dict(
+        # #     loss=loss,
+        # #     log_vars=log_vars,
+        # #     num_samples=len(batch_data['feature']))
+        #
+        # outputs = dict(
+        #     loss=loss,
+        #     # log_vars=losses,
+        #     num_samples=len(batch_data['feature']))
+        # outputs.update(losses)
+        # return outputs
+
+    def losses(self, output, target):
+        loss = self.trip_loss(output, target)
         losses = dict(bce_loss=loss)
 
         # loss, log_vars = self._parse_losses(losses)
@@ -138,7 +164,7 @@ class MCAN(nn.Module):
         outputs = dict(
             loss=loss,
             # log_vars=losses,
-            num_samples=len(batch_data['feature']))
+            num_samples=len(target))
         outputs.update(losses)
         return outputs
 
@@ -150,7 +176,7 @@ class MCAN(nn.Module):
         img_feat = batch_data['feature']
         input_ids = batch_data['input_ids']
         text_mask = batch_data['input_mask']
-        targets = batch_data['answers_scores']
+        # targets = batch_data['answers_scores']
 
         ques_feat = self.embedding_model[0](input_ids)
         # text_mask = ques_feat.eq(0)
@@ -167,12 +193,11 @@ class MCAN(nn.Module):
         model_output = {'scores': self.head(joint_embedding)}
         return model_output
 
-    def preprocess_data(cls, batched_inputs):
-        #batched_inputs = list2dict(batched_inputs)
+    def preprocess_data(self, batched_inputs):
+        # batched_inputs = list2dict(batched_inputs)
 
         img_feat = batched_inputs['feature']
         input_ids = batched_inputs['input_ids']
-        answers_scores = batched_inputs['answers_scores']
         input_mask = batched_inputs['input_mask']
 
         b, c, h, w = img_feat.shape
@@ -180,17 +205,20 @@ class MCAN(nn.Module):
         padded_feat = torch.zeros((b, c, 1024), dtype=torch.float)
         padded_feat[:, :, :h * w] = feat
         feat = padded_feat.unsqueeze(-1)
-        feat = feat.squeeze(0)
+        # feat = feat.squeeze(0)
         feat = feat.cuda()
 
         input_ids = input_ids.cuda()
-        answers_scores = answers_scores.cuda()
         input_mask = input_mask.cuda()
 
         batched_inputs['feature'] = feat
         batched_inputs['input_ids'] = input_ids
-        batched_inputs['answers_scores'] = answers_scores
         batched_inputs['input_mask'] = input_mask
+
+        if self.training:
+            answers_scores = batched_inputs['answers_scores']
+            answers_scores = answers_scores.cuda()
+            batched_inputs['answers_scores'] = answers_scores
 
         return batched_inputs
 
@@ -308,7 +336,7 @@ class TripleLogitBinaryCrossEntropy(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, targets, model_output):
+    def forward(self, model_output, targets):
         """Calculates and returns the binary cross entropy for logits
         Args:
             sample_list (SampleList): SampleList containing `targets` attribute.

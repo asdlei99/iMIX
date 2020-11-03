@@ -22,6 +22,7 @@ class CommonMetricLoggerHook(LogBufferWriter):
     #     pass
 
     def write(self):  # TODO(jinliang):modify
+        #self.logger.info("get_world_size{}  get_local_rank{} get_rank{}".format(comm.get_world_size(),comm.get_local_rank(),comm.get_rank()))
         storage = get_log_buffer()
         iteration = storage.iter
 
@@ -61,21 +62,45 @@ class CommonMetricLoggerHook(LogBufferWriter):
         else:
             max_mem_mb = None
 
-        # NOTE: max_mem is parsed by grep in "dev/parse_results.sh"
-        self.logger.info(
-            ' {eta}iter: {iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
-            .format(
-                eta=f'eta: {eta_string}  ' if eta_string else '',
-                iter=iteration,
-                losses='  '.join([
-                    '{}: {:.3f}'.format(k, v.median(20))
-                    for k, v in storage.histories().items() if 'loss' in k
-                ]),
-                time='time: {:.4f}  '.format(iter_time)
-                if iter_time is not None else '',
-                data_time='data_time: {:.4f}  '.format(data_time)
-                if data_time is not None else '',
-                lr=lr,
-                memory='max_mem: {:.0f}M'.format(max_mem_mb)
-                if max_mem_mb is not None else '',
-            ))
+        if storage.by_epoch:
+            # NOTE: max_mem is parsed by grep in "dev/parse_results.sh"
+            self.logger.info(
+                ' {eta}  epoch:{epoch}   {inner_iter}/{single_epoch_iters}   iter: {iter}  max_iter:{max_iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
+                .format(
+                    eta=f'eta: {eta_string}  ' if eta_string else '',
+                    epoch=storage.epoch,
+                    inner_iter=storage.epoch_inner_iter + 1,
+                    single_epoch_iters=storage.single_epoch_iters,
+                    iter=iteration + 1,
+                    max_iter=self._max_iter,
+                    losses='  '.join([
+                        '{}: {:.3f}'.format(k, v.median(20))
+                        for k, v in storage.histories().items() if 'loss' in k
+                    ]),
+                    time='time: {:.4f}  '.format(iter_time)
+                    if iter_time is not None else '',
+                    data_time='data_time: {:.4f}  '.format(data_time)
+                    if data_time is not None else '',
+                    lr=lr,
+                    memory='max_mem: {:.0f}M'.format(max_mem_mb)
+                    if max_mem_mb is not None else '',
+                ))
+        else:
+            self.logger.info(
+                ' {eta} iter: {iter} max_iter:{max_iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
+                .format(
+                    eta=f'eta: {eta_string}  ' if eta_string else '',
+                    iter=iteration + 1,
+                    max_iter=self._max_iter,
+                    losses='  '.join([
+                        '{}: {:.3f}'.format(k, v.median(20))
+                        for k, v in storage.histories().items() if 'loss' in k
+                    ]),
+                    time='time: {:.4f}  '.format(iter_time)
+                    if iter_time is not None else '',
+                    data_time='data_time: {:.4f}  '.format(data_time)
+                    if data_time is not None else '',
+                    lr=lr,
+                    memory='max_mem: {:.0f}M'.format(max_mem_mb)
+                    if max_mem_mb is not None else '',
+                ))

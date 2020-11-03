@@ -24,8 +24,15 @@ class PeriodicLogger(HookBase):
 
     def after_train_iter(self):
         assert self._period_iter, self._period_iter
-        if (self.trainer.iter + 1) % self._period_iter == 0 or (
-                self.trainer.iter == self.trainer.max_iter - 1):
+        write_flag = False
+        if self.trainer.by_epoch is True:
+            if (self.trainer.inner_iter + 1) % self._period_iter == 0:
+                write_flag = True
+        else:
+            if (self.trainer.iter + 1) % self._period_iter == 0 or (
+                    self.trainer.iter == self.trainer.max_iter - 1):
+                write_flag = True
+        if write_flag:
             for logger in self._loggers:
                 logger.write()
 
@@ -34,5 +41,6 @@ class PeriodicLogger(HookBase):
             logger.close()
 
     def after_train_epoch(self):  # TODO(jinliang): modify:write epoch log
-        for logger in self._loggers:
-            logger.write()
+        if self.trainer.epoch == self.trainer.max_epoch - 1:
+            for logger in self._loggers:
+                logger.write()

@@ -1,26 +1,34 @@
 from .base_engine import EngineBase
-from .organizer import Organizer
+from .organizer import Organizer, is_mixed_precision
 import time
 import logging
 import torch
 import mix.utils.comm as comm
 import numpy as np
 from mix.evaluation import verify_results
+from torch.cuda.amp.autocast_mode import autocast
 
 
 class CommonEngine(EngineBase):
 
-    def __init__(self, model, data_loader, optimizer, batch_processor=None):
+    def __init__(self,
+                 model,
+                 data_loader,
+                 optimizer,
+                 loss_fn,
+                 batch_processor=None):
         super(CommonEngine, self).__init__()
 
         model.train()
 
         self.model = model
+        self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.batch_processor = batch_processor
 
         self.data_loader = data_loader
         self.__data_loader_iter = iter(data_loader)
+        self.mixed_precision = False
 
     def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
@@ -35,13 +43,23 @@ class CommonEngine(EngineBase):
             self.output = self.batch_processor(
                 batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
         else:
-            self.output = self.model(batch_data)
+            with autocast(enabled=is_mixed_precision()
+                          ):  # TODO(jinliang) autocast warp
+                self.model_output = self.model(batch_data)
+                self.output = self.loss_fn(
+                    dict(scores=self.model_output['scores']),
+                    self.model_output['target']
+                )  # TODO(jinliang) -> loss_fn(output,target)
 
         self.output['loss'] /= comm.get_world_size()
 
         metrics_dict = self.output
         metrics_dict['data_time'] = data_time
         self._write_metrics(metrics_dict)
+
+        # self.optimizer.zero_grad()
+        # self.output['loss'].backward()
+        # self.optimizer.step()
 
     def _detect_anomaly(self, losses,
                         loss_dict):  # TODO(jinliang):jinliang_copy
@@ -100,8 +118,6 @@ class CommonEngine(EngineBase):
             self.after_train_iter()
             self.iter += 1
 
-        a = 1
-
 
 class MixEngine(CommonEngine):
 
@@ -109,7 +125,8 @@ class MixEngine(CommonEngine):
         self.organizer = Organizer(cfg)
         super(MixEngine, self).__init__(self.organizer.model,
                                         self.organizer.train_data_loader,
-                                        self.organizer.optimizer)
+                                        self.organizer.optimizer,
+                                        self.organizer.model.losses)
 
         self.start_iter = self.organizer.start_iter
         self.max_iter = self.organizer.max_iter
@@ -117,6 +134,8 @@ class MixEngine(CommonEngine):
         self.max_epoch = self.organizer.max_epoch
         self.cfg = self.organizer.cfg
         self.by_epoch = self.organizer.by_epoch
+        self.mixed_precision = self.organizer.mixed_precision if hasattr(
+            self.organizer, 'mixed_precision') else False
 
         self.register_hooks(self.organizer.hooks)
 

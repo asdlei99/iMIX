@@ -1,6 +1,7 @@
 from ..base_hook import HookBase
 from mix.utils.checkpoint import PeriodicCheckpointer
 from ..builder import HOOKS
+import mix.utils.comm as comm
 
 
 @HOOKS.register_module()
@@ -15,3 +16,6 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
 
     def after_train_epoch(self):
         self.save(name='epoch_{}'.format(self.trainer.epoch))
+
+    def _multi_gpus_sync(self):
+        comm.synchronize()

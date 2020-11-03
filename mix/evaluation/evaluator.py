@@ -9,6 +9,7 @@ import torch
 
 from mix.utils.comm import get_world_size, is_main_process
 from mix.utils.logger import log_every_n_seconds
+import pickle as pkl
 
 
 class DatasetEvaluator:
@@ -96,6 +97,12 @@ class DatasetEvaluators(DatasetEvaluator):
                     results[k] = v
         return results
 
+    def process_submit_result(self, inputs, outpus):
+        pass
+
+    def save_submit_result(self):
+        pass
+
 
 def inference_on_dataset(model, data_loader, evaluator):
     """Run model on the data_loader and evaluate the metrics with evaluator.
@@ -178,6 +185,139 @@ def inference_on_dataset(model, data_loader, evaluator):
     if results is None:
         results = {}
     return results
+
+
+def build_submit_file(model, data_loader, evaluator):
+    """Run model on the data_loader and evaluate the metrics with evaluator.
+    Also benchmark the inference speed of `model.forward` accurately. The model
+    will be used in eval mode.
+
+    Args:
+        model (nn.Module): a module which accepts an object from
+            `data_loader` and returns some outputs. It will be temporarily set to `eval` mode.
+
+            If you wish to evaluate a model in `training` mode instead, you can
+            wrap the given model and override its behavior of `.eval()` and `.train()`.
+        data_loader: an iterable object with a length.
+            The elements it generates will be the inputs to the model.
+        evaluator (DatasetEvaluator): the evaluator to run. Use `None` if you only want
+            to benchmark, but don't want to do any evaluation.
+
+    Returns:
+        The return value of `evaluator.evaluate()`
+    """
+    num_devices = get_world_size()
+    logger = logging.getLogger(__name__)
+    logger.info('Start inference on {} images'.format(len(data_loader)))
+
+    total = len(data_loader)  # inference data loader must have a fixed length
+    if evaluator is None:
+        # create a no-op evaluator
+        evaluator = DatasetEvaluators([])
+    evaluator.reset()
+
+    from itertools import count
+    start_time = time.perf_counter()
+    total_compute_time = 0
+    with inference_context(model), torch.no_grad():
+        for idx, inputs in zip(count(), data_loader):
+            logger.info('idx:{}/{}'.format(idx, len(data_loader)))
+
+            # if torch.cuda.is_available():
+            #     torch.cuda.synchronize()
+            # if idx < 0.99 * total:
+            #     continue
+            start_compute_time = time.perf_counter()
+            outputs = model(inputs)
+            # logger.info('question_id:{}'.format(inputs['question_id'].detach().numpy()))
+            # logger.info('image_id:{}'.format(inputs['image_id'].detach().numpy()))
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            total_compute_time += time.perf_counter() - start_compute_time
+            evaluator.process_submit_result(inputs, outputs)
+
+    evaluator.save_submit_result()
+
+    # Measure the time only for this worker (before the synchronization barrier)
+    total_time = time.perf_counter() - start_time
+    total_time_str = str(datetime.timedelta(seconds=total_time))
+    # NOTE this format is parsed by grep
+    logger.info(
+        'Total inference time: {} ({:.6f} s / img per device, on {} devices)'.
+        format(total_time_str, total_time / total, num_devices))
+    total_compute_time_str = str(
+        datetime.timedelta(seconds=int(total_compute_time)))
+    logger.info(
+        'Total inference pure compute time: {} ({:.6f} s / img per device, on {} devices)'
+        .format(total_compute_time_str, total_compute_time / total,
+                num_devices))
+
+
+def build_test_predict_result(model, data_loader, evaluator):
+    """Run model on the data_loader and evaluate the metrics with evaluator.
+    Also benchmark the inference speed of `model.forward` accurately. The model
+    will be used in eval mode.
+
+    Args:
+        model (nn.Module): a module which accepts an object from
+            `data_loader` and returns some outputs. It will be temporarily set to `eval` mode.
+
+            If you wish to evaluate a model in `training` mode instead, you can
+            wrap the given model and override its behavior of `.eval()` and `.train()`.
+        data_loader: an iterable object with a length.
+            The elements it generates will be the inputs to the model.
+        evaluator (DatasetEvaluator): the evaluator to run. Use `None` if you only want
+            to benchmark, but don't want to do any evaluation.
+
+    Returns:
+        The return value of `evaluator.evaluate()`
+    """
+    num_devices = get_world_size()
+    logger = logging.getLogger(__name__)
+    logger.info('Start inference on {} images'.format(len(data_loader)))
+
+    total = len(data_loader)  # inference data loader must have a fixed length
+
+    test_predict = dict()
+
+    from itertools import count
+
+    start_time = time.perf_counter()
+    total_compute_time = 0
+
+    with inference_context(model), torch.no_grad():
+        for idx, inputs in zip(count(), data_loader):
+            logger.info('idx:{}/{}'.format(idx, len(data_loader)))
+            start_compute_time = time.perf_counter()
+            outputs = model(inputs)
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            total_compute_time += time.perf_counter() - start_compute_time
+            for qid, pred in zip(inputs['question_id'].detach().numpy(),
+                                 outputs['scores'].cpu().detach().numpy()):
+                test_predict['question_id'] = qid
+                test_predict['scores'] = pred
+
+    if is_main_process():
+        logger.info('vqa data size:{}'.format(len(test_predict)))
+        save_path = '/home/jinliang/code/Mix/mix/work_dir/inference/vqa_test_predict.pkl'
+        with open(save_path, 'wb') as f:
+            pkl.dump(test_predict, f)
+        logger.info('vqa_test_predict save path:{}'.format(save_path))
+
+    # Measure the time only for this worker (before the synchronization barrier)
+    total_time = time.perf_counter() - start_time
+    total_time_str = str(datetime.timedelta(seconds=total_time))
+    # NOTE this format is parsed by grep
+    logger.info(
+        'Total inference time: {} ({:.6f} s / img per device, on {} devices)'.
+        format(total_time_str, total_time / total, num_devices))
+    total_compute_time_str = str(
+        datetime.timedelta(seconds=int(total_compute_time)))
+    logger.info(
+        'Total inference pure compute time: {} ({:.6f} s / img per device, on {} devices)'
+        .format(total_compute_time_str, total_compute_time / total,
+                num_devices))
 
 
 @contextmanager

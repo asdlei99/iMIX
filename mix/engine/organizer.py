@@ -8,13 +8,26 @@ from mix.solver import build_lr_scheduler, build_optimizer
 import mix.engine.hooks as hooks
 from mix.utils.precise_bn import get_bn_modules
 import mix.utils.comm as comm
-from mix.evaluation import DatasetEvaluator, inference_on_dataset, print_csv_format
+from mix.evaluation import DatasetEvaluator, inference_on_dataset, build_submit_file, build_test_predict_result
 from collections import OrderedDict
 from mix.evaluation import VQAEvaluator
 from torch.nn.parallel import DistributedDataParallel
 
 import logging
 import os
+
+_AUTOMATIC_MIXED_PRECISION = False
+
+
+def is_mixed_precision():
+    return _AUTOMATIC_MIXED_PRECISION
+
+
+def is_multi_gpus_mixed_precision():
+    if comm.get_world_size() > 1 and is_mixed_precision():
+        return True
+    else:
+        return False
 
 
 class Organizer:
@@ -29,7 +42,7 @@ class Organizer:
         self.cfg = cfg
 
         self.model = self.build_model(cfg)
-        self.optimizer = self.build_optimizer(cfg, self.model)
+
         self.train_data_loader = self.build_train_loader(cfg)
 
         if comm.get_world_size() > 1:
@@ -41,9 +54,11 @@ class Organizer:
             self.model = DistributedDataParallel(
                 self.model,
                 device_ids=[comm.get_local_rank()],
-                broadcast_buffers=False,
+                output_device=comm.get_local_rank(),
+                check_reduction=True,
+                broadcast_buffers=True,
                 find_unused_parameters=cfg.find_unused_parameters)
-
+        self.optimizer = self.build_optimizer(cfg, self.model)
         self.scheduler = self.build_lr_scheduler(cfg, self.optimizer)
         self.checkpointer = MixCheckpointer(
             self.model,
@@ -59,9 +74,8 @@ class Organizer:
         self.max_epoch = cfg.total_epochs if self.by_epoch else 0
 
         self.hooks = self.build_hooks()
-        if comm.is_main_process() and hasattr(
-                cfg, 'test_data') and cfg.test_data.eval_period is not 0:
-            self.hooks.append(self.add_evaluate_hook())
+
+        logger.info('Organizer.init')
 
     @classmethod
     def build_model(cls, cfg):
@@ -116,9 +130,15 @@ class Organizer:
         cfg = self.cfg
 
         hook_list = []
+        if hasattr(self.cfg, 'fp16'):
+            hook_list.append(
+                hooks.Fp16OptimizerHook(self.cfg.optimizer_config.grad_clip,
+                                        self.cfg.fp16))
+            self.set_mixed_precision(True)
+        else:
+            hook_list.append(
+                hooks.OptimizerHook(self.cfg.optimizer_config.grad_clip))
         hook_list.append(hooks.IterationTimerHook())
-        hook_list.append(
-            hooks.OptimizerHook(self.cfg.optimizer_config.grad_clip))
         hook_list.append(hooks.LRSchedulerHook(self.optimizer, self.scheduler))
 
         if hasattr(cfg, 'test') and hasattr(cfg.test, 'precise_bn'):
@@ -131,6 +151,9 @@ class Organizer:
             hook_list.append(
                 hooks.CheckPointHook(self.checkpointer,
                                      cfg.checkpoint_config.period))
+
+        if hasattr(cfg, 'test_data') and cfg.test_data.eval_period is not 0:
+            hook_list.append(self.add_evaluate_hook())
 
         if comm.is_main_process():
             hook_list.append(
@@ -204,6 +227,54 @@ class Organizer:
         logger.info('test finish')
         return results
 
+    @classmethod
+    def build_test_result(cls,
+                          cfg,
+                          model,
+                          evaluators=None,
+                          only_test_pred=False):
+        """
+                Args:
+                    cfg (CfgNode):
+                    model (nn.Module):
+                    evaluators (list[DatasetEvaluator] or None): if None, will call
+                        :meth:`build_evaluator`. Otherwise, must have the same length as
+                        `cfg.DATASETS.TEST`.
+
+                Returns:
+                    dict: a dict of result metrics
+                """
+        logger = logging.getLogger(__name__)
+        logger.info('build  submission result')
+
+        if isinstance(evaluators, DatasetEvaluator):
+            evaluators = [evaluators]
+        if evaluators is not None:
+            assert len(
+                cfg.DATASETS.TEST) == len(evaluators), '{} != {}'.format(
+                    len(cfg.DATASETS.TEST), len(evaluators))
+
+        results = OrderedDict()
+        for idx, dataset_name in enumerate(cfg.test_datasets):
+            data_loader = cls.build_test_loader(cfg, dataset_name)
+            # When evaluators are passed in as arguments,
+            # implicitly assume that evaluators can be created before data_loader.
+            if evaluators is not None:
+                evaluator = evaluators[idx]
+            else:
+                try:
+                    evaluator = cls.build_evaluator(cfg, dataset_name)
+                except NotImplementedError:
+                    logger.warning(
+                        'No evaluator found. Use `DefaultTrainer.test(evaluators=)`, '
+                        'or implement its `build_evaluator` method.')
+                    results[dataset_name] = {}
+                    continue
+            if only_test_pred:
+                build_test_predict_result(model, data_loader, evaluator)
+            else:
+                build_submit_file(model, data_loader, evaluator)
+
     def add_evaluate_hook(self):
 
         def test_and_save_results():
@@ -216,3 +287,7 @@ class Organizer:
     @property
     def by_epoch(self):
         return self._by_epoch
+
+    def set_mixed_precision(self, enable=False):
+        global _AUTOMATIC_MIXED_PRECISION
+        _AUTOMATIC_MIXED_PRECISION = enable

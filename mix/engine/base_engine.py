@@ -4,6 +4,7 @@ import mix.engine.hooks as hooks
 import weakref
 from mix.engine.hooks.periods import LogBufferStorage
 import logging
+import time
 
 
 class EngineBase:
@@ -37,6 +38,8 @@ class EngineBase:
         for hk in self._hooks:
             hk.after_train_iter()
         self.log_buffer.step()
+        if self.by_epoch:
+            self.log_buffer.epoch_iter(self.inner_iter)
 
     def before_train_epoch(self):
         for hk in self._hooks:
@@ -45,6 +48,7 @@ class EngineBase:
     def after_train_epoch(self):
         for hk in self._hooks:
             hk.after_train_epoch()
+        self.log_buffer.epoch_step()
 
     @abstractmethod
     def run_train_epoch(self):
@@ -81,7 +85,8 @@ class EngineBase:
         self.iter = self.start_iter
         self.max_iter = max_epoch * len(self.data_loader)
 
-        with LogBufferStorage(self.iter) as self.log_buffer:
+        with LogBufferStorage(self.iter,
+                              len(self.data_loader)) as self.log_buffer:
             try:
                 self.before_train()
                 for self.epoch in range(self.start_epoch, self.max_epoch):
@@ -91,4 +96,5 @@ class EngineBase:
             except Exception as e:
                 raise
             finally:
+                time.sleep(1)  # wait for some hooks like logger to finish
                 self.after_train()

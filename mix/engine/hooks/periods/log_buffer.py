@@ -5,7 +5,7 @@ from collections import defaultdict
 from mix.utils.history_buffer import HistoryBuffer
 import torch
 
-#TODO(jinliang) logBufferStorage在_CURRENT_LOG_BUFFER_STACK存入数据,
+# TODO(jinliang) logBufferStorage在_CURRENT_LOG_BUFFER_STACK存入数据,
 # 而LogBufferWriter将存入数据写文件或终端输出，因此所有logBuffer数据仅有一份，
 # 后期可通过带有装饰器单例模式进行优化
 
@@ -106,7 +106,7 @@ class LogBufferStorage:
     if needed.
     """
 
-    def __init__(self, start_iter=0):
+    def __init__(self, start_iter=0, sigle_epoch_iters=0, by_epoch=True):
         """
         Args:
             start_iter (int): the iteration number to start with
@@ -118,6 +118,10 @@ class LogBufferStorage:
         self._current_prefix = ''
         self._vis_data = []
         self._histograms = []
+        self._epoch_inner_iter = 0
+        self._epoch = 0
+        self._single_epoch_iters = sigle_epoch_iters
+        self._by_epoch = by_epoch
 
     def put_image(self, img_name, img_tensor):
         """Add an `img_tensor` associated with `img_name`, to be shown on
@@ -255,14 +259,36 @@ class LogBufferStorage:
         self._iter += 1
         self._latest_scalars = {}
 
+    def epoch_step(self):
+        self._epoch += 1
+
+    def epoch_iter(self, inner_iter):
+        self._epoch_inner_iter = inner_iter + 1
+
     @property
     def iter(self):
         return self._iter
 
     @property
+    def epoch(self):
+        return self._epoch
+
+    @property
+    def epoch_inner_iter(self):
+        return self._epoch_inner_iter
+
+    @property
+    def single_epoch_iters(self):
+        return self._single_epoch_iters
+
+    @property
     def iteration(self):
         # for backward compatibility
         return self._iter
+
+    @property
+    def by_epoch(self):
+        return self._by_epoch
 
     def __enter__(self):
         _CURRENT_LOG_BUFFER_STACK.append(self)

@@ -67,7 +67,7 @@ class EvaluateHook(HookBase):
         del self._func
 
     def after_train_epoch(self):
-        logger = logging.getLogger(__name__)
+        # logger = logging.getLogger(__name__)
         results = self._do_eval()
-        logger.info('epoch_{} evaluate accuracy :'.format(
-            self.trainer.epoch, float(results['classification'])))
+        # logger.info('epoch_{} evaluate accuracy :'.format(
+        #     self.trainer.epoch, float(results['classification'])))

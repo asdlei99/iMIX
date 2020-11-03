@@ -17,6 +17,7 @@ from .evaluator import DatasetEvaluator
 from tabulate import tabulate
 from mix.utils.file_io import PathManager
 import mix.utils.comm as comm
+import json
 
 from mix.utils.logger import create_small_table
 from mix.models.vqa_models.mcan import list2dict
@@ -94,14 +95,50 @@ class VQAEvaluator(DatasetEvaluator):
         #
         #     self._predictions.append(prediction)
         # inputs = list2dict(inputs)  #TODO(jinliang)
-        prediction = dict()
+
         for idx in range(outputs['scores'].shape[0]):
-            prediction['input_ids'] = inputs['input_ids'][idx]
+            prediction = dict()
+            prediction['question_id'] = inputs['question_id'][idx]
             prediction['answers_scores'] = inputs['answers_scores'][idx]
             score = outputs['scores'][idx].to(self._cpu_device)
             prediction['scores'] = _get_accuracy(
                 score.view(-1, score.shape[0]))
             self._predictions.append(prediction)
+
+    def process_submit_result(self, inputs, outpus):
+        prediction = dict()
+        score, label = outpus['scores'].max(1)
+        for qid, l in zip(inputs['question_id'].detach().numpy(),
+                          label.cpu().detach().numpy()):
+            prediction = dict()
+            prediction['question_id'] = int(qid)
+            prediction['answer'] = inputs['quesid2ans'][l][
+                0]  # TODO(jinliang):two
+            self._predictions.append(prediction)
+
+    def save_submit_result(self):
+        if self._distributed:
+            comm.synchronize()
+            predictions = comm.gather(self._predictions, dst=0)
+            predictions = list(itertools.chain(*predictions))
+
+            if not comm.is_main_process():
+                return {}
+        else:
+            predictions = self._predictions
+
+        if len(predictions) == 0:
+            self._logger.warning(
+                '[VQAEvaluator] Did not receive valid predictions.')
+            return {}
+
+        if os.path.exists(self._output_dir) is False:
+            os.mkdir(self._output_dir)
+        file = os.path.join(self._output_dir, 'submit_result.json')
+        with open(file, 'w') as f:
+            json.dump(predictions, f, indent=True)
+        self._logger.info('submit file:{}  smaple_nums:{}'.format(
+            file, len(predictions)))
 
     def evaluate(self):
         if self._distributed:

@@ -6,6 +6,7 @@ from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
 from ..utils.registry import build_from_cfg, Registry
 from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
 from ..utils.misc import is_list_of
+import mix.utils.comm as comm
 
 
 @OPTIMIZER_BUILDERS.register_module()
@@ -199,7 +200,23 @@ class DefaultOptimizerConstructor:
         optimizer_cfg = self.optimizer_cfg.copy()
         # if no paramwise option is specified, just use the global setting
         if not self.paramwise_cfg:
+            # if hasattr(model, "get_optimizer_parameters"):
+            #     optimizer_cfg['params'] = model.get_optimizer_parameters(optimizer_cfg['lr'],
+            #                                                              optimizer_cfg['training_encoder_lr_multiply'])
+            #     # if comm.get_world_size() > 1:
+            #     #     optimizer_cfg['params'] = model.module.get_optimizer_parameters(optimizer_cfg['lr'],
+            #     #                                                                     optimizer_cfg[
+            #     #                                                                         'training_encoder_lr_multiply'])
+            #     # else:
+            #     #     optimizer_cfg['params'] = model.get_optimizer_parameters(optimizer_cfg['lr'],
+            #     #                                                              optimizer_cfg[
+            #     #                                                                  'training_encoder_lr_multiply'])
+            #
+            #     optimizer_cfg.pop('training_encoder_lr_multiply')
+            # else:
+            #     optimizer_cfg['params'] = model.parameters()
             optimizer_cfg['params'] = model.parameters()
+            optimizer_cfg.pop('training_encoder_lr_multiply')
             return build_from_cfg(optimizer_cfg, OPTIMIZERS)
 
         # set param-wise lr and weight decay recursively
