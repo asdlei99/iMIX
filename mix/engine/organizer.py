@@ -12,6 +12,7 @@ from mix.evaluation import DatasetEvaluator, inference_on_dataset, build_submit_
 from collections import OrderedDict
 from mix.evaluation import VQAEvaluator
 from torch.nn.parallel import DistributedDataParallel
+import torch
 
 import logging
 import os
@@ -21,6 +22,13 @@ _AUTOMATIC_MIXED_PRECISION = False
 
 def is_mixed_precision():
     return _AUTOMATIC_MIXED_PRECISION
+
+
+def get_masked_fill_value():
+    if is_mixed_precision():
+        return torch.finfo(torch.float16).min
+    else:
+        return -1e9
 
 
 def is_multi_gpus_mixed_precision():

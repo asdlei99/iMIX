@@ -76,9 +76,9 @@ class _netW(nn.Module):
 
     def __init__(self, ntoken, ninp, dropout, emb_dim):
         super(_netW, self).__init__()
-        #self.word_embed = nn.Embedding(ntoken+1, ninp).cuda()
+        # self.word_embed = nn.Embedding(ntoken+1, ninp).cuda()
         self.word_embed = nn.Embedding(ntoken + 1, ninp, padding_idx=0)
-        #pdb.set_trace()
+        # pdb.set_trace()
 
         self.vocab_size = ntoken
 
@@ -87,7 +87,7 @@ class _netW(nn.Module):
         self.word_embed.weight.data.copy_(
             torch.from_numpy(self.pretrained_wemb))
         self.Linear = share_Linear(self.word_embed.weight).cuda()
-        #self.init_weights()
+        # self.init_weights()
         self.d = dropout
 
     """
@@ -236,8 +236,8 @@ class share_Linear(nn.Module):
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' \
-            + str(self.in_features) + ' -> ' \
-            + str(self.out_features) + ')'
+               + str(self.in_features) + ' -> ' \
+               + str(self.out_features) + ')'
 
 
 class SAEmbedding(nn.Module):
@@ -311,7 +311,10 @@ class MovieMcanMultiHeadAttention(nn.Module):
         d_k = query.size(-1)
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
         if mask is not None:
-            scores.data.masked_fill_(mask.unsqueeze(1).unsqueeze(2), -1e9)
+            from mix.engine.organizer import get_masked_fill_value
+            # scores.data.masked_fill_(mask.unsqueeze(1).unsqueeze(2), -1e9)
+            scores.data.masked_fill_(
+                mask.unsqueeze(1).unsqueeze(2), get_masked_fill_value())
 
         p_attn = nn.functional.softmax(scores, dim=-1)
         if dropout is not None:
@@ -385,7 +388,9 @@ class AttnPool1d(nn.Module):
         b = query.size(0)
         score = self.linear(query).transpose(-2, -1)
         if mask is not None:
-            score.data.masked_fill_(mask.unsqueeze(1), -1e9)
+            from mix.engine.organizer import get_masked_fill_value
+            #score.data.masked_fill_(mask.unsqueeze(1), -1e9)
+            score.data.masked_fill_(mask.unsqueeze(1), get_masked_fill_value())
         self.p_attn = nn.functional.softmax(score, dim=-1)
 
         return torch.matmul(self.p_attn, value).view(b, self.num_attn, -1)

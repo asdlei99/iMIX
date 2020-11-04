@@ -123,10 +123,13 @@ class MixEngine(CommonEngine):
 
     def __init__(self, cfg):
         self.organizer = Organizer(cfg)
-        super(MixEngine, self).__init__(self.organizer.model,
-                                        self.organizer.train_data_loader,
-                                        self.organizer.optimizer,
-                                        self.organizer.model.losses)
+        loss_fn = self.organizer.model.module.losses if comm.get_world_size(
+        ) > 1 else self.organizer.model.losses
+        super(MixEngine, self).__init__(
+            self.organizer.model,
+            self.organizer.train_data_loader,
+            self.organizer.optimizer,
+            loss_fn=loss_fn)
 
         self.start_iter = self.organizer.start_iter
         self.max_iter = self.organizer.max_iter
