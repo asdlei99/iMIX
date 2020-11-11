@@ -65,7 +65,7 @@ class EngineBase:
         self.iter = start_iter
         self.max_iter = max_iter
 
-        with LogBufferStorage(start_iter) as self.log_buffer:
+        with LogBufferStorage(start_iter, by_epoch=False) as self.log_buffer:
             try:
                 self.before_train()
                 for self.iter in range(self.start_iter, self.max_iter):

@@ -102,11 +102,10 @@ class MCAN(nn.Module):
     #     return model_output
 
     def forward(self, batch_data):  # TODO(jinliang): imitate Det2
-        if not self.training:
-            return self.inference(batch_data)
-
         from mix.engine.organizer import is_multi_gpus_mixed_precision
         with autocast(enabled=is_multi_gpus_mixed_precision()):
+            if not self.training:
+                return self.inference(batch_data)
             batch_data = self.preprocess_data(batch_data)
 
             img_feat = batch_data['feature']
@@ -194,7 +193,9 @@ class MCAN(nn.Module):
         return model_output
 
     def preprocess_data(self, batched_inputs):
-        # batched_inputs = list2dict(batched_inputs)
+        from mix.engine.organizer import is_by_iter
+        if is_by_iter():
+            batched_inputs = list2dict(batched_inputs)
 
         img_feat = batched_inputs['feature']
         input_ids = batched_inputs['input_ids']
@@ -213,7 +214,8 @@ class MCAN(nn.Module):
 
         batched_inputs['feature'] = feat
         batched_inputs['input_ids'] = input_ids
-        batched_inputs['input_mask'] = input_mask
+        batched_inputs[
+            'input_mask'] = ~input_mask  # TODO(jinliang):lixiaochuan
 
         if self.training:
             answers_scores = batched_inputs['answers_scores']
@@ -271,11 +273,13 @@ def list2dict(batched_inputs):  # TODO(jinliang):
     input_mask = torch.zeros(
         (batch_size, *batched_inputs[0]['input_mask'].shape),
         dtype=batched_inputs[0]['input_mask'].dtype)
+    question_id = torch.zeros([batch_size], dtype=torch.int32)
     for idx in range(batch_size):
         img_feats[idx] = batched_inputs[idx]['feature']
         input_ids[idx] = batched_inputs[idx]['input_ids']
         answers_scores[idx] = batched_inputs[idx]['answers_scores']
         input_mask[idx] = batched_inputs[idx]['input_mask']
+        question_id[idx] = batched_inputs[idx]['question_id']
 
     batch_data = dict()
 
@@ -283,6 +287,7 @@ def list2dict(batched_inputs):  # TODO(jinliang):
     batch_data['input_ids'] = input_ids
     batch_data['answers_scores'] = answers_scores
     batch_data['input_mask'] = input_mask
+    batch_data['question_id'] = question_id
 
     return batch_data
 

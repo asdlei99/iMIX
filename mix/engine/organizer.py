@@ -18,6 +18,7 @@ import logging
 import os
 
 _AUTOMATIC_MIXED_PRECISION = False
+_BY_ITER_TRAIN = False
 
 
 def is_mixed_precision():
@@ -36,6 +37,10 @@ def is_multi_gpus_mixed_precision():
         return True
     else:
         return False
+
+
+def is_by_iter():
+    return _BY_ITER_TRAIN
 
 
 class Organizer:
@@ -82,6 +87,8 @@ class Organizer:
         self.max_epoch = cfg.total_epochs if self.by_epoch else 0
 
         self.hooks = self.build_hooks()
+
+        self.set_by_iter()
 
         logger.info('Organizer.init')
 
@@ -299,3 +306,7 @@ class Organizer:
     def set_mixed_precision(self, enable=False):
         global _AUTOMATIC_MIXED_PRECISION
         _AUTOMATIC_MIXED_PRECISION = enable
+
+    def set_by_iter(self):
+        global _BY_ITER_TRAIN
+        _BY_ITER_TRAIN = False if self._by_epoch else True

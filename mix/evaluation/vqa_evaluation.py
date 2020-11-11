@@ -20,7 +20,6 @@ import mix.utils.comm as comm
 import json
 
 from mix.utils.logger import create_small_table
-from mix.models.vqa_models.mcan import list2dict
 
 
 class VQAEvaluator(DatasetEvaluator):
@@ -95,6 +94,10 @@ class VQAEvaluator(DatasetEvaluator):
         #
         #     self._predictions.append(prediction)
         # inputs = list2dict(inputs)  #TODO(jinliang)
+        from mix.models.vqa_models.mcan import list2dict
+        from mix.engine.organizer import is_by_iter
+        if is_by_iter():
+            inputs = list2dict(inputs)
 
         for idx in range(outputs['scores'].shape[0]):
             prediction = dict()

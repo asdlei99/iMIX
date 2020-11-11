@@ -8,12 +8,12 @@ optimizer = dict(
     training_encoder_lr_multiply=1
 )  # mix_model_zrz_jin get_optimizer_parmeters??
 optimizer_config = dict(grad_clip=None)  # ??
-fp16 = dict(
-    init_scale=2.**16,
-    growth_factor=2.0,
-    backoff_factor=0.5,
-    growth_interval=2000,
-)
+# fp16 = dict(
+#     init_scale=2.**16,
+#     growth_factor=2.0,
+#     backoff_factor=0.5,
+#     growth_interval=2000,
+# )
 # learning policy
 # lr_config = dict(
 #     policy='step',  # TODO(jinliang) multiStep  <-  step
@@ -31,4 +31,6 @@ lr_config = dict(
     warmup_iterations=27000,
     policy='MultiStepScheduler')
 # max_iter = 118000
-total_epochs = 13
+max_iter = 236000
+by_iter = True
+#total_epochs = 13

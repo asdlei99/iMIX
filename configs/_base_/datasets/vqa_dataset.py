@@ -54,8 +54,8 @@ vqa_info_cpler_cfg = dict(
         vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'))
 
 train_data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=2,
+    samples_per_gpu=1,
+    workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
