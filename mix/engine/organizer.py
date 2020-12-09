@@ -7,7 +7,8 @@ from mix.models import build_model
 from mix.solver import build_lr_scheduler, build_optimizer
 import mix.engine.hooks as hooks
 from mix.utils.precise_bn import get_bn_modules
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 from mix.evaluation import DatasetEvaluator, inference_on_dataset, build_submit_file, build_test_predict_result
 from collections import OrderedDict
 from mix.evaluation import VQAEvaluator

@@ -6,8 +6,8 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
-import mix.utils.comm as comm
-
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 __all__ = ['launch']
 
 

@@ -2,8 +2,8 @@
 import pickle
 from mix.utils.checkpoint import Checkpointer
 from mix.utils.file_io import PathManager
-import mix.utils.comm as comm
-
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 # from .c2_model_loading import align_and_update_state_dicts #TODO(jinliang)
 
 

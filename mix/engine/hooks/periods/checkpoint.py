@@ -1,7 +1,8 @@
 from ..base_hook import HookBase
 from mix.utils.checkpoint import PeriodicCheckpointer
 from ..builder import HOOKS
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 
 
 @HOOKS.register_module()

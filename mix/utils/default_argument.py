@@ -4,7 +4,8 @@ import argparse
 import sys
 import os
 from .collect_env import collect_env_info
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 from .file_io import PathManager
 from .env import seed_all_rng
 from .logger import setup_logger

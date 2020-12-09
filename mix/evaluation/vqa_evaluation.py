@@ -16,7 +16,8 @@ from .evaluator import DatasetEvaluator
 
 from tabulate import tabulate
 from mix.utils.file_io import PathManager
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 import json
 
 from mix.utils.logger import create_small_table
@@ -146,7 +147,7 @@ class VQAEvaluator(DatasetEvaluator):
     def evaluate(self):
         if self._distributed:
             comm.synchronize()
-            predictions = comm.gather(self._predictions, dst=0)
+            predictions = comm.gather(self._predictions, dst_rank=0)
             predictions = list(itertools.chain(*predictions))
 
             if not comm.is_main_process():

@@ -3,9 +3,10 @@ import inspect
 import torch
 import logging
 
-from ..utils.registry import Registry, build_from_cfg
-import mix.utils.comm as comm
-
+# from ..utils.registry import Registry, build_from_cfg
+from ..utils_mix.registry import Registry, build_from_cfg
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 OPTIMIZERS = Registry('optimizer')
 OPTIMIZER_BUILDERS = Registry('optimizer builder')
 LR_SCHEDULERS = Registry('lr scheduler')
@@ -46,8 +47,8 @@ def build_optimizer(optimizer_config, model):
 
 
 def build_lr_scheduler(
-        lr_config, optimizer
-):  #TODO(jinliang): The config file of LR does not match the code
+    lr_config, optimizer
+):  # TODO(jinliang): The config file of LR does not match the code
 
     logger = logging.getLogger(__name__)
     try:
@@ -56,18 +57,18 @@ def build_lr_scheduler(
         # lr_type = policy_type + ''
         lr_config['type'] = policy_type
         lr_config['optimizer'] = optimizer
-        #lr_config = modify_lr_config(lr_config, optimizer)#TODO(jinliang):modify
+        # lr_config = modify_lr_config(lr_config, optimizer)#TODO(jinliang):modify
 
         lr_scheduler = build_from_cfg(lr_config, LR_SCHEDULERS)
     except AssertionError:
         logger.error('policy is not in {}'.format(lr_config))
-    except Exception as e:  #TODO(jinliang) capture build_from_cfg exception
+    except Exception as e:  # TODO(jinliang) capture build_from_cfg exception
         logger.error(e)
     else:
-        #logger.info('Success in building learn rate scheduler')
+        # logger.info('Success in building learn rate scheduler')
         return lr_scheduler
     finally:
-        #logger.info('build_lr_scheduler completion')
+        # logger.info('build_lr_scheduler completion')
         pass
 
 

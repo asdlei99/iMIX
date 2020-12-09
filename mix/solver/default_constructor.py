@@ -3,10 +3,12 @@ import warnings
 import torch
 from torch.nn import GroupNorm, LayerNorm
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
-from ..utils.registry import build_from_cfg, Registry
+# from ..utils.registry import build_from_cfg, Registry
+from ..utils_mix.registry import build_from_cfg, Registry
 from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
 from ..utils.misc import is_list_of
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 
 
 @OPTIMIZER_BUILDERS.register_module()

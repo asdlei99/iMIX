@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from collections import defaultdict
 from mix.utils.history_buffer import HistoryBuffer
 import torch
+import weakref
 
 # TODO(jinliang) logBufferStorage在_CURRENT_LOG_BUFFER_STACK存入数据,
 # 而LogBufferWriter将存入数据写文件或终端输出，因此所有logBuffer数据仅有一份，
@@ -19,16 +20,36 @@ def get_log_buffer():
     return _CURRENT_LOG_BUFFER_STACK[-1]
 
 
+# before_modification
+# class LogBufferWriter:
+#     """将LogBufferStorage数据按照不同类型writer."""
+#
+#     @abstractmethod
+#     def write(self):
+#         raise NotImplementedError
+#
+#     @abstractmethod
+#     def close(self):
+#         pass
+
+
 class LogBufferWriter:
     """将LogBufferStorage数据按照不同类型writer."""
 
-    @abstractmethod
     def write(self):
-        raise NotImplementedError
+        self.get_buffer_data()
+        self.process_buffer_data()
 
-    @abstractmethod
+    @staticmethod
     def close(self):
         pass
+
+    def get_buffer_data(self):
+        self.log_buffer = get_log_buffer()
+
+    @staticmethod
+    def process_buffer_data():
+        raise NotImplementedError
 
 
 # class LogBufferStorage:

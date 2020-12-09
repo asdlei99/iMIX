@@ -3,7 +3,8 @@ from .organizer import Organizer, is_mixed_precision
 import time
 import logging
 import torch
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 import numpy as np
 from mix.evaluation import verify_results
 from torch.cuda.amp.autocast_mode import autocast

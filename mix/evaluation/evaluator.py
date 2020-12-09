@@ -7,7 +7,8 @@ from collections import OrderedDict
 from contextlib import contextmanager
 import torch
 
-from mix.utils.comm import get_world_size, is_main_process
+# from mix.utils.comm import get_world_size, is_main_process
+from mix.utils_mix.distributed_info import get_world_size, is_main_process
 from mix.utils.logger import log_every_n_seconds
 import pickle as pkl
 

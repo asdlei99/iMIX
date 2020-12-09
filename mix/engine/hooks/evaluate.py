@@ -1,7 +1,8 @@
 # TODO(jinliang):jinliang_imitate
 from .base_hook import HookBase
 from .builder import HOOKS
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 import logging
 
 

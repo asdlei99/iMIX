@@ -1,6 +1,7 @@
 from torch import nn
 import torch
-from mix.utils.registry import Registry, build_from_cfg
+# from mix.utils.registry import Registry, build_from_cfg
+from mix.utils_mix.registry import Registry, build_from_cfg
 from mix.data.parallel.distributed import MMDistributedDataParallel
 from mix.data.parallel.data_parallel import MMDataParallel
 
