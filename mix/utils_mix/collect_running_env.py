@@ -89,7 +89,7 @@ class EnvironmentInfo:
             # unhandled failure
             return so_file
 
-    def running_env_info(self):
+    def get_env_info(self):
         if torch.cuda.is_available():
             self._data.append(('GPU available', True))
             self._gpu_info()
@@ -108,5 +108,5 @@ class EnvironmentInfo:
 
 def collect_env_info():
     env_info = EnvironmentInfo()
-    env_info.running_env_info()
+    env_info.get_env_info()
     return tabulate(env_info.env_info)

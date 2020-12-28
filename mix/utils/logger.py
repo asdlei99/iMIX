@@ -21,7 +21,8 @@ class _ColorfulFormatter(logging.Formatter):
 
     def formatMessage(self, record):
         record.name = record.name.replace(self._root_name, self._abbrev_name)
-        log = super(_ColorfulFormatter, self).formatMessage(record)
+        log = super().formatMessage(record)
+        # log = super(_ColorfulFormatter, self).formatMessage(record)
         if record.levelno == logging.WARNING:
             prefix = colored('WARNING', 'red', attrs=['blink'])
         elif record.levelno == logging.ERROR or record.levelno == logging.CRITICAL:
@@ -59,7 +60,7 @@ def setup_logger(output=None,
     logger.propagate = False
 
     if abbrev_name is None:
-        abbrev_name = 'mix' if name == 'MIX' else name
+        abbrev_name = 'MIX' if name == 'MIX' else name
 
     plain_formatter = logging.Formatter(
         '[%(asctime)s] %(name)s %(levelname)s: %(message)s',

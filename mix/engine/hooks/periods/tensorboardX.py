@@ -1,5 +1,6 @@
 # TODO(jinliang):jinliang_copy
-from .log_buffer import LogBufferWriter, get_log_buffer
+#from .log_buffer import LogBufferWriter, get_log_buffer
+from .log_buffer_mix import get_log_buffer, LogBufferWriter
 from ..builder import HOOKS
 
 # @HOOKS.register_module()
@@ -117,14 +118,14 @@ class TensorboardXLoggerHook(LogBufferWriter):
             self._writer.add_scalar(name, value, self.log_buffer.iter)
 
     def _add_image(self):
-        if len(self.log_buffer._vis_data) >= 1:
-            for img_name, img_data, step_num in self.log_buffer._vis_data:
+        if len(self.log_buffer.vis_data) >= 1:
+            for img_name, img_data, step_num in self.log_buffer.vis_data:
                 self._writer.add_image(img_name, img_data, step_num)
             self.log_buffer.clear_images()
 
     def _add_histogram(self):
-        if len(self.log_buffer._histograms) >= 1:
-            for hist_params in self.log_buffer._histograms:
+        if len(self.log_buffer.histograms) >= 1:
+            for hist_params in self.log_buffer.histograms:
                 self._writer.add_histogram_raw(**hist_params)
             self.log_buffer.clear_histograms()
 

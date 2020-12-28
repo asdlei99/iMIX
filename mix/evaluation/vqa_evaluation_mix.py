@@ -16,11 +16,28 @@ from .evaluator import DatasetEvaluator
 
 from tabulate import tabulate
 from mix.utils.file_io import PathManager
-import mix.utils.comm as comm
+# import mix.utils.comm as comm
+import mix.utils_mix.distributed_info as comm
 import json
 
 from mix.utils.logger import create_small_table
-from mix.models.vqa_models.mcan import list2dict
+
+
+def get_predictions(func):
+
+    def wrapper(self, *args, **kwargs):
+        if self._distributed is False:
+            predictions = self._predictions
+        else:
+            comm.synchronize()
+            predicts_list = comm.gather(self._predictions, dst_rank=0)
+            predictions = list(itertools.chain(*predicts_list))
+            if not comm.is_main_process():
+                return {}
+        kwargs['predictions'] = predictions
+        return func(self, *args, **kwargs)
+
+    return wrapper
 
 
 class VQAEvaluator(DatasetEvaluator):
@@ -30,25 +47,13 @@ class VQAEvaluator(DatasetEvaluator):
     def __init__(self, dataset_name, cfg, distributed, output_dir=None):
         """
         Args:
-            dataset_name (str): name of the dataset to be evaluated.
-                It must have either the following corresponding metadata:
-
-                    "json_file": the path to the COCO format annotation
-
-                Or it must be in detectron2's standard dataset format
-                so it can be converted to COCO format automatically.
-            cfg (CfgNode): config instance
-            distributed (True): if True, will collect results from all ranks and run evaluation
-                in the main process.
-                Otherwise, will evaluate the results in the current process.
-            output_dir (str): optional, an output directory to dump all
-                results predicted on the dataset. The dump contains two files:
-
-                1. "instance_predictions.pth" a file in torch serialization
-                   format that contains all the raw original predictions.
-                2. "coco_instances_results.json" a json file in COCO's result
-                   format.
+            dataset_name (str): The name of the dataset to be evaluated.
+            cfg (Config): Config instance
+            distributed (True): if True,the results will be collected in all ranks and run evaluation in the main process,
+                Otherwize , will evaluate in the current process
+            output_dir (str): optional,an output directory to save all results predicted on the dataset
         """
+        self._dataset_name = dataset_name
         self._tasks = self._tasks_from_config(cfg)
         self._distributed = distributed
         self._output_dir = output_dir
@@ -58,43 +63,21 @@ class VQAEvaluator(DatasetEvaluator):
 
     def reset(self):
         self._predictions = []
+        self._results = OrderedDict()
 
     def _tasks_from_config(self, cfg):
         """
         Returns:
-            tuple[str]: tasks that can be evaluated under the given configuration.
+            tuple[str]: it is some tasks that get through cfg related config
         """
         tasks = ('classification', )
-        # if cfg.MODEL.MASK_ON:
-        #     tasks = tasks + ("segm", )
-        # if cfg.MODEL.KEYPOINT_ON:
-        #     tasks = tasks + ("keypoints", )
         return tasks
 
-    def process(self, inputs, outputs):
-        """
-        Args:
-            inputs: the inputs to a VQA model (e.g., MCAN).
-                It is a list of dict. Each dict corresponds to an image and a question ,that
-                contains keys like "feature", "input_ids", "input_mask", "answers_scores".
-            outputs: the outputs of a VQA model. It is a list of dicts with key
-                "scores" that contains :class:`scores`.
-        """
-
-        # TODO(jinliang) prediction = {image_id=xxx,question=xxx,pred_score=xxx}
-        # for input, output in zip(inputs, outputs):
-        #     prediction = {
-        #         "input_ids": input["input_ids"],
-        #         "answers_scores": input["answers_scores"]
-        #     }
-        #
-        #     # TODO this is ugly
-        #     if "scores" in output:
-        #         scores = output["scores"].to(self._cpu_device)
-        #         prediction["scores"] = _get_accuracy(scores)
-        #
-        #     self._predictions.append(prediction)
-        # inputs = list2dict(inputs)  #TODO(jinliang)
+    def eval_process(self, inputs, outputs):
+        from mix.models.vqa_models.mcan import list2dict
+        from mix.engine.organizer import is_by_iter
+        if is_by_iter():
+            inputs = list2dict(inputs)
 
         for idx in range(outputs['scores'].shape[0]):
             prediction = dict()
@@ -105,7 +88,7 @@ class VQAEvaluator(DatasetEvaluator):
                 score.view(-1, score.shape[0]))
             self._predictions.append(prediction)
 
-    def process_submit_result(self, inputs, outpus):
+    def submit_process(self, inputs, outpus):
         prediction = dict()
         score, label = outpus['scores'].max(1)
         for qid, l in zip(inputs['question_id'].detach().numpy(),
@@ -116,17 +99,8 @@ class VQAEvaluator(DatasetEvaluator):
                 0]  # TODO(jinliang):two
             self._predictions.append(prediction)
 
-    def save_submit_result(self):
-        if self._distributed:
-            comm.synchronize()
-            predictions = comm.gather(self._predictions, dst=0)
-            predictions = list(itertools.chain(*predictions))
-
-            if not comm.is_main_process():
-                return {}
-        else:
-            predictions = self._predictions
-
+    @get_predictions
+    def save_submit_result(self, predictions=[]):
         if len(predictions) == 0:
             self._logger.warning(
                 '[VQAEvaluator] Did not receive valid predictions.')
@@ -140,17 +114,8 @@ class VQAEvaluator(DatasetEvaluator):
         self._logger.info('submit file:{}  smaple_nums:{}'.format(
             file, len(predictions)))
 
-    def evaluate(self):
-        if self._distributed:
-            comm.synchronize()
-            predictions = comm.gather(self._predictions, dst=0)
-            predictions = list(itertools.chain(*predictions))
-
-            if not comm.is_main_process():
-                return {}
-        else:
-            predictions = self._predictions
-
+    @get_predictions
+    def evaluate(self, predictions=[]):
         if len(predictions) == 0:
             self._logger.warning(
                 '[VQAEvaluator] Did not receive valid predictions.')
@@ -163,10 +128,9 @@ class VQAEvaluator(DatasetEvaluator):
             with PathManager.open(file_path, 'wb') as f:
                 torch.save(predictions, f)
 
-        self._results = OrderedDict()
         if 'classification' in self._tasks:
             self._eval_predictions(set(self._tasks), predictions)
-        # Copy so the caller can do whatever with results
+
         return copy.deepcopy(self._results)
 
     def _eval_predictions(self, tasks, predictions):

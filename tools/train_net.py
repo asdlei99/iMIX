@@ -12,6 +12,7 @@ from mix.utils.mix_checkpoint import MixCheckpointer
 # from mix.utils.default_argument import default_argument_parser, default_setup
 from mix.utils_mix.default_argument import default_argument_parser, default_setup
 from mix.utils.launch import launch
+from mix.utils_mix.launch import launch as ddp_launch
 
 from mix.utils_mix.config import Config as mix_config
 
@@ -36,7 +37,7 @@ from mix.utils_mix.config import Config as mix_config
 #             cfg[k] = v
 
 
-def del_args_some_args(args):
+def del_some_args(args):
     if args.seed is None:
         del args.seed
     if args.work_dir is None:
@@ -63,7 +64,7 @@ def init_set(args):
     # cfg = cfg_mix
 
     cfg = mix_config.fromfile(args.config_file)
-    del_args_some_args(args)
+    del_some_args(args)
     merge_args_to_cfg(args, cfg)
     default_setup(args, cfg)
 
@@ -102,11 +103,19 @@ def main(args):
 if __name__ == '__main__':
     args = default_argument_parser().parse_args()
     print('Command line Args:', args)
-    launch(
-        main,
-        args.num_gpus,
-        num_machines=args.num_machines,
-        machine_rank=args.machine_rank,
-        dist_url=args.dist_url,
-        args=(args, ),
-    )
+    # launch(
+    #     main,
+    #     args.num_gpus,
+    #     num_machines=args.num_machines,
+    #     machine_rank=args.machine_rank,
+    #     dist_url=args.dist_url,
+    #     args=(args,),
+    # )
+
+    ddp_launch(
+        run_fn=main,
+        nproc_per_node=args.nproc_per_node,
+        nnodes=args.nnodes,
+        master_addr=args.master_addr,
+        master_port=args.master_port,
+        run_fn_args=(args, ))

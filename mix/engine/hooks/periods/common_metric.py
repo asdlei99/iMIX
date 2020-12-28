@@ -1,9 +1,11 @@
 # TODO(jinliang):jinliang_copy
-from .log_buffer import LogBufferWriter, get_log_buffer
+#from .log_buffer import LogBufferWriter, get_log_buffer
+from .log_buffer_mix import get_log_buffer, LogBufferWriter
 import logging
 import datetime
 import time
 import torch
+# from mix.utils.logger import setup_logger
 
 # class CommonMetricLoggerHook(LogBufferWriter):
 #     """在终端输出相关信息，迭代时间、前传相关Loss、学习率、ETA."""
@@ -111,6 +113,7 @@ class CommonMetricLoggerHook(LogBufferWriter):
     def __init__(self, max_iter):
         self._max_iter = max_iter
         self.logger = logging.getLogger(__name__)
+
         self._last_write = None
 
     def _common_data(self):
@@ -213,6 +216,16 @@ class CommonMetricLoggerHook(LogBufferWriter):
                 eta_seconds = estimate_iter_time * (self._max_iter - iteration)
                 eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
             self._last_write = (iteration, time.perf_counter())
+
+        iter_time = None
+        # estimate eta on our own - more noisy
+        if self._last_write is not None:
+            estimate_iter_time = (time.perf_counter() -
+                                  self._last_write[1]) / (
+                                      iteration - self._last_write[0])
+            eta_seconds = estimate_iter_time * (self._max_iter - iteration)
+            eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
+        self._last_write = (iteration, time.perf_counter())
 
         try:
             lr = '{:.6f}'.format(storage.history('lr').latest())

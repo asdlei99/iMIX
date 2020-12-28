@@ -40,15 +40,13 @@ class LogBufferWriter:
         self.get_buffer_data()
         self.process_buffer_data()
 
-    @staticmethod
     def close(self):
         pass
 
     def get_buffer_data(self):
         self.log_buffer = get_log_buffer()
 
-    @staticmethod
-    def process_buffer_data():
+    def process_buffer_data(self):
         raise NotImplementedError
 
 

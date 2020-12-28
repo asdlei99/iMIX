@@ -1,5 +1,6 @@
 # TODO(jinliang):jinliang_copy
-from .log_buffer import LogBufferWriter, get_log_buffer
+#from .log_buffer import LogBufferWriter, get_log_buffer
+from .log_buffer_mix import get_log_buffer, LogBufferWriter
 from mix.utils.file_io import PathManager
 from ..builder import HOOKS
 import json

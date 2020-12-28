@@ -1,7 +1,8 @@
 # TODO(jinliang):jinliang_imitate
 
 from ..data import build_mix_test_loader, build_mix_train_loader
-from mix.utils.logger import setup_logger
+# from mix.utils.logger import setup_logger
+from mix.utils_mix.logger import setup_logger
 from mix.utils.mix_checkpoint import MixCheckpointer
 from mix.models import build_model
 from mix.solver import build_lr_scheduler, build_optimizer
@@ -98,7 +99,7 @@ class Organizer:
 
         model = build_model(cfg)
         logger = logging.getLogger(__name__)
-        logger.info('build model: '.format(model))
+        logger.info('build model:\n {} '.format(model))
 
         return model
 
@@ -165,8 +166,14 @@ class Organizer:
                                         cfg.test.precise_bn.num_iter))
         if comm.is_main_process():
             hook_list.append(
-                hooks.CheckPointHook(self.checkpointer,
-                                     cfg.checkpoint_config.period))
+                hooks.CheckPointHook(
+                    self.checkpointer,
+                    iter_period=cfg.checkpoint_config.period,
+                    epoch_period=1,
+                    max_num_checkpoints=2))
+            # hook_list.append(
+            #     hooks.CheckPointHook(self.checkpointer,
+            #                          cfg.checkpoint_config.period))
 
         if hasattr(cfg, 'test_data') and cfg.test_data.eval_period is not 0:
             hook_list.append(self.add_evaluate_hook())
