@@ -76,6 +76,7 @@ class EngineBase:
                 raise
                 # logger.error(e)
             finally:
+                time.sleep(1)  # wait for some hooks like logger to finish
                 self.after_train()
 
     def train_by_epoch(self, start_epoch: int, max_epoch: int) -> None:

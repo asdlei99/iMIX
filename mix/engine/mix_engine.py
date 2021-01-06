@@ -8,6 +8,7 @@ import mix.utils_mix.distributed_info as comm
 import numpy as np
 from mix.evaluation import verify_results
 from torch.cuda.amp.autocast_mode import autocast
+from mix.utils_mix.logger import setup_logger
 
 
 class CommonEngine(EngineBase):
@@ -33,12 +34,15 @@ class CommonEngine(EngineBase):
 
     def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
-        start_time = time.perf_counter()
 
+        metrics_dict = {}
         if (self.by_epoch is False) and (batch_data is None):
+            start_time = time.perf_counter()
             batch_data = next(self.__data_loader_iter)
-
-        data_time = time.perf_counter() - start_time
+            data_time = time.perf_counter() - start_time
+            metrics_dict['data_time'] = data_time
+        else:
+            metrics_dict['data_time'] = 0
 
         if self.batch_processor is not None:
             self.output = self.batch_processor(
@@ -53,9 +57,7 @@ class CommonEngine(EngineBase):
                 )  # TODO(jinliang) -> loss_fn(output,target)
 
         self.output['loss'] /= comm.get_world_size()
-
-        metrics_dict = self.output
-        metrics_dict['data_time'] = data_time
+        metrics_dict.update(self.output)
         self._write_metrics(metrics_dict)
 
         # self.optimizer.zero_grad()

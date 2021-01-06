@@ -50,7 +50,7 @@ class Organizer:
     def __init__(self, cfg):
         assert cfg, 'cfg must be non-empty!'
 
-        logger = logging.getLogger('MIX')
+        logger = logging.getLogger('mix')
         if not logger.isEnabledFor(logging.INFO):
             setup_logger()
 
@@ -92,7 +92,7 @@ class Organizer:
 
         self.set_by_iter()
 
-        logger.info('Organizer.init')
+        logger.info('Created Organizer')
 
     @classmethod
     def build_model(cls, cfg):
@@ -175,7 +175,7 @@ class Organizer:
             #     hooks.CheckPointHook(self.checkpointer,
             #                          cfg.checkpoint_config.period))
 
-        if hasattr(cfg, 'test_data') and cfg.test_data.eval_period is not 0:
+        if hasattr(cfg, 'test_data') and cfg.test_data.eval_period != 0:
             hook_list.append(self.add_evaluate_hook())
 
         if comm.is_main_process():
@@ -187,10 +187,11 @@ class Organizer:
 
     def build_writers(self):  # TODO(jinliang) Modify based on cfg file
         return [
-            hooks.CommonMetricLoggerHook(self.max_iter),
+            hooks.CommonMetricLoggerHook(self.max_iter, self.max_epoch)
+            if self.by_epoch else hooks.CommonMetricLoggerHook(self.max_iter),
             hooks.JSONLoggerHook(
                 os.path.join(self.cfg.work_dir, 'metrics.json')),
-            hooks.TensorboardXLoggerHook(self.cfg.work_dir)
+            hooks.TensorboardLoggerHook(self.cfg.work_dir)
         ]
 
     def __getattr__(self, item):

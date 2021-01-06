@@ -1,8 +1,8 @@
 # TODO(jinliang):jinliang_imitate
 
-import sys
-
-sys.path.append('/home/jinliang/code/Mix/mix')
+# import sys
+#
+# sys.path.append('/home/jinliang/code/Mix/mix')
 
 import os
 from mix.utils.config import Config
@@ -11,7 +11,7 @@ from mix.engine.organizer import Organizer
 from mix.utils.mix_checkpoint import MixCheckpointer
 # from mix.utils.default_argument import default_argument_parser, default_setup
 from mix.utils_mix.default_argument import default_argument_parser, default_setup
-from mix.utils.launch import launch
+# from mix.utils.launch import launch
 from mix.utils_mix.launch import launch as ddp_launch
 
 from mix.utils_mix.config import Config as mix_config

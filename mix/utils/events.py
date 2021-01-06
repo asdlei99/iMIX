@@ -166,7 +166,7 @@ class CommonMetricPrinter(EventWriter):
         """
         self.logger = logging.getLogger(__name__)
         self._max_iter = max_iter
-        self._last_write = None
+        self._recorder_iter_time = None
 
     def write(self):
         storage = get_event_storage()
@@ -190,13 +190,13 @@ class CommonMetricPrinter(EventWriter):
         except KeyError:
             iter_time = None
             # estimate eta on our own - more noisy
-            if self._last_write is not None:
-                estimate_iter_time = (time.perf_counter() -
-                                      self._last_write[1]) / (
-                                          iteration - self._last_write[0])
+            if self._recorder_iter_time is not None:
+                estimate_iter_time = (
+                    time.perf_counter() - self._recorder_iter_time[1]) / (
+                        iteration - self._recorder_iter_time[0])
                 eta_seconds = estimate_iter_time * (self._max_iter - iteration)
                 eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
-            self._last_write = (iteration, time.perf_counter())
+            self._recorder_iter_time = (iteration, time.perf_counter())
 
         try:
             lr = '{:.6f}'.format(storage.history('lr').latest())

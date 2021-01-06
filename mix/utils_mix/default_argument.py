@@ -10,7 +10,6 @@ from mix.utils_mix.logger import setup_logger
 # from mix.utils.collect_env import collect_env_info
 from mix.utils_mix.collect_running_env import collect_env_info
 import argparse
-import sys
 
 
 def default_argument_parser(
@@ -85,7 +84,7 @@ def default_setup(args, cfg):  # DODO(jinliang):modify
         PathManager.mkdirs(output_dir)
 
     rank = dist_info.get_rank()
-    logger = setup_logger(output_dir, distributed_rank=rank, name='MIX')
+    logger = setup_logger(output_dir, distributed_rank=rank, name='mix')
     logger.info('Current environment information : \n{}'.format(
         collect_env_info()))
     logger.info('Command line args: \n{}'.format(args))

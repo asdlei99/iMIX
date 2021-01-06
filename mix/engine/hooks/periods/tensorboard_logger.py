@@ -1,5 +1,5 @@
 # TODO(jinliang):jinliang_copy
-#from .log_buffer import LogBufferWriter, get_log_buffer
+# from .log_buffer import LogBufferWriter, get_log_buffer
 from .log_buffer_mix import get_log_buffer, LogBufferWriter
 from ..builder import HOOKS
 
@@ -68,7 +68,7 @@ from ..builder import HOOKS
 
 
 @HOOKS.register_module()
-class TensorboardXLoggerHook(LogBufferWriter):
+class TensorboardLoggerHook(LogBufferWriter):
     """Write all scalars to a tensorboard file."""
 
     def __init__(self, log_dir: str, window_size: int = 20, **kwargs):
@@ -82,7 +82,7 @@ class TensorboardXLoggerHook(LogBufferWriter):
         self._window_size = window_size
         from torch.utils.tensorboard import SummaryWriter
 
-        self._writer = SummaryWriter(log_dir, **kwargs)
+        self._writer = SummaryWriter(log_dir + '/runs/', **kwargs)
 
     # def write(self):
     #     storage = get_log_buffer()
@@ -119,13 +119,13 @@ class TensorboardXLoggerHook(LogBufferWriter):
 
     def _add_image(self):
         if len(self.log_buffer.vis_data) >= 1:
-            for img_name, img_data, step_num in self.log_buffer.vis_data:
+            for img_name, img_data, step_num in self.log_buffer.vis_data.images:
                 self._writer.add_image(img_name, img_data, step_num)
             self.log_buffer.clear_images()
 
     def _add_histogram(self):
         if len(self.log_buffer.histograms) >= 1:
-            for hist_params in self.log_buffer.histograms:
+            for hist_params in self.log_buffer.histograms.histograms:
                 self._writer.add_histogram_raw(**hist_params)
             self.log_buffer.clear_histograms()
 

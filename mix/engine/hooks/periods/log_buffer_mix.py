@@ -45,18 +45,18 @@ class Histogram:
         ), torch.histc(data, self._bins)
         lins = torch.linspace(
             ht_min, ht_max, steps=self._bins + 1, dtype=torch.float32)
-        hist = dict(
-            name=name,
+        histogram_raw_data = dict(
+            tag=name,
             min=ht_min,
             max=ht_max,
-            sum_1=float(data.sum()),
-            sum_2=float(torch.sum(data**2)),
+            sum=float(data.sum()),
+            sum_squares=float(torch.sum(data**2)),
             num=len(data),
             bucket_limits=lins[1:].tolist(),
             bucket_counts=ht_counts.tolist(),
-            iter_idx=iter_idx,
+            global_step=iter_idx,
         )
-        return hist
+        return histogram_raw_data
 
     def clear(self):
         self._histograms = []
@@ -215,6 +215,15 @@ class LogBufferStorage:
             **kwargs)
 
     def put_image(self, name, data):
+        """Data to be visualized on tensorboard.
+
+        Args:
+            name (str): data identifier
+            data (torch.Tensor or numpy.array): image data , An `uint8` or `float`
+                Tensor of shape `[channel, height, width]` where `channel` is
+                3. The  format of the image should be RGB.,where the range of element is [0,1](float)
+                or [0,255](uint8).
+        """
         self.vis_data.append(name, data, self.train_info.iter)
 
     def clear_images(self):
@@ -271,7 +280,7 @@ class LogBufferStorage:
     def by_epoch(self):
         return self.train_info.is_by_epoch
 
-    def history(self, name):
+    def history(self, name=None):
         ret = self.vis_scalars.history.get(name, None)
         if ret is None:
             raise KeyError('No history metric available for {}!'.format(name))

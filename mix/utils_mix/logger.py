@@ -25,7 +25,7 @@ class _ColoredMessage(logging.Formatter):
 def setup_logger(output: str = None,
                  distributed_rank: int = 0,
                  color: bool = True,
-                 name: str = 'MIX'):
+                 name: str = 'mix'):
     logger = logging.getLogger(name)
     logger.propagate = False
     logger.setLevel(logging.DEBUG)

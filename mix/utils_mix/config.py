@@ -6,6 +6,8 @@ import regex
 import sys
 from importlib import import_module
 import ast
+from typing import Dict, List
+import os.path as osp
 
 BASE_KEY = '_base_'
 DELETE_KEY = '_delete_'
@@ -20,6 +22,47 @@ class MIXEasyDict(EasyDict):
             return d
         else:
             return super().pop(k, d)
+
+
+class ToExpanduser:  # ~  ->  /home/xxxx/
+
+    def __init__(self, cfg: Dict):
+        self.cfg = cfg
+
+    def to_expanduser(self):
+        return self._traverse_dict(self.cfg)
+
+    def _traverse_dict(self, instance_dict):
+        output = {}
+        for k, v in instance_dict.items():
+            output[k] = self._traverse(k, v)
+        return output
+
+    def _traverse(self, key, value):
+        if isinstance(value, ToExpanduser):
+            return value.to_expanduser()
+        elif isinstance(value, dict):
+            return self._traverse_dict(value)
+        elif isinstance(value, list):
+            return [self._traverse(key, i) for i in value]
+        elif hasattr(value, '__dict__'):
+            return self._traverse_dict(value.__dict__)
+        elif isinstance(value, str):
+            return self._modify_path(value)
+        else:
+            return value
+
+    @classmethod
+    def generate_obj(cls, args):
+        return cls(args)
+
+    @staticmethod
+    def _modify_path(path: str) -> str:
+        if path.startswith('~'):
+            new_path = path.replace('~', osp.expanduser('~'))
+            return new_path
+        else:
+            return path
 
 
 def file2buffer(filename: str,
@@ -51,6 +94,8 @@ def file2buffer(filename: str,
 
             sys.path.pop(0)
             del sys.modules[tmp_module_name]
+
+        tmp_cfg_file.close()
 
     return cfg_dict, file_content
 
@@ -147,6 +192,8 @@ class Config:
     def fromfile(file_name: str, use_predefined_var: bool = True):
         cfg_dict, cfg_content = Config._file2dict(file_name,
                                                   use_predefined_var)
+
+        cfg_dict = ToExpanduser.generate_obj(cfg_dict).to_expanduser()
         return Config(cfg_dict, cfg_content=cfg_content, file_name=file_name)
 
     def __init__(self,
