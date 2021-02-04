@@ -54,11 +54,9 @@ model = dict(
                     target_stds=[0.1, 0.1, 0.2, 0.2]),
                 reg_class_agnostic=True,
                 loss_cls=dict(
-                    type='CrossEntropyLoss',
-                    use_sigmoid=False,
+                    type='CrossEntropyLoss', use_sigmoid=False,
                     loss_weight=1.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
-                               loss_weight=1.0)),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0)),
             dict(
                 type='Shared2FCBBoxHead',
                 in_channels=256,
@@ -71,11 +69,9 @@ model = dict(
                     target_stds=[0.05, 0.05, 0.1, 0.1]),
                 reg_class_agnostic=True,
                 loss_cls=dict(
-                    type='CrossEntropyLoss',
-                    use_sigmoid=False,
+                    type='CrossEntropyLoss', use_sigmoid=False,
                     loss_weight=1.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
-                               loss_weight=1.0)),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0)),
             dict(
                 type='Shared2FCBBoxHead',
                 in_channels=256,
@@ -88,8 +84,7 @@ model = dict(
                     target_stds=[0.033, 0.033, 0.067, 0.067]),
                 reg_class_agnostic=True,
                 loss_cls=dict(
-                    type='CrossEntropyLoss',
-                    use_sigmoid=False,
+                    type='CrossEntropyLoss', use_sigmoid=False,
                     loss_weight=1.0),
                 loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
         ],

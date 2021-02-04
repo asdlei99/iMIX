@@ -17,6 +17,5 @@ __all__ = [
     'IterationTimerHook', 'LRSchedulerHook', 'MomentumSchedulerHook',
     'OptimizerHook', 'PreciseBNHook', 'PeriodicLogger', 'CheckPointHook',
     'CommonMetricLoggerHook', 'JSONLoggerHook', 'TensorboardLoggerHook',
-    'LogBufferWriter', 'LogBufferStorage', 'get_log_buffer',
-    'Fp16OptimizerHook'
+    'LogBufferWriter', 'LogBufferStorage', 'get_log_buffer', 'Fp16OptimizerHook'
 ]

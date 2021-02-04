@@ -2,78 +2,132 @@ dataset_type = 'VQADATASET'
 data_root = '~/.cache/torch/mmf/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
+feature_default_path = 'data/datasets/vqa2/defaults/features/'
+feature_global_path = 'data/datasets/vqa2/defaults/resnet152/'
+annotation_default_path = 'data/datasets/vqa2/defaults/annotations/'
 vocab_path = 'data/datasets/vqa2/defaults/extras/vocabs/'
 
-# train_datasets = ['train', 'val', 'visualgenome']
-train_datasets = ['train']
-test_datasets = ['oneval']
+# train_datasets = ["train", "val", "visualgenome"]
+# train_datasets = ["train"]
+# test_datasets = ["oneval"]
 # test_datasets = ["test"]
+
+train_datasets = ['train']
+test_datasets = ['minival']
 
 vqa_reader_train_cfg = dict(
     type='VQAReader',
-    mmf_features=dict(
-        train=data_root + feature_path + 'train2014',
-        val=data_root + feature_path + 'val2014',
-        test=data_root + feature_path + 'test2015',
-        visualgenome=data_root + feature_path + 'visualgenome',
-        oneval=data_root + feature_path + 'val2014'),
-    mmf_annotations=dict(
-        train=data_root + annotation_path + 'imdb_train2014.npy',
-        val=data_root + annotation_path + 'imdb_val2014.npy',
-        test=data_root + annotation_path + 'imdb_test2015.npy',
-        visualgenome=data_root + annotation_path + 'imdb_visualgenome.npy',
-        oneval=data_root + annotation_path + 'imdb_oneval2014.npy',
+    card='default',
+    mix_features=dict(
+        train=data_root + feature_default_path + 'trainval2014.lmdb',
+        val=data_root + feature_default_path + 'trainval2014.lmdb',
+        test=data_root + feature_default_path + 'test2015.lmdb',
+        minival=data_root + feature_default_path + 'trainval2014.lmdb',
+        train_coco10pc=data_root + feature_default_path + 'trainval2014.lmdb',
+        train_coco50pc=data_root + feature_default_path + 'trainval2014.lmdb',
+        valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
+    ),
+    mix_global_features=dict(
+        train=data_root + feature_global_path + 'train_val_2014',
+        val=data_root + feature_global_path + 'train_val_2014',
+        test=data_root + feature_global_path + 'test2015',
+        minival=data_root + feature_global_path + 'train_val_2014',
+        train_coco10pc=data_root + feature_global_path + 'train_val_2014',
+        train_coco50pc=data_root + feature_global_path + 'train_val_2014',
+        valminusminival=data_root + feature_global_path + 'train_val_2014',
+    ),
+    mix_annotations=dict(
+        train=data_root + annotation_default_path + 'imdb_train2014.npy',
+        val=data_root + annotation_default_path + 'imdb_val2014.npy',
+        test=data_root + annotation_default_path + 'imdb_test2015.npy',
+        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
+        train_coco10pc=data_root + annotation_default_path +
+        'imdb_train2014_len_coco_10_pc.npy',
+        train_coco50pc=data_root + annotation_default_path +
+        'imdb_train2014_len_coco_50_pc.npy',
+        valminusminival=data_root + annotation_default_path +
+        'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets  # used datasets
 )
 
 vqa_reader_test_cfg = dict(
     type='VQAReader',
-    mmf_features=dict(
-        train=data_root + feature_path + 'train2014',
-        val=data_root + feature_path + 'val2014',
-        test=data_root + feature_path + 'test2015',
-        visualgenome=data_root + feature_path + 'visualgenome',
-        oneval=data_root + feature_path + 'val2014'),
-    mmf_annotations=dict(
-        train=data_root + annotation_path + 'imdb_train2014.npy',
-        val=data_root + annotation_path + 'imdb_val2014.npy',
-        test=data_root + annotation_path + 'imdb_test2015.npy',
-        visualgenome=data_root + annotation_path + 'imdb_visualgenome.npy',
-        oneval=data_root + annotation_path + 'imdb_oneval2014.npy',
+    card='default',
+    mix_features=dict(
+        train=data_root + feature_default_path + 'trainval2014.lmdb',
+        val=data_root + feature_default_path + 'trainval2014.lmdb',
+        test=data_root + feature_default_path + 'test2015.lmdb',
+        minival=data_root + feature_default_path + 'trainval2014.lmdb',
+        train_coco10pc=data_root + feature_default_path + 'trainval2014.lmdb',
+        train_coco50pc=data_root + feature_default_path + 'trainval2014.lmdb',
+        valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
+    ),
+    mix_global_features=dict(
+        train=data_root + feature_path + 'trainval2014.lmdb',
+        val=data_root + feature_path + 'trainval2014.lmdb',
+        test=data_root + feature_path + 'test2015.lmdb',
+        minival=data_root + feature_path + 'trainval2014.lmdb',
+        train_coco10pc=data_root + feature_path + 'trainval2014.lmdb',
+        train_coco50pc=data_root + feature_path + 'trainval2014.lmdb',
+        valminusminival=data_root + feature_path + 'trainval2014.lmdb',
+    ),
+    mix_annotations=dict(
+        train=data_root + annotation_default_path + 'imdb_train2014.npy',
+        val=data_root + annotation_default_path + 'imdb_val2014.npy',
+        test=data_root + annotation_default_path + 'imdb_test2015.npy',
+        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
+        train_coco10pc=data_root + annotation_default_path +
+        'imdb_train2014_len_coco_10_pc.npy',
+        train_coco50pc=data_root + annotation_default_path +
+        'imdb_train2014_len_coco_50_pc.npy',
+        valminusminival=data_root + annotation_default_path +
+        'imdb_valminusminival2014.npy',
     ),
     datasets=test_datasets  # used datasets
 )
 
 vqa_info_cpler_cfg = dict(
     type='VQAInfoCpler',
-    glove_weights=data_root + 'glove.6B.300d.txt.pt',
+    glove_weights=dict(
+        glove6b50d=data_root + 'glove.6B.50d.txt.pt',
+        glove6b100d=data_root + 'glove.6B.100d.txt.pt',
+        glove6b200d=data_root + 'glove.6B.200d.txt.pt',
+        glove6b300d=data_root + 'glove.6B.300d.txt.pt',
+    ),
     tokenizer='/home/datasets/VQA/bert/' + 'bert-base-uncased-vocab.txt',
-    mmf_vocab=dict(
+    mix_vocab=dict(
         answers_vqa=data_root + vocab_path + 'answers_vqa.txt',
         vocabulart_100k=data_root + vocab_path + 'vocabulary_100k.txt',
-        vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'))
+        vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'),
+    max_seg_lenth=20,  #20,
+    word_mask_ratio=0.0,
+    vocab_name='vocabulart_100k',
+    vocab_answer_name='answers_vqa',
+    glove_name='glove6b300d',
+    if_bert=True,
+)
 
 train_data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=2,  #16
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
-        vqa_reader=vqa_reader_train_cfg,
-        vqa_info_cpler=vqa_info_cpler_cfg,
-        limit_nums=400))
+        reader=vqa_reader_train_cfg,
+        info_cpler=vqa_info_cpler_cfg,
+        limit_nums=800))
 
-# evaluation = dict(metric=['bbox', 'segm']) TODO(jinliang) mix-evaluation
+# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) mix-evaluation
 test_data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TestingSampler',
-    # metric='',
+    # metric="",
     data=dict(
         type=dataset_type,
-        vqa_reader=vqa_reader_test_cfg,
-        vqa_info_cpler=vqa_info_cpler_cfg),
+        reader=vqa_reader_test_cfg,
+        info_cpler=vqa_info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
 
 evaluator_type = 'VQA'  # TODO(jinliang)
