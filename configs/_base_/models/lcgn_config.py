@@ -28,4 +28,7 @@ model = dict(
         OUT_QUESTION_MUL=True,
         CMD_DIM=512,
         outputDropout=0.85,
-        loss_cls=dict(type='LogitBinaryCrossEntropy')))
+        # loss_cls=dict(type='LogitBinaryCrossEntropy')
+    ))
+
+loss = dict(type='LogitBinaryCrossEntropy')

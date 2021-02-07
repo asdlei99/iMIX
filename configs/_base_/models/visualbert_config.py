@@ -14,3 +14,5 @@ model = dict(
         special_visual_initialize=True,
         freeze_base=False,
         random_initialize=False))
+
+loss = dict(type='BinaryCrossEntropyWithLogits')

@@ -46,3 +46,5 @@ model = dict(
         training_head_type='vqa2',
         bert_model_name='bert-base-uncased',
     ))
+
+loss = dict(type='BinaryCrossEntropyWithLogits')

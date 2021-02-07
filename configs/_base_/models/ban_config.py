@@ -29,4 +29,7 @@ model = dict(
         out_dim=3129,
         hidden_dim=2560,
         dropout=0.5,
-        loss_cls=dict(type='LogitBinaryCrossEntropy')))
+        # loss_cls=dict(type='LogitBinaryCrossEntropy')
+    ))
+
+loss = dict(type='LogitBinaryCrossEntropy')

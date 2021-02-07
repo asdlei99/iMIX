@@ -126,7 +126,7 @@ textvqa_info_cpler_cfg = dict(
     vocab_answer_name='answers_textvqa_8k',
     glove_name='glove6b300d',
     fasttext_name='wiki_bin',
-    if_bert=False,
+    if_bert=True,
 )
 
 train_data = dict(

@@ -71,4 +71,6 @@ model = dict(
         # classifier_type='triple_linear',
         in_dim=2048,
         out_dim=3129,
-        loss_cls=dict(type='TripleLogitBinaryCrossEntropy')))
+        # loss_cls=dict(type='TripleLogitBinaryCrossEntropy')
+    ))
+loss = dict(type='TripleLogitBinaryCrossEntropy')

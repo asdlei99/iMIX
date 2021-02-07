@@ -87,7 +87,7 @@ train_data = dict(
         vqa_info_cpler=vqa_info_cpler_cfg,
         limit_nums=800))
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) mix-evaluation
+# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,

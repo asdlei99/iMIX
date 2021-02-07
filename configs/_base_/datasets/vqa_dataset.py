@@ -109,16 +109,16 @@ vqa_info_cpler_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=2,  #16
+    samples_per_gpu=4,  #16
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
         reader=vqa_reader_train_cfg,
         info_cpler=vqa_info_cpler_cfg,
-        limit_nums=800))
+        limit_nums=400))
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) mix-evaluation
+# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
@@ -130,4 +130,8 @@ test_data = dict(
         info_cpler=vqa_info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
 
-evaluator_type = 'VQA'  # TODO(jinliang)
+# evaluator_type = 'VQA'  # TODO(jinliang)
+post_processor = dict(
+    type='Evaluator',
+    metrics=[dict(type='VQAAccuracyMetric')],
+    dataset_converters=[dict(type='VQADatasetConverter')])

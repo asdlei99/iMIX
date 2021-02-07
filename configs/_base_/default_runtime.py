@@ -10,7 +10,7 @@ log_config = dict(
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs'  # the dir to save logs and models
-load_from = '/home/jinliang/code/Mix/mix/work_dir/model_epoch3.pth'
+load_from = '/home/jinliang/code/Mix/imix/work_dir/model_epoch3.pth'
 # load_from = None
 resume_from = None
 workflow = [('train', 1)]

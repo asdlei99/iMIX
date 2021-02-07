@@ -2,28 +2,28 @@
 
 # import sys
 #
-# sys.path.append('/home/jinliang/code/Mix/mix')
+# sys.path.append('/home/jinliang/code/imix/imix')
 
 import os
-from mix.utils.config import Config
-from mix.engine.mix_engine import MixEngine
-from mix.engine.organizer import Organizer
-from mix.utils.mix_checkpoint import MixCheckpointer
-# from mix.utils.default_argument import default_argument_parser, default_setup
-from mix.utils_mix.default_argument import default_argument_parser, default_setup
-# from mix.utils.launch import launch
-from mix.utils_mix.launch import launch as ddp_launch
+from imix.utils.config import Config
+from imix.engine.imix_engine import imixEngine
+from imix.engine.organizer import Organizer
+from imix.utils.imix_checkpoint import imixCheckpointer
+# from imix.utils.default_argument import default_argument_parser, default_setup
+from imix.utils_imix.default_argument import default_argument_parser, default_setup
+# from imix.utils.launch import launch
+from imix.utils_imix.launch import launch as ddp_launch
 
-from mix.utils_mix.config import Config as mix_config
+from imix.utils_imix.config import Config as imix_config
 
 # import argparse
 # import torch
-# from mix.utils.file_io import PathManager
-# from mix.utils import comm
-# from mix.utils.logger import setup_logger
-# from mix.utils.env import seed_all_rng
-# from mix.utils.collect_env import collect_env_info
-# from mix.evaluation import verify_results
+# from imix.utils.file_io import PathManager
+# from imix.utils import comm
+# from imix.utils.logger import setup_logger
+# from imix.utils.env import seed_all_rng
+# from imix.utils.collect_env import collect_env_info
+# from imix.evaluation import verify_results
 # import warnings
 
 # def merge_args_to_cfg(cfg, args):  # TODO(jinliang):jinliang_copy
@@ -59,11 +59,11 @@ def init_set(args):
     """
 
   # cfg = Config.fromfile(args.config_file)
-  # cfg_mix = mix_config.fromfile(args.config_file)
+  # cfg_imix = imix_config.fromfile(args.config_file)
   # del cfg
-  # cfg = cfg_mix
+  # cfg = cfg_imix
 
-  cfg = mix_config.fromfile(args.config_file)
+  cfg = imix_config.fromfile(args.config_file)
   del_some_args(args)
   merge_args_to_cfg(args, cfg)
   default_setup(args, cfg)
@@ -73,8 +73,8 @@ def init_set(args):
 
 def test(cfg):
   model = Organizer.build_model(cfg)
-  mix_ck = MixCheckpointer(model, save_dir=cfg.work_dir)
-  mix_ck.resume_or_load(cfg.load_from, resume=False)
+  imix_ck = imixCheckpointer(model, save_dir=cfg.work_dir)
+  imix_ck.resume_or_load(cfg.load_from, resume=False)
 
   result = []
   # Organizer.build_test_result(cfg, model)
@@ -88,8 +88,8 @@ def test(cfg):
 
 
 def train(cfg):
-  mix_trainer = MixEngine(cfg)
-  return mix_trainer.train()
+  imix_trainer = imixEngine(cfg)
+  return imix_trainer.train()
 
 
 def main(args):

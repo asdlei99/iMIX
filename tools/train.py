@@ -1,17 +1,18 @@
 import argparse
 import torch
 import os
-from mix.utils.config import Config
-from mix.engine.mix_engine import MixEngine
-from mix.engine.organizer import Organizer
-from mix.utils.file_io import PathManager
-from mix.utils import comm
-from mix.utils.logger import setup_logger
-from mix.utils.env import seed_all_rng
-from mix.utils.collect_env import collect_env_info
-from mix.evaluation import verify_results
+from iimix.utils.config import Config
+from iimix.engine.iimix_engine import iimixEngine
+from imix.engine.organizer import Organizer
+from imix.utils.file_io import PathManager
+# from iopath.common.file_io import PathManager
+from imix.utils import comm
+from imix.utils.logger import setup_logger
+from imix.utils.env import seed_all_rng
+from imix.utils.collect_env import collect_env_info
+from imix.evaluation import verify_results
 import warnings
-from mix.utils.mix_checkpoint import MixCheckpointer
+from imix.utils.imix_checkpoint import imixCheckpointer
 
 
 def parse_args():
@@ -65,7 +66,7 @@ def parse_args():
 def default_setup(cfg, args):
   """Perform some basic common setups at the beginning of a job, including:
 
-  1. Set up the mix logger
+  1. Set up the imix logger
   2. Log basic information about environment, cmdline arguments, and config
   3. Backup the config to the output directory
 
@@ -78,7 +79,7 @@ def default_setup(cfg, args):
     PathManager.mkdirs(output_dir)
 
   rank = comm.get_rank()
-  setup_logger(output_dir, distributed_rank=rank, name='MIX')
+  setup_logger(output_dir, distributed_rank=rank, name='imix')
   logger = setup_logger(output_dir, distributed_rank=rank)
 
   logger.info('Rank of current process: {}. World size: {}'.format(
@@ -147,8 +148,8 @@ def init_set():
 
 def test(cfg):
   model = Organizer.build_model(cfg)
-  mix_ck = MixCheckpointer(model, save_dir=cfg.work_dir)
-  mix_ck.resume_or_load(cfg.load_from, resume=False)
+  imix_ck = imixCheckpointer(model, save_dir=cfg.work_dir)
+  imix_ck.resume_or_load(cfg.load_from, resume=False)
   #TODO(jinliang): add to load the trained model
   result = Organizer.test(cfg, model)
   # if comm.is_main_process():
@@ -157,8 +158,8 @@ def test(cfg):
 
 
 def train(cfg):
-  mix_trainer = MixEngine(cfg)
-  return mix_trainer.train_iter()
+  imix_trainer = imixEngine(cfg)
+  return imix_trainer.train_iter()
 
 
 def main():
