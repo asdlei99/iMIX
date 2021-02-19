@@ -71,10 +71,16 @@ class HGL(R2C):
                                answer_mask)
     logits = self.head(pooled_rep)
 
-    loss = F.cross_entropy(logits.squeeze(2), data['label'].cuda())
+    model_output = {'scores': logits.squeeze(2),
+                    'target': data['label'].cuda(),
+                    'obj_scores': obj_reps['obj_logits'],
+                    'obj_target':  obj_reps['obj_labels']}
 
-    losses = {
-        'cnn_regularization_loss': obj_reps['cnn_regularization_loss'],
-        'loss': loss
-    }
-    return losses
+
+    # loss = F.cross_entropy(logits.squeeze(2), data['label'].cuda())
+    #
+    # losses = {
+    #     'cnn_regularization_loss': obj_reps['cnn_regularization_loss'],
+    #     'loss': loss
+    # }
+    return model_output

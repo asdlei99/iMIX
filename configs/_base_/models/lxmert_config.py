@@ -48,3 +48,5 @@ model = dict(
     ))
 
 loss = dict(type='BinaryCrossEntropyWithLogits')
+# loss = [dict(type='BinaryCrossEntropyWithLogits'),
+#         dict(type='LogitBinaryCrossEntropy')]

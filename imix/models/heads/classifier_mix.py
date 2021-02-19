@@ -6,6 +6,20 @@ from imix.models.backbones.lcgn_backbone import Linear
 from typing import Dict
 from torch.nn.utils.weight_norm import weight_norm
 from abc import abstractmethod, ABCMeta
+import math
+
+def gelu(x):
+  """Implementation of the gelu activation function.
+      For information: OpenAI GPT's gelu is slightly different (and gives slightly different results):
+      0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
+      Also see https://arxiv.org/abs/1606.08415
+  """
+  return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
+
+class GELU(nn.Module):
+  def forward(self, input_):
+    output = gelu(input_)
+    return output
 
 
 @HEADS.register_module()
@@ -227,4 +241,20 @@ class R2CHead(ClassifierHead):
 
   def forward(self, x):
     logits = self.main(x)
+    return logits
+
+
+@HEADS.register_module()
+class UNITERHead(ClassifierHead):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.vqa_output = nn.Sequential(
+      nn.Linear(self.in_dim, self.in_dim * 2),
+      GELU(),
+      nn.LayerNorm(self.in_dim * 2, eps=1e-12),
+      nn.Linear(self.in_dim * 2, self.out_dim)
+    )
+
+  def forward(self, x):
+    logits = self.vqa_output(x)
     return logits

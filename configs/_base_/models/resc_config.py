@@ -17,3 +17,8 @@ model = dict(
         convlstm=False,
         leaky=False),
     weights_file='/home/zrz/code/ReSC/saved_models/yolov3.weights')
+
+loss = [
+    dict(type='YOLOLossV2'),
+    dict(type='DiverseLoss')
+    ]

@@ -9,7 +9,7 @@ import os
 import pickle
 
 
-class BaseDataReader():
+class BaseDataReader(object):
 
   def __init__(self, cfg):
     # load config: path, name, split ...

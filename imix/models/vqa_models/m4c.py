@@ -46,7 +46,7 @@ class M4C(BaseModel):
     self.backbone = build_backbone(backbone)
     # self.combine_model = build_combine_layer(combine_model)  ###combine text and image
     self.head = build_head(head)
-    self.loss = M4CDecodingBCEWithMaskLoss()
+    # self.loss = M4CDecodingBCEWithMaskLoss()
 
     self.finetune_modules = []
 
@@ -211,9 +211,15 @@ class M4C(BaseModel):
     scores = fwd_results['scores']
     train_loss_mask = fwd_results['train_loss_mask']
     targets = fwd_results['answers_scores']
-    loss = self.loss(scores, train_loss_mask, targets)
+    # loss = self.loss(scores, train_loss_mask, targets)
+    model_outputs = {
+        'scores': scores,
+        'target': targets,
+        'train_loss_mask': train_loss_mask
 
-    return loss
+    }
+
+    return model_outputs
 
 
 class OcrPtrNet(nn.Module):

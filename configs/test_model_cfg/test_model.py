@@ -31,7 +31,7 @@
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
 
-# loss - 沒修改
+# 前傳沒問題
 # _base_ = [
 #     '../_base_/models/m4c_config.py',
 #     '../_base_/datasets/textvqa_dataset.py',
@@ -40,7 +40,7 @@
 # ] # yapf:disable
 
 
-# R2c - two loss  沒修改
+# 前傳沒問題
 # _base_ = [
 #     '../_base_/models/r2c_config.py',
 #     '../_base_/datasets/vcr_dataset.py',
@@ -48,7 +48,7 @@
 #     '../_base_/default_runtime.py'
 # ]  # yapf:disable
 
-# hgl - two loss  沒修改
+# 前傳沒問題
 # _base_ = [
 #     '../_base_/models/hgl_config.py',
 #     '../_base_/datasets/vcr_dataset.py',
@@ -56,7 +56,7 @@
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
 
-# 不通过
+# 前傳沒問題
 # _base_ = [
 #     '../_base_/models/pythia_config.py',
 #     '../_base_/datasets/vqa_dataset.py',
@@ -89,10 +89,18 @@
 # ] # yapf:disable
 
 
-# 不通过
+# 前傳沒問題
 # _base_ = [
 #     '../_base_/models/resc_config.py',
 #     '../_base_/datasets/refcoco_dataset.py',
 #     '../_base_/schedules/schedule_vqa.py',
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
+
+# 前傳沒問題
+_base_ = [
+    '../_base_/models/uniter_config.py',
+    '../_base_/datasets/vqa_dataset.py',  ### for fuxian acc
+    '../_base_/schedules/schedule_vqa.py',
+    '../_base_/default_runtime.py'
+] # yapf:disable

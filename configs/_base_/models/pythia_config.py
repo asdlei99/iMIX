@@ -61,5 +61,5 @@ model = dict(
         in_dim=5000,
         out_dim=3129,
         img_hidden_dim=5000,
-        text_hidden_dim=300,
-        loss_cls=dict(type='LogitBinaryCrossEntropy')))
+        text_hidden_dim=300))
+loss = dict(type='LogitBinaryCrossEntropy')

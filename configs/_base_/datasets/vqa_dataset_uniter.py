@@ -1,8 +1,8 @@
-dataset_type = 'VQADATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+dataset_type = 'VQADATASETUNITER'
+data_root = '/home/datasets/UNITER/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
-feature_default_path = 'data/datasets/vqa2/defaults/features/'
+feature_default_path = ''
 feature_global_path = 'data/datasets/vqa2/defaults/resnet152/'
 annotation_default_path = 'data/datasets/vqa2/defaults/annotations/'
 vocab_path = 'data/datasets/vqa2/defaults/extras/vocabs/'
@@ -19,34 +19,34 @@ vqa_reader_train_cfg = dict(
     type='VQAReader',
     card='default',
     mix_features=dict(
-        train=data_root + feature_default_path + 'trainval2014.lmdb',
-        val=data_root + feature_default_path + 'trainval2014.lmdb',
-        test=data_root + feature_default_path + 'test2015.lmdb',
-        minival=data_root + feature_default_path + 'trainval2014.lmdb',
-        train_coco10pc=data_root + feature_default_path + 'trainval2014.lmdb',
-        train_coco50pc=data_root + feature_default_path + 'trainval2014.lmdb',
-        valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
+        train=data_root + feature_default_path + 'coco_train2014',
+        val=data_root + feature_default_path + 'coco_val2014',
+        test=data_root + feature_default_path + 'coco_test2015',
+        minival=data_root + feature_default_path + 'coco_val2014',
+        train_coco10pc=data_root + feature_default_path + 'coco_train2014',
+        train_coco50pc=data_root + feature_default_path + 'coco_train2014',
+        valminusminival=data_root + feature_default_path + 'coco_val2014',
     ),
-    mix_global_features=dict(
-        train=data_root + feature_global_path + 'trainval2014.lmdb',
-        val=data_root + feature_global_path + 'trainval2014.lmdb',
-        test=data_root + feature_global_path + 'trainval2014.lmdb',
-        minival=data_root + feature_global_path + 'trainval2014.lmdb',
-        train_coco10pc=data_root + feature_global_path + 'trainval2014.lmdb',
-        train_coco50pc=data_root + feature_global_path + 'trainval2014.lmdb',
-        valminusminival=data_root + feature_global_path + 'trainval2014.lmdb',
-    ),
+    # mix_global_features=dict(
+    #     train=data_root + feature_global_path + 'trainval2014.lmdb',
+    #     val=data_root + feature_global_path + 'trainval2014.lmdb',
+    #     test=data_root + feature_global_path + 'trainval2014.lmdb',
+    #     minival=data_root + feature_global_path + 'trainval2014.lmdb',
+    #     train_coco10pc=data_root + feature_global_path + 'trainval2014.lmdb',
+    #     train_coco50pc=data_root + feature_global_path + 'trainval2014.lmdb',
+    #     valminusminival=data_root + feature_global_path + 'trainval2014.lmdb',
+    # ),
     mix_annotations=dict(
-        train=data_root + annotation_default_path + 'imdb_train2014.npy',
-        val=data_root + annotation_default_path + 'imdb_val2014.npy',
-        test=data_root + annotation_default_path + 'imdb_test2015.npy',
-        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
-        train_coco10pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_10_pc.npy',
-        train_coco50pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_50_pc.npy',
-        valminusminival=data_root + annotation_default_path +
-        'imdb_valminusminival2014.npy',
+        train=data_root + feature_default_path + 'vqa_train.db',
+        val=data_root + feature_default_path + 'vqa_trainval.db',
+        test=data_root + feature_default_path + 'vqa_devval.db',
+        minival=data_root + feature_default_path + 'vqa_devval.db',
+        # train_coco10pc=data_root + feature_default_path +
+        # 'imdb_train2014_len_coco_10_pc.npy',
+        # train_coco50pc=data_root + feature_default_path +
+        # 'imdb_train2014_len_coco_50_pc.npy',
+        # valminusminival=data_root + feature_default_path +
+        # 'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets  # used datasets
 )
@@ -55,34 +55,34 @@ vqa_reader_test_cfg = dict(
     type='VQAReader',
     card='default',
     mix_features=dict(
-        train=data_root + feature_default_path + 'trainval2014.lmdb',
-        val=data_root + feature_default_path + 'trainval2014.lmdb',
-        test=data_root + feature_default_path + 'test2015.lmdb',
-        minival=data_root + feature_default_path + 'trainval2014.lmdb',
-        train_coco10pc=data_root + feature_default_path + 'trainval2014.lmdb',
-        train_coco50pc=data_root + feature_default_path + 'trainval2014.lmdb',
-        valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
+        train=data_root + feature_default_path + 'coco_train2014',
+        val=data_root + feature_default_path + 'coco_val2014',
+        test=data_root + feature_default_path + 'coco_test2015',
+        minival=data_root + feature_default_path + 'coco_val2014',
+        train_coco10pc=data_root + feature_default_path + 'coco_train2014',
+        train_coco50pc=data_root + feature_default_path + 'coco_train2014',
+        valminusminival=data_root + feature_default_path + 'coco_val2014',
     ),
-    mix_global_features=dict(
-        train=data_root + feature_path + 'trainval2014.lmdb',
-        val=data_root + feature_path + 'trainval2014.lmdb',
-        test=data_root + feature_path + 'test2015.lmdb',
-        minival=data_root + feature_path + 'trainval2014.lmdb',
-        train_coco10pc=data_root + feature_path + 'trainval2014.lmdb',
-        train_coco50pc=data_root + feature_path + 'trainval2014.lmdb',
-        valminusminival=data_root + feature_path + 'trainval2014.lmdb',
-    ),
+    # mix_global_features=dict(
+    #     train=data_root + feature_path + 'trainval2014.lmdb',
+    #     val=data_root + feature_path + 'trainval2014.lmdb',
+    #     test=data_root + feature_path + 'test2015.lmdb',
+    #     minival=data_root + feature_path + 'trainval2014.lmdb',
+    #     train_coco10pc=data_root + feature_path + 'trainval2014.lmdb',
+    #     train_coco50pc=data_root + feature_path + 'trainval2014.lmdb',
+    #     valminusminival=data_root + feature_path + 'trainval2014.lmdb',
+    # ),
     mix_annotations=dict(
-        train=data_root + annotation_default_path + 'imdb_train2014.npy',
-        val=data_root + annotation_default_path + 'imdb_val2014.npy',
-        test=data_root + annotation_default_path + 'imdb_test2015.npy',
-        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
-        train_coco10pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_10_pc.npy',
-        train_coco50pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_50_pc.npy',
-        valminusminival=data_root + annotation_default_path +
-        'imdb_valminusminival2014.npy',
+        train=data_root + feature_default_path + 'vqa_trainval.db',
+        val=data_root + feature_default_path + 'vqa_trainval.db',
+        test=data_root + feature_default_path + 'vqa_devval.db',
+        minival=data_root + feature_default_path + 'vqa_devval.db',
+        # train_coco10pc=data_root + feature_default_path +
+        # 'imdb_train2014_len_coco_10_pc.npy',
+        # train_coco50pc=data_root + feature_default_path +
+        # 'imdb_train2014_len_coco_50_pc.npy',
+        # valminusminival=data_root + feature_default_path +
+        # 'imdb_valminusminival2014.npy',
     ),
     datasets=test_datasets  # used datasets
 )

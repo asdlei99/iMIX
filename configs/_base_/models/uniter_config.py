@@ -17,4 +17,11 @@ model = dict(
     ],
     encoder=dict(
         type='UniterEncoder',
-        config_file='configs/_base_/models/uniter-base.json'))
+        config_file='configs/_base_/models/uniter-base.json'),
+    head=dict(
+        type='UNITERHead',
+        in_dim=768,
+        out_dim=3129
+    )
+)
+loss=dict(type='LogitBinaryCrossEntropy')

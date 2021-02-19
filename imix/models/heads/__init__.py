@@ -4,7 +4,7 @@
 # __all__ = ['ClassifierLayer', 'VISDIALPRINCIPLES_HEAD']
 
 from .classifier_mix import ClassifierHead, BertClassifierHead, MLPClassiferHead, LogitClassifierHead, \
-    LCGNClassiferHead, TripleLinearHead, WeightNormClassifierHead, R2CHead
+    LCGNClassiferHead, TripleLinearHead, WeightNormClassifierHead, R2CHead, UNITERHead
 from .decoder_mix import VisualDialogueHead, DiscQtDecoderHead, DiscByRoundDecoderHead, LanguageDecoderHead, \
     LanguageDecoder
 
@@ -13,5 +13,5 @@ __all__ = [
     'LogitClassifierHead', 'LCGNClassiferHead', 'TripleLinearHead',
     'VisualDialogueHead', 'DiscQtDecoderHead', 'DiscByRoundDecoderHead',
     'WeightNormClassifierHead', 'LanguageDecoderHead', 'LanguageDecoder',
-    'R2CHead'
+    'R2CHead', 'UNITERHead'
 ]

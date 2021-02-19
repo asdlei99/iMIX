@@ -1,5 +1,5 @@
 dataset_type = 'VQADATASET'
-data_root = '~/.cache/torch/mmf/'
+data_root = '/home/datasets/mix_data/mmf/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
 feature_default_path = 'data/datasets/vqa2/defaults/features/'
@@ -28,13 +28,13 @@ vqa_reader_train_cfg = dict(
         valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
     ),
     mix_global_features=dict(
-        train=data_root + feature_global_path + 'train_val_2014',
-        val=data_root + feature_global_path + 'train_val_2014',
-        test=data_root + feature_global_path + 'test2015',
-        minival=data_root + feature_global_path + 'train_val_2014',
-        train_coco10pc=data_root + feature_global_path + 'train_val_2014',
-        train_coco50pc=data_root + feature_global_path + 'train_val_2014',
-        valminusminival=data_root + feature_global_path + 'train_val_2014',
+        train=data_root + feature_global_path + 'trainval2014.lmdb',
+        val=data_root + feature_global_path + 'trainval2014.lmdb',
+        test=data_root + feature_global_path + 'trainval2014.lmdb',
+        minival=data_root + feature_global_path + 'trainval2014.lmdb',
+        train_coco10pc=data_root + feature_global_path + 'trainval2014.lmdb',
+        train_coco50pc=data_root + feature_global_path + 'trainval2014.lmdb',
+        valminusminival=data_root + feature_global_path + 'trainval2014.lmdb',
     ),
     mix_annotations=dict(
         train=data_root + annotation_default_path + 'imdb_train2014.npy',

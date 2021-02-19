@@ -71,6 +71,7 @@ class VQADATASET(Dataset):
     # TODO(jinliang+ce@lxc)
     item = {
         'feature': itemFeature.features,  # feature - feature
+        'feature_global': itemFeature.global_features, # feature - global_features
         'cls_prob': itemFeature.cls_prob,  # 1601 cls_prob
         'bbox': itemFeature.bbox,  # feature - bbox
         'image_dim': itemFeature.num_boxes,  # feature - bbox_Num

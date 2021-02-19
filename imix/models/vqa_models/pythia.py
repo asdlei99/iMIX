@@ -105,8 +105,11 @@ class PYTHIA(BaseModel):
     joint_embedding = self.combine_model(image_embedding_total,
                                          text_embedding_total)
     targets = data['answers_scores'].cuda()
-    model_output = {
-        'losses': self.head.forward_train(joint_embedding, labels=targets)
-    }
+
+    scores = self.head(joint_embedding)
+
+    model_output = {'scores': scores,
+                    'target': targets
+                    }
 
     return model_output

@@ -4,14 +4,16 @@ from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder
 from ..encoder import OSCARBackbone
 
 
+
 @VQA_MODELS.register_module()
 class UNITER(BaseModel):
 
-  def __init__(self, embeddings, encoder):
+  def __init__(self, embeddings, encoder, head):
     super().__init__()
 
     self.embedding = build_embedding(embeddings)
     self.encoder = build_encoder(encoder)
+    self.head = build_head(head)
 
   def _compute_txt_embeddings(self, input_ids, position_ids, txt_type_ids=None):
     output = self.embedding[0](input_ids, position_ids, txt_type_ids)
@@ -53,7 +55,7 @@ class UNITER(BaseModel):
 
     return embedding_output
 
-  def forward(self, data, output_all_encoded_layers=True):
+  def forward(self, data, output_all_encoded_layers=False):
 
     input_ids = data['input_ids'].cuda()
     position_ids = torch.arange(
@@ -91,4 +93,11 @@ class UNITER(BaseModel):
         output_all_encoded_layers=output_all_encoded_layers)
     if not output_all_encoded_layers:
       encoded_layers = encoded_layers[-1]
-    return encoded_layers
+
+    pooled_output = self.encoder.pooler(encoded_layers)
+    logits = self.head(pooled_output)
+    model_outputs={
+        'scores':logits,
+        'target':data['answers_scores'].cuda()
+    }
+    return model_outputs

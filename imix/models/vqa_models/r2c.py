@@ -127,13 +127,19 @@ class R2C(BaseModel):
                                answer_mask)
     logits = self.head(pooled_rep)
 
-    loss = F.cross_entropy(logits.squeeze(2), data['label'].cuda())
+    model_output = {'scores': logits.squeeze(2),
+                    'target': data['label'].cuda(),
+                    'obj_scores': obj_reps['obj_logits'],
+                    'obj_target':  obj_reps['obj_labels']}
 
-    losses = {
-        'cnn_regularization_loss': obj_reps['cnn_regularization_loss'],
-        'loss': loss
-    }
-    return losses
+
+    # loss = F.cross_entropy(logits.squeeze(2), data['label'].cuda())
+    #
+    # losses = {
+    #     'cnn_regularization_loss': obj_reps['cnn_regularization_loss'],
+    #     'loss': loss
+    # }
+    return model_output
 
 
 def _load_resnet(pretrained=True):
@@ -282,8 +288,8 @@ class SimpleDetector(nn.Module):
     # Add some regularization, encouraging the model to keep giving decent enough predictions
     obj_logits = self.regularizing_predictor(post_roialign)
     obj_labels = classes[box_inds[:, 0], box_inds[:, 1]]
-    cnn_regularization = F.cross_entropy(
-        obj_logits, obj_labels, size_average=True)[None]
+    # cnn_regularization = F.cross_entropy(
+    #     obj_logits, obj_labels, size_average=True)[None]
 
     feats_to_downsample = post_roialign if self.object_embed is None else torch.cat(
         (post_roialign, self.object_embed(obj_labels)), -1)
@@ -296,5 +302,5 @@ class SimpleDetector(nn.Module):
         'obj_reps': obj_reps,
         'obj_logits': obj_logits,
         'obj_labels': obj_labels,
-        'cnn_regularization_loss': cnn_regularization,
+        # 'cnn_regularization_loss': cnn_regularization,
     }
