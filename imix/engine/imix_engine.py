@@ -77,9 +77,15 @@ class CommonEngine(EngineBase):
         else:
             with autocast(
                     enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
-                self.model_output = self.model(batch_data)
 
-                self.output = self.loss_fn(self.model_output)
+                try:
+                    self.model_output = self.model(batch_data)
+
+                    self.output = self.loss_fn(self.model_output)
+
+                except:
+                    self.model_output = self.model(batch_data)
+                    self.output = self.loss_fn(self.model_output)
                 # self.output = self.loss_fn.loss(
                 #     scores=self.model_output['scores'],
                 #     targets=self.model_output['target'])

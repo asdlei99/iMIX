@@ -94,15 +94,18 @@ class VQAInfoCpler(object):
     return itemFeature
 
   def completeBertInfo(self, itemFeature):
-    tokens = self.tokenizer.tokenize(itemFeature.question_str.strip())
-    tokens = self.tokenizer.get_limited_tokens(tokens, self.max_seq_length - 2)
-    tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(
-        tokens, self.word_mask_ratio)
-    tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
+    if itemFeature.input_ids is not None:
+      tokens = itemFeature.tokens
+      input_ids = itemFeature.input_ids
+    else:
+      tokens = self.tokenizer.tokenize(itemFeature.question_str.strip())
+      tokens = self.tokenizer.get_limited_tokens(tokens, self.max_seq_length - 2)
+      tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(
+          tokens, self.word_mask_ratio)
+      tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
+      input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
     itemFeature = self.compute_bboxInfo(itemFeature)
-
-    input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
     input_mask = [1] + [1] * (len(tokens) - 2) + [1]
     input_segment = [0] + [0] * (len(tokens) - 2) + [0]
     input_lm_label_ids = [-1] + [-1] * (len(tokens) - 2) + [-1]
