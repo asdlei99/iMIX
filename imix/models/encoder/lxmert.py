@@ -126,13 +126,13 @@ class BertVisualObjHead(nn.Module):
     # an output-only bias for each token.
     self.decoder_dict = nn.ModuleDict({
         key: nn.Linear(config.hidden_size, config.visual_loss_config[key][0])
-        for key in self.visual_losses
+        for key in self.visual_losses.split(",")
     })
 
   def forward(self, hidden_states):
     hidden_states = self.transform(hidden_states)
     output = {}
-    for key in self.visual_losses:
+    for key in self.visual_losses.split(','):
       output[key] = self.decoder_dict[key](hidden_states)
     return output
 
@@ -395,9 +395,7 @@ class LXMERTForPretraining(nn.Module):
     self.bert = LXMERTBase.from_pretrained(
         self.config.bert_model_name,
         config=BertConfig.from_dict(
-            OmegaConf.to_container(self.config, resolve=True)),
-        cache_dir=os.path.join(get_mmf_cache_dir(),
-                               'distributed_{}'.format(-1)),
+            self.config),
     )
 
     self.num_labels = config.num_labels
@@ -419,12 +417,12 @@ class LXMERTForPretraining(nn.Module):
       self.answer_head = BertVisualAnswerHead(
           config, [self.num_labels, self.gqa_labels])
 
-    # loss functions
-    self.loss_fcts = {
-        'l2': SmoothL1Loss(reduction='none'),
-        'ce': CrossEntropyLoss(ignore_index=-1, reduction='none'),
-        'ce_lang': CrossEntropyLoss(ignore_index=-1),
-    }
+    # # loss functions
+    # self.loss_fcts = {
+    #     'l2': SmoothL1Loss(reduction='none'),
+    #     'ce': CrossEntropyLoss(ignore_index=-1, reduction='none'),
+    #     'ce_lang': CrossEntropyLoss(ignore_index=-1),
+    # }
 
   def init_weights(self):
     if self.config.random_initialize is False:
@@ -477,63 +475,25 @@ class LXMERTForPretraining(nn.Module):
         lang_output, pooled_output)
 
     ## KEEP TRACK OF OUTPUTS HERE
-    output = {}
-    if output_all_attention_masks:
-      raise NotImplementedError
+    output = {
+        "lang_prediction_scores": lang_prediction_scores,
+        "cross_relationship_score": cross_relationship_score,
+    }
 
-    if ans is not None and self.task_qa:
-      answer_score = self.answer_head(pooled_output, name)
-      if name is None or 'gqa' not in name:
-        num_labels = self.config.num_labels
-      else:
-        num_labels = self.config.gqa_labels
-      answer_loss = self.loss_fcts['ce_lang'](answer_score.view(-1, num_labels),
-                                              ans.argmax(-1))
-      output['answer_loss'] = answer_loss
-    if masked_lm_labels is not None and self.task_mask_lm:
-      masked_lm_loss = self.loss_fcts['ce_lang'](
-          lang_prediction_scores.view(-1, lang_prediction_scores.size(-1)),
-          masked_lm_labels.view(-1),
-      )
-      output['masked_lm_loss'] = masked_lm_loss
-    if matched_label is not None and self.task_matched:
-      matched_label = matched_label.to(cross_relationship_score).long()
-      matched_loss = self.loss_fcts['ce_lang'](cross_relationship_score.view(
-          -1, 2), matched_label)
-      output['matched_loss'] = matched_loss
-    if obj_labels is not None and self.task_obj_predict:
-      total_visn_loss = 0.0
-      visn_prediction_scores_dict = self.obj_predict_head(visn_output)
-      for key in self.visual_losses:
-        visn_prediction_scores = visn_prediction_scores_dict[key]
-        (
-            output_dim,
-            loss_fct_name,
-            label_shape,
-            weight,
-        ) = self.visual_loss_config[key]
-        if key == 'attr':
-          continue
-        elif key == 'obj':
-          temp_obj_labels_dict = obj_labels.max(-1)
-          mask_conf = temp_obj_labels_dict.values
-          visn_loss = self.loss_fcts[loss_fct_name](
-              visn_prediction_scores.view(-1, output_dim),
-              temp_obj_labels_dict.indices.view(-1),
-          )
-        elif key == 'feat':
-          if type(masked_image_labels) is None:
-            continue
-          mask_conf = (masked_image_labels == 1).float()
-          visn_loss = self.loss_fcts[loss_fct_name](
-              visn_prediction_scores.view(-1, output_dim),
-              visual_feats.view(-1, output_dim),
-          )
-        if visn_loss.dim() > 1:  # Regression Losses
-          visn_loss = visn_loss.mean(1)
-        visn_loss = (visn_loss * mask_conf.view(-1)).mean() * weight
-        total_visn_loss += visn_loss
-      output['visn_loss'] = total_visn_loss
+    if output_all_attention_masks:
+        raise NotImplementedError
+
+    if self.task_qa:
+        answer_score = self.answer_head(pooled_output, name)
+    else:
+        # This answer_score would not be used anywhere,
+        # just to keep a constant return function signature.
+        answer_score = pooled_output[0][0]
+    output.update({"answer_score": answer_score})
+
+    if self.task_obj_predict:
+        visn_prediction_scores_dict = self.obj_predict_head(visn_output)
+        output.update({"visn_prediction_scores_dict": visn_prediction_scores_dict})
 
     return output
 

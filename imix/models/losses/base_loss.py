@@ -70,3 +70,5 @@ class Losser:
 
             losses_log[name] = value.item()
         return loss, losses_log
+
+

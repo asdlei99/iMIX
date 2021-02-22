@@ -5,14 +5,14 @@ created time: 2021/1/26
 
 from torch.utils.data import Dataset, IterableDataset
 import logging
-from ..reader import RefCOCOgReader as Reader
-from ..infocomp import RefCOCOgInfoCpler as InfoCpler
+from ..reader import RefCOCOpReader as Reader
+from ..infocomp import RefCOCOpInfoCpler as InfoCpler
 from ..builder import DATASETS
 import imix.utils_imix.distributed_info as comm
 
 
 @DATASETS.register_module()
-class RefCOCOgDATASET(Dataset):
+class RefCOCOpDATASET(Dataset):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
         if comm.is_main_process():

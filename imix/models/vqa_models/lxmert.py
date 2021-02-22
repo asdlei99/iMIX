@@ -1,6 +1,7 @@
 from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
 import torch.nn as nn
 import torch
+import copy
 import math
 import torch.nn.functional as F
 from transformers.modeling_bert import (
@@ -22,15 +23,19 @@ class LXMERT(BaseModel):
     super().__init__()
 
     params = kwargs['params']
-    pretrained_path = params['pretrained_path']
+
     # self.special_visual_initialize = params['special_visual_initialize']
     freeze_base = params['freeze_base']
     self.training_head_type = params['training_head_type']
 
     if self.training_head_type == 'pretraining':
-      self.model = LXMERTForPretraining(**params)
+      self.model = LXMERTForPretraining(params)
+      self.forward_train = self.forward_train_pretrain
     else:
       self.model = LXMERTForClassification(**params)
+      pretrained_path = params['pretrained_path']
+      ckpt = torch.load(pretrained_path)
+      self.load_my_state_dict(ckpt)
 
     # if self.special_visual_initialize:
     #     self.model.bert.embeddings.initialize_visual_from_pretrained()
@@ -39,8 +44,8 @@ class LXMERT(BaseModel):
       for p in self.model.bert.parameters():
         p.requires_grad = False
 
-    ckpt = torch.load(pretrained_path)
-    self.load_my_state_dict(ckpt)
+    # ckpt = torch.load(pretrained_path)
+    # self.load_my_state_dict(ckpt)
 
   def load_my_state_dict(self, state_dict):
       own_state = self.model.state_dict()
@@ -193,3 +198,39 @@ class LXMERT(BaseModel):
     # losses = F.binary_cross_entropy_with_logits(output_dict['scores'],
     #                                             params['ans'].cuda())
     # return {'losses': losses}
+
+  def forward_train_pretrain(self, data):
+      params = copy.deepcopy(data)
+      if params.get("feats") is not None and params.get("image_dim") is not None:
+          image_mask = (torch.arange(params["feats"].size(-2)).expand(*params["feats"].size()[:-1]))
+          if len(params["image_dim"].size()) < len(image_mask.size()):
+              params["image_dim"] = data["image_dim"].unsqueeze(-1)
+              assert len(params["image_dim"].size()) == len(image_mask.size())
+          image_mask = image_mask < params["image_dim"]
+          params["visual_attention_mask"] = image_mask.long()
+      else:
+          params["visual_attention_mask"] = None
+      output_dict = self.model(
+          input_ids=params["input_ids"].cuda(),
+          token_type_ids=params["segment_ids"].cuda(),
+          attention_mask=params["input_mask"].cuda(),
+          visual_feats=params["feats"].cuda(),
+          visual_pos=params["pos"].cuda(),
+          visual_attention_mask=params["visual_attention_mask"].cuda() if params["visual_attention_mask"] is not None else params["visual_attention_mask"],
+      )
+      target_dict = {
+          "masked_lm_labels": params["lm_label_ids"].cuda(),
+          "matched_label": params["is_matched"].cuda(),
+          "ans": params["ans"].cuda(),
+          "obj_labels": {
+              "obj": (params["det_obj_labels"].cuda(), params["det_obj_confs"].cuda()),
+              "attr": (params["det_attr_labels"].cuda(), params["det_attr_confs"].cuda()),
+              "feat": (params["det_feat"].cuda(), params["det_feat_mask"].cuda()),
+          }
+      }
+      model_output = {
+          "scores": output_dict,
+          "target": target_dict
+      }
+      return model_output
+

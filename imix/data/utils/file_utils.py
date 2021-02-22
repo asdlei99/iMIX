@@ -247,3 +247,11 @@ def get_file_extension(path, dot=True, lower=True):
   ext = os.path.splitext(path)[1]
   ext = ext if dot else ext[1:]
   return ext.lower() if lower else ext
+
+class StrToBytes(object):
+  def __init__(self, fileobj):
+    self.fileobj = fileobj
+  def read(self, size):
+    return self.fileobj.read(size).encode()
+  def readline(self, size=-1):
+    return self.fileobj.readline(size).encode()

@@ -3,6 +3,8 @@ import torch.nn.functional as F
 from ..builder import LOSSES
 import torch
 from .base_loss import BaseLoss
+from torch.nn import CrossEntropyLoss as TorchCrossEntropyLoss
+from torch.nn import SmoothL1Loss as TorchSmoothL1Loss
 
 
 @LOSSES.register_module()
@@ -216,3 +218,69 @@ class M4CDecodingBCEWithMaskLoss(BaseLoss):
         count = torch.max(torch.sum(loss_mask), self.one.to(losses.device))
         loss = torch.sum(losses) / count
         return loss
+
+@LOSSES.register_module()
+class LXMERTPreTrainLossV0(BaseLoss):
+
+    def __init__(self, visual_losses, visual_loss_config, vocab_size, num_answers):
+        super().__init__(loss_name=str(self))
+        self.loss_fct_cls = TorchCrossEntropyLoss(ignore_index=-1)
+        self.loss_fcts_feat = {
+            'l2': TorchSmoothL1Loss(reduction='none'),
+            'ce': TorchCrossEntropyLoss(ignore_index=-1, reduction='none')
+        }
+        self.visual_losses = visual_losses.split(",")
+        self.visual_loss_config = visual_loss_config
+        self.vocab_size = vocab_size
+        self.num_answers = num_answers
+
+    def forward(self, model_output):
+        scores = model_output['scores']
+        target = model_output['target']
+        lang_prediction_scores = scores["lang_prediction_scores"]
+        cross_relationship_score = scores["cross_relationship_score"]
+        visn_prediction_scores_dict = scores["visn_prediction_scores_dict"]
+        answer_score = scores["answer_score"]
+        masked_lm_labels = target["masked_lm_labels"]
+        matched_label = target["matched_label"]
+        obj_labels = target["obj_labels"]
+        ans = target["ans"]
+
+        total_loss = 0.
+        losses = ()
+
+        masked_lm_loss = self.loss_fct_cls(lang_prediction_scores.view(-1, self.vocab_size), masked_lm_labels.view(-1))
+        total_loss += masked_lm_loss
+        losses += (masked_lm_loss.detach(),)
+
+        matched_loss = self.loss_fct_cls(cross_relationship_score.view(-1, 2), matched_label.view(-1))
+        total_loss += matched_loss
+        losses += (matched_loss.detach(),)
+
+        total_visn_loss = 0.
+        for key in self.visual_losses:
+            label, mask_conf = obj_labels[key]
+            output_dim, loss_fct_name, label_shape, weight = self.visual_loss_config[key]
+            visn_loss_fct = self.loss_fcts_feat[loss_fct_name]
+            visn_prediction_scores = visn_prediction_scores_dict[key]
+            visn_loss = visn_loss_fct(
+                visn_prediction_scores.view(-1, output_dim),
+                label.view(*label_shape),
+            )
+            if visn_loss.dim() > 1:  # Regression Losses
+                visn_loss = visn_loss.mean(1)
+            visn_loss = (visn_loss * mask_conf.view(-1)).mean() * weight
+            total_visn_loss += visn_loss
+            losses += (visn_loss.detach(),)
+        total_loss += total_visn_loss
+
+        answer_loss = self.loss_fct_cls(answer_score.view(-1, self.num_answers), ans.view(-1))
+
+        total_loss += answer_loss
+        losses += (answer_loss.detach(),)
+
+        return total_loss #, torch.stack(losses).unsqueeze(0), answer_score.detach()
+
+    def __str__(self):
+        return 'lxmert_pretrain_loss_v0'
+

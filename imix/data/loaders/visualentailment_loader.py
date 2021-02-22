@@ -5,14 +5,14 @@ created time: 2021/1/26
 
 from torch.utils.data import Dataset, IterableDataset
 import logging
-from ..reader import RefCOCOgReader as Reader
-from ..infocomp import RefCOCOgInfoCpler as InfoCpler
+from ..reader import VisualEntailmentReader as Reader
+from ..infocomp import VisualEntailmentInfoCpler as InfoCpler
 from ..builder import DATASETS
 import imix.utils_imix.distributed_info as comm
 
 
 @DATASETS.register_module()
-class RefCOCOgDATASET(Dataset):
+class VisualEntailmentDATASET(Dataset):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
         if comm.is_main_process():
@@ -36,12 +36,15 @@ class RefCOCOgDATASET(Dataset):
         item_feature = self.infocpler.complete_info(item_feature)
 
         item = {
-            'image': item_feature.img,
+            'features': item_feature.features,
             'bbox': item_feature.bbox,
             'input_ids': item_feature.input_ids,
             'input_mask': item_feature.input_mask,
             'input_type_ids': item_feature.input_type_ids,
-            'dw': item_feature.dw,
-            'dh': item_feature.dh,
+            'image_width': item_feature.image_width,
+            'image_height': item_feature.image_height,
+            'objects': item_feature.objects,
         }
+        if item_feature.get('label') is not None:
+            item['label'] = item_feature['label']
         return item
