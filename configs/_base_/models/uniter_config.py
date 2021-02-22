@@ -22,6 +22,7 @@ model = dict(
         type='UNITERHead',
         in_dim=768,
         out_dim=3129
-    )
+    ),
+    pretrained_path='/home/datasets/UNITER/uniter-base.pt'
 )
 loss=dict(type='LogitBinaryCrossEntropy')

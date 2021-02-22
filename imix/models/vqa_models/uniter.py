@@ -8,12 +8,31 @@ from ..encoder import OSCARBackbone
 @VQA_MODELS.register_module()
 class UNITER(BaseModel):
 
-  def __init__(self, embeddings, encoder, head):
+  def __init__(self, embeddings, encoder, head, **kwargs):
     super().__init__()
 
     self.embedding = build_embedding(embeddings)
     self.encoder = build_encoder(encoder)
     self.head = build_head(head)
+    pretrained_path = kwargs['pretrained_path']
+    ckpt = torch.load(pretrained_path)
+    self.load_my_state_dict(ckpt)
+
+  #### not load head weights from pretrained weights
+  def load_my_state_dict(self, state_dict):
+      own_state = self.state_dict()
+      for name, param in state_dict.items():
+          if 'uniter.embeddings' in name:
+              own_state[name.replace('uniter.embeddings', 'embedding.0')].copy_(param)
+          elif 'uniter.img_embeddings' in name:
+              own_state[name.replace('uniter.img_embeddings', 'embedding.1')].copy_(param)
+          elif 'uniter.encoder' in name:
+              own_state[name.replace('uniter.encoder', 'encoder')].copy_(param)
+          elif 'uniter.pooler' in name:
+              own_state[name.replace('uniter.pooler', 'encoder.pooler')].copy_(param)
+          if name not in own_state:
+              continue
+          own_state[name].copy_(param)
 
   def _compute_txt_embeddings(self, input_ids, position_ids, txt_type_ids=None):
     output = self.embedding[0](input_ids, position_ids, txt_type_ids)

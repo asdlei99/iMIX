@@ -547,6 +547,7 @@ class LXMERTForClassification(nn.Module):
     self.config = kwargs
     self.num_labels = kwargs['num_labels']
     self.gqa_labels = kwargs['gqa_labels']
+
     # self.mode = self.config["mode"]
     self.mode = mode
     self.bert_model_name = self.config['bert_model_name']
@@ -567,8 +568,9 @@ class LXMERTForClassification(nn.Module):
 
     self.classifier = BertVisualAnswerHead(self.config,
                                            [self.num_labels, self.gqa_labels])
-
     self.init_weights()
+
+
 
   def init_weights(self):
     if self.config['random_initialize'] is False:

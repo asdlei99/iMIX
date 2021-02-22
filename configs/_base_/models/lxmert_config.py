@@ -45,8 +45,9 @@ model = dict(
         model='bert',
         training_head_type='vqa2',
         bert_model_name='bert-base-uncased',
+        pretrained_path='/home/datasets/mix_data/mmf/data/models/vqa2_pretrained.pth'
     ))
 
-loss = dict(type='BinaryCrossEntropyWithLogits')
+loss = dict(type='LogitBinaryCrossEntropy')
 # loss = [dict(type='BinaryCrossEntropyWithLogits'),
 #         dict(type='LogitBinaryCrossEntropy')]

@@ -22,6 +22,7 @@ class LXMERT(BaseModel):
     super().__init__()
 
     params = kwargs['params']
+    pretrained_path = params['pretrained_path']
     # self.special_visual_initialize = params['special_visual_initialize']
     freeze_base = params['freeze_base']
     self.training_head_type = params['training_head_type']
@@ -37,6 +38,17 @@ class LXMERT(BaseModel):
     if freeze_base:
       for p in self.model.bert.parameters():
         p.requires_grad = False
+
+    ckpt = torch.load(pretrained_path)
+    self.load_my_state_dict(ckpt)
+
+  def load_my_state_dict(self, state_dict):
+      own_state = self.model.state_dict()
+      for name, param in state_dict.items():
+          if name not in own_state:
+              continue
+          own_state[name].copy_(param)
+
 
   def get_image_and_text_features(self, data):
     # bert input
