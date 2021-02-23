@@ -7,7 +7,7 @@ import os
 import torch
 import lmdb
 import pickle
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 from ..utils.image_utils import letterbox, random_affine
 from PIL import Image
@@ -16,7 +16,7 @@ from scipy.io import loadmat
 import random
 
 
-class ReferitReader(MMFDataReader):
+class ReferitReader(IMIXDataReader):
 
   def __init__(self, cfg):
     self.init_default_params(cfg)

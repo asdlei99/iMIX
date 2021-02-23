@@ -25,7 +25,7 @@ class BaseDataReader(object):
     return list(set(l))
 
 
-class MMFDataReader(BaseDataReader):
+class IMIXDataReader(BaseDataReader):
 
   def __init__(self, cfg):
     self.init_default_params(cfg)

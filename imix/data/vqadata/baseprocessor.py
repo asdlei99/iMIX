@@ -3,8 +3,8 @@ import torch
 
 
 class BaseProcessor:
-  """Every processor in MMF needs to inherit this class for compatibility with
-  MMF. End user mainly needs to implement ``__call__`` function.
+  """Every processor in IMIX needs to inherit this class for compatibility with
+  IMIX. End user mainly needs to implement ``__call__`` function.
 
   Args:
       config (DictConfig): Config for this processor, containing `type` and
@@ -27,7 +27,7 @@ class BaseProcessor:
 
 
 class Processor:
-  """Wrapper class used by MMF to initialized processor based on their ``type``
+  """Wrapper class used by IMIX to initialized processor based on their ``type``
   as passed in configuration. It retrieves the processor class registered in
   registry corresponding to the ``type`` key and initializes with ``params``
   passed in configuration. All functions and attributes of the processor

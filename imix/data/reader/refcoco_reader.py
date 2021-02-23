@@ -8,7 +8,7 @@ import torch
 import os.path as osp
 import lmdb
 import pickle
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 from ..utils.image_utils import letterbox, random_affine
 from PIL import Image
@@ -19,7 +19,7 @@ import re
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 
 
-class RefCOCOReader(MMFDataReader):
+class RefCOCOReader(IMIXDataReader):
 
   def __init__(self, cfg):
     self.init_default_params(cfg)

@@ -8,7 +8,7 @@ import os
 import torch
 import lmdb
 import pickle
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 from ..utils.tokenization import BertTokenizer
 
@@ -25,7 +25,7 @@ def tokenize_gqa(sentence,
   return tokens
 
 
-class GQAReader(MMFDataReader):
+class GQAReader(IMIXDataReader):
 
   def __init__(self, cfg):
     super().__init__(cfg)

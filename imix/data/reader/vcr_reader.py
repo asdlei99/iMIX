@@ -11,7 +11,7 @@ import pickle
 import copy
 import json
 import h5py
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 
 from allennlp.data.fields import TextField, ListField, LabelField, SequenceLabelField, ArrayField, MetadataField
@@ -24,7 +24,7 @@ from ..utils.vcr_utils import _fix_tokenization, make_mask
 from ..utils.image_utils import load_image, resize_image, to_tensor_and_normalize
 
 
-class VCRReader(MMFDataReader):
+class VCRReader(IMIXDataReader):
 
   def __init__(self, cfg):
     splits = cfg.datasets

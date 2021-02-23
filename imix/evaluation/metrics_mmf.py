@@ -66,7 +66,7 @@ def _convert_to_one_hot(expected, output):
 
 
 class Metrics:
-  """Internally used by MMF, Metrics acts as wrapper for handling
+  """Internally used by IMIX, Metrics acts as wrapper for handling
     calculation of metrics over various metrics specified by the model in
     the config. It initializes all of the metrics and when called it runs
     calculate on each of them one by one and returns back a dict with proper
@@ -152,7 +152,7 @@ class Metrics:
 
 
 class BaseMetric:
-  """Base class to be inherited by all metrics registered to MMF. See the
+  """Base class to be inherited by all metrics registered to IMIX. See the
   description on top of the file for more information. Child class must
   implement ``calculate`` function.
 

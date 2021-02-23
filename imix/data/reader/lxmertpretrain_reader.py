@@ -15,12 +15,12 @@ import csv
 import random
 import copy
 from tqdm import tqdm
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 from ..utils.tokenization import BertTokenizer
 
 
-class LXMERTPretrainReader(MMFDataReader):
+class LXMERTPretrainReader(IMIXDataReader):
 
     def __init__(self, cfg):
         self.cfg = cfg

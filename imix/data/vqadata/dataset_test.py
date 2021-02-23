@@ -142,7 +142,7 @@ class BatchCollator:
 
 
 class Sample(OrderedDict):
-  """Sample represent some arbitrary data. All datasets in MMF must return an
+  """Sample represent some arbitrary data. All datasets in IMIX must return an
   object of type ``Sample``.
 
     Args:

@@ -8,11 +8,11 @@ import os
 import torch
 import lmdb
 import pickle
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 
 
-class TextVQAReader(MMFDataReader):
+class TextVQAReader(IMIXDataReader):
 
   def __init__(self, cfg):
     super().__init__(cfg)

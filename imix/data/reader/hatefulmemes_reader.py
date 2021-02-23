@@ -10,11 +10,11 @@ import lmdb
 import pickle
 import json
 from PIL import Image
-from .base_reader import MMFDataReader
+from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
 
 
-class HatefulMemesReader(MMFDataReader):
+class HatefulMemesReader(IMIXDataReader):
 
     def __init__(self, cfg):
         self.init_default_params(cfg)
