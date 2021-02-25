@@ -77,10 +77,8 @@ class HGL(R2C):
                     'obj_target':  obj_reps['obj_labels']}
 
 
-    # loss = F.cross_entropy(logits.squeeze(2), data['label'].cuda())
-    #
-    # losses = {
-    #     'cnn_regularization_loss': obj_reps['cnn_regularization_loss'],
-    #     'loss': loss
-    # }
+    return model_output
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
     return model_output

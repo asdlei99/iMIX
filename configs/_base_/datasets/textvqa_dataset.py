@@ -49,7 +49,9 @@ textvqa_reader_train_cfg = dict(
         test_en=data_root + annotation_path + 'imdb_test_ocr_en.npy',
         test_ml=data_root + annotation_path + 'imdb_test_ocr_ml.npy',
     ),
-    datasets=train_datasets)
+    datasets=train_datasets,
+    if_global=True
+)
 
 textvqa_reader_test_cfg = dict(
     type='TEXTVQAREADER',
@@ -92,7 +94,9 @@ textvqa_reader_test_cfg = dict(
         test_en=data_root + annotation_path + 'imdb_test_ocr_en.npy',
         test_ml=data_root + annotation_path + 'imdb_test_ocr_ml.npy',
     ),
-    datasets=train_datasets)
+    datasets=train_datasets,
+    if_global=True
+)
 
 textvqa_info_cpler_cfg = dict(
     type='TEXTVQAInfoCpler',
@@ -149,3 +153,4 @@ test_data = dict(
         reader=textvqa_reader_test_cfg,
         info_cpler=textvqa_info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
+

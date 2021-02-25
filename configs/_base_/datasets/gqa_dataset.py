@@ -21,7 +21,7 @@ vqa_reader_train_cfg = dict(
         train=data_root + feature_default_path + 'gqa',
         val=data_root + feature_default_path + 'gqa_val',
         test=data_root + feature_default_path + 'gqa_val',
-        minival=data_root + feature_default_path + 'trainval2014.lmdb',
+        minival=data_root + feature_default_path + 'gqa_val',
         train_coco10pc=data_root + feature_default_path + 'trainval2014.lmdb',
         train_coco50pc=data_root + feature_default_path + 'trainval2014.lmdb',
         valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
@@ -30,8 +30,8 @@ vqa_reader_train_cfg = dict(
         train=data_root + annotation_default_path +
         'train_balanced_questions.npy',
         val=data_root + annotation_default_path + 'val_balanced_questions.npy',
-        test=data_root + annotation_default_path + 'val_balanced_questions.npy',
-        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
+        test=data_root + annotation_default_path + 'test_balanced_questions.npy',
+        minival=data_root + annotation_default_path + 'val_balanced_questions.npy',
         train_coco10pc=data_root + annotation_default_path +
         'imdb_train2014_len_coco_10_pc.npy',
         train_coco50pc=data_root + annotation_default_path +
@@ -46,10 +46,10 @@ vqa_reader_test_cfg = dict(
     type='GQAReader',
     card='default',
     mix_features=dict(
-        train=data_root + feature_default_path + 'trainval2014.lmdb',
-        val=data_root + feature_default_path + 'trainval2014.lmdb',
-        test=data_root + feature_default_path + 'test2015.lmdb',
-        minival=data_root + feature_default_path + 'trainval2014.lmdb',
+        train=data_root + feature_default_path + 'gqa',
+        val=data_root + feature_default_path + 'gqa_val',
+        test=data_root + feature_default_path + 'gqa_val',
+        minival=data_root + feature_default_path + 'gqa_val',
         train_coco10pc=data_root + feature_default_path + 'trainval2014.lmdb',
         train_coco50pc=data_root + feature_default_path + 'trainval2014.lmdb',
         valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
@@ -60,7 +60,7 @@ vqa_reader_test_cfg = dict(
         val=data_root + annotation_default_path + 'val_balanced_questions.npy',
         test=data_root + annotation_default_path +
         'test_balanced_questions.npy',
-        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
+        minival=data_root + annotation_default_path + 'val_balanced_questions.npy',
         train_coco10pc=data_root + annotation_default_path +
         'imdb_train2014_len_coco_10_pc.npy',
         train_coco50pc=data_root + annotation_default_path +

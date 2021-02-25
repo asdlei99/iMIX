@@ -46,10 +46,9 @@ class LCGN(BaseModel):
     }
     return model_output
 
-    # loss = self.head.forward_train(
-    #     x_att, vecQuestions, labels=data['answers_scores'].cuda())
-    #
-    # return {'losses': loss}
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output
 
 
 class SingleHop(nn.Module):

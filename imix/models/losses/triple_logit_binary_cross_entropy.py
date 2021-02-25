@@ -219,6 +219,9 @@ class M4CDecodingBCEWithMaskLoss(BaseLoss):
         loss = torch.sum(losses) / count
         return loss
 
+    def __str__(self):
+        return 'lxmert_pretrain_loss_v0'
+
 @LOSSES.register_module()
 class LXMERTPreTrainLossV0(BaseLoss):
 

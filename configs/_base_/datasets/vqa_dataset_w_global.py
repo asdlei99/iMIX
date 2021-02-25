@@ -49,7 +49,7 @@ vqa_reader_train_cfg = dict(
         'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets,  # used datasets
-    if_global=False,
+    if_global=True
 )
 
 vqa_reader_test_cfg = dict(
@@ -86,7 +86,7 @@ vqa_reader_test_cfg = dict(
         'imdb_valminusminival2014.npy',
     ),
     datasets=test_datasets,  # used datasets
-    if_global=False
+    if_global=True
 )
 
 vqa_info_cpler_cfg = dict(

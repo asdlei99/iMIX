@@ -1,10 +1,10 @@
 # 前傳沒問題
-_base_ = [
-    '../_base_/models/lxmert_config.py',
-    '../_base_/datasets/vqa_dataset.py',
-    '../_base_/schedules/schedule_vqa.py',
-    '../_base_/default_runtime.py'
-] # yapf:disable
+# _base_ = [
+#     '../_base_/models/lxmert_config.py',
+#     '../_base_/datasets/vqa_dataset.py',
+#     '../_base_/schedules/schedule_vqa.py',
+#     '../_base_/default_runtime.py'
+# ] # yapf:disable
 
 # 前傳沒問題
 # _base_ = [
@@ -59,7 +59,7 @@ _base_ = [
 # 前傳沒問題
 # _base_ = [
 #     '../_base_/models/pythia_config.py',
-#     '../_base_/datasets/vqa_dataset.py',
+#     '../_base_/datasets/vqa_dataset_w_global.py',
 #     '../_base_/schedules/schedule_vqa.py',
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
@@ -98,12 +98,12 @@ _base_ = [
 # ] # yapf:disable
 
 # 前傳沒問題 UNITER
-# _base_ = [
-#     '../_base_/models/uniter_config.py',
-#     '../_base_/datasets/vqa_dataset_uniter.py',
-#     '../_base_/schedules/schedule_vqa.py',
-#     '../_base_/default_runtime.py'
-# ] # yapf:disable
+_base_ = [
+    '../_base_/models/uniter_config.py',
+    '../_base_/datasets/vqa_dataset_uniter.py',
+    '../_base_/schedules/schedule_vqa.py',
+    '../_base_/default_runtime.py'
+] # yapf:disable
 
 
 # 前傳沒問題 pretrain for lxmert

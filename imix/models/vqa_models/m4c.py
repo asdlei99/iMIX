@@ -221,6 +221,10 @@ class M4C(BaseModel):
 
     return model_outputs
 
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output
+
 
 class OcrPtrNet(nn.Module):
 

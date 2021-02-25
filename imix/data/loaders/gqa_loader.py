@@ -47,7 +47,7 @@ class GQADATASET(Dataset):
     return len(self.reader)
 
   def __getitem__(self, idx):
-    idx = 0
+    # idx = 0
     itemFeature = self.reader[idx]
     itemFeature = self.infocpler.completeInfo(itemFeature)
 

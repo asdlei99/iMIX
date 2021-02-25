@@ -58,16 +58,24 @@ class VQAReader(IMIXDataReader):
         else:
           feature_global_info['global_feature_path'] = feature_global_info.pop('feature_path')
           feature_global_info['global_features'] = feature_global_info.pop('features')
-      if feature_info is None or feature_global_info is None:
-        itemFeature.error = True
-        itemFeature.feature = np.random.random((100, 2048))
-        itemFeature.global_feature = np.random.random((100, 2048))
-        return itemFeature
+
+      if self.if_global:
+        if feature_info is None or feature_global_info is None:
+          itemFeature.error = True
+          itemFeature.feature = np.random.random((100, 2048))
+          itemFeature.global_feature = np.random.random((100, 2048))
+          return itemFeature
+      else:
+        if feature_info is None:
+          itemFeature.error = True
+          itemFeature.feature = np.random.random((100, 2048))
+          return itemFeature
 
       for k, v in feature_info.items():
         itemFeature[k] = v
-      for k, v in feature_global_info.items():
-        itemFeature[k] = v
+      if self.if_global:
+        for k, v in feature_global_info.items():
+          itemFeature[k] = v
       return itemFeature
     feature_path = self.features_pathes[split + '_' + str(itemFeature.img_id)]
     itemFeature.feature = torch.load(feature_path)[0]

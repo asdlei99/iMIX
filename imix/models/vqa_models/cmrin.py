@@ -220,3 +220,7 @@ class CMRIN(BaseModel):
 
     model_output = {'scores': pred_anchor, 'target': data['bbox'].cuda()}
     return model_output
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output

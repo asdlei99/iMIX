@@ -74,7 +74,7 @@ class UNITER(BaseModel):
 
     return embedding_output
 
-  def forward(self, data, output_all_encoded_layers=False):
+  def forward_train(self, data, output_all_encoded_layers=False):
 
     input_ids = data['input_ids'].cuda()
     position_ids = torch.arange(
@@ -115,8 +115,15 @@ class UNITER(BaseModel):
 
     pooled_output = self.encoder.pooler(encoded_layers)
     logits = self.head(pooled_output)
-    model_outputs={
-        'scores':logits,
-        'target':data['answers_scores'].cuda()
-    }
+    try:
+        model_outputs={
+            'scores':logits,
+            'target':data['answers_scores'].cuda()
+        }
+    except:
+        pass
     return model_outputs
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output

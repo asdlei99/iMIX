@@ -113,3 +113,7 @@ class PYTHIA(BaseModel):
                     }
 
     return model_output
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output

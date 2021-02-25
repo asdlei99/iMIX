@@ -31,3 +31,7 @@ class BAN(BaseModel):
     predict_scores = self.head.forward(q_emb.sum(1))
     model_output = {'scores': predict_scores, 'target': targets}
     return model_output
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output

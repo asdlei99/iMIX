@@ -40,7 +40,7 @@ vqa_reader_train_cfg = dict(
         train=data_root + annotation_default_path + 'uniter_imdb_train2014.npy',
         val=data_root + annotation_default_path + 'uniter_imdb_val2014.npy',
         test=data_root + annotation_default_path + 'imdb_test2015.npy',
-        minival=data_root + annotation_default_path + 'uniter_imdb_minival2014.npy',
+        minival=data_root + annotation_default_path + 'uniter_imdb_val2014.npy',
         train_coco10pc=data_root + annotation_default_path +
         'imdb_train2014_len_coco_10_pc.npy',
         train_coco50pc=data_root + annotation_default_path +
@@ -48,7 +48,8 @@ vqa_reader_train_cfg = dict(
         valminusminival=data_root + annotation_default_path +
         'imdb_valminusminival2014.npy',
     ),
-    datasets=train_datasets  # used datasets
+    datasets=train_datasets,  # used datasets
+    if_global=False
 )
 
 vqa_reader_test_cfg = dict(
@@ -73,10 +74,10 @@ vqa_reader_test_cfg = dict(
         valminusminival=data_root + feature_path + 'trainval2014.lmdb',
     ),
     mix_annotations=dict(
-        train=data_root + annotation_default_path + 'imdb_train2014.npy',
-        val=data_root + annotation_default_path + 'imdb_val2014.npy',
+        train=data_root + annotation_default_path + 'uniter_imdb_train2014.npy',
+        val=data_root + annotation_default_path + 'uniter_imdb_val2014.npy',
         test=data_root + annotation_default_path + 'imdb_test2015.npy',
-        minival=data_root + annotation_default_path + 'imdb_minival2014.npy',
+        minival=data_root + annotation_default_path + 'uniter_imdb_val2014.npy',
         train_coco10pc=data_root + annotation_default_path +
         'imdb_train2014_len_coco_10_pc.npy',
         train_coco50pc=data_root + annotation_default_path +
@@ -84,7 +85,8 @@ vqa_reader_test_cfg = dict(
         valminusminival=data_root + annotation_default_path +
         'imdb_valminusminival2014.npy',
     ),
-    datasets=test_datasets  # used datasets
+    datasets=test_datasets,  # used datasets
+    if_global=False
 )
 
 vqa_info_cpler_cfg = dict(
@@ -100,7 +102,7 @@ vqa_info_cpler_cfg = dict(
         answers_vqa=data_root + vocab_path + 'answers_vqa.txt',
         vocabulart_100k=data_root + vocab_path + 'vocabulary_100k.txt',
         vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'),
-    max_seg_lenth=20,  #20,
+    max_seg_lenth=40,  #20,
     word_mask_ratio=0.0,
     vocab_name='vocabulart_100k',
     vocab_answer_name='answers_vqa',

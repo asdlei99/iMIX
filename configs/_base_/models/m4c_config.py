@@ -39,4 +39,4 @@ model = dict(
         in_dim=768,
         out_dim=5000))
 
-loss = dict(type='M4CDecodingBCEWithMaskLoss', )
+loss = dict(type='M4CDecodingBCEWithMaskLoss')

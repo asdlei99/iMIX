@@ -195,9 +195,12 @@ class LXMERT(BaseModel):
         'target': params['ans'].cuda()
     }
     return model_output
-    # losses = F.binary_cross_entropy_with_logits(output_dict['scores'],
-    #                                             params['ans'].cuda())
-    # return {'losses': losses}
+
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output
+
 
   def forward_train_pretrain(self, data):
       params = copy.deepcopy(data)

@@ -141,6 +141,11 @@ class R2C(BaseModel):
     # }
     return model_output
 
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output
+
+
 
 def _load_resnet(pretrained=True):
   # huge thx to https://github.com/ruotianluo/pytorch-faster-rcnn/blob/master/lib/nets/resnet_v1.py

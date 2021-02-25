@@ -85,3 +85,7 @@ class LoRRA(PYTHIA):
     model_output = {'scores': self.head(joint_embedding)}
 
     return model_output
+
+  def forward_test(self, data):
+    model_output = self.forward_train(data)
+    return model_output
