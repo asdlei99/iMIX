@@ -98,5 +98,5 @@ test_data = dict(
 # evaluator_type = 'VCR'  # TODO(jinliang)
 post_processor = dict(
     type='Evaluator',
-    metrics=[dict(type='VQAAccuracyMetric')],
-    dataset_converters=[dict(type='VQADatasetConverter')])
+    metrics=[dict(type='VCRAccuracyMetric')],
+    dataset_converters=[dict(type='VCRDatasetConverter')])

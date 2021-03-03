@@ -4,6 +4,7 @@ import logging
 from .evaluator_mix1 import METRICS
 import numpy as np
 from abc import abstractmethod, ABCMeta
+import numpy as np
 
 
 class BaseMetric(metaclass=ABCMeta):
@@ -18,7 +19,11 @@ class BaseMetric(metaclass=ABCMeta):
 
   @staticmethod
   def list_to_tensor(list_data: list) -> torch.tensor:
-    tensor_size = (len(list_data), list_data[0].shape[1])
+    # tensor_size = (len(list_data), list_data[0].shape[1])
+    if len(list_data[0].shape) == 1:
+      tensor_size = (len(list_data), list_data[0].shape[0])
+    else:
+      tensor_size = (len(list_data), list_data[0].shape[1])
     tensor_dtype = list_data[0].dtype
     tensor_data = torch.zeros(size=tensor_size, dtype=tensor_dtype)
     for idx, data in enumerate(list_data):
@@ -74,6 +79,53 @@ class VQAAccuracyMetric(BaseMetric):
     y = x1 / x1_sum
     return y
 
+@METRICS.register_module()
+class VCRAccuracyMetric(BaseMetric):
+  metric_name = 'vcr_accuracy_metric'
+
+  def __init__(self, *args, **kwargs):
+    pass
+
+  def calculate(self, predictions: torch.Tensor, labels: torch.Tensor,
+                **kwargs):
+    # one_hots = labels.new_zeros(*labels.shape)
+    # one_hots.scatter_(1, predictions.view(-1, 1), 1)
+    # accuracy = torch.sum(one_hots * labels) / labels.shape[0]
+    accuracy = torch.sum(torch.eq(labels, predictions.view(-1, 1))).float() / labels.shape[0]
+    # predictions = predictions.view(-1, 1)
+    # labels = np.array(labels)
+    # predictions = np.array(predictions)
+    # accuracy = len(set(labels) & set(predictions)) / labels.shape[0]
+    # cal_num = 0
+    # for i in range(len(labels)):
+    #   if labels[i][0] == predictions.view(-1, 1)[i][0]:
+    #     cal_num += 1
+    # accuracy = cal_num / labels.shape[0]
+    return accuracy
+
+  def data_pre_process(self, model_outputs, labels, *args, **kwargs):
+    labels = self.list_to_tensor(labels)
+    # scores_list = list(model_output['scores'] for model_output in model_outputs)
+    scores_list = list(model_output for model_output in model_outputs)
+    scores_tensor = self.list_to_tensor(scores_list)
+    predictions = VCRAccuracyMetric._get_accuracy(scores_tensor)
+    return predictions, labels
+
+  @staticmethod
+  def _get_accuracy(output):
+    output = VCRAccuracyMetric._masked_unk_softmax(output, 1, 0)
+    output = output.argmax(dim=1)  # argmax
+    return output
+
+  @staticmethod
+  def _masked_unk_softmax(x, dim, mask_idx):
+    # x1 = torch.nn.functional.softmax(x, dim=dim)
+    x1 = torch.nn.functional.log_softmax(x, dim=dim)
+    # x1[:, mask_idx] = 0
+    # x1_sum = torch.sum(x1, dim=1, keepdim=True)
+    # y = x1 / x1_sum
+    y = x1
+    return y
 
 @METRICS.register_module()
 class AccuracyMetric(BaseMetric):

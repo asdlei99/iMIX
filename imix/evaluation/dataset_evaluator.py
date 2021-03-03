@@ -92,7 +92,51 @@ class VQADatasetConverter(BaseDatasetConverter):
     } for qid, s in zip(q_ids, scores))
     return predictions
 
+@DATASET_CONVERTER.register_module()
+class VCRDatasetConverter(BaseDatasetConverter):
 
+  def __init__(self, post_process_type: str):
+    super().__init__(post_process_type=post_process_type)
+
+  def __str__(self):
+    return 'vcr_dataset_converter'
+
+  def evaluation(self, batch_data, model_outputs, *args, **kwargs):
+    from imix.models.vqa_models.mcan_mix import list2dict
+    from imix.engine.organizer import is_by_iter
+    if is_by_iter():
+      batch_data = list2dict(batch_data)
+
+    # labels = list(batch_data['answers_scores'].split(1))
+    labels = list(model_outputs['target'].split(1))
+    # q_ids, scores = batch_data['question_id'].split(
+    #     1), model_outputs['scores'].to('cpu').split(1)
+    # predictions = list({
+    #     'question_id': q_id,
+    #     'scores': score
+    # } for q_id, score in zip(q_ids, scores))
+    predictions = list(model_outputs['scores'].split(1))
+    return predictions, labels
+
+  def submit(self, batch_data, model_outputs, *args, **kwargs):
+    scores, labels = model_outputs['scores'].max(1)
+    q_ids = batch_data['question_id'].detach().numpy()
+    labels = labels.cpu().detach().numpy()
+    q2a = batch_data['quesid2ans']
+    predictions = list({
+        'question_id': int(qid),
+        'answer': q2a[l][0]
+    } for qid, l in zip(q_ids, labels))
+    return predictions
+
+  def predict(self, batch_data, model_outputs, *args, **kwargs):
+    q_ids = batch_data['question_id'].detach().numpy()
+    scores = model_outputs['scores'].cpu().detach().numpy()
+    predictions = list({
+        'question_id': int(qid),
+        'scores': s
+    } for qid, s in zip(q_ids, scores))
+    return predictions
 @DATASET_CONVERTER.register_module()
 class CaptionBleu4Converter(BaseDatasetConverter):
 
