@@ -49,12 +49,12 @@
 # ]  # yapf:disable
 
 # 前傳沒問題
-_base_ = [
-    '../_base_/models/hgl_config.py',
-    '../_base_/datasets/vcr_dataset.py',
-    '../_base_/schedules/schedule_vqa.py',
-    '../_base_/default_runtime.py'
-] # yapf:disable
+# _base_ = [
+#     '../_base_/models/hgl_config.py',
+#     '../_base_/datasets/vcr_dataset.py',
+#     '../_base_/schedules/schedule_vqa.py',
+#     '../_base_/default_runtime.py'
+# ] # yapf:disable
 
 # 前傳沒問題
 # _base_ = [
@@ -65,12 +65,12 @@ _base_ = [
 # ] # yapf:disable
 
 # 前傳沒問題
-# _base_ = [
-#     '../_base_/models/lcgn_config.py',
-#     '../_base_/datasets/gqa_dataset.py',
-#     '../_base_/schedules/schedule_vqa.py',
-#     '../_base_/default_runtime.py'
-# ] # yapf:disable
+_base_ = [
+    '../_base_/models/lcgn_config.py',
+    '../_base_/datasets/gqa_dataset.py',
+    '../_base_/schedules/schedule_vqa.py',
+    '../_base_/default_runtime.py'
+] # yapf:disable
 
 # 前傳沒問題
 # _base_ = [
