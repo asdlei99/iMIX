@@ -102,10 +102,10 @@ class VCRDatasetConverter(BaseDatasetConverter):
     return 'vcr_dataset_converter'
 
   def evaluation(self, batch_data, model_outputs, *args, **kwargs):
-    from imix.models.vqa_models.mcan_mix import list2dict
-    from imix.engine.organizer import is_by_iter
-    if is_by_iter():
-      batch_data = list2dict(batch_data)
+    # from imix.models.vqa_models.mcan_mix import list2dict
+    # from imix.engine.organizer import is_by_iter
+    # if is_by_iter():
+    #   batch_data = list2dict(batch_data)
 
     # labels = list(batch_data['answers_scores'].split(1))
     labels = list(model_outputs['target'].split(1))
