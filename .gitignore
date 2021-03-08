@@ -118,3 +118,9 @@ work_dirs/
 *.pth
 *.py~
 *.sh~
+
+#vim 
+*.swp
+
+#sphinx
+*.rst
