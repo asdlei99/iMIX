@@ -5,16 +5,21 @@ import logging
 
 from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
+from .base_infocpler import BaseInfoCpler
 
-WORD_MASK_RATIO = 0.15
-MAX_SEQ_LENGTH = 14
+#WORD_MASK_RATIO = 0.15
+#MAX_SEQ_LENGTH = 14
 
 
-class GQAInfoCpler(object):
+class GQAInfoCpler(BaseInfoCpler):
 
     def __init__(self, cfg):
         # logger = logging.getLogger(__name__)
-
+        #TODO: shihzh need to confirm
+        self.vocab_name = cfg.get('vocab_name',
+                                  'vocabulary_gqa')  ### bert for vocabulart_100k
+        super().__init__(cfg)
+        '''
         self.if_bert = cfg.if_bert
         self._init_tokens()
 
@@ -36,7 +41,7 @@ class GQAInfoCpler(object):
 
         # print('xiix')
         # logger.info("VQAInfoCpler success")
-
+        '''
     def completeInfo(self, itemFeature: ItemFeature):
         if self.if_bert:
             return self.completeBertInfo(itemFeature)
@@ -52,9 +57,13 @@ class GQAInfoCpler(object):
         input_ids = [self.stoi[t] for t in tokens]
         input_mask = [1] * len(input_ids)
 
-        to_extend = self.max_seq_length - len(input_ids)
-        input_ids.extend([0] * to_extend)
-        input_mask.extend([0] * to_extend)
+        '''
+        while len(input_ids) < self.max_seq_length:
+            input_ids.append(0)
+            input_mask.append(0)
+        '''
+        to_extd_length = self.max_seq_length - len(input_ids)
+        self.info_extend(to_extd_length, (input_ids, 0), (input_mask, 0))
 
         itemFeature.input_ids = torch.tensor(input_ids, dtype=torch.long)
         itemFeature.input_mask = torch.tensor(input_mask, dtype=torch.bool)
@@ -137,102 +146,106 @@ class GQAInfoCpler(object):
 
         return itemFeature
 
-    def compute_answers_scores(self, answers_indices):
-        """Generate VQA based answer scores for answers_indices.
+    # inheriting func
+    # def compute_answers_scores(self, answers_indices):
+    #     """Generate VQA based answer scores for answers_indices.
+    #
+    #     Args:
+    #         answers_indices (torch.LongTensor): tensor containing indices of the answers
+    #
+    #     Returns:
+    #         torch.FloatTensor: tensor containing scores.
+    #     """
+    #     scores = torch.zeros(len(self.qa_ans2id), dtype=torch.float)
+    #     gt_answers = list(enumerate(answers_indices))
+    #     unique_answers = set(answers_indices.tolist())
+    #
+    #     for answer in unique_answers:
+    #         accs = []
+    #         for gt_answer in gt_answers:
+    #             other_answers = [item for item in gt_answers if item != gt_answer]
+    #             matching_answers = [item for item in other_answers if item[1] == answer]
+    #             acc = min(1, float(len(matching_answers)) / 3)
+    #             accs.append(acc)
+    #         avg_acc = sum(accs) / len(accs)
+    #         if answer != 0:
+    #             scores[int(answer)] = avg_acc
+    #     return scores
 
-        Args:
-            answers_indices (torch.LongTensor): tensor containing indices of the answers
+    #def _increase_to_ten(self, tokens):
+    #    while len(tokens) < self.DEFAULT_NUM_ANSWERS:
+    #        tokens += tokens[:self.DEFAULT_NUM_ANSWERS - len(tokens)]
+    #    return tokens
 
-        Returns:
-            torch.FloatTensor: tensor containing scores.
-        """
-        scores = torch.zeros(len(self.qa_ans2id), dtype=torch.float)
-        gt_answers = list(enumerate(answers_indices))
-        unique_answers = set(answers_indices.tolist())
+    #inheriting func
+    #def load_glove_weights(self):
+    #    glove = torch.load(self.glove_weights_path)
+    #    self.glove_vocabs = glove[0]
+    #    self.glove_vocab_dict = glove[1]
+    #    self.glove_weights = glove[2]
 
-        for answer in unique_answers:
-            accs = []
-            for gt_answer in gt_answers:
-                other_answers = [item for item in gt_answers if item != gt_answer]
-                matching_answers = [item for item in other_answers if item[1] == answer]
-                acc = min(1, float(len(matching_answers)) / 3)
-                accs.append(acc)
-            avg_acc = sum(accs) / len(accs)
-            if answer != 0:
-                scores[int(answer)] = avg_acc
-        return scores
+    #inheriting func
+    #def get_glove_single_word(self, word):
+    #    try:
+    #        return self.glove_weights[self.glove_vocab_dict[word]]
+    #    except:
+    #        return ([0] * 300).copy()
 
-    def _increase_to_ten(self, tokens):
-        while len(tokens) < self.DEFAULT_NUM_ANSWERS:
-            tokens += tokens[:self.DEFAULT_NUM_ANSWERS - len(tokens)]
-        return tokens
+    #inheriting func
+    #def get_glove_single_id(self, id):
+    #    if id == self.pad_idx:
+    #        return torch.zeros((300,))
+    #    try:
+    #        return self.glove_weights[id]
+    #    except:
+    #        return torch.zeros((300,))
+    # inheriting func
+    # def load_vocab(self):
+    #     with open(self.vocab_answer_path) as f:
+    #         raw_qa_vocab = f.readlines()
+    #     self.qa_id2ans = [t.strip() for t in raw_qa_vocab]
+    #     self.qa_ans2id = {k: v for v, k in enumerate(self.qa_id2ans)}
+    #     self.DEFAULT_NUM_ANSWERS = 10
+    #
+    #     self.word_dict = {}
+    #     self.itos = {}
+    #
+    #     self.itos[self.PAD_INDEX] = self.PAD_TOKEN
+    #     self.itos[self.SOS_INDEX] = self.SOS_TOKEN
+    #     self.itos[self.EOS_INDEX] = self.EOS_TOKEN
+    #     self.itos[self.UNK_INDEX] = self.UNK_TOKEN
+    #     self.word_dict[self.SOS_TOKEN] = self.SOS_INDEX
+    #     self.word_dict[self.EOS_TOKEN] = self.EOS_INDEX
+    #     self.word_dict[self.PAD_TOKEN] = self.PAD_INDEX
+    #     self.word_dict[self.UNK_TOKEN] = self.UNK_INDEX
+    #
+    #     index = len(self.itos.keys())
+    #     self.total_predefined = len(self.itos.keys())
+    #     with open(self.vocab_path, 'r') as f:
+    #         for line in f:
+    #             self.itos[index] = line.strip()
+    #             self.word_dict[line.strip()] = index
+    #             index += 1
+    #
+    #     self.stoi = defaultdict(self.get_unk_index)
+    #     self.stoi.update(self.word_dict)
 
-    def load_glove_weights(self):
-        glove = torch.load(self.glove_weights_path)
-        self.glove_vocabs = glove[0]
-        self.glove_vocab_dict = glove[1]
-        self.glove_weights = glove[2]
+    #def get_unk_index(self):
+    #    return self.UNK_INDEX
 
-    def get_glove_single_word(self, word):
-        try:
-            return self.glove_weights[self.glove_vocab_dict[word]]
-        except:
-            return ([0] * 300).copy()
-
-    def get_glove_single_id(self, id):
-        if id == self.pad_idx:
-            return torch.zeros((300,))
-        try:
-            return self.glove_weights[id]
-        except:
-            return torch.zeros((300,))
-
-    def load_vocab(self):
-        with open(self.vocab_answer_path) as f:
-            raw_qa_vocab = f.readlines()
-        self.qa_id2ans = [t.strip() for t in raw_qa_vocab]
-        self.qa_ans2id = {k: v for v, k in enumerate(self.qa_id2ans)}
-        self.DEFAULT_NUM_ANSWERS = 10
-
-        self.word_dict = {}
-        self.itos = {}
-
-        self.itos[self.PAD_INDEX] = self.PAD_TOKEN
-        self.itos[self.SOS_INDEX] = self.SOS_TOKEN
-        self.itos[self.EOS_INDEX] = self.EOS_TOKEN
-        self.itos[self.UNK_INDEX] = self.UNK_TOKEN
-        self.word_dict[self.SOS_TOKEN] = self.SOS_INDEX
-        self.word_dict[self.EOS_TOKEN] = self.EOS_INDEX
-        self.word_dict[self.PAD_TOKEN] = self.PAD_INDEX
-        self.word_dict[self.UNK_TOKEN] = self.UNK_INDEX
-
-        index = len(self.itos.keys())
-        self.total_predefined = len(self.itos.keys())
-        with open(self.vocab_path, 'r') as f:
-            for line in f:
-                self.itos[index] = line.strip()
-                self.word_dict[line.strip()] = index
-                index += 1
-
-        self.stoi = defaultdict(self.get_unk_index)
-        self.stoi.update(self.word_dict)
-
-    def get_unk_index(self):
-        return self.UNK_INDEX
-
-    def _init_tokens(self):
-        self.tokenizer = BertTokenizer.from_pretrained(
-            'bert-base-uncased', do_lower_case=True)
-        self.PAD_TOKEN = '<pad>'
-        self.SOS_TOKEN = '<s>'
-        self.EOS_TOKEN = '</s>'
-        self.UNK_TOKEN = '<unk>'
-        self.PAD_INDEX = 0
-        self.SOS_INDEX = 1
-        self.EOS_INDEX = 2
-        self.UNK_INDEX = 3
-        self._MASK_TOKEN = '[MASK]'
-        self._SEP_TOEKN = '[SEP]'
-        self._CLS_TOKEN = '[CLS]'
-        self._PAD_TOKEN = '[PAD]'
-        self.pad_idx = self.tokenizer.vocab[self._PAD_TOKEN]
+    #def _init_tokens(self):
+    #    self.tokenizer = BertTokenizer.from_pretrained(
+    #        'bert-base-uncased', do_lower_case=True)
+    #    self.PAD_TOKEN = '<pad>'
+    #    self.SOS_TOKEN = '<s>'
+    #    self.EOS_TOKEN = '</s>'
+    #    self.UNK_TOKEN = '<unk>'
+    #    self.PAD_INDEX = 0
+    #    self.SOS_INDEX = 1
+    #    self.EOS_INDEX = 2
+    #    self.UNK_INDEX = 3
+    #    self._MASK_TOKEN = '[MASK]'
+    #    self._SEP_TOEKN = '[SEP]'
+    #    self._CLS_TOKEN = '[CLS]'
+    #    self._PAD_TOKEN = '[PAD]'
+    #    self.pad_idx = self.tokenizer.vocab[self._PAD_TOKEN]
