@@ -27,9 +27,11 @@ class VizWizInfoCpler(BaseInfoCpler):
 
         input_ids = [self.stoi[t] for t in tokens]
         input_mask = [1] * len(input_ids)
-        while len(input_ids) < self.max_seq_length:
-            input_ids.append(0)
-            input_mask.append(0)
+        to_extd_length = self.max_seq_length - len(input_ids)
+        self.info_extend(to_extd_length, (input_ids, 0),  (input_mask, 0))
+        #while len(input_ids) < self.max_seq_length:
+        #    input_ids.append(0)
+        #    input_mask.append(0)
         item_feature.input_ids = torch.tensor(input_ids, dtype=torch.long)
         item_feature.input_mask = torch.tensor(input_mask, dtype=torch.bool)
         # item_feature.feature_question = torch.stack(list(map(self.get_glove_single_id, input_ids)))
@@ -60,11 +62,14 @@ class VizWizInfoCpler(BaseInfoCpler):
         input_mask = [1] * len(tokens)
         input_segment = [0] * len(tokens)
         input_lm_label_ids = [-1] * len(tokens)
-        while len(input_ids) < self.max_seq_length:
-            input_ids.append(int(self.pad_idx))
-            input_mask.append(0)
-            input_segment.append(0)
-            input_lm_label_ids.append(-1)
+        to_extd_lenght = self.max_seq_length - len(input_ids)
+        self.info_extend(to_extd_lenght, (input_ids, int(self.pad_idx)), (input_mask, 0),
+                         (input_segment, 0), (input_lm_label_ids, -1))
+        #while len(input_ids) < self.max_seq_length:
+        #    input_ids.append(int(self.pad_idx))
+        #    input_mask.append(0)
+        #    input_segment.append(0)
+        #    input_lm_label_ids.append(-1)
 
         item_feature.bbox_normalized = torch.tensor(
             self._get_normalized_from_bbox(item_feature.bbox,

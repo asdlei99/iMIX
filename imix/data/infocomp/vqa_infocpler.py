@@ -5,33 +5,34 @@ import logging
 
 from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
+from .base_infocpler import BaseInfoCpler
 
 WORD_MASK_RATIO = 0.15
 MAX_SEQ_LENGTH = 14
 
 
-class VQAInfoCpler(object):
+class VQAInfoCpler(BaseInfoCpler):
 
     def __init__(self, cfg):
         # logger = logging.getLogger(__name__)
+        super().__init__(cfg)
+        #self.if_bert = cfg.if_bert
+        #self._init_tokens()
 
-        self.if_bert = cfg.if_bert
-        self._init_tokens()
+        #self.max_seq_length = cfg.get('max_seg_lenth', 14)
+        #self.word_mask_ratio = cfg.get('word_mask_ratio', 0.15)
 
-        self.max_seq_length = cfg.get('max_seg_lenth', 14)
-        self.word_mask_ratio = cfg.get('word_mask_ratio', 0.15)
+        #self.vocab_name = cfg.get('vocab_name', 'vocabulart_100k')
+        #self.vocab_path = cfg['mix_vocab'][self.vocab_name]
 
-        self.vocab_name = cfg.get('vocab_name', 'vocabulart_100k')
-        self.vocab_path = cfg['mix_vocab'][self.vocab_name]
+        #self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
+        #self.vocab_answer_path = cfg['mix_vocab'][self.vocab_answer_name]
 
-        self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
-        self.vocab_answer_path = cfg['mix_vocab'][self.vocab_answer_name]
+        #self.glove_name = cfg.get('glove_name', 'glove6b300d')
+        #self.glove_weights_path = cfg['glove_weights'][self.glove_name]
 
-        self.glove_name = cfg.get('glove_name', 'glove6b300d')
-        self.glove_weights_path = cfg['glove_weights'][self.glove_name]
-
-        self.load_glove_weights()
-        self.load_vocab()
+        #self.load_glove_weights()
+        #self.load_vocab()
 
         # print('xiix')
         # logger.info("VQAInfoCpler success")
@@ -50,9 +51,11 @@ class VQAInfoCpler(object):
 
         input_ids = [self.stoi[t] for t in tokens]
         input_mask = [1] * len(input_ids)
-        while len(input_ids) < self.max_seq_length:
-            input_ids.append(0)
-            input_mask.append(0)
+        to_extd_length = self.max_seq_length - len(input_ids)
+        self.info_extend(to_extd_length, (input_ids, 0), (input_mask, 0))
+        #while len(input_ids) < self.max_seq_length:
+        #    input_ids.append(0)
+        #    input_mask.append(0)
         itemFeature.input_ids = torch.tensor(input_ids, dtype=torch.long)
         itemFeature.input_mask = torch.tensor(input_mask, dtype=torch.bool)
         # itemFeature.feature_question = torch.stack(list(map(self.get_glove_single_id, input_ids)))
@@ -109,11 +112,14 @@ class VQAInfoCpler(object):
         input_mask = [1] + [1] * (len(tokens) - 2) + [1]
         input_segment = [0] + [0] * (len(tokens) - 2) + [0]
         input_lm_label_ids = [-1] + [-1] * (len(tokens) - 2) + [-1]
-        while len(input_ids) < self.max_seq_length:
-            input_ids.append(int(self.pad_idx))
-            input_mask.append(0)
-            input_segment.append(0)
-            input_lm_label_ids.append(-1)
+        to_extd_length = self.max_seq_length - len(input_ids)
+        self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0),
+                         (input_segment, 0), (input_lm_label_ids, -1))
+        #while len(input_ids) < self.max_seq_length:
+        #    input_ids.append(int(self.pad_idx))
+        #    input_mask.append(0)
+        #    input_segment.append(0)
+        #    input_lm_label_ids.append(-1)
 
         itemFeature.input_ids = torch.tensor(
             input_ids, dtype=torch.long)  # token ids

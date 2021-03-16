@@ -49,11 +49,14 @@ class TextVQAInfoCpler(BaseInfoCpler):
             input_mask = [1] * len(tokens)
             input_segment = [0] * len(tokens)
             input_lm_label_ids = [-1] * len(tokens)
-            while len(input_ids) < self.max_seq_length:
-                input_ids.append(int(self.pad_idx))
-                input_mask.append(0)
-                input_segment.append(0)
-                input_lm_label_ids.append(-1)
+            to_extd_length = self.max_seq_length - len(input_ids)
+            self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0),
+                             (input_segment, 0), (input_lm_label_ids, -1))
+            #while len(input_ids) < self.max_seq_length:
+            #    input_ids.append(int(self.pad_idx))
+            #    input_mask.append(0)
+            #    input_segment.append(0)
+            #    input_lm_label_ids.append(-1)
             itemFeature.input_segment = torch.tensor(input_segment, dtype=torch.int)
             itemFeature.input_lm_label_ids = torch.tensor(
                 input_lm_label_ids, dtype=torch.long)
@@ -64,9 +67,11 @@ class TextVQAInfoCpler(BaseInfoCpler):
                 tokens = tokens[:self.max_seq_length]
             input_ids = [self.stoi[t] for t in tokens]
             input_mask = [1] * len(tokens)
-            while len(input_ids) < self.max_seq_length:
-                input_ids.append(int(self.pad_idx))
-                input_mask.append(0)
+            to_extd_length = self.max_seq_length - len(input_ids)
+            self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0))
+            #while len(input_ids) < self.max_seq_length:
+            #    input_ids.append(int(self.pad_idx))
+            #    input_mask.append(0)
 
         # ocr vectors
 

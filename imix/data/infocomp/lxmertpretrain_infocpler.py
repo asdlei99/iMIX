@@ -35,12 +35,15 @@ class LXMERTPreTrainInfoCpler(object):
         segment_ids = [0] * len(input_ids)
 
         # Zero-pad up to the sequence length.
-        while len(input_ids) < self.max_seq_length:
-            input_ids.append(0)
-            input_mask.append(0)
-            segment_ids.append(0)
-            lm_label_ids.append(-1)
+        #while len(input_ids) < self.max_seq_length:
+        #    input_ids.append(0)
+        #    input_mask.append(0)
+        #    segment_ids.append(0)
+        #    lm_label_ids.append(-1)
 
+        to_extd_length = self.max_seq_length - len(input_ids)
+        self.info_extend(to_extd_length, (input_ids, 0), (input_mask, 0),
+                         (segment_ids, 0), (lm_label_ids, -1))
         assert len(input_ids) == self.max_seq_length
         assert len(input_mask) == self.max_seq_length
         assert len(segment_ids) == self.max_seq_length
@@ -150,3 +153,6 @@ class LXMERTPreTrainInfoCpler(object):
                 feat_mask[i] = 1.
 
         return mask_feats, feat_mask
+    def info_extend(self, length, *to_be_extend):
+        for info, value in to_be_extend:
+            info.extend([value] * length)
