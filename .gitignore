@@ -121,3 +121,5 @@ work_dirs/
 
 #Vim tmp file
 *.swp
+#shihzh custom
+shihzh*
