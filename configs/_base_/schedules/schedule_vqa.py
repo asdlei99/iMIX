@@ -1,7 +1,7 @@
 # optimizer  transform.AdamW
 optimizer = dict(
     type='AdamW',
-    lr=0.00005,
+    lr=0.0003,
     weight_decay=0,
     eps=1e-9,
     betas=[0.9, 0.98],
@@ -33,4 +33,4 @@ lr_config = dict(
 # max_iter = 118000
 # max_iter = 236000
 #by_iter = True
-total_epochs = 4
+total_epochs = 25

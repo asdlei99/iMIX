@@ -9,7 +9,7 @@ reader_train_cfg = dict(
     type='RefCOCOReader',
     card='default',
     data_type='unc',
-    imgset_dir='/home/zrz/code/ReSC/data/unc',
+    imgset_dir='/home/wbq/code/ReSC/data/unc',
     image_dir='/home/datasets/COCO2014/train2014',
     annotations=dict(
         instances=data_root + 'instances.json',
@@ -54,8 +54,9 @@ train_data = dict(
     data=dict(
         type=dataset_type,
         reader=reader_train_cfg,
-        info_cpler=info_cpler_cfg,
-        limit_nums=800))
+        info_cpler=info_cpler_cfg))
+# ,
+#         limit_nums=800
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(

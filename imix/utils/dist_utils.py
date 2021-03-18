@@ -7,6 +7,7 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
+mp.set_sharing_strategy('file_system')
 #from mmcv.utils import TORCH_VERSION
 TORCH_VERSION = '1.6.0'  # TODO(jinliang)
 

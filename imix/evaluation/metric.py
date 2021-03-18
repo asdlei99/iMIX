@@ -67,13 +67,14 @@ class VQAAccuracyMetric(BaseMetric):
 
   @staticmethod
   def _get_accuracy(output):
-    output = VQAAccuracyMetric._masked_unk_softmax(output, 1, 0)
+    output = VQAAccuracyMetric._masked_unk_softmax(output, 1, [0,1])
     output = output.argmax(dim=1)  # argmax
     return output
 
   @staticmethod
   def _masked_unk_softmax(x, dim, mask_idx):
     x1 = torch.nn.functional.softmax(x, dim=dim)
+    #x1 = x
     x1[:, mask_idx] = 0
     x1_sum = torch.sum(x1, dim=1, keepdim=True)
     y = x1 / x1_sum

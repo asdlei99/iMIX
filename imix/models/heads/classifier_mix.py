@@ -7,6 +7,7 @@ from typing import Dict
 from torch.nn.utils.weight_norm import weight_norm
 from abc import abstractmethod, ABCMeta
 import math
+from torch import Tensor
 
 def gelu(x):
   """Implementation of the gelu activation function.
@@ -151,7 +152,16 @@ class LogitClassifierHead(ClassifierHead):
 @HEADS.register_module()
 class LCGNClassiferHead(ClassifierHead):
 
-  def __init__(self, OUT_QUESTION_MUL, CMD_DIM, outputDropout, *args, **kwargs):
+  def __init__(self, OUT_QUESTION_MUL: bool, CMD_DIM: int, outputDropout: float, *args, **kwargs) ->None:
+    """ initialization of LCGNClassiferHead
+
+    Args:
+      OUT_QUESTION_MUL: bool to identify if do the multiplication opearation based on features
+      CMD_DIM: command vector's dimension
+      outputDropout: dropout rate in output layer
+      *args: optional
+      **kwargs: optional
+    """
     super().__init__(*args, **kwargs)
     self.OUT_QUESTION_MUL = OUT_QUESTION_MUL
     self.outQuestion = Linear(CMD_DIM, CMD_DIM)
@@ -160,7 +170,17 @@ class LCGNClassiferHead(ClassifierHead):
         nn.Dropout(1 - outputDropout), Linear(self.in_dim, CMD_DIM), nn.ELU(),
         nn.Dropout(1 - outputDropout), Linear(CMD_DIM, self.out_dim))
 
-  def forward(self, x_att, vecQuestions):
+  def forward(self, x_att: Tensor, vecQuestions: Tensor) -> Tensor:
+    """ forward computation of LCGNClassiferHead
+
+    Args:
+      x_att: shape of batch_size x 512
+      vecQuestions: question feature shaped of batch_size x 512
+
+    Returns:
+      Tensor: the predicted values
+
+    """
     eQ = self.outQuestion(vecQuestions)
     if self.OUT_QUESTION_MUL:
       features = torch.cat([x_att, eQ, x_att * eQ], dim=-1)

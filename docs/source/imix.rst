@@ -1,6 +1,8 @@
-API REFERENCE
-==============
+imix package
+============
 
+Subpackages
+-----------
 
 .. toctree::
    :maxdepth: 4
@@ -12,3 +14,10 @@ API REFERENCE
    imix.solver
    imix.utils
 
+Module contents
+---------------
+
+.. automodule:: imix
+   :members:
+   :undoc-members:
+   :show-inheritance:

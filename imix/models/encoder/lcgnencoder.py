@@ -5,13 +5,26 @@ import numpy as np
 import os
 import pickle
 import torch.nn.functional as F
+from torch import Tensor
+from collections import Iterable
+from typing import Tuple
 
 
 @ENCODER.register_module()
 class LCGNEncoder(nn.Module):
 
-  def __init__(self, WRD_EMB_INIT_FILE, encInputDropout, qDropout, WRD_EMB_DIM,
-               ENC_DIM, WRD_EMB_FIXED):
+  def __init__(self, WRD_EMB_INIT_FILE: str, encInputDropout: float, qDropout: float, WRD_EMB_DIM: int,
+               ENC_DIM: int, WRD_EMB_FIXED: bool) -> None:
+    """Initialization of LCGNEncoder
+
+    Args:
+      WRD_EMB_INIT_FILE: the file path storing the initial information of word embedding
+      encInputDropout: dropout rate of encoder input
+      qDropout: question dropout
+      WRD_EMB_DIM: the dimension of word embedding
+      ENC_DIM: the dimension of encoder
+      WRD_EMB_FIXED: if the word embedding is fixed during training
+    """
     super().__init__()
     self.WRD_EMB_INIT_FILE = WRD_EMB_INIT_FILE
     self.encInputDropout = encInputDropout
@@ -19,14 +32,25 @@ class LCGNEncoder(nn.Module):
     self.WRD_EMB_DIM = WRD_EMB_DIM
     self.ENC_DIM = ENC_DIM
     self.WRD_EMB_FIXED = WRD_EMB_FIXED
-    embInit = np.load(self.WRD_EMB_INIT_FILE)
+    embInit = np.load(self.WRD_EMB_INIT_FILE) #shape: (2956,300)
     self.embeddingsVar = nn.Parameter(
         torch.Tensor(embInit), requires_grad=(not self.WRD_EMB_FIXED)).cuda()
     self.enc_input_drop = nn.Dropout(1 - self.encInputDropout)
     self.rnn0 = BiLSTM(self.WRD_EMB_DIM, self.ENC_DIM)
     self.question_drop = nn.Dropout(1 - self.qDropout)
 
-  def forward(self, qIndices, questionLengths):
+  def forward(self, qIndices: Tensor, questionLengths: Tensor) -> Tuple[Tensor, Tensor]:
+    """ forward computatuion of LCGNEncoder, based on inputs
+
+    Args:
+      qIndices: the indices of questions, shape of batch_size x 128
+      questionLengths: the length of the question, shape of batch_size
+
+    Returns:
+      Tuple[Tensor, Tensor]: questionCntxWords: the representation of word context in questions, shape of batch_size x128x512;
+      vecQuestions: the representation of the whole question, shape of batch_size x512
+
+    """
     # Word embedding
     # embeddingsVar = self.embeddingsVar.cuda()
     # embeddings = torch.cat(
@@ -49,7 +73,14 @@ class LCGNEncoder(nn.Module):
 
 class BiLSTM(nn.Module):
 
-  def __init__(self, WRD_EMB_DIM, ENC_DIM, forget_gate_bias=1.):
+  def __init__(self, WRD_EMB_DIM: int, ENC_DIM: int, forget_gate_bias: float = 1.) -> None:
+    """Initialization of BiLSTM
+
+    Args:
+      WRD_EMB_DIM: the word embedding dimension
+      ENC_DIM: the dimension of the encoder for BiLSTM, which is twice of the hidden state dimension
+      forget_gate_bias:(optional):the initialization of the forget-gate bias
+    """
     super().__init__()
     self.WRD_EMB_DIM = WRD_EMB_DIM
     self.ENC_DIM = ENC_DIM
@@ -81,7 +112,17 @@ class BiLSTM(nn.Module):
     self.bilstm.bias_hh_l0_reverse.data[...] = 0.
     self.bilstm.bias_hh_l0_reverse.requires_grad = False
 
-  def forward(self, questions, questionLengths):
+  def forward(self, questions: Tensor, questionLengths: Tensor) -> Tuple[Tensor, Tensor]:
+    """ encoder based on BiLSTM
+
+    Args:
+      questions: the question representation, sized of 128x128x300
+      questionLengths: the question length which is 128, recoding the length of questions.
+
+    Returns:
+      Tuple[Tensor, Tensor]: output:the output of bilstm, sized of batch_size x128x512; h_n: the hidden states of bilstm, sized of batch_size x 512
+
+    """
     # sort samples according to question length (descending)
     sorted_lengths, indices = torch.sort(questionLengths, descending=True)
     sorted_questions = questions[indices]

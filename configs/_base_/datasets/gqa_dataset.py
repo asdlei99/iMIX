@@ -12,7 +12,7 @@ vocab_path = 'data/datasets/gqa/defaults/extras/vocabs/'
 # test_datasets = ["test"]
 
 train_datasets = ['train']
-test_datasets = ['minival']
+test_datasets = ['val']
 
 vqa_reader_train_cfg = dict(
     type='VQAReader',
@@ -28,16 +28,16 @@ vqa_reader_train_cfg = dict(
     ),
     mix_annotations=dict(
         train=data_root + annotation_default_path +
-        'train_balanced_questions.npy',
+              'train_balanced_questions.npy',
         val=data_root + annotation_default_path + 'val_balanced_questions.npy',
         test=data_root + annotation_default_path + 'test_balanced_questions.npy',
         minival=data_root + annotation_default_path + 'val_balanced_questions.npy',
         train_coco10pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_10_pc.npy',
+                       'imdb_train2014_len_coco_10_pc.npy',
         train_coco50pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_50_pc.npy',
+                       'imdb_train2014_len_coco_50_pc.npy',
         valminusminival=data_root + annotation_default_path +
-        'imdb_valminusminival2014.npy',
+                        'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets  # used datasets
 )
@@ -56,17 +56,17 @@ vqa_reader_test_cfg = dict(
     ),
     mix_annotations=dict(
         train=data_root + annotation_default_path +
-        'train_balanced_questions.npy',
+              'train_balanced_questions.npy',
         val=data_root + annotation_default_path + 'val_balanced_questions.npy',
         test=data_root + annotation_default_path +
-        'test_balanced_questions.npy',
+             'test_balanced_questions.npy',
         minival=data_root + annotation_default_path + 'val_balanced_questions.npy',
         train_coco10pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_10_pc.npy',
+                       'imdb_train2014_len_coco_10_pc.npy',
         train_coco50pc=data_root + annotation_default_path +
-        'imdb_train2014_len_coco_50_pc.npy',
+                       'imdb_train2014_len_coco_50_pc.npy',
         valminusminival=data_root + annotation_default_path +
-        'imdb_valminusminival2014.npy',
+                        'imdb_valminusminival2014.npy',
     ),
     datasets=test_datasets  # used datasets
 )
@@ -84,7 +84,7 @@ vqa_info_cpler_cfg = dict(
         answers_gqa=data_root + vocab_path + 'answers_gqa.txt',
         vocabulart_100k=data_root + vocab_path + 'vocabulary_100k.txt',
         vocabulary_gqa=data_root + vocab_path + 'vocabulary_gqa.txt'),
-    max_seg_lenth=128,  #20,
+    max_seg_lenth=128,  # 20,
     word_mask_ratio=0.0,
     vocab_name='vocabulary_gqa',  ##bert for vocabulary_100k
     vocab_answer_name='answers_gqa',
@@ -93,14 +93,16 @@ vqa_info_cpler_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=128,
+    samples_per_gpu=127,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
         reader=vqa_reader_train_cfg,
-        info_cpler=vqa_info_cpler_cfg))
-#, limit_nums=1280
+        info_cpler=vqa_info_cpler_cfg),
+)
+
+# , limit_nums=1280
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
