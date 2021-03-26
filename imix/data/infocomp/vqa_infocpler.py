@@ -37,14 +37,14 @@ class VQAInfoCpler(BaseInfoCpler):
         # print('xiix')
         # logger.info("VQAInfoCpler success")
 
-    def completeInfo(self, itemFeature: ItemFeature):
+    def completeInfo(self, item_feature: ItemFeature):
         if self.if_bert:
-            return self.completeBertInfo(itemFeature)
+            return self.completeBertInfo(item_feature)
         else:
-            return self.completeNormalInfo(itemFeature)
+            return self.completeNormalInfo(item_feature)
 
-    def completeNormalInfo(self, itemFeature):
-        tokens = itemFeature.tokens
+    def completeNormalInfo(self, item_feature):
+        tokens = item_feature.tokens
 
         if len(tokens) > self.max_seq_length:
             tokens = tokens[:self.max_seq_length]
@@ -56,30 +56,30 @@ class VQAInfoCpler(BaseInfoCpler):
         #while len(input_ids) < self.max_seq_length:
         #    input_ids.append(0)
         #    input_mask.append(0)
-        itemFeature.input_ids = torch.tensor(input_ids, dtype=torch.long)
-        itemFeature.input_mask = torch.tensor(input_mask, dtype=torch.bool)
-        # itemFeature.feature_question = torch.stack(list(map(self.get_glove_single_id, input_ids)))
+        item_feature.input_ids = torch.tensor(input_ids, dtype=torch.long)
+        item_feature.input_mask = torch.tensor(input_mask, dtype=torch.bool)
+        # item_feature.feature_question = torch.stack(list(map(self.get_glove_single_id, input_ids)))
 
-        if itemFeature.answers is not None:
-            itemFeature.answers = self._increase_to_ten(itemFeature.answers)
-            itemFeature.qa_ids = [
+        if item_feature.answers is not None:
+            item_feature.answers = self._increase_to_ten(item_feature.answers)
+            item_feature.qa_ids = [
                 self.qa_ans2id[ans]
-                for ans in itemFeature.answers
+                for ans in item_feature.answers
                 if ans in self.qa_ans2id
             ]
-            itemFeature.qa_allids = [
+            item_feature.qa_allids = [
                 self.qa_ans2id[ans]
-                for ans in itemFeature.all_answers
+                for ans in item_feature.all_answers
                 if ans in self.qa_ans2id
             ]
-            itemFeature.answers_scores = self.compute_answers_scores(
-                torch.Tensor(itemFeature.qa_ids))
-        return itemFeature
+            item_feature.answers_scores = self.compute_answers_scores(
+                torch.Tensor(item_feature.qa_ids))
+        return item_feature
 
-    def compute_bboxInfo(self, itemFeature):
-        bbox = itemFeature['bbox']
-        image_w = itemFeature['image_width']
-        image_h = itemFeature['image_height']
+    def compute_bboxInfo(self, item_feature):
+        bbox = item_feature['bbox']
+        image_w = item_feature['image_width']
+        image_h = item_feature['image_height']
         image_location = torch.zeros((bbox.shape[0], 7), dtype=torch.float)
         image_location[:, :4] = torch.from_numpy(bbox)
 
@@ -93,22 +93,22 @@ class VQAInfoCpler(BaseInfoCpler):
         image_location[:, 1] = image_location[:, 1] / image_h
         image_location[:, 2] = image_location[:, 2] / image_w
         image_location[:, 3] = image_location[:, 3] / image_h
-        itemFeature['bbox'] = image_location
-        return itemFeature
+        item_feature['bbox'] = image_location
+        return item_feature
 
-    def completeBertInfo(self, itemFeature):
-        if itemFeature.input_ids is not None:
-            tokens = itemFeature.tokens
-            input_ids = itemFeature.input_ids
+    def completeBertInfo(self, item_feature):
+        if item_feature.input_ids is not None:
+            tokens = item_feature.tokens
+            input_ids = item_feature.input_ids
         else:
-            tokens = self.tokenizer.tokenize(itemFeature.question_str.strip())
+            tokens = self.tokenizer.tokenize(item_feature.question_str.strip())
             tokens = self.tokenizer.get_limited_tokens(tokens, self.max_seq_length - 2)
             tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(
                 tokens, self.word_mask_ratio)
             tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
             input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
-        itemFeature = self.compute_bboxInfo(itemFeature)
+        item_feature = self.compute_bboxInfo(item_feature)
         input_mask = [1] + [1] * (len(tokens) - 2) + [1]
         input_segment = [0] + [0] * (len(tokens) - 2) + [0]
         input_lm_label_ids = [-1] + [-1] * (len(tokens) - 2) + [-1]
@@ -121,28 +121,28 @@ class VQAInfoCpler(BaseInfoCpler):
         #    input_segment.append(0)
         #    input_lm_label_ids.append(-1)
 
-        itemFeature.input_ids = torch.tensor(
+        item_feature.input_ids = torch.tensor(
             input_ids, dtype=torch.long)  # token ids
-        itemFeature.input_mask = torch.tensor(
+        item_feature.input_mask = torch.tensor(
             input_mask, dtype=torch.long)  # token mask
-        itemFeature.input_segment = torch.tensor(
+        item_feature.input_segment = torch.tensor(
             input_segment, dtype=torch.long)  # token segments
-        itemFeature.input_lm_label_ids = torch.tensor(
+        item_feature.input_lm_label_ids = torch.tensor(
             input_lm_label_ids, dtype=torch.long)  # token mlm labels
-        itemFeature.qa_ids = [
+        item_feature.qa_ids = [
             self.qa_ans2id[ans]
-            for ans in itemFeature.answers
+            for ans in item_feature.answers
             if ans in self.qa_ans2id
         ]
-        itemFeature.qa_allids = [
+        item_feature.qa_allids = [
             self.qa_ans2id[ans]
-            for ans in itemFeature.all_answers
+            for ans in item_feature.all_answers
             if ans in self.qa_ans2id
         ]
-        itemFeature.answers_scores = self.compute_answers_scores(
-            torch.Tensor(itemFeature.qa_ids))
+        item_feature.answers_scores = self.compute_answers_scores(
+            torch.Tensor(item_feature.qa_ids))
 
-        return itemFeature
+        return item_feature
 
     def compute_answers_scores(self, answers_indices):
         """Generate VQA based answer scores for answers_indices.
