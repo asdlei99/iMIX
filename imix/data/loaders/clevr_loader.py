@@ -3,12 +3,14 @@ author: lxc
 created time: 2021/1/11
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
-from ..reader import ClevrReader as Reader
-from ..infocomp import ClevrInfoCpler as InfoCpler
-from ..builder import DATASETS
+
+from torch.utils.data import Dataset, IterableDataset
+
 import imix.utils_imix.distributed_info as comm
+from ..builder import DATASETS
+from ..infocomp import ClevrInfoCpler as InfoCpler
+from ..reader import ClevrReader as Reader
 
 
 @DATASETS.register_module()
@@ -39,13 +41,11 @@ class ClevrDATASET(Dataset):
         item = {
             'feature': item_feature.features,  # feature - feature
             'bbox': item_feature.bbox,  # feature - bbox
-            'bbox_normalized':
-            item_feature.bbox_normalized,  # feature - bbox(normalized)
+            'bbox_normalized': item_feature.bbox_normalized,  # feature - bbox(normalized)
             'input_ids': item_feature.input_ids,  # tokens - ids
             'input_mask': item_feature.input_mask,  # tokens - mask
             'input_segment': item_feature.input_segment,  # tokens - segments
-            'input_lm_label_ids':
-            item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
             'question_id': item_feature.question_id,
             'image_id': item_feature.image_id,
         }

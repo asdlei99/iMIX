@@ -1,11 +1,12 @@
-from torch.utils.data import Dataset, IterableDataset
-import yaml
-from ..reader.lxmertpretrain_reader import LXMERTPretrainReader
-from ..infocomp.lxmertpretrain_infocpler import LXMERTPreTrainInfoCpler
-from ..builder import DATASETS
-
 import logging
+
+import yaml
+from torch.utils.data import Dataset, IterableDataset
+
 import imix.utils_imix.distributed_info as comm
+from ..builder import DATASETS
+from ..infocomp.lxmertpretrain_infocpler import LXMERTPreTrainInfoCpler
+from ..reader.lxmertpretrain_reader import LXMERTPretrainReader
 
 
 @DATASETS.register_module()
@@ -34,4 +35,3 @@ class LXMERTPreTrainDATASET(Dataset):
         item_feature = self.infocpler.completeInfo(item_feature)
 
         return item_feature
-

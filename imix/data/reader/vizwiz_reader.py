@@ -3,13 +3,15 @@ author: lxc
 created time: 2020/8/18
 """
 
-import numpy as np
 import os
-import torch
-import lmdb
 import pickle
-from .base_reader import IMIXDataReader
+
+import lmdb
+import numpy as np
+import torch
+
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class VizWizReader(IMIXDataReader):
@@ -42,17 +44,14 @@ class VizWizReader(IMIXDataReader):
         item_feature.tokens = annotation.get('question_tokens')
         item_feature.img_id = annotation.get('image_id')
         if self.default_feature:
-            feature_info = self.get_featureinfo_from_txns(
-                self.feature_txns, annotation.get('image_id'))
+            feature_info = self.get_featureinfo_from_txns(self.feature_txns, annotation.get('image_id'))
             if feature_info is None:
                 item_feature.error = True
                 item_feature.feature = np.random.random((100, 2048))
                 return item_feature
             for k, v in feature_info.items():
-                item_feature[k] = v if item_feature.get(
-                    k) is None else item_feature[k]
+                item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
             return item_feature
-        feature_path = self.features_pathes[split + '_' +
-                                            str(item_feature.img_id)]
+        feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
         item_feature.feature = torch.load(feature_path)[0]
         return item_feature

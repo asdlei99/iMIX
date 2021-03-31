@@ -1,8 +1,10 @@
-from typing import Dict, Tuple
+from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from typing import Dict, Tuple
+
 import torch
 import torch.distributed as dist
-from abc import abstractmethod, ABCMeta
+
 from ..builder import build_loss
 
 
@@ -33,6 +35,7 @@ class BaseLoss(torch.nn.Module, metaclass=ABCMeta):
 
 
 class Losser:
+
     def __init__(self, losses_cfg):
         self._loss_list: list = self.build_losses(losses_cfg)
 
@@ -70,5 +73,3 @@ class Losser:
 
             losses_log[name] = value.item()
         return loss, losses_log
-
-

@@ -1,7 +1,9 @@
 # TODO(jinliang):jinliang_copy
-from .base_hook import HookBase
 from collections import Counter
+
 import torch
+
+from .base_hook import HookBase
 from .builder import HOOKS
 
 # @HOOKS.register_module()
@@ -48,38 +50,39 @@ from .builder import HOOKS
 
 @HOOKS.register_module()
 class LRSchedulerHook(HookBase):
-  """A hook which executes a torch builtin LR scheduler and summarizes the LR.
+    """A hook which executes a torch builtin LR scheduler and summarizes the
+    LR.
 
-  It is executed after every iteration.
-  """
-
-  def __init__(self, optimizer: torch.optim.Optimizer, scheduler):
+    It is executed after every iteration.
     """
+
+    def __init__(self, optimizer: torch.optim.Optimizer, scheduler):
+        """
         Args:
             optimizer (torch.optim.Optimizer):
             scheduler (torch.optim._LRScheduler)
         """
-    self._optimizer = optimizer
-    self._scheduler = scheduler
-    self._best_param_group_idx = self._get_best_parm_group_idx()
+        self._optimizer = optimizer
+        self._scheduler = scheduler
+        self._best_param_group_idx = self._get_best_parm_group_idx()
 
-  def after_train_iter(self):
-    self._record_lr_log()
-    self._scheduler.step()
+    def after_train_iter(self):
+        self._record_lr_log()
+        self._scheduler.step()
 
-  def _get_best_parm_group_idx(self):
-    longest = max(len(pg['params']) for pg in self._optimizer.param_groups)
-    if longest == 1:
-      lr_counter = Counter([pg['lr'] for pg in self._optimizer.param_groups])
-      lr_largest = lr_counter.most_common()[0][0]
-      for idx, pg in enumerate(self._optimizer.param_groups):
-        if pg['lr'] == lr_largest:
-          return idx
-    else:
-      for idx, pg in enumerate(self._optimizer.param_groups):
-        if len(pg['params']) == longest:
-          return idx
+    def _get_best_parm_group_idx(self):
+        longest = max(len(pg['params']) for pg in self._optimizer.param_groups)
+        if longest == 1:
+            lr_counter = Counter([pg['lr'] for pg in self._optimizer.param_groups])
+            lr_largest = lr_counter.most_common()[0][0]
+            for idx, pg in enumerate(self._optimizer.param_groups):
+                if pg['lr'] == lr_largest:
+                    return idx
+        else:
+            for idx, pg in enumerate(self._optimizer.param_groups):
+                if len(pg['params']) == longest:
+                    return idx
 
-  def _record_lr_log(self):
-    lr = self._optimizer.param_groups[self._best_param_group_idx]['lr']
-    self.trainer.log_buffer.put_scalar('lr', lr, smoothing_hint=False)
+    def _record_lr_log(self):
+        lr = self._optimizer.param_groups[self._best_param_group_idx]['lr']
+        self.trainer.log_buffer.put_scalar('lr', lr, smoothing_hint=False)

@@ -3,12 +3,14 @@ author: lxc
 created time: 2021/1/26
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
-from ..reader import HatefulMemesReader as Reader
-from ..infocomp import HatefulMemesInfoCpler as InfoCpler
-from ..builder import DATASETS
+
+from torch.utils.data import Dataset, IterableDataset
+
 import imix.utils_imix.distributed_info as comm
+from ..builder import DATASETS
+from ..infocomp import HatefulMemesInfoCpler as InfoCpler
+from ..reader import HatefulMemesReader as Reader
 
 
 @DATASETS.register_module()

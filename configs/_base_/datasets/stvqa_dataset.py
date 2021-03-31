@@ -63,8 +63,7 @@ info_cpler_cfg = dict(
     ),
     tokenizer='/home/datasets/VQA/bert/' + 'bert-base-uncased-vocab.txt',
     mix_vocab=dict(
-        answers_st_5k=data_root + vocab_path +
-        'fixed_answer_vocab_stvqa_5k.txt',
+        answers_st_5k=data_root + vocab_path + 'fixed_answer_vocab_stvqa_5k.txt',
         vocabulary_100k=data_root + vocab_path + 'vocabulary_100k.txt',
     ),
     max_seg_lenth=20,
@@ -81,17 +80,12 @@ train_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
-    data=dict(
-        type=dataset_type,
-        reader=reader_train_cfg,
-        info_cpler=info_cpler_cfg,
-        limit_nums=800))
+    data=dict(type=dataset_type, reader=reader_train_cfg, info_cpler=info_cpler_cfg, limit_nums=800))
 
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(
-        type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
+    data=dict(type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable

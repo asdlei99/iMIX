@@ -34,27 +34,21 @@ model = dict(
             type='ImageFeatureEmbedding',
             img_dim=2048,
             question_dim=2048,
-            modal_combine=dict(
-                type='non_linear_element_multiply',
-                params=dict(dropout=0, hidden_dim=5000)),
+            modal_combine=dict(type='non_linear_element_multiply', params=dict(dropout=0, hidden_dim=5000)),
             normalization='softmax',
             transform=dict(type='linear', params=dict(out_dim=1))),
         dict(
             type='ImageFeatureEmbedding',
             img_dim=2048,
             question_dim=2048,
-            modal_combine=dict(
-                type='non_linear_element_multiply',
-                params=dict(dropout=0, hidden_dim=5000)),
+            modal_combine=dict(type='non_linear_element_multiply', params=dict(dropout=0, hidden_dim=5000)),
             normalization='softmax',
             transform=dict(type='linear', params=dict(out_dim=1))),
         dict(
             type='ImageFeatureEmbedding',
             img_dim=300,
             question_dim=2048,
-            modal_combine=dict(
-                type='non_linear_element_multiply',
-                params=dict(dropout=0, hidden_dim=5000)),
+            modal_combine=dict(type='non_linear_element_multiply', params=dict(dropout=0, hidden_dim=5000)),
             normalization='softmax',
             transform=dict(type='linear', params=dict(out_dim=1))),
     ],

@@ -3,13 +3,15 @@ author: lxc
 created time: 2021/1/14
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
+
+from torch.utils.data import Dataset, IterableDataset
+
+import imix.utils_imix.distributed_info as comm
+from ..builder import DATASETS
+from ..infocomp import STVQAInfoCpler as InfoCpler
 # from ..reader import STVQAReader as Reader
 from ..reader import STVQAReader as Reader
-from ..infocomp import STVQAInfoCpler as InfoCpler
-from ..builder import DATASETS
-import imix.utils_imix.distributed_info as comm
 
 
 @DATASETS.register_module()
@@ -36,7 +38,7 @@ class STVQADATASET(Dataset):
         try:
             item_feature = self.reader[idx]
             item_feature = self.infocpler.complete_info(item_feature)
-        except:
+        except Exception:
             item_feature = 0
 
         # TODO(jinliang+ce@lxc)
@@ -55,8 +57,7 @@ class STVQADATASET(Dataset):
             'input_ids': item_feature.input_ids,  # tokens - ids
             'input_mask': item_feature.input_mask,  # tokens - mask
             'input_segment': item_feature.input_segment,  # tokens - segments
-            'input_lm_label_ids':
-            item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
             'question_id': item_feature.question_id,
             'image_id': item_feature.image_id,
         }

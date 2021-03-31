@@ -52,8 +52,7 @@ info_cpler_cfg = dict(
         glove6b300d=data_root + 'glove/glove.6B.300d.txt.pt',
     ),
     tokenizer='/home/datasets/VQA/bert/' + 'bert-base-uncased-vocab.txt',
-    mix_vocab=dict(
-        vocabulary_100k=mix_dir + 'extras/vocabs/' + 'vocabulary_100k.txt', ),
+    mix_vocab=dict(vocabulary_100k=mix_dir + 'extras/vocabs/' + 'vocabulary_100k.txt', ),
     default_max_length=20,
     word_mask_ratio=0.0,
     vocab_name='vocabulary_100k',
@@ -65,11 +64,7 @@ train_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
-    data=dict(
-        type=dataset_type,
-        reader=reader_train_cfg,
-        info_cpler=info_cpler_cfg,
-        limit_nums=800))
+    data=dict(type=dataset_type, reader=reader_train_cfg, info_cpler=info_cpler_cfg, limit_nums=800))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) mix-evaluation
 test_data = dict(
@@ -77,8 +72,7 @@ test_data = dict(
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(
-        type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
+    data=dict(type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
 
 evaluator_type = 'VQA'  # TODO(jinliang)

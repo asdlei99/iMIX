@@ -28,18 +28,12 @@ textvqa_reader_train_cfg = dict(
         test_ml=data_root + feature_path + 'resnet152.lmdb',
     ),
     mix_ocr_features=dict(
-        train_en=data_root + ocr_feature_path +
-        'ocr_en/features/ocr_en_frcn_features.lmdb',
-        train_ml=data_root + ocr_feature_path +
-        'ocr_ml/features/ocr_ml_frcn_features.lmdb',
-        val_en=data_root + ocr_feature_path +
-        'ocr_en/features/ocr_en_frcn_features.lmdb',
-        val_ml=data_root + ocr_feature_path +
-        'ocr_ml/features/ocr_ml_frcn_features.lmdb',
-        test_en=data_root + ocr_feature_path +
-        'ocr_en/features/ocr_en_frcn_features.lmdb',
-        test_ml=data_root + ocr_feature_path +
-        'ocr_ml/features/ocr_ml_frcn_features.lmdb',
+        train_en=data_root + ocr_feature_path + 'ocr_en/features/ocr_en_frcn_features.lmdb',
+        train_ml=data_root + ocr_feature_path + 'ocr_ml/features/ocr_ml_frcn_features.lmdb',
+        val_en=data_root + ocr_feature_path + 'ocr_en/features/ocr_en_frcn_features.lmdb',
+        val_ml=data_root + ocr_feature_path + 'ocr_ml/features/ocr_ml_frcn_features.lmdb',
+        test_en=data_root + ocr_feature_path + 'ocr_en/features/ocr_en_frcn_features.lmdb',
+        test_ml=data_root + ocr_feature_path + 'ocr_ml/features/ocr_ml_frcn_features.lmdb',
     ),
     mix_annotations=dict(
         train_en=data_root + annotation_path + 'imdb_train_ocr_en.npy',
@@ -50,8 +44,7 @@ textvqa_reader_train_cfg = dict(
         test_ml=data_root + annotation_path + 'imdb_test_ocr_ml.npy',
     ),
     datasets=train_datasets,
-    if_global=True
-)
+    if_global=True)
 
 textvqa_reader_test_cfg = dict(
     type='TEXTVQAREADER',
@@ -73,18 +66,12 @@ textvqa_reader_test_cfg = dict(
         test_ml=data_root + feature_path + 'resnet152.lmdb',
     ),
     mix_ocr_features=dict(
-        train_en=data_root + ocr_feature_path +
-        'ocr_en/features/ocr_en_frcn_features.lmdb',
-        train_ml=data_root + ocr_feature_path +
-        'ocr_ml/features/ocr_ml_frcn_features.lmdb',
-        val_en=data_root + ocr_feature_path +
-        'ocr_en/features/ocr_en_frcn_features.lmdb',
-        val_ml=data_root + ocr_feature_path +
-        'ocr_ml/features/ocr_ml_frcn_features.lmdb',
-        test_en=data_root + ocr_feature_path +
-        'ocr_en/features/ocr_en_frcn_features.lmdb',
-        test_ml=data_root + ocr_feature_path +
-        'ocr_ml/features/ocr_ml_frcn_features.lmdb',
+        train_en=data_root + ocr_feature_path + 'ocr_en/features/ocr_en_frcn_features.lmdb',
+        train_ml=data_root + ocr_feature_path + 'ocr_ml/features/ocr_ml_frcn_features.lmdb',
+        val_en=data_root + ocr_feature_path + 'ocr_en/features/ocr_en_frcn_features.lmdb',
+        val_ml=data_root + ocr_feature_path + 'ocr_ml/features/ocr_ml_frcn_features.lmdb',
+        test_en=data_root + ocr_feature_path + 'ocr_en/features/ocr_en_frcn_features.lmdb',
+        test_ml=data_root + ocr_feature_path + 'ocr_ml/features/ocr_ml_frcn_features.lmdb',
     ),
     mix_annotations=dict(
         train_en=data_root + annotation_path + 'imdb_train_ocr_en.npy',
@@ -95,8 +82,7 @@ textvqa_reader_test_cfg = dict(
         test_ml=data_root + annotation_path + 'imdb_test_ocr_ml.npy',
     ),
     datasets=train_datasets,
-    if_global=True
-)
+    if_global=True)
 
 textvqa_info_cpler_cfg = dict(
     type='TEXTVQAInfoCpler',
@@ -115,13 +101,11 @@ textvqa_info_cpler_cfg = dict(
     mix_vocab=dict(
         answers_empty=data_root + vocab_path + 'answers_empty.txt',
         answers_textvqa_8k=data_root + vocab_path + 'answers_textvqa_8k.txt',
-        answers_textvqa_more_than_1=data_root + vocab_path +
-        'answers_textvqa_more_than_1.txt',
-        fixed_answer_vocab_textvqa_5k=data_root + vocab_path +
-        'fixed_answer_vocab_textvqa_5k.txt',
+        answers_textvqa_more_than_1=data_root + vocab_path + 'answers_textvqa_more_than_1.txt',
+        fixed_answer_vocab_textvqa_5k=data_root + vocab_path + 'fixed_answer_vocab_textvqa_5k.txt',
         vocabulary_100k=data_root + vocab_path + 'vocabulary_100k.txt',
     ),
-    max_seg_lenth=14,  #20
+    max_seg_lenth=14,  # 20
     max_ocr_lenth=100,
     max_txt_lenth=50,
     max_copy_steps=12,
@@ -137,20 +121,12 @@ train_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
-    data=dict(
-        type=dataset_type,
-        reader=textvqa_reader_train_cfg,
-        info_cpler=textvqa_info_cpler_cfg,
-        limit_nums=800))
+    data=dict(type=dataset_type, reader=textvqa_reader_train_cfg, info_cpler=textvqa_info_cpler_cfg, limit_nums=800))
 
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(
-        type=dataset_type,
-        reader=textvqa_reader_test_cfg,
-        info_cpler=textvqa_info_cpler_cfg),
+    data=dict(type=dataset_type, reader=textvqa_reader_test_cfg, info_cpler=textvqa_info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
-

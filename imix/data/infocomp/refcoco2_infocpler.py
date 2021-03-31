@@ -3,15 +3,16 @@ author: lxc
 created time: 2021/1/11
 """
 
-import torch
-from collections import defaultdict
 import logging
-import numpy as np
+from collections import defaultdict
 
-from ..utils.tokenization import BertTokenizer
-from ..utils.stream import ItemFeature
-from .base_infocpler import BaseInfoCpler
+import numpy as np
+import torch
 from torchvision import transforms as T
+
+from ..utils.stream import ItemFeature
+from ..utils.tokenization import BertTokenizer
+from .base_infocpler import BaseInfoCpler
 
 
 class RefCOCOInfoCpler(BaseInfoCpler):
@@ -19,17 +20,12 @@ class RefCOCOInfoCpler(BaseInfoCpler):
     def __init__(self, cfg):
         self._init_tokens()
         self.default_max_length = cfg.default_max_length
-        self.transform = T.Compose([
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+        self.transform = T.Compose([T.ToTensor(), T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
     def complete_info(self, item_feature: ItemFeature):
         item_feature.img = self.transform(item_feature.img)
         phrases = item_feature.phrase
-        tokenss = [
-            self.tokenizer.tokenize(phrase.strip()) for phrase in phrases
-        ]
+        tokenss = [self.tokenizer.tokenize(phrase.strip()) for phrase in phrases]
         tokens_r = [self._CLS_TOKEN]
         input_type_ids = [0]
         for i, tokens in enumerate(tokenss):

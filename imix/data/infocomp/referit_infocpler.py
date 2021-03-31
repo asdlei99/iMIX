@@ -3,58 +3,55 @@ author: lxc
 created time: 2021/1/11
 """
 
-import torch
-import numpy as np
-from collections import defaultdict
 import logging
+from collections import defaultdict
 
-from ..utils.tokenization import BertTokenizer
-from ..utils.stream import ItemFeature
-from .base_infocpler import BaseInfoCpler
+import numpy as np
+import torch
 from torchvision import transforms as T
+
+from ..utils.stream import ItemFeature
+from ..utils.tokenization import BertTokenizer
+from .base_infocpler import BaseInfoCpler
 
 
 class ReferitInfoCpler(BaseInfoCpler):
 
-  def __init__(self, cfg):
-    self._init_tokens()
+    def __init__(self, cfg):
+        self._init_tokens()
 
-    self.vocab_name = cfg.get('vocab_name', 'vocabulart_100k')
-    self.vocab_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_name)
-    self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
-    self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab',
-                                                  self.vocab_answer_name)
+        self.vocab_name = cfg.get('vocab_name', 'vocabulart_100k')
+        self.vocab_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_name)
+        self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
+        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_answer_name)
 
-    self.default_max_length = cfg.default_max_length
-    self.transform = T.Compose([
-        T.ToTensor(),
-        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+        self.default_max_length = cfg.default_max_length
+        self.transform = T.Compose([T.ToTensor(), T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
-  def complete_info(self, item_feature: ItemFeature):
-    item_feature.img = self.transform(item_feature.img)
-    phrases = item_feature.phrase
-    tokenss = [self.tokenizer.tokenize(phrase.strip()) for phrase in phrases]
-    tokens_r = [self._CLS_TOKEN]
-    input_type_ids = [0]
-    for i, tokens in enumerate(tokenss):
-      tokens_r += tokens
-      tokens_r += [self._SEP_TOEKN]
-      input_type_ids += [i] * (len(tokens) + 1)
-    input_ids = self.tokenizer.convert_tokens_to_ids(tokens_r)
+    def complete_info(self, item_feature: ItemFeature):
+        item_feature.img = self.transform(item_feature.img)
+        phrases = item_feature.phrase
+        tokenss = [self.tokenizer.tokenize(phrase.strip()) for phrase in phrases]
+        tokens_r = [self._CLS_TOKEN]
+        input_type_ids = [0]
+        for i, tokens in enumerate(tokenss):
+            tokens_r += tokens
+            tokens_r += [self._SEP_TOEKN]
+            input_type_ids += [i] * (len(tokens) + 1)
+        input_ids = self.tokenizer.convert_tokens_to_ids(tokens_r)
 
-    input_mask = [1] * len(input_ids)
-    while len(input_ids) < self.default_max_length:
-      input_ids.append(0)
-      input_mask.append(0)
-      input_type_ids.append(0)
+        input_mask = [1] * len(input_ids)
+        while len(input_ids) < self.default_max_length:
+            input_ids.append(0)
+            input_mask.append(0)
+            input_type_ids.append(0)
 
-    input_ids = np.array(input_ids[:self.default_max_length])
-    input_mask = np.array(input_mask[:self.default_max_length])
-    input_type_ids = np.array(input_type_ids[:self.default_max_length])
+        input_ids = np.array(input_ids[:self.default_max_length])
+        input_mask = np.array(input_mask[:self.default_max_length])
+        input_type_ids = np.array(input_type_ids[:self.default_max_length])
 
-    item_feature.input_ids = input_ids
-    item_feature.input_mask = input_mask
-    item_feature.input_type_ids = input_type_ids
+        item_feature.input_ids = input_ids
+        item_feature.input_mask = input_mask
+        item_feature.input_type_ids = input_type_ids
 
-    return item_feature
+        return item_feature

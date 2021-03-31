@@ -6,10 +6,7 @@ model = dict(
     ocr_in_dim=3002,
     encoder=[
         dict(
-            type='TextBertBase',
-            text_bert_init_from_bert_base=True,
-            hidden_size=768,
-            params=dict(num_hidden_layers=3)),
+            type='TextBertBase', text_bert_init_from_bert_base=True, hidden_size=768, params=dict(num_hidden_layers=3)),
         dict(
             type='ImageFeatureEncoder',
             encoder_type='finetune_faster_rcnn_fpn_fc7',
@@ -34,9 +31,6 @@ model = dict(
         dropout=0,
         hidden_dim=5000,
     ),
-    head=dict(
-        type='LinearHead',
-        in_dim=768,
-        out_dim=5000))
+    head=dict(type='LinearHead', in_dim=768, out_dim=5000))
 
 loss = dict(type='M4CDecodingBCEWithMaskLoss')

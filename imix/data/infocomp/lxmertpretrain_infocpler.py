@@ -1,10 +1,12 @@
-import torch
 import random
-import numpy as np
 from collections import defaultdict
 
-from ..utils.tokenization import BertTokenizer
+import numpy as np
+import torch
+
 from ..utils.stream import ItemFeature
+from ..utils.tokenization import BertTokenizer
+
 
 class LXMERTPreTrainInfoCpler(object):
 
@@ -26,7 +28,7 @@ class LXMERTPreTrainInfoCpler(object):
         masked_tokens, masked_label = self.random_word(tokens)
 
         # concatenate lm labels and account for CLS, SEP, SEP
-        masked_tokens = ["[CLS]"] + masked_tokens + ["[SEP]"]
+        masked_tokens = ['[CLS]'] + masked_tokens + ['[SEP]']
         input_ids = self.tokenizer.convert_tokens_to_ids(masked_tokens)
 
         # Mask & Segment Word
@@ -86,20 +88,19 @@ class LXMERTPreTrainInfoCpler(object):
         return ItemFeature(item_dict)
 
     def _init_tokens(self):
-        self.tokenizer = BertTokenizer.from_pretrained(
-            "bert-base-uncased", do_lower_case=True)
-        self.PAD_TOKEN = "<pad>"
-        self.SOS_TOKEN = "<s>"
-        self.EOS_TOKEN = "</s>"
-        self.UNK_TOKEN = "<unk>"
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+        self.PAD_TOKEN = '<pad>'
+        self.SOS_TOKEN = '<s>'
+        self.EOS_TOKEN = '</s>'
+        self.UNK_TOKEN = '<unk>'
         self.PAD_INDEX = 0
         self.SOS_INDEX = 1
         self.EOS_INDEX = 2
         self.UNK_INDEX = 3
-        self._MASK_TOKEN = "[MASK]"
-        self._SEP_TOEKN = "[SEP]"
-        self._CLS_TOKEN = "[CLS]"
-        self._PAD_TOKEN = "[PAD]"
+        self._MASK_TOKEN = '[MASK]'
+        self._SEP_TOEKN = '[SEP]'
+        self._CLS_TOKEN = '[CLS]'
+        self._PAD_TOKEN = '[PAD]'
         self.pad_idx = self.tokenizer.vocab[self._PAD_TOKEN]
 
     def random_word(self, tokens):
@@ -112,7 +113,7 @@ class LXMERTPreTrainInfoCpler(object):
 
                 # 80% randomly change token to mask token
                 if prob < 0.8:
-                    tokens[i] = "[MASK]"
+                    tokens[i] = '[MASK]'
                 # 10% randomly change token to random token
                 elif prob < 0.9:
                     tokens[i] = random.choice(list(self.tokenizer.vocab.items()))[0]
@@ -123,7 +124,7 @@ class LXMERTPreTrainInfoCpler(object):
                     output_label.append(self.tokenizer.vocab[token])
                 except KeyError:
                     # For unknown words (should not occur with BPE vocab)
-                    output_label.append(self.tokenizer.vocab["[UNK]"])
+                    output_label.append(self.tokenizer.vocab['[UNK]'])
             else:
                 # no masking token (will be ignored by loss function later)
                 output_label.append(-1)
