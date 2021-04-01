@@ -1,14 +1,9 @@
 import argparse
 import os
-import warnings
 
-import torch
-from iimix.engine.iimix_engine import iimixEngine
 from iimix.utils.config import Config
 
 from imix.engine.organizer import Organizer
-from imix.evaluation import verify_results
-# from iopath.common.file_io import PathManager
 from imix.utils import comm
 from imix.utils.collect_env import collect_env_info
 from imix.utils.env import seed_all_rng

@@ -2,19 +2,12 @@
 author: lxc
 created time: 2021/1/11
 """
-import os
 import os.path as osp
-import pickle
 import random
-import re
 
 import cv2
-import lmdb
 import numpy as np
 import torch
-from PIL import Image
-from pytorch_pretrained_bert.tokenization import BertTokenizer
-from scipy.io import loadmat
 
 from ..utils.image_utils import letterbox, random_affine
 from ..utils.stream import ItemFeature

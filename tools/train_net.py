@@ -1,19 +1,10 @@
 # TODO(jinliang):jinliang_imitate
 
-# import sys
-#
-# sys.path.append('/home/jinliang/code/imix/imix')
-
-import os
-
 from imix.engine.imix_engine import imixEngine
 from imix.engine.organizer import Organizer
-from imix.utils.config import Config
 from imix.utils.imix_checkpoint import imixCheckpointer
 from imix.utils_imix.config import Config as imix_config
-# from imix.utils.default_argument import default_argument_parser, default_setup
 from imix.utils_imix.default_argument import default_argument_parser, default_setup
-# from imix.utils.launch import launch
 from imix.utils_imix.launch import launch as ddp_launch
 
 # import argparse

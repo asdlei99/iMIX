@@ -5,7 +5,6 @@ from torch.autograd import Variable
 from torch.nn.utils.weight_norm import weight_norm
 
 from ..builder import BACKBONES
-from ..combine_layers import ModalCombineLayer
 
 
 @BACKBONES.register_module()

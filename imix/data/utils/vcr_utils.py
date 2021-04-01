@@ -1,24 +1,13 @@
-import textwrap
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-import matplotlib
 import numpy as np
 import torch
-from allennlp.common.checks import ConfigurationError
-from allennlp.data.fields import ArrayField, LabelField, ListField, MetadataField, SequenceLabelField, TextField
+from allennlp.data.fields import SequenceLabelField
 from allennlp.data.fields.sequence_field import SequenceField
-from allennlp.data.instance import Instance
-from allennlp.data.token_indexers import ELMoTokenCharactersIndexer
 from allennlp.data.tokenizers import Token
-# from allennlp.data.tokenizers.token import Token
-# from allennlp.data.token_indexers.token_indexer import TokenIndexer, TokenType
-from allennlp.data.vocabulary import Vocabulary
 from allennlp.nn import util
-from allennlp.nn.util import get_text_field_mask
 from matplotlib import path
 from overrides import overrides
-from spacy.tokens import Token as SpacyToken
-from torch.utils.data import Dataset
 
 GENDER_NEUTRAL_NAMES = [
     'Casey', 'Riley', 'Jessie', 'Jackie', 'Avery', 'Jaime', 'Peyton', 'Kerry', 'Jody', 'Kendall', 'Peyton', 'Skyler',

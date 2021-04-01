@@ -8,10 +8,8 @@ import os
 import pickle
 import time
 
-import lmdb
 import numpy as np
 import pyximport
-import torch
 from external import mask
 from PIL import Image
 

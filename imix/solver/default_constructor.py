@@ -3,12 +3,8 @@ import warnings
 import torch
 from torch.nn import GroupNorm, LayerNorm
 
-# import imix.utils.comm as comm
-import imix.utils_imix.distributed_info as comm
-# from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
 from ..utils.misc import is_list_of
-# from ..utils.registry import build_from_cfg, Registry
-from ..utils_imix.registry import Registry, build_from_cfg
+from ..utils_imix.registry import build_from_cfg
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
 
 

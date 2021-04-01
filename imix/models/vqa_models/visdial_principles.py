@@ -1,7 +1,6 @@
-import torch
 import torch.nn as nn
 
-from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
+from ..builder import VQA_MODELS, build_backbone, build_encoder, build_head
 
 
 @VQA_MODELS.register_module()

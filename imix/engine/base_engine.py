@@ -1,8 +1,7 @@
 # TODO(jinliang):jinliang_copy_and_imitate
-import logging
 import time
 import weakref
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 
 import imix.engine.hooks as hooks
 from imix.engine.hooks.periods import LogBufferStorage

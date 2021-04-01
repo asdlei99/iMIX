@@ -1,14 +1,8 @@
 import logging
 import time
 
-import numpy as np
-import torch
 from torch.cuda.amp.autocast_mode import autocast
 
-# import imix.utils.comm as comm
-import imix.utils_imix.distributed_info as comm
-from imix.evaluation import verify_results
-from imix.utils_imix.logger import setup_logger
 from imix.utils_imix.Timer import Timer
 from .base_engine import EngineBase
 from .hooks.periods import write_metrics

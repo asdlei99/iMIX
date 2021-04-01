@@ -6,18 +6,12 @@ created time: 2021/1/19
 import copy
 import json
 import os
-import pickle
 
 import h5py
-import lmdb
 import numpy as np
-import torch
-from allennlp.data.fields import ArrayField, LabelField, ListField, MetadataField, SequenceLabelField, TextField
-from allennlp.data.instance import Instance
+from allennlp.data.fields import ArrayField, LabelField, ListField, MetadataField
 from allennlp.data.token_indexers import ELMoTokenCharactersIndexer
-from allennlp.data.tokenizers import Token
 from allennlp.data.vocabulary import Vocabulary
-from allennlp.nn.util import get_text_field_mask
 
 from ..utils.image_utils import load_image, resize_image, to_tensor_and_normalize
 from ..utils.stream import ItemFeature

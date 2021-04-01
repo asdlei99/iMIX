@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from apex.normalization.fused_layer_norm import FusedLayerNorm
 
 from ..builder import EMBEDDING
 

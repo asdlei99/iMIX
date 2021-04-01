@@ -5,7 +5,7 @@ import shutil
 import sys
 import tempfile
 from importlib import import_module
-from typing import Dict, List
+from typing import Dict
 
 import regex
 from easydict import EasyDict

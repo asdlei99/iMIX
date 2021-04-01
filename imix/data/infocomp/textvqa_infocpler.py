@@ -1,5 +1,3 @@
-# from ..vqadata.stream import ItemFeature
-import logging
 from collections import defaultdict
 
 import numpy as np
@@ -7,7 +5,6 @@ import torch
 
 from ..utils.common import VocabDict
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
 from .base_infocpler import BaseInfoCpler
 
 

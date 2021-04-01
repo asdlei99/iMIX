@@ -1,6 +1,4 @@
 # TODO(jinliang):jinliang_copy
-import weakref
-from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from contextlib import contextmanager
 

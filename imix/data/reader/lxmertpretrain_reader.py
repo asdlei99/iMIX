@@ -7,18 +7,14 @@ import base64
 import copy
 import csv
 import json
-import os
-import pickle
 import random
 import sys
 import time
 
 import numpy as np
-import torch
 from tqdm import tqdm
 
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
 from .base_reader import IMIXDataReader
 
 

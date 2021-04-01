@@ -4,7 +4,7 @@ import random
 
 import torch
 import torch.multiprocessing.spawn as spawn
-from torch.distributed import destroy_process_group, init_process_group, new_group
+from torch.distributed import init_process_group, new_group
 
 import imix.utils_imix.distributed_info as dist_info
 

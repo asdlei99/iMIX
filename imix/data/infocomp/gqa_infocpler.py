@@ -1,7 +1,4 @@
-# from ..vqadata.stream import ItemFeature
-import logging
 from collections import defaultdict
-
 import torch
 
 from ..utils.stream import ItemFeature

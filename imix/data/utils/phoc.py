@@ -4,7 +4,6 @@ created time: 2020/8/20
 """
 import logging
 import os
-import sys
 
 import numpy as np
 

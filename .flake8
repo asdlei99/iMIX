@@ -6,9 +6,9 @@ select = B,C,E,F,W,T4,B9
 max-line-length = 120
 max-complexity = 18
 ignore = W503, E203, E221, C901, C408, E741, C407, E741, C404,
-         W504,F401,F821,F841,E122,E129,
+         W504,,F821,F841,E122,E129,
          E266,E731,E262,E265
-            #E501,E266,E128,E126,E722,E124,E251,E127,E125
+            #E501,E266,E128,E126,E722,E124,E251,E127,E125,F401
 # C404 dict comprehension ignored due to https://github.com/pytorch/pytorch/issues/41448
 exclude = build
 per-file-ignores = __init__.py:F401,F403,E402

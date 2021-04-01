@@ -1,5 +1,3 @@
-import io
-import logging
 from collections import defaultdict
 
 import numpy as np
@@ -7,7 +5,6 @@ import torch
 from fasttext import load_model
 
 from ..utils.phoc import phoc
-from ..utils.stream import ItemFeature
 from ..utils.tokenization import BertTokenizer
 
 

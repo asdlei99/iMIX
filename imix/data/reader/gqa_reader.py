@@ -3,10 +3,8 @@ author: zrz
 created time: 2021/1/14
 """
 
-import os
 import pickle
 
-import lmdb
 import numpy as np
 import torch
 

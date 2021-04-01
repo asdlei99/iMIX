@@ -1,8 +1,3 @@
-import torch
-
-from ..builder import EMBEDDING
-
-
 class BaseProcessor:
     """Every processor in IMIX needs to inherit this class for compatibility
     with IMIX. End user mainly needs to implement ``__call__`` function.

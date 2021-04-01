@@ -1,6 +1,5 @@
 import copy
 
-import torch
 import torch.nn as nn
 from transformers.modeling_bert import BertConfig, BertLayer
 

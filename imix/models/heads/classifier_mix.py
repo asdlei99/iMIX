@@ -1,6 +1,5 @@
 import math
 from abc import ABCMeta, abstractmethod
-from typing import Dict
 
 import torch
 import torch.nn as nn
@@ -8,7 +7,7 @@ from torch.nn.utils.weight_norm import weight_norm
 
 from imix.models.backbones.lcgn_backbone import Linear
 from imix.models.combine_layers import ReLUWithWeightNormFC
-from ..builder import HEADS, build_loss
+from ..builder import HEADS
 
 
 def gelu(x):

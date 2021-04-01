@@ -5,7 +5,7 @@ created time: 2021/1/14
 
 import logging
 
-from torch.utils.data import Dataset, IterableDataset
+from torch.utils.data import Dataset
 
 import imix.utils_imix.distributed_info as comm
 from ..builder import DATASETS

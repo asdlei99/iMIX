@@ -1,11 +1,6 @@
-import os
-import pickle
-
 import torch
 import torch.nn as nn
 
-from imix.models.backbones.lcgn_backbone import Linear
-from imix.models.combine_layers import ReLUWithWeightNormFC
 from imix.models.encoder.visdiag_lstm import DynamicRNN
 from ..builder import HEADS
 

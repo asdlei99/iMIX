@@ -9,7 +9,6 @@ import pickle
 
 import lmdb
 import numpy as np
-import torch
 from PIL import Image
 
 from ..utils.stream import ItemFeature

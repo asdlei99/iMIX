@@ -1,11 +1,8 @@
 from collections import OrderedDict
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict
 
 import numpy as np
 import torch
-from mmcv import Config
-from mmcv.utils import Registry, build_from_cfg
-from models.builder import build_vqa_models
 
 
 class VQA2Dataset(torch.utils.data.Dataset):

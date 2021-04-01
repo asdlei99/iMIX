@@ -1,8 +1,6 @@
 # TODO(jinliang):jinliang_copy
-# from .log_buffer import LogBufferWriter, get_log_buffer
 import datetime
 import logging
-import time
 from typing import NamedTuple, Optional
 
 import torch

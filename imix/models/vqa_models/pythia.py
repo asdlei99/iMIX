@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 
 from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
 from .base_model import BaseModel

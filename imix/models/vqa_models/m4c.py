@@ -3,12 +3,9 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers.modeling_bert import BertConfig, BertEmbeddings, BertEncoder, BertPreTrainedModel  # BertLayerNorm,
 
-from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
+from ..builder import VQA_MODELS, build_backbone, build_encoder, build_head
 from .base_model import BaseModel
-
-# from ..losses import M4CDecodingBCEWithMaskLoss
 
 
 ### test forward####

@@ -1,14 +1,10 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import os.path as osp
-import pickle
-from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
+from typing import Any
 
 from torch.nn import Module
 
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-# from imix.utils.checkpoint import Checkpointer
-from imix.utils.file_io import PathManager
 from imix.utils_imix.checkpoint import Checkpointer
 
 # from .c2_model_loading import align_and_update_state_dicts #TODO(jinliang)

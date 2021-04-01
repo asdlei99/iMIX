@@ -5,8 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
-from .pythia import PYTHIA
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder
 
 
 @VQA_MODELS.register_module()

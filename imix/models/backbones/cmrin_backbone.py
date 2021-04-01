@@ -1,14 +1,9 @@
-import functools
-import logging
-import math
 from collections import OrderedDict
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 from torch.nn.init import kaiming_normal, kaiming_uniform
-from transformers.modeling_bert import BertConfig, BertEmbeddings, BertEncoder, BertPreTrainedModel  # BertLayerNorm,
 
 from ..builder import BACKBONES
 

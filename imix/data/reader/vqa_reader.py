@@ -3,16 +3,13 @@ author: lxc
 created time: 2020/8/18
 """
 
-import os
 import pickle
 
-import lmdb
 import numpy as np
 import torch
 
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
-from .base_reader import BaseDataReader, IMIXDataReader
+from .base_reader import IMIXDataReader
 
 
 class VQAReader(IMIXDataReader):

@@ -1,11 +1,9 @@
 # TODO(jinliang):jinliang_imitate
 import json
-import logging
 import os
 
 import torch
 
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
 from imix.utils.file_io import PathManager
 from .base_hook import HookBase, PriorityStatus

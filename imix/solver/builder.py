@@ -4,9 +4,6 @@ import logging
 
 import torch
 
-# import imix.utils.comm as comm
-import imix.utils_imix.distributed_info as comm
-# from ..utils.registry import Registry, build_from_cfg
 from ..utils_imix.registry import Registry, build_from_cfg
 
 OPTIMIZERS = Registry('optimizer')

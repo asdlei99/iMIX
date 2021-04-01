@@ -5,9 +5,7 @@ created time: 2020/8/18
 
 import json
 import os
-import pickle
 
-import horovod.torch as hvd
 import lmdb
 import msgpack
 import msgpack_numpy
@@ -17,7 +15,6 @@ from lz4.frame import compress, decompress
 from tqdm import tqdm
 
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
 from .base_reader import BaseDataReader
 
 msgpack_numpy.patch()

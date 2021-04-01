@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from allennlp.nn.util import masked_softmax, replace_masked_values, weighted_sum
+from allennlp.nn.util import masked_softmax, replace_masked_values
 
 from ..builder import BACKBONES
 from .r2c_backbone import R2C_BACKBONE

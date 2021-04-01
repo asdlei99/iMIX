@@ -1,24 +1,16 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 # TODO(jinliang):jinliang_imitate
-import contextlib
 import copy
-import io
 import itertools
 import json
 import logging
 import os
-import pickle
 from collections import OrderedDict
 
-import numpy as np
 import torch
-from tabulate import tabulate
 
-# from iopath.common.file_io import PathManager
 import imix.utils.comm as comm
-from imix.models.vqa_models.mcan import list2dict
 from imix.utils.file_io import PathManager
-from imix.utils.logger import create_small_table
 from .evaluator import DatasetEvaluator
 
 

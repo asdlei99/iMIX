@@ -2,8 +2,7 @@ import json
 
 import lmdb
 import msgpack
-import msgpack_numpy
-from lz4.frame import compress, decompress
+from lz4.frame import decompress
 
 db_dir = '/home/datasets/UNITER/vqa_train.db'
 

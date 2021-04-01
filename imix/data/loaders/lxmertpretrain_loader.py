@@ -1,7 +1,6 @@
 import logging
 
-import yaml
-from torch.utils.data import Dataset, IterableDataset
+from torch.utils.data import Dataset
 
 import imix.utils_imix.distributed_info as comm
 from ..builder import DATASETS

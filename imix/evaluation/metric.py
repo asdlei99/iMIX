@@ -1,8 +1,4 @@
-import logging
 from abc import ABCMeta, abstractmethod
-from typing import Dict
-
-import numpy as np
 import torch
 
 from .evaluator_mix1 import METRICS

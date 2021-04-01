@@ -3,7 +3,6 @@ from collections import OrderedDict
 import torch
 import torch.distributed as dist
 import torch.nn as nn
-import torch.nn.functional as func
 from torch.cuda.amp.autocast_mode import autocast  # TODO(jinliang)
 
 from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head

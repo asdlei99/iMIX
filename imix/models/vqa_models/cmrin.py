@@ -1,14 +1,6 @@
-import math
-
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from pytorch_pretrained_bert.modeling import BertModel
-from torch.autograd import Variable
 
-from imix.models.backbones.lcgn_backbone import Linear, apply_mask1d
-from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
+from ..builder import VQA_MODELS, build_backbone, build_encoder
 from .base_model import BaseModel
 
 # def yolo_loss(input, target, gi, gj, best_n_list, w_coord=5., w_neg=1. / 5, size_average=True):

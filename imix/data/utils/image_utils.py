@@ -1,11 +1,8 @@
 import math
-import os
 import random
-import warnings
 
 import cv2
 import numpy as np
-import scipy
 from torchvision.datasets.folder import default_loader
 from torchvision.transforms import functional
 

@@ -3,13 +3,10 @@ author: lxc
 created time: 2021/1/11
 """
 import os
-import pickle
 import random
 
 import cv2
-import lmdb
 import numpy as np
-import torch
 from PIL import Image
 from scipy.io import loadmat
 

@@ -1,11 +1,10 @@
 import logging
 import os
-import pickle
 
 import torch
 import torch.nn as nn
-from transformers.modeling_bert import (BertConfig, BertEmbeddings, BertEncoder, BertPooler,
-                                        BertPredictionHeadTransform, BertPreTrainedModel)
+from transformers.modeling_bert import (BertConfig, BertEncoder, BertPooler, BertPredictionHeadTransform,
+                                        BertPreTrainedModel)
 
 from imix.models.embedding import BertVisioLinguisticEmbeddings
 from ..builder import ENCODER

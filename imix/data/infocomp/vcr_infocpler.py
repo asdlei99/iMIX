@@ -1,11 +1,6 @@
-import logging
-from collections import defaultdict
-
 import numpy as np
-import torch
 
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
 from .base_infocpler import BaseInfoCpler
 
 

@@ -1,9 +1,6 @@
 import torch
 from torch import nn
 
-from imix.data.parallel.data_parallel import MMDataParallel
-from imix.data.parallel.distributed import MMDistributedDataParallel
-# from imix.utils.registry import Registry, build_from_cfg
 from imix.utils_imix.registry import Registry, build_from_cfg
 
 EMBEDDING = Registry('embedding')

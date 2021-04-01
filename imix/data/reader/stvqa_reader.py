@@ -3,13 +3,6 @@ author: lxc
 created time: 2020/8/19
 """
 
-import os
-import pickle
-
-import lmdb
-import numpy as np
-import torch
-
 from ..utils.stream import ItemFeature
 from .base_reader import IMIXDataReader
 

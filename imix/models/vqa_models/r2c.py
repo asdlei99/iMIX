@@ -1,17 +1,12 @@
-import math
-
-import allennlp
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-from allennlp.modules import FeedForward, InputVariationalDropout, Seq2SeqEncoder, TextFieldEmbedder, TimeDistributed
+
+from allennlp.modules import InputVariationalDropout, TimeDistributed
 from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
 from mmcv.ops import RoIAlign  # #import from mmcv
 from torchvision.models import resnet
-from transformers.modeling_bert import BertConfig, BertEmbeddings, BertEncoder, BertPreTrainedModel  # BertLayerNorm,
 
-from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
+from ..builder import VQA_MODELS, build_backbone, build_head
 from .base_model import BaseModel
 
 

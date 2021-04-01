@@ -1,15 +1,13 @@
 import logging
 import math
 import os
-import pickle
 from copy import deepcopy
 
-import torch
 import torch.nn as nn
 from transformers.modeling_bert import (ACT2FN, BertConfig, BertEmbeddings, BertIntermediate, BertLayer, BertOutput,
-                                        BertPooler, BertPredictionHeadTransform, BertPreTrainedModel)
+                                        BertPredictionHeadTransform, BertPreTrainedModel)
 
-from imix.models.embedding import BertImageFeatureEmbeddings, BertVisioLinguisticEmbeddings
+from imix.models.embedding import BertImageFeatureEmbeddings
 from ..builder import ENCODER
 
 logger = logging.getLogger(__name__)
