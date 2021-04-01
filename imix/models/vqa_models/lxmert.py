@@ -167,13 +167,13 @@ class LXMERT(BaseModel):
             visual_feats=params['image_feature'].cuda(),
             visual_pos=params['image_location'].cuda(),
             visual_attention_mask=params['image_attention_mask'].cuda(),
-            #masked_lm_labels=params["masked_lm_labels"],
-            #masked_image_labels=params["masked_image_labels"],
-            #obj_labels=params["obj_labels"],
-            #matched_label=params["matched_label"],
-            #ans=params["ans"],
-            #num_features=params["max_features"],
-            #name=params["dataset_name"],
+            # masked_lm_labels=params["masked_lm_labels"],
+            # masked_image_labels=params["masked_image_labels"],
+            # obj_labels=params["obj_labels"],
+            # matched_label=params["matched_label"],
+            # ans=params["ans"],
+            # num_features=params["max_features"],
+            # name=params["dataset_name"],
         )
 
         model_output = {'scores': output_dict['scores'], 'target': params['ans'].cuda()}

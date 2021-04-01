@@ -37,7 +37,7 @@ class BaseInfoCpler(object):
         self.load_vocab()
         self.init_phoc()
 
-        #print('xiix')
+        # print('xiix')
         # logger.info("VQAInfoCpler success")
 
     def compute_answers_scores(self, answers_indices):

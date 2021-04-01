@@ -96,7 +96,7 @@ class VisDialANSEncoder(nn.Module):
             mask = Variable(mask, volatile=input_feat.volatile)
 
         # Doing self attention here.
-        #pdb.set_trace()
+        # pdb.set_trace()
         atten = self.W2(F.dropout(F.tanh(self.W1(output.view(-1, self.nhid))), self.d,
                                   training=self.training)).view(idx.size())
         atten.masked_fill_(mask, -99999)

@@ -1,4 +1,4 @@
-#__all__ = ["MetadataCatelog",]
+# __all__ = ["MetadataCatelog",]
 
 from .builder import build_imix_test_loader, build_imix_train_loader
 from .loaders.clevr_loader import ClevrDATASET

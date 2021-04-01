@@ -16,7 +16,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         self.img_feature_size = img_feature_size
         self.dropout_fc = dropout_fc
         self.dropout = nn.Dropout(p=self.dropout)
-        ##q c att on img
+        # q c att on img
         self.Wq2 = nn.Sequential(self.dropout, nn.Linear(self.nhid * 2, self.nhid))
         self.Wi2 = nn.Sequential(self.dropout, nn.Linear(self.img_feature_size, self.nhid))
         self.Wall2 = nn.Linear(self.nhid, 1)
@@ -38,11 +38,11 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         self.Wq1 = nn.Sequential(self.dropout, nn.Linear(self.nhid, self.nhid))
         self.Wh1 = nn.Sequential(self.dropout, nn.Linear(self.nhid, self.nhid))
         self.Wqh1 = nn.Linear(self.nhid, 1)
-        ###cap att img
+        # cap att img
         self.Wc4 = nn.Sequential(self.dropout, nn.Linear(self.nhid * 2, self.nhid))
         self.Wi4 = nn.Sequential(self.dropout, nn.Linear(self.img_feature_size, self.nhid))
         self.Wall4 = nn.Linear(self.nhid, 1)
-        ##fusion
+        # fusion
         self.i2i = nn.Sequential(self.dropout, nn.Linear(self.img_feature_size, self.nhid))
         self.fusion_1 = nn.Sequential(
             nn.Dropout(p=self.dropout_fc), nn.Linear(self.nhid * 2 + self.img_feature_size + self.nhid, self.nhid),
@@ -122,7 +122,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         img_final_feat = torch.bmm(torch.softmax(all_score, dim=-1).view(batch_size, 1, -1), img_feat)
         return img_final_feat.view(batch_size, -1)
 
-    ################################################add h
+    # add h
     def ques_att_on_his(self, ques_feat, his_feat):
         batch_size = ques_feat.size(0)
         rnd = his_feat.size(1)
@@ -135,7 +135,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         atted_his_feat = torch.bmm(weight.view(batch_size, 1, -1), his_feat)
         return atted_his_feat
 
-    #####################################################
+    #
 
     def forward(self, ques_encoded, cap_encoded, his_feat, q_output, c_output, ques_len, cap_len, ques_embed, cap_emb,
                 img, batch_size):
