@@ -59,7 +59,7 @@ def apply_mask2d(attention, image_locs):
 
 def generate_scaled_var_drop_mask(shape, keep_prob):
     assert keep_prob > 0. and keep_prob <= 1.
-    mask = torch.rand(shape, device='cpu').le(keep_prob).cuda()  ##cuda
+    mask = torch.rand(shape, device='cpu').le(keep_prob).cuda()  # cuda
     mask = mask.float() / keep_prob
     return mask
 

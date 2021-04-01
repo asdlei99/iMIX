@@ -35,7 +35,7 @@ class DiverseLoss(BaseLoss):
                     word_mask_cp[ii, word_mask_cp[ii, :].sum() - 1] = 0
                 else:
                     word_mask_cp[ii, 0] = 0
-                    word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  ## set one to 0 already
+                    word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  # set one to 0 already
         mask_score = score * word_mask_cp.float()
         mask_score = mask_score / (mask_score.sum(1) + 1e-8).view(mask_score.size(0), 1).expand(
             mask_score.size(0), mask_score.size(1))
@@ -44,8 +44,8 @@ class DiverseLoss(BaseLoss):
     @staticmethod
     def compute_loss(score_list, word_mask, m=-1, coverage_reg=True):
         score_matrix = torch.stack([DiverseLoss.mask_softmax(score, word_mask) for score in score_list],
-                                   dim=1)  ## (B,Nfilm,N,H,W)
-        cov_matrix = torch.bmm(score_matrix, score_matrix.permute(0, 2, 1))  ## (BHW,Nfilm,Nfilm)
+                                   dim=1)  # (B,Nfilm,N,H,W)
+        cov_matrix = torch.bmm(score_matrix, score_matrix.permute(0, 2, 1))  # (BHW,Nfilm,Nfilm)
         id_matrix = Variable(torch.eye(cov_matrix.shape[1]).unsqueeze(0).repeat(cov_matrix.shape[0], 1, 1).cuda())
         if m == -1.:
             div_reg = torch.sum(((cov_matrix * (1 - id_matrix))**2).view(-1)) / cov_matrix.shape[0]
@@ -55,7 +55,7 @@ class DiverseLoss(BaseLoss):
             word_mask_cp = word_mask.clone()
             for ii in range(word_mask_cp.shape[0]):
                 word_mask_cp[ii, 0] = 0
-                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  ## set one to 0 already
+                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  # set one to 0 already
             cover_matrix = 1. - torch.clamp(torch.sum(score_matrix, dim=1, keepdim=False), min=0., max=1.)
             cover_reg = torch.sum((cover_matrix * word_mask_cp.float()).view(-1)) / cov_matrix.shape[0]
             div_reg += cover_reg

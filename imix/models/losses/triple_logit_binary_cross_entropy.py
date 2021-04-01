@@ -277,7 +277,7 @@ class LXMERTPreTrainLossV0(BaseLoss):
         total_loss += answer_loss
         losses += (answer_loss.detach(), )
 
-        return total_loss  #, torch.stack(losses).unsqueeze(0), answer_score.detach()
+        return total_loss  # , torch.stack(losses).unsqueeze(0), answer_score.detach()
 
     def __str__(self):
         return 'lxmert_pretrain_loss_v0'

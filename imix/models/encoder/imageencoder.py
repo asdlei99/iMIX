@@ -355,7 +355,7 @@ class DarknetEncoder(nn.Module):
                 layer_i = int(module_def['from'])
                 x = layer_outputs[-1] + layer_outputs[layer_i]
             elif module_def['type'] == 'yoloconvolutional':
-                output.append(x)  ## save final feature block
+                output.append(x)  # save final feature block
                 x = module(x)
             elif module_def['type'] == 'yolo':
                 # Train phase: get loss

@@ -125,7 +125,7 @@ def random_affine(img,
         for ii in range(all_bbox.shape[0]):
             all_bbox[ii, :] = wrap_points(all_bbox[ii, :], M, height, a)
         return imw, maskw, targets, all_bbox, M
-    elif targets is not None:  ## previous main
+    elif targets is not None:  # previous main
         targets = wrap_points(targets, M, height, a)
         return imw, maskw, targets, M
     else:
@@ -166,8 +166,8 @@ def wrap_points(targets, M, height, a):
     # ar = np.maximum(w / (h + 1e-16), h / (w + 1e-16))
     # i = (w > 4) & (h > 4) & (area / (area0 + 1e-16) > 0.1) & (ar < 10)
 
-    ## print(targets, xy)
-    ## [ 56  36 108 210] [[ 47.80464857  15.6096533  106.30993434 196.71267693]]
+    # print(targets, xy)
+    # [ 56  36 108 210] [[ 47.80464857  15.6096533  106.30993434 196.71267693]]
     # targets = targets[i]
     # targets[:, 1:5] = xy[i]
     targets = xy[0]

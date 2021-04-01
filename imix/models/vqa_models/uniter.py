@@ -17,7 +17,7 @@ class UNITER(BaseModel):
         ckpt = torch.load(pretrained_path)
         self.load_my_state_dict(ckpt)
 
-    #### not load head weights from pretrained weights
+    # not load head weights from pretrained weights
     def load_my_state_dict(self, state_dict):
         own_state = self.state_dict()
         for name, param in state_dict.items():

@@ -28,7 +28,7 @@ class VCRInfoCpler(BaseInfoCpler):
                                                                  need_mask=True,
                                                                  lowers=False)
         answers_tokens = [list(map(str, s.tokens)) for s in item_feature.answers.field_list
-                          ]  #[s.tokens for s in item_feature.answers.field_list]
+                          ]  # [s.tokens for s in item_feature.answers.field_list]
         answers_obj_tags = self.get_pad_2dlst([s.labels for s in item_feature.answer_tags.field_list],
                                               length=self.max_answer_length,
                                               dtype=np.int,

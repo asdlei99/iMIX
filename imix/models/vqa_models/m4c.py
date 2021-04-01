@@ -8,7 +8,7 @@ from ..builder import VQA_MODELS, build_backbone, build_encoder, build_head
 from .base_model import BaseModel
 
 
-### test forward####
+# test forward####
 def init_weights(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:

@@ -49,7 +49,7 @@ class GQADATASET(Dataset):
         itemFeature = self.reader[idx]
         itemFeature = self.infocpler.completeInfo(itemFeature)
 
-        ### Only test for GQA LCGN ########## TODO zhangrunze
+        # Only test for GQA LCGN ########## TODO zhangrunze
         feature = torch.zeros([36, 2048], dtype=torch.float)
         bbox = torch.zeros([36, 4], dtype=torch.float)
         for idx in range(itemFeature.features.shape[0]):

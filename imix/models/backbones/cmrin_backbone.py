@@ -58,7 +58,7 @@ class CMRIN_BACKBONE(nn.Module):
         self.tunebert = tunebert
         self.textdim = 768  # 'bert-base-uncased'
 
-        ## Mapping module
+        # Mapping module
         self.mapping_lang = torch.nn.Sequential(
             nn.Linear(self.textdim, emb_size),
             nn.BatchNorm1d(emb_size),
@@ -151,7 +151,7 @@ class CMRIN_BACKBONE(nn.Module):
             else:
                 flangvisu.append(torch.cat([fvisu[ii], flang_tile], dim=1))
 
-        ## fcn
+        # fcn
         intmd_fea, outbox = [], []
         for ii in range(len(fvisu)):
             intmd_fea.append(self.fcn_emb._modules[str(ii)](flangvisu[ii]))
@@ -331,7 +331,7 @@ def mask_softmax(attn_score, word_mask, tempuature=10., clssep=False, lstm=False
                 word_mask_cp[ii, word_mask_cp[ii, :].sum() - 1] = 0
             else:
                 word_mask_cp[ii, 0] = 0
-                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  ## set one to 0 already
+                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  # set one to 0 already
     mask_score = score * word_mask_cp.float()
     mask_score = mask_score / (mask_score.sum(1) + 1e-8).view(mask_score.size(0), 1).expand(
         mask_score.size(0), mask_score.size(1))

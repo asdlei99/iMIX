@@ -190,7 +190,7 @@ class CMRIN(BaseModel):
         super().__init__()
 
         self.encoder_model = build_encoder(encoder)
-        self.encoder_model.load_weights(weights_file)  ###TODO zhangrunze
+        self.encoder_model.load_weights(weights_file)  # TODO zhangrunze
         self.textmodel = BertModel.from_pretrained('bert-base-uncased')
         self.backbone = build_backbone(backbone)
 
@@ -201,9 +201,9 @@ class CMRIN(BaseModel):
 
         raw_fvisu = self.encoder_model(image)
 
-        ## Language Module
+        # Language Module
         all_encoder_layers, _ = self.textmodel(input_ids, token_type_ids=None, attention_mask=input_mask)
-        ## Sentence feature at the first position [cls]
+        # Sentence feature at the first position [cls]
         raw_flang = (all_encoder_layers[-1][:, 0, :] + all_encoder_layers[-2][:, 0, :] +
                      all_encoder_layers[-3][:, 0, :] + all_encoder_layers[-4][:, 0, :]) / 4
         raw_flang = raw_flang.detach()

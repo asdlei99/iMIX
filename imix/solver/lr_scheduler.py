@@ -102,7 +102,7 @@ class PythiaScheduler(LambdaLR):
 
 
 @LR_SCHEDULERS.register_module()
-class MultiStepScheduler(PythiaScheduler):  #TODO(jinliang): modify
+class MultiStepScheduler(PythiaScheduler):  # TODO(jinliang): modify
 
     def __init__(self, optimizer, *args, **kwargs):
         self.use_warmup = kwargs['use_warmup']

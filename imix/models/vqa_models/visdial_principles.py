@@ -12,7 +12,7 @@ class VISDIALPRINCIPLES(nn.Module):
         self.embedding_model = nn.Embedding(vocabulary_len, word_embedding_size, padding_idx=0)
         self.encoder_model = build_encoder(encoder)
         self.backbone = build_backbone(backbone)
-        self.head = build_head(head)  ###包括 classification head， generation head
+        self.head = build_head(head)  # 包括 classification head， generation head
 
     def forward(self, data):
         img = data['img_feat']

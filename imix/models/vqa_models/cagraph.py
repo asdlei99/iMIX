@@ -15,12 +15,12 @@ class CAGRAPH(nn.Module):
         super(CAGRAPH, self).__init__()
         self.embedding_model = build_embedding(embedding)
         self.encoder = build_encoder(encoder)
-        self.backbone = build_backbone(backbone)  ###包括two_branch_embedding(MCAN), BERT
+        self.backbone = build_backbone(backbone)  # 包括two_branch_embedding(MCAN), BERT
 
         self.ques_hidden = self.backbone.init_hidden(batch_size)
         self.his_hidden = self.backbone.init_hidden(batch_size)
         self.real_hidden = self.backbone.init_hidden(batch_size)
-        self.wrong_hidden = self.backbone.init_hidden(batch_size)  ## question dataset
+        self.wrong_hidden = self.backbone.init_hidden(batch_size)  # question dataset
         self.nhid = 512
         self.img_embed = nn.Linear(2048, self.nhid)
 
@@ -57,7 +57,7 @@ class CAGRAPH(nn.Module):
 
         batch_size = question.size(0)
 
-        image = image.view(-1, 36, 2048)  #   image : batchx36x2048
+        image = image.view(-1, 36, 2048)  # image : batchx36x2048
         # img_input.data.resize_(image.size()).copy_(image)
         img_input = image
 

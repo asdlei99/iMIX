@@ -69,7 +69,7 @@ class ReSC_BACKBONE(nn.Module):
         # jemb_drop_out = 0.0
         # ###########
 
-        ## Mapping module
+        # Mapping module
         self.mapping_visu = ConvBatchNormReLU(512 if self.convlstm else 256, emb_size, 1, 1, 0, 1, leaky=leaky)
 
         self.mapping_lang = torch.nn.Sequential(
@@ -85,7 +85,7 @@ class ReSC_BACKBONE(nn.Module):
             fusion=fusion,
             intmd=(intmd or mstage or convlstm))
 
-        ## output head
+        # output head
         output_emb = emb_size
         if self.mstage:
             # selfn_out = nn.ModuleDict()
@@ -122,7 +122,7 @@ class ReSC_BACKBONE(nn.Module):
         for ii in range(raw_fword.shape[0]):
             ntoken = (word_mask[ii] != 0).sum()
             fword[ii, :ntoken, :] = F.normalize(self.mapping_lang(raw_fword[ii, :ntoken, :]), p=2, dim=1)
-            ## [CLS], [SEP]
+            # [CLS], [SEP]
             # fword[ii,1:ntoken-1,:] = F.normalize(
             # self.mapping_lang(raw_fword[ii,1:ntoken-1,:].view(-1,self.textdim)), p=2, dim=1)
         raw_fword = fword
@@ -143,7 +143,7 @@ class ReSC_BACKBONE(nn.Module):
         else:
             x = torch.stack(x, dim=1).view(batch_size, -1, raw_fvisu.size(2), raw_fvisu.size(3))
             outbox = [self.fcn_out(x)]
-        return outbox, attnscore_list  ## list
+        return outbox, attnscore_list  # list
 
 
 class ConvBatchNormReLU(nn.Sequential):
@@ -318,7 +318,7 @@ def mask_softmax(attn_score, word_mask, tempuature=10., clssep=False, lstm=False
                 word_mask_cp[ii, word_mask_cp[ii, :].sum() - 1] = 0
             else:
                 word_mask_cp[ii, 0] = 0
-                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  ## set one to 0 already
+                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  # set one to 0 already
     mask_score = score * word_mask_cp.float()
     mask_score = mask_score / (mask_score.sum(1) + 1e-8).view(mask_score.size(0), 1).expand(
         mask_score.size(0), mask_score.size(1))
@@ -375,7 +375,7 @@ class FiLMedConvBlock_context(nn.Module):
                  baseline=False):
         super(FiLMedConvBlock_context, self).__init__()
 
-        self.cont_map = cont_map  ## mapping context with language feature
+        self.cont_map = cont_map  # mapping context with language feature
         self.lstm = lstm
         self.emb_size = emb_size
         self.with_residual = with_residual
@@ -389,7 +389,7 @@ class FiLMedConvBlock_context(nn.Module):
         if self.fusion == 'cat':
             self.attn_map = nn.Conv1d(textdim + visudim, emb_size // 2, kernel_size=1)
         elif self.fusion == 'prod':
-            assert (textdim == visudim)  ## if product fusion
+            assert (textdim == visudim)  # if product fusion
             self.attn_map = nn.Conv1d(visudim, emb_size // 2, kernel_size=1)
 
         self.attn_score = nn.Conv1d(emb_size // 2, 1, kernel_size=1)
@@ -413,14 +413,14 @@ class FiLMedConvBlock_context(nn.Module):
             fsent = F.normalize(F.relu(self.sent_map(fsent)), p=2, dim=1)
             fcont = torch.matmul(context_score.view(B, 1, N), fword.permute(0, 2, 1)).squeeze(1)
             fcontext = F.relu(self.context_map(fsent * fcont)).unsqueeze(2).repeat(1, 1, N)
-            ## word attention
+            # word attention
             tile_visu = torch.mean(fvisu.view(B, Dvisu, -1), dim=2, keepdim=True).repeat(1, 1, N)
             if self.fusion == 'cat':
                 context_tile = torch.cat([tile_visu, fword, fcontext], dim=1)
             elif self.fusion == 'prod':
                 context_tile = tile_visu * fword * fcontext
         else:
-            ## word attention
+            # word attention
             tile_visu = torch.mean(fvisu.view(B, Dvisu, -1), dim=2, keepdim=True).repeat(1, 1, N)
             if self.fusion == 'cat':
                 context_tile = torch.cat([tile_visu, fword * context_score.view(B, 1, N).repeat(
@@ -448,13 +448,13 @@ class FiLMedConvBlock_context(nn.Module):
                      attn_lang.unsqueeze(2).unsqueeze(2).repeat(1, 1, fvisu.shape[-1], fvisu.shape[-1]), fcoord],
                     dim=1))
         else:
-            ## lang-> gamma, beta
+            # lang-> gamma, beta
             film_param = self.gamme_decode(attn_lang)
             film_param = film_param.view(B, 2 * self.emb_size, 1, 1).repeat(1, 1, H, W)
             gammas, betas = torch.split(film_param, self.emb_size, dim=1)
             gammas, betas = F.tanh(gammas), F.tanh(betas)
 
-            ## modulate visu feature
+            # modulate visu feature
             fmodu = self.bn1(self.conv1(torch.cat([fvisu, fcoord], dim=1)))
             fmodu = self.film(fmodu, gammas, betas)
             fmodu = F.relu(fmodu)
@@ -540,7 +540,7 @@ class FiLMedConvBlock_multihop(nn.Module):
             x = self.modulesdict['conv%d' % n](x)
             x, _, attn_score = self.modulesdict['film%d' % n](
                 x, fword, (1 - score), fcoord, fsent=fsent, word_mask=word_mask)
-            attnscore_list.append(attn_score.view(B, N, 1, 1))  ## format match div loss in main func
+            attnscore_list.append(attn_score.view(B, N, 1, 1))  # format match div loss in main func
             if self.intmd:
                 intmd_feat.append(x)
             elif n == self.NFilm - 1:

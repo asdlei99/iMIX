@@ -13,8 +13,8 @@ class PYTHIA(BaseModel):
         self.embedding_model = build_embedding(embedding)
         self.encoder_model = build_encoder(encoder)
         self.backbone = build_backbone(backbone)
-        self.combine_model = build_combine_layer(combine_model)  ###combine text and image
-        self.head = build_head(head)  ###包括 classification head， generation head
+        self.combine_model = build_combine_layer(combine_model)  # combine text and image
+        self.head = build_head(head)  # 包括 classification head， generation head
 
         # self.init_weights()
 

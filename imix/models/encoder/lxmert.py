@@ -435,7 +435,7 @@ class LXMERTForPretraining(nn.Module):
 
         lang_prediction_scores, cross_relationship_score = self.cls(lang_output, pooled_output)
 
-        ## KEEP TRACK OF OUTPUTS HERE
+        # KEEP TRACK OF OUTPUTS HERE
         output = {
             'lang_prediction_scores': lang_prediction_scores,
             'cross_relationship_score': cross_relationship_score,

@@ -16,7 +16,7 @@ class LCGN(BaseModel):
         self.encoder_model = build_encoder(encoder)
         self.backbone = build_backbone(backbone)
         self.single_hop = SingleHop(self.backbone.CTX_DIM, self.encoder_model.ENC_DIM)
-        self.head = build_head(head)  ###包括 classification head， generation head
+        self.head = build_head(head)  # 包括 classification head， generation head
 
     def forward_train(self, data):
         questionIndices = data['input_ids'].cuda()
