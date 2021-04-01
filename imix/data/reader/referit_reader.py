@@ -81,7 +81,8 @@ class ReferitReader(IMIXDataReader):
         return item_feature
 
     def augment(self, img, bbox, phrase):
-        h, w = img.shape[0], img.shape[1]
+        # h, w = img.shape[0], img.shape[1]
+        w = img.shape[1]
         if self.augment:
             ## random horizontal flip
             if self.augment_flip and random.random() > 0.5:

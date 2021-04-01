@@ -67,8 +67,8 @@ class RefCOCOReader(IMIXDataReader):
         return item_feature
 
     def augment(self, img, bbox, phrase):
-        h, w = img.shape[0], img.shape[1]
-
+        # h, w = img.shape[0], img.shape[1]
+        w = img.shape[1]
         ## test forward accuracy without augment TODO(UNCOMMENT ZHANGRUNZE)
         if self.aug:
             ## random horizontal flip

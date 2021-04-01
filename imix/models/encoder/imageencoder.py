@@ -173,7 +173,7 @@ def create_modules(module_defs):
             anchors = [(anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)]
             anchors = [anchors[i] for i in anchor_idxs]
             num_classes = int(module_def['classes'])
-            img_height = int(hyperparams['height'])
+            # img_height = int(hyperparams['height'])
             # Define detection layer
             # yolo_layer = YOLOLayer(anchors, num_classes, img_height)
             yolo_layer = YOLOLayer(anchors, num_classes, 256)
@@ -340,7 +340,7 @@ class DarknetEncoder(nn.Module):
         self.loss_names = ['x', 'y', 'w', 'h', 'conf', 'cls', 'recall', 'precision']
 
     def forward(self, x, targets=None):
-        batch = x.shape[0]
+        # batch = x.shape[0]
         is_training = targets is not None
         output, output_obj = [], []
         self.losses = defaultdict(float)

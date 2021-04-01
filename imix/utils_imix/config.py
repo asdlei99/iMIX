@@ -104,7 +104,7 @@ def _validate_py_syntax(py_file):
 
     try:
         ast.parse(py_content)
-    except SyntaxError as e:
+    except SyntaxError:
         raise SyntaxError('In the {} ,there are some syntax errors', format(py_file))
 
 

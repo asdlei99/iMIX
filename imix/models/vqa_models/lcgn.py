@@ -22,7 +22,7 @@ class LCGN(BaseModel):
         questionIndices = data['input_ids'].cuda()
         questionLengths = data['questionLengths']
         images = torch.cat((data['feature'], data['bbox'].repeat(1, 1, 16)), dim=-1).cuda()
-        batchSize = data['image_dim'].shape[0]
+        # batchSize = data['image_dim'].shape[0]
         imagesObjectNum = data['image_dim'].cuda()
 
         questionCntxWords, vecQuestions = self.encoder_model(questionIndices, questionLengths)

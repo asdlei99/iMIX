@@ -85,7 +85,7 @@ class M4C(BaseModel):
 
     def _forward_txt_encoding(self, data, fwd_results):
         fwd_results['txt_inds'] = data['input_ids'].cuda()
-        text_len = data['input_ids'].shape[1] * torch.ones(data['input_ids'].shape[0])
+        # text_len = data['input_ids'].shape[1] * torch.ones(data['input_ids'].shape[0])
         # binary mask of valid text (question words) vs padding
         # fwd_results['txt_mask'] = _get_mask(text_len, data['input_ids'].size(1)).cuda()
         fwd_results['txt_mask'] = data['input_mask'].cuda()

@@ -57,7 +57,7 @@ class RefCOCOReader(ReferitReader):
         img = self.load_image_from_ref(ref)
         mask_info = self.getMask(ref)
         mask = mask_info['mask']
-        area = mask_info['area']
+        # area = mask_info['area']
 
         # get phrases
         phrase_info = ref['sentences']

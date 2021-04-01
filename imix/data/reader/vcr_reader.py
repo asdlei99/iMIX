@@ -58,7 +58,7 @@ class VCRReader(IMIXDataReader):
 
         self.default_answer_idx = cfg.default_answer_idx
         self.annotations = self.annotations[:20]
-        flag = True
+        # flag = True
 
     def _load_jsonl(self, annotation_path):
         with open(annotation_path, 'r') as f:
@@ -81,7 +81,7 @@ class VCRReader(IMIXDataReader):
             conditioned_label = item_feature['answer_label'] if split != 'test' else self.default_answer_idx
             item_feature['question_only'] = copy.deepcopy(item_feature['question'])
             item_feature['question'] = item_feature['question'] + item_feature['answer_choices'][conditioned_label]
-            answer_conditioned = item_feature['answer_choices'][conditioned_label]
+            # answer_conditioned = item_feature['answer_choices'][conditioned_label]
 
         answer_choices = item_feature['{}_choices'.format(self.mode)]
         dets2use, old_det_to_new_ind = self._get_dets_to_use(annotation)

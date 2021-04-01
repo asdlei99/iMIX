@@ -68,13 +68,13 @@ class OSCAR(BaseModel):
             extended_attention_mask,
             head_mask=head_mask,
             encoder_history_states=encoder_history_states)
-        sequence_output = encoder_outputs[0]
+        # sequence_output = encoder_outputs[0]
 
         # add hidden_states and attentions if they are here
-        outputs = (
-            encoder_outputs[0],
-            pooled_output,
-        ) + encoder_outputs[1:]
+        # outputs = (
+        #               encoder_outputs[0],
+        #               pooled_output,
+        #           ) + encoder_outputs[1:]
 
         logits = self.head(pooled_output)
         return logits

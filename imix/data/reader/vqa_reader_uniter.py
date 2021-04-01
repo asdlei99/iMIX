@@ -14,7 +14,6 @@ import torch
 from lz4.frame import compress, decompress
 from tqdm import tqdm
 
-from ..utils.stream import ItemFeature
 from .base_reader import BaseDataReader
 
 msgpack_numpy.patch()
@@ -256,7 +255,7 @@ class VQAReaderUNITER(BaseDataReader):
         target = _get_vqa_target(example, self.num_answers)
 
         attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
-        itemFeature = ItemFeature()
+        # itemFeature = ItemFeature()
 
         return input_ids, img_feat, img_pos_feat, attn_masks, target
 

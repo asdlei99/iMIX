@@ -1,4 +1,3 @@
-import logging
 import time
 
 from torch.cuda.amp.autocast_mode import autocast
@@ -52,7 +51,7 @@ class CommonEngine(EngineBase):
         # batch_data = next(self.data_loader_iter)
         # data_time = Timer.passed_seconds(start=start_time, end=Timer.now())
         # metrics_dict['data_time'] = data_time
-        loger = logging.getLogger(__name__)
+        # loger = logging.getLogger(__name__)
 
         @Timer.run_time
         def load_data():

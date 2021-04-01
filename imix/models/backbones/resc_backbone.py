@@ -88,7 +88,7 @@ class ReSC_BACKBONE(nn.Module):
         ## output head
         output_emb = emb_size
         if self.mstage:
-            selfn_out = nn.ModuleDict()
+            # selfn_out = nn.ModuleDict()
             modules = OrderedDict()
             for n in range(0, NFilm):
                 modules['out%d' % n] = torch.nn.Sequential(
@@ -136,7 +136,9 @@ class ReSC_BACKBONE(nn.Module):
         elif self.convlstm:
             x = torch.stack(x, dim=1)
             output, state = self.global_out(x)
-            output, hidden, cell = output[-1], state[-1][0], state[-1][1]
+            # output, hidden = output[-1], state[-1][0]
+            # output, hidden, cell = output[-1], state[-1][0], state[-1][1]
+            output, hidden = output[-1], state[-1][0]
             outbox = [self.fcn_out(hidden)]
         else:
             x = torch.stack(x, dim=1).view(batch_size, -1, raw_fvisu.size(2), raw_fvisu.size(3))

@@ -137,7 +137,7 @@ def wrap_points(targets, M, height, a):
     # points = targets[:, 1:5].copy()
     points = targets.copy()
     # area0 = (points[:, 2] - points[:, 0]) * (points[:, 3] - points[:, 1])
-    area0 = (points[2] - points[0]) * (points[3] - points[1])
+    # area0 = (points[2] - points[0]) * (points[3] - points[1])
 
     # warp points
     xy = np.ones((4, 3))
@@ -160,11 +160,11 @@ def wrap_points(targets, M, height, a):
 
     # reject warped points outside of image
     np.clip(xy, 0, height, out=xy)
-    w = xy[:, 2] - xy[:, 0]
-    h = xy[:, 3] - xy[:, 1]
-    area = w * h
-    ar = np.maximum(w / (h + 1e-16), h / (w + 1e-16))
-    i = (w > 4) & (h > 4) & (area / (area0 + 1e-16) > 0.1) & (ar < 10)
+    # w = xy[:, 2] - xy[:, 0]
+    # h = xy[:, 3] - xy[:, 1]
+    # area = w * h
+    # ar = np.maximum(w / (h + 1e-16), h / (w + 1e-16))
+    # i = (w > 4) & (h > 4) & (area / (area0 + 1e-16) > 0.1) & (ar < 10)
 
     ## print(targets, xy)
     ## [ 56  36 108 210] [[ 47.80464857  15.6096533  106.30993434 196.71267693]]

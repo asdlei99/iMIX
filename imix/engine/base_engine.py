@@ -76,7 +76,7 @@ class EngineBase:
                     self.before_train_iter()
                     self.run_train_iter()
                     self.after_train_iter()
-            except Exception as e:
+            except Exception:
                 raise
                 # logger.error(e)
             finally:
@@ -97,7 +97,7 @@ class EngineBase:
                     self.before_train_epoch()
                     self.run_train_epoch()
                     self.after_train_epoch()
-            except Exception as e:
+            except Exception:
                 raise
             finally:
                 time.sleep(1)  # wait for some hooks like logger to finish

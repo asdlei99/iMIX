@@ -167,8 +167,8 @@ def build_data_loader_by_iter(dataset, cfg, is_training=True):
     # worker_init_reset_seed = lambda worker_id: seed_all_rng(np.random.randint(2 ** 31) + worker_id)
 
     if is_training:
-        world_size = get_world_size()
-        total_batch_size = world_size * cfg.train_data.samples_per_gpu  # multimachine ? *
+        # world_size = get_world_size()
+        # total_batch_size = world_size * cfg.train_data.samples_per_gpu  # multimachine ? *
         # assert (
         #         total_batch_size > 0 and total_batch_size % world_size == 0
         # ), "Total batch size ({}) must be divisible by the number of gpus ({}).".format(

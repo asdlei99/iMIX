@@ -105,7 +105,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
     def q_att_on_img(self, ques_feat, img_feat):
         batch_size = ques_feat.size(0)
         region_size = img_feat.size(1)
-        device = ques_feat.device
+        # device = ques_feat.device
         q_emb = self.Wq2(ques_feat).view(batch_size, -1, self.nhid)
         i_emb = self.Wi2(img_feat).view(batch_size, -1, self.nhid)
         all_score = self.Wall2(self.dropout(torch.tanh(i_emb * q_emb.repeat(1, region_size, 1)))).view(batch_size, -1)
@@ -115,7 +115,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
     def c_att_on_img(self, cap_feat, img_feat):
         batch_size = cap_feat.size(0)
         region_size = img_feat.size(1)
-        device = cap_feat.device
+        # device = cap_feat.device
         c_emb = self.Wc4(cap_feat).view(batch_size, -1, self.nhid)
         i_emb = self.Wi4(img_feat).view(batch_size, -1, self.nhid)
         all_score = self.Wall4(self.dropout(torch.tanh(i_emb * c_emb.repeat(1, region_size, 1)))).view(batch_size, -1)
@@ -126,7 +126,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
     def ques_att_on_his(self, ques_feat, his_feat):
         batch_size = ques_feat.size(0)
         rnd = his_feat.size(1)
-        device = ques_feat.device
+        # device = ques_feat.device
         q_emb = self.Wq1(ques_feat).view(batch_size, -1, self.nhid)
         h_emb = self.Wh1(his_feat)
 

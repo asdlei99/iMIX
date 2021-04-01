@@ -71,7 +71,7 @@ class CAGRAPH_BACKBONE(nn.Module):
         ####################### belief_matrix #############################
         mes_b = self.W3(graph) * self.W4(q_c).unsqueeze(1)
         belief_mat = torch.bmm(self.W5(graph), mes_b.transpose(1, 2))
-        belief = F.softmax(belief_mat, dim=2)
+        # belief = F.softmax(belief_mat, dim=2)
         ####################### message passing ###########################
         mes = self.W6(graph) * self.W7(q_c).unsqueeze(1)
         sum_mes = self._create_neighbourhood(mes, belief_mat, self.neighbourhood_size)
@@ -86,7 +86,7 @@ class CAGRAPH_BACKBONE(nn.Module):
         ####################### belief_matrix #############################
         mes_b2 = self.W3(graph2) * self.W4(q_c2).unsqueeze(1)
         belief_mat2 = torch.bmm(self.W5(graph2), mes_b2.transpose(1, 2))
-        belief2 = F.softmax(belief_mat2, dim=2)
+        # belief2 = F.softmax(belief_mat2, dim=2)
         ####################### message passing ###########################
         mes2 = self.W6(graph2) * self.W7(q_c2).unsqueeze(1)
         sum_mes2 = self._create_neighbourhood(mes2, belief_mat2, self.neighbourhood_size)
@@ -101,7 +101,7 @@ class CAGRAPH_BACKBONE(nn.Module):
         ####################### belief_matrix #############################
         mes_b3 = self.W3(graph3) * self.W4(q_c3).unsqueeze(1)
         belief_mat3 = torch.bmm(self.W5(graph3), mes_b3.transpose(1, 2))
-        belief3 = F.softmax(belief_mat3, dim=2)
+        # belief3 = F.softmax(belief_mat3, dim=2)
         ####################### message passing ###########################
         mes3 = self.W6(graph3) * self.W7(q_c3).unsqueeze(1)
         sum_mes3 = self._create_neighbourhood(mes3, belief_mat3, self.neighbourhood_size)
