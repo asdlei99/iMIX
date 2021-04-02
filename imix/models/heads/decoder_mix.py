@@ -7,6 +7,7 @@ import torch.nn as nn
 
 from imix.models.encoder.visdiag_lstm import DynamicRNN
 from ..builder import HEADS, build_loss
+from torch.nn.utils import weight_norm
 
 
 @HEADS.register_module()
@@ -189,7 +190,8 @@ class LanguageDecoder(LanguageDecoderHead):
 
     def forward(self, weighted_attn):
         # Get LSTM state
-        state = registry.get(f'{weighted_attn.device}_lstm_state')
+        # state = registry.get(f'{weighted_attn.device}_lstm_state')
+        state = None
         h1, c1 = state['td_hidden']
         h2, c2 = state['lm_hidden']
 

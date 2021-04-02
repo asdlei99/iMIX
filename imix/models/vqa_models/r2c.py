@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import torch.utils.model_zoo as model_zoo
 from allennlp.modules import InputVariationalDropout, TimeDistributed
 from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
 from mmcv.ops import RoIAlign  # #import from mmcv

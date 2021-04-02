@@ -1,7 +1,22 @@
 import torch
-
+from mmcv.utils import Registry, build_from_cfg
 from ..builder import EMBEDDING
 from .baseprocessor import BaseProcessor
+
+VOCAB = Registry('vocab')
+
+
+def build_vocab(cfg):
+    """Build vocab."""
+    return build_from_cfg(cfg, VOCAB)
+
+
+PREPROCESSOR = Registry('preprocessor')
+
+
+def build_preprocessor(cfg):
+    """Build preprocessor."""
+    return build_from_cfg(cfg, PREPROCESSOR)
 
 
 @EMBEDDING.register_module()

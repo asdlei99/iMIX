@@ -25,7 +25,8 @@ class MCAN(nn.Module):
         self.head = build_head(head)  # 包括 classification head， generation head
 
         # self.init_weights()
-        self.trip_loss = TripleLogitBinaryCrossEntropy()
+        # self.trip_loss = TripleLogitBinaryCrossEntropy()
+        self.trip_loss = None
 
     def get_optimizer_parameters(self, optimizer_params_lr, training_encoder_lr_multiply):
         combine_layer = self.combine_model

@@ -2,14 +2,15 @@ import logging
 import math
 import os
 from copy import deepcopy
+import torch
 
 import torch.nn as nn
 from transformers.modeling_bert import (ACT2FN, BertConfig, BertEmbeddings, BertIntermediate, BertLayer, BertOutput,
-                                        BertPredictionHeadTransform, BertPreTrainedModel)
+                                        BertForPreTraining, BertPredictionHeadTransform, BertPreTrainedModel)
 
 from imix.models.embedding import BertImageFeatureEmbeddings
 from ..builder import ENCODER
-
+from omegaconf import OmegaConf
 logger = logging.getLogger(__name__)
 
 TEXT_BERT_HIDDEN_SIZE = 768
@@ -754,7 +755,7 @@ class ViLBERTForPretraining(nn.Module):
             self.bert = ViLBERTBase.from_pretrained(
                 self.config.bert_model_name,
                 config=self.bert_config,
-                cache_dir=os.path.join(get_mmf_cache_dir(), 'distributed_{}'.format(-1)),
+                cache_dir=os.path.join(self.config.cache_dir, 'distributed_{}'.format(-1)),  # todo zrz cache_dir
                 # visual_embedding_dim=self.config.visual_embedding_dim,
                 # embedding_strategy=self.config.embedding_strategy,
                 # bypass_transformer=self.config.bypass_transformer,
@@ -774,7 +775,7 @@ class ViLBERTForPretraining(nn.Module):
         else:
             bert_masked_lm = BertForPreTraining.from_pretrained(
                 self.config.bert_model_name,
-                cache_dir=os.path.join(get_mmf_cache_dir(), 'distributed_{}'.format(-1)),
+                cache_dir=os.path.join(self.config.cache_dir, 'distributed_{}'.format(-1)),  # todo zrz cache_dir
             )
         self.cls = deepcopy(bert_masked_lm.cls)
         self.loss_fct = nn.CrossEntropyLoss(ignore_index=-1)

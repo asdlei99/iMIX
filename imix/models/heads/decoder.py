@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from imix.models.encoder.visdiag_lstm import DynamicRNN
 from ..builder import HEADS
+import json
 
 
 @HEADS.register_module()

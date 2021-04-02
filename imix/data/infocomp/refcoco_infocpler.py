@@ -59,7 +59,10 @@ class RefCOCOInfoCpler(BaseInfoCpler):
                 # Modifies `tokens_a` and `tokens_b` in place so that the total
                 # length is less than the specified length.
                 # Account for [CLS], [SEP], [SEP] with "- 3"
-                _truncate_seq_pair(tokens_a, tokens_b, seq_length - 3)
+
+                # FLAKE 8 TODO(JINLIANG)
+                print('flake 8 error unused')
+                # _truncate_seq_pair(tokens_a, tokens_b, seq_length - 3)
             else:
                 # Account for [CLS] and [SEP] with "- 2"
                 if len(tokens_a) > seq_length - 2:

@@ -80,8 +80,8 @@ class VilBERT(BaseModel):
             'ans': answers
         }
 
-    def get_optimizer_parameters(self, config):
-        return get_optimizer_parameters_for_bert(self.model, config)
+    # def get_optimizer_parameters(self, config):
+    #     return get_optimizer_parameters_for_bert(self.model, config)
 
     def forward_train(self, data):
         params = self.get_image_and_text_features(data)

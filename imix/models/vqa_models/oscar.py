@@ -25,9 +25,9 @@ class OSCAR(BaseModel):
         if self.special_visual_initialize:
             self.model.bert.embeddings.initialize_visual_from_pretrained()
 
-        if freeze_base:
-            for p in self.model.bert.parameters():
-                p.requires_grad = False
+        # if freeze_base:
+        #     for p in self.model.bert.parameters():
+        #         p.requires_grad = False
 
     def forward(self, data):
 
@@ -38,8 +38,8 @@ class OSCAR(BaseModel):
 
         embedding_output = self.embedding_model.text_embedding(
             input_ids, position_ids=position_ids, token_type_ids=token_type_ids)
-        if encoder_history_states:
-            assert img_feats is None, 'Cannot take image features while using encoder history states'
+        # if encoder_history_states:
+        #     assert img_feats is None, 'Cannot take image features while using encoder history states'
 
         if img_feats is not None:
             if self.img_feature_type == 'dis_code':
@@ -65,9 +65,10 @@ class OSCAR(BaseModel):
 
         encoder_outputs, pooled_output = self.model(
             embedding_output,
-            extended_attention_mask,
-            head_mask=head_mask,
-            encoder_history_states=encoder_history_states)
+            # extended_attention_mask,
+            # head_mask=head_mask,
+            # encoder_history_states=encoder_history_states
+        )
         # sequence_output = encoder_outputs[0]
 
         # add hidden_states and attentions if they are here

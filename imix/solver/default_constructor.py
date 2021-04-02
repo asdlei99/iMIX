@@ -138,7 +138,8 @@ class DefaultOptimizerConstructor:
         bypass_duplicate = self.paramwise_cfg.get('bypass_duplicate', False)
 
         # special rules for norm layers and depth-wise conv layers
-        is_norm = isinstance(module, (_BatchNorm, _InstanceNorm, GroupNorm, LayerNorm))
+        # is_norm = isinstance(module, (_BatchNorm, _InstanceNorm, GroupNorm, LayerNorm))
+        is_norm = isinstance(module, (GroupNorm, LayerNorm))
         is_dwconv = (isinstance(module, torch.nn.Conv2d) and module.in_channels == module.groups)
 
         for name, param in module.named_parameters(recurse=False):

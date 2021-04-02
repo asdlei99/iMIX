@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from typing import Any, Dict
+import collections
 
 import numpy as np
 import torch
@@ -31,7 +32,8 @@ class VQA2Dataset(torch.utils.data.Dataset):
             self.data = self.db
 
     def init_processors(self):
-        self.text_processor = Vocab
+        # self.text_processor = Vocab
+        self.text_processor = None
 
     def get(self, item):
         feature_path = item.get(self.feature_key, None)

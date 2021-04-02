@@ -8,6 +8,7 @@ from allennlp.data.tokenizers import Token
 from allennlp.nn import util
 from matplotlib import path
 from overrides import overrides
+import numpy
 
 GENDER_NEUTRAL_NAMES = [
     'Casey', 'Riley', 'Jessie', 'Jackie', 'Avery', 'Jaime', 'Peyton', 'Kerry', 'Jody', 'Kendall', 'Peyton', 'Skyler',

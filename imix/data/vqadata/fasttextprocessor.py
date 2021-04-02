@@ -1,11 +1,12 @@
 import os
 import warnings
-
+from torch import distributed as dist
 import torch
 from mmcv.utils import Registry, build_from_cfg
-
+import numpy as np
 from ..builder import EMBEDDING
 from .vocabprocessor import VocabProcessor
+from imix.utils.file_io import PathManager
 
 VOCAB = Registry('vocab')
 
@@ -16,6 +17,22 @@ def build_vocab(cfg):
 
 
 PREPROCESSOR = Registry('preprocessor')
+
+
+def synchronize():
+    if not dist.is_available():
+        return
+    if not dist.is_nccl_available():
+        return
+    if not dist.is_initialized():
+        return
+
+    world_size = dist.get_world_size()
+
+    if world_size == 1:
+        return
+
+    dist.barrier()
 
 
 def build_preprocessor(cfg):
@@ -46,7 +63,8 @@ class FastTextProcessor(VocabProcessor):
         # self._init_extras(config)
         # self.config = config
         self.model_file = model_file
-        self._download_initially = config.get('download_initially', True)
+        # self._download_initially = config.get('download_initially', True)
+        self._download_initially = False
         self._already_downloaded = False
         self._already_loaded = False
 
@@ -54,7 +72,8 @@ class FastTextProcessor(VocabProcessor):
             self._try_download()
 
     def _try_download(self):
-        _is_master = is_master()
+        # _is_master = is_master()
+        _is_master = False
 
         if self._already_downloaded:
             return
@@ -69,7 +88,8 @@ class FastTextProcessor(VocabProcessor):
         model_file = self.model_file
         # If model_file is already an existing path don't join to cache dir
         if not PathManager.exists(model_file):
-            model_file = os.path.join(get_mmf_cache_dir(), model_file)
+            # model_file = os.path.join(get_mmf_cache_dir(), model_file)
+            model_file = model_file  # todo cache_dir
 
         if not PathManager.exists(model_file):
             if _is_master:
@@ -85,9 +105,11 @@ class FastTextProcessor(VocabProcessor):
         synchronize()
 
     def _download_model(self):
-        _is_master = is_master()
+        # _is_master = is_master()
+        _is_master = False
 
-        model_file_path = os.path.join(get_mmf_cache_dir(), 'wiki.en.bin')
+        # model_file_path = os.path.join(get_mmf_cache_dir(), 'wiki.en.bin')
+        model_file_path = 'wiki.en.bin'
 
         if not _is_master:
             return model_file_path

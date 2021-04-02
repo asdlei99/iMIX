@@ -5,7 +5,7 @@ created time: 2020/8/18
 
 import json
 import os
-
+import io
 import lmdb
 import msgpack
 import msgpack_numpy
@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from lz4.frame import compress, decompress
 from tqdm import tqdm
-
+from collections import defaultdict
 from .base_reader import BaseDataReader
 
 msgpack_numpy.patch()
@@ -26,11 +26,11 @@ msgpack_numpy.patch()
 #     dist = False
 #   return dist
 #
-# def _fp16_to_fp32(feat_dict):
-#   out = {k: arr.astype(np.float32)
-#   if arr.dtype == np.float16 else arr
-#          for k, arr in feat_dict.items()}
-#   return out
+
+
+def _fp16_to_fp32(feat_dict):
+    out = {k: arr.astype(np.float32) if arr.dtype == np.float16 else arr for k, arr in feat_dict.items()}
+    return out
 
 
 def compute_num_bb(confs, conf_th, min_bb, max_bb):

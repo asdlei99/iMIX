@@ -7,6 +7,7 @@ import numpy as np
 import PIL
 import torch
 from tabulate import tabulate
+import re
 
 __all__ = ['collect_env_info']
 

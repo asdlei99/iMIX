@@ -27,6 +27,27 @@ class ModalCombineLayer(nn.Module):
         return self.module(*args, **kwargs)
 
 
+class MfbExpand(nn.Module):
+
+    def __init__(self, img_feat_dim, txt_emb_dim, hidden_dim, dropout):
+        super().__init__()
+        self.lc_image = nn.Linear(in_features=img_feat_dim, out_features=hidden_dim)
+        self.lc_ques = nn.Linear(in_features=txt_emb_dim, out_features=hidden_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, image_feat, question_embed):
+        image1 = self.lc_image(image_feat)
+        ques1 = self.lc_ques(question_embed)
+        if len(image_feat.data.shape) == 3:
+            num_location = image_feat.data.size(1)
+            ques1_expand = torch.unsqueeze(ques1, 1).expand(-1, num_location, -1)
+        else:
+            ques1_expand = ques1
+        joint_feature = image1 * ques1_expand
+        joint_feature = self.dropout(joint_feature)
+        return joint_feature
+
+
 class MFH(nn.Module):
 
     def __init__(self, image_feat_dim, ques_emb_dim, **kwargs):
@@ -156,7 +177,8 @@ class TopDownAttentionLSTM(nn.Module):
         image_feat_mean = image_feat.mean(1)
 
         # Get LSTM state
-        state = registry.get(f'{image_feat.device}_lstm_state')
+        # state = registry.get(f'{image_feat.device}_lstm_state')
+        state = None
         h1, c1 = state['td_hidden']
         h2, c2 = state['lm_hidden']
 

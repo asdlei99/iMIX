@@ -121,7 +121,7 @@ class VQAEvalAIAccuracyMetric(BaseMetric):
     metric_name = 'vqa_eval_ai_accuracy_metric'
 
     def __init__(self, *args, **kwargs):
-        self.evalai_answer_processor = EvalAIAnswerProcessor()
+        self.evalai_answer_processor = None  # EvalAIAnswerProcessor()
 
     def data_pre_process(self, model_outputs, labels, *args, **kwargs):
         pass

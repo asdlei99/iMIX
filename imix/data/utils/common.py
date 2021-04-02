@@ -4,6 +4,26 @@ created time: 2020/8/20
 """
 
 import unicodedata
+import re
+SENTENCE_SPLIT_REGEX = re.compile(r'(\W+)')
+
+
+def tokenize(sentence, regex=SENTENCE_SPLIT_REGEX, keep=None, remove=None):
+    if keep is None:
+        keep = ["'s"]
+    if remove is None:
+        remove = [',', '?']
+    sentence = sentence.lower()
+
+    for token in keep:
+        sentence = sentence.replace(token, ' ' + token)
+
+    for token in remove:
+        sentence = sentence.replace(token, '')
+
+    tokens = regex.split(sentence)
+    tokens = [t.strip() for t in tokens if len(t.strip()) > 0]
+    return tokens
 
 
 def _is_punctuation(char):

@@ -6,6 +6,7 @@ from torch.nn import SmoothL1Loss as TorchSmoothL1Loss
 
 from ..builder import LOSSES
 from .base_loss import BaseLoss
+from torch.nn.utils.rnn import pack_padded_sequence
 
 
 @LOSSES.register_module()

@@ -65,18 +65,8 @@ class CommonEngine(EngineBase):
             self.output = self.batch_processor(batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
         else:
             with autocast(enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
-
-                try:
-                    self.model_output = self.model(batch_data)
-
-                    self.output = self.loss_fn(self.model_output)
-
-                except Exception:
-                    self.model_output = self.model(batch_data)
-                    self.output = self.loss_fn(self.model_output)
-                # self.output = self.loss_fn.loss(
-                #     scores=self.model_output['scores'],
-                #     targets=self.model_output['target'])
+                self.model_output = self.model(batch_data)
+                self.output = self.loss_fn(self.model_output)
 
         # self.output['loss'] /= comm.get_world_size()
         metrics_dict.update(self.output)

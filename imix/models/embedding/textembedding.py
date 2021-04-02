@@ -6,8 +6,17 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torch.autograd import Variable
 from ..builder import EMBEDDING
+
+
+class Identity(nn.Module):
+
+    def __init__(self, **kwargs):
+        super().__init__()
+
+    def forward(self, x):
+        return x
 
 
 @EMBEDDING.register_module()
@@ -32,14 +41,14 @@ class TextEmbedding(nn.Module):
         if emb_type == 'identity':
             self.module = Identity()
             self.module.text_out_dim = self.embedding_dim
-        elif emb_type == 'vocab':
-            self.module = VocabEmbedding(**kwargs)
-            self.module.text_out_dim = self.embedding_dim
-        elif emb_type == 'projection':
-            self.module = ProjectionEmbedding(**kwargs)
-            self.module.text_out_dim = self.module.out_dim
-        elif emb_type == 'preextracted':
-            self.module = PreExtractedEmbedding(**kwargs)
+        # elif emb_type == 'vocab':
+        #     self.module = VocabEmbedding(**kwargs)
+        #     self.module.text_out_dim = self.embedding_dim
+        # elif emb_type == 'projection':
+        #     self.module = ProjectionEmbedding(**kwargs)
+        #     self.module.text_out_dim = self.module.out_dim
+        # elif emb_type == 'preextracted':
+        #     self.module = PreExtractedEmbedding(**kwargs)
         elif emb_type == 'bilstm':
             self.module = BiLSTMTextEmbedding(hidden_dim, embedding_dim, num_layers, dropout, **kwargs)
 
