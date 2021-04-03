@@ -1,20 +1,18 @@
-import logging
-import os
-import random
-
 import torch
+from torch.distributed import init_process_group, new_group  # destroy_process_group
 import torch.multiprocessing.spawn as spawn
-from torch.distributed import init_process_group, new_group
-
+import logging
+import random
 import imix.utils_imix.distributed_info as dist_info
+import os
 
 __all__ = ['launch']
 
 
 def launch(run_fn,
-           nproc_per_node,
+           gpus,
            *,
-           nnodes=1,
+           machines=1,
            node_rank=0,
            master_addr='tcp://127.0.0.1',
            master_port='auto',
@@ -22,7 +20,7 @@ def launch(run_fn,
     """
           Args:
               run_fn: a function that will be called by `run_fn(*args)`
-              nnodes (int): the total number of machines
+              machines (int): the total number of machines
               node_rank (int): the rank of this machine (one per machine)
               master_addr (str): url to connect to for distributed jobs, including protocol
                              e.g. "tcp://127.0.0.1:8686".
@@ -36,19 +34,19 @@ def launch(run_fn,
         master_port = random.randint(2**14, 1**16)
     dist_url = f'{master_addr}:{master_port}'
 
-    dist_world_size = nproc_per_node * nnodes
+    dist_world_size = gpus * machines
     set_pytorch_env_var(master_addr=master_addr, master_port=master_port, world_size=dist_world_size)
 
     if dist_world_size > 1:
         try:
-            if nnodes > 1:
+            if machines > 1:
                 is_right_dist_url(dist_url)
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(e)
         else:
-            spawn_fn_args = (run_fn, dist_world_size, nproc_per_node, node_rank, dist_url, run_fn_args)
-            spawn(fn=_distributed_main, nprocs=nproc_per_node, args=spawn_fn_args)
+            spawn_fn_args = (run_fn, dist_world_size, gpus, node_rank, dist_url, run_fn_args)
+            spawn(fn=_distributed_main, nprocs=gpus, args=spawn_fn_args)
         # finally:
         #     destroy_process_group()
     else:
@@ -60,15 +58,15 @@ def is_right_dist_url(dist_url):
         raise Exception('dist_url dose not support the format{},please use {}'.format(dist_url, 'tcp://'))
 
 
-def _distributed_main(local_rank, run_fn, dist_world_size, nproc_per_node, node_rank, dist_url, run_fn_args):
-    if nproc_per_node > torch.cuda.device_count():
+def _distributed_main(local_rank, run_fn, dist_world_size, gpus, node_rank, dist_url, run_fn_args):
+    if gpus > torch.cuda.device_count():
         raise RuntimeError('The number of GPUs per machine is greater than the number of  GPUs available')
 
     if dist_info._LOCAL_PROCESS_GROUP is not None:
         raise RuntimeError('_LOCAL_PROCESS_GROUP is {},unable to set up local process group'.format(
             dist_info._LOCAL_PROCESS_GROUP))
 
-    global_rank_idx = nproc_per_node * node_rank + local_rank
+    global_rank_idx = gpus * node_rank + local_rank
     try:
         init_process_group(backend='nccl', world_size=dist_world_size, rank=global_rank_idx, init_method=dist_url)
     except Exception as e:
@@ -77,9 +75,9 @@ def _distributed_main(local_rank, run_fn, dist_world_size, nproc_per_node, node_
     else:
         dist_info.synchronize()
         torch.cuda.set_device(local_rank)
-        machine_nums = dist_world_size // nproc_per_node
+        machine_nums = dist_world_size // gpus
         for idx in range(machine_nums):
-            ranks_list = list(range(idx * nproc_per_node, (idx + 1) * nproc_per_node))
+            ranks_list = list(range(idx * gpus, (idx + 1) * gpus))
             dist_group = new_group(ranks_list)
             if idx == node_rank:
                 dist_info._LOCAL_PROCESS_GROUP = dist_group

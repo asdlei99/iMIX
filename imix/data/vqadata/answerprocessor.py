@@ -1,10 +1,11 @@
 import torch
-from mmcv.utils import Registry, build_from_cfg
+from mmcv.utils import Registry, build_from_cfg  # TODO(jinliang) mmcv ?
 import os
 from ..builder import EMBEDDING
 from .baseprocessor import BaseProcessor
 from imix.utils.file_io import PathManager
 import re
+
 VOCAB = Registry('vocab')
 SENTENCE_SPLIT_REGEX = re.compile(r'(\W+)')
 

@@ -5,7 +5,8 @@ import logging
 import torch
 
 from ..utils_imix.registry import Registry, build_from_cfg
-
+# import imix.utils.comm as comm
+# import imix.utils_imix.distributed_info as comm
 OPTIMIZERS = Registry('optimizer')
 OPTIMIZER_BUILDERS = Registry('optimizer builder')
 LR_SCHEDULERS = Registry('lr scheduler')

@@ -1,5 +1,5 @@
 import torch
-from mmcv.utils import Registry, build_from_cfg
+from mmcv.utils import Registry, build_from_cfg  # TODO(jinliang)
 from ..builder import EMBEDDING
 from .baseprocessor import BaseProcessor
 

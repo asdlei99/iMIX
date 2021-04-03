@@ -1,7 +1,7 @@
-from abc import ABCMeta, abstractmethod
 import torch
-
 from .evaluator_mix1 import METRICS
+
+from abc import abstractmethod, ABCMeta
 
 
 class BaseMetric(metaclass=ABCMeta):
@@ -9,26 +9,34 @@ class BaseMetric(metaclass=ABCMeta):
 
     def evaluate(self, model_outputs, labels, *args, **kwargs):
         assert len(model_outputs) > 0
-        predictions, labels = self.data_pre_process(model_outputs, labels, *args, **kwargs)
-        metric_result = self.calculate(predictions, labels)
+        # predictions, labels = self.data_pre_process(model_outputs, labels, *args,
+        #                                             **kwargs)
+        # predictions = self.model_outputs
+        # labels = self.labels
+        # metric_result = self.calculate(predictions, labels)
+        metric_result = self.calculate(model_outputs, labels)
         return metric_result
 
-    @staticmethod
-    def list_to_tensor(list_data: list) -> torch.tensor:
-        tensor_size = (len(list_data), list_data[0].shape[1])
-        tensor_dtype = list_data[0].dtype
-        tensor_data = torch.zeros(size=tensor_size, dtype=tensor_dtype)
-        for idx, data in enumerate(list_data):
-            tensor_data[idx] = data
-
-        return tensor_data
+    # @staticmethod
+    # def list_to_tensor(list_data: list) -> torch.tensor:
+    #   # tensor_size = (len(list_data), list_data[0].shape[1])
+    #   if len(list_data[0].shape) == 1:
+    #     tensor_size = (len(list_data), list_data[0].shape[0])
+    #   else:
+    #     tensor_size = (len(list_data), list_data[0].shape[1])
+    #   tensor_dtype = list_data[0].dtype
+    #   tensor_data = torch.zeros(size=tensor_size, dtype=tensor_dtype)
+    #   for idx, data in enumerate(list_data):
+    #     tensor_data[idx] = data
+    #
+    #   return tensor_data
 
     def __str__(self):
         return self.metric_name
 
-    @abstractmethod
-    def data_pre_process(self, model_outputs, labels, *args, **kwargs):
-        pass
+    # @abstractmethod
+    # def data_pre_process(self, model_outputs, labels, *args, **kwargs):
+    #   pass
 
     @abstractmethod
     def calculate(self, predictions: torch.Tensor, labels: torch.Tensor, **kwargs):
@@ -48,26 +56,119 @@ class VQAAccuracyMetric(BaseMetric):
         accuracy = torch.sum(one_hots * labels) / labels.shape[0]
         return accuracy
 
-    def data_pre_process(self, model_outputs, labels, *args, **kwargs):
-        labels = self.list_to_tensor(labels)
-        scores_list = list(model_output['scores'] for model_output in model_outputs)
-        scores_tensor = self.list_to_tensor(scores_list)
-        predictions = VQAAccuracyMetric._get_accuracy(scores_tensor)
-        return predictions, labels
 
-    @staticmethod
-    def _get_accuracy(output):
-        output = VQAAccuracyMetric._masked_unk_softmax(output, 1, 0)
-        output = output.argmax(dim=1)  # argmax
-        return output
+# def data_pre_process(self, model_outputs, labels, *args, **kwargs):
+#   labels = self.list_to_tensor(labels)
+#   scores_list = list(model_output['scores'] for model_output in model_outputs)
+#   scores_tensor = self.list_to_tensor(scores_list)
+#   predictions = VQAAccuracyMetric._get_accuracy(scores_tensor)
+#   return predictions, labels
 
-    @staticmethod
-    def _masked_unk_softmax(x, dim, mask_idx):
-        x1 = torch.nn.functional.softmax(x, dim=dim)
-        x1[:, mask_idx] = 0
-        x1_sum = torch.sum(x1, dim=1, keepdim=True)
-        y = x1 / x1_sum
-        return y
+# @staticmethod
+# def _get_accuracy(output):
+#   output = VQAAccuracyMetric._masked_unk_softmax(output, 1, 0)
+#   output = output.argmax(dim=1)  # argmax
+#   return output
+#
+# @staticmethod
+# def _masked_unk_softmax(x, dim, mask_idx):
+#   x1 = torch.nn.functional.softmax(x, dim=dim)
+#   x1[:, mask_idx] = 0
+#   x1_sum = torch.sum(x1, dim=1, keepdim=True)
+#   y = x1 / x1_sum
+#   return y
+
+
+@METRICS.register_module()
+class VisDialMetric(BaseMetric):
+    metric_name = 'visdialMetric'
+
+    def __init__(self, *args, **kwargs):
+        self.all_metrics = {}
+        self.predictions = {}
+        self._rank_list = []
+        self._ndcg_numerator = 0.0
+        self._ndcg_denominator = 0.0
+
+    def calculate(self, predictions, labels, **kwargs):
+        self.predictions = predictions
+        for p in predictions:
+            self._rank_list.extend(p['sparse_r'])
+            self._ndcg_numerator += sum(p['ndcg_n'])
+            self._ndcg_denominator += p['ndcg_d']
+        self.all_metrics.update(self.sparse_retrieve())
+        self.all_metrics.update(self.ndcg_retrieve())
+
+        return self.all_metrics
+
+    def sparse_retrieve(self):
+
+        # _rank_list for p1 in predictions for _rank_list in p1['sparse_r']]
+        # _rank_list = self.predictions['sparse_r']
+        num_examples = len(self._rank_list)
+        if num_examples > 0:
+            # convert to numpy array for easy calculation.
+            __rank_list = torch.tensor(self._rank_list).float()
+            metrics = {
+                'r@1': torch.mean((__rank_list <= 1).float()).item(),
+                'r@5': torch.mean((__rank_list <= 5).float()).item(),
+                'r@10': torch.mean((__rank_list <= 10).float()).item(),
+                'mean': torch.mean(__rank_list).item(),
+                'mrr': torch.mean(__rank_list.reciprocal()).item()
+            }
+            # # add round metrics
+            # _rank_list_rnd = np.concatenate(self._rank_list_rnd)
+            # _rank_list_rnd = _rank_list_rnd.astype(float)
+            # r_1_rnd = np.mean(_rank_list_rnd <= 1, axis=0)
+            # r_5_rnd = np.mean(_rank_list_rnd <= 5, axis=0)
+            # r_10_rnd = np.mean(_rank_list_rnd <= 10, axis=0)
+            # mean_rnd = np.mean(_rank_list_rnd, axis=0)
+            # mrr_rnd = np.mean(np.reciprocal(_rank_list_rnd), axis=0)
+            #
+            # for rnd in range(1, self.num_rounds + 1):
+            #     metrics["r_1" + "_round_" + str(rnd)] = r_1_rnd[rnd-1]
+            #     metrics["r_5" + "_round_" + str(rnd)] = r_5_rnd[rnd-1]
+            #     metrics["r_10" + "_round_" + str(rnd)] = r_10_rnd[rnd-1]
+            #     metrics["mean" + "_round_" + str(rnd)] = mean_rnd[rnd-1]
+            #     metrics["mrr" + "_round_" + str(rnd)] = mrr_rnd[rnd-1]
+        else:
+            metrics = {}
+
+        return metrics
+
+    def ndcg_retrieve(self):
+        # _ndcg_denominator = sum(self.predictions['ndcg_d'])
+        # _ndcg_numerator = sum(self.predictions['ndcg_n'])
+        if self._ndcg_denominator > 0:
+            metrics = {'ndcg': float(self._ndcg_numerator / self._ndcg_denominator)}
+        else:
+            metrics = {}
+
+        return metrics
+
+
+@METRICS.register_module()
+class VCRAccuracyMetric(BaseMetric):
+    metric_name = 'vcr_accuracy_metric'
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def calculate(self, predictions: torch.Tensor, labels: torch.Tensor, **kwargs):
+        # one_hots = labels.new_zeros(*labels.shape)
+        # one_hots.scatter_(1, predictions.view(-1, 1), 1)
+        # accuracy = torch.sum(one_hots * labels) / labels.shape[0]
+        accuracy = torch.sum(torch.eq(labels, predictions.view(-1, 1))).float() / labels.shape[0]
+        # predictions = predictions.view(-1, 1)
+        # labels = np.array(labels)
+        # predictions = np.array(predictions)
+        # accuracy = len(set(labels) & set(predictions)) / labels.shape[0]
+        # cal_num = 0
+        # for i in range(len(labels)):
+        #   if labels[i][0] == predictions.view(-1, 1)[i][0]:
+        #     cal_num += 1
+        # accuracy = cal_num / labels.shape[0]
+        return accuracy
 
 
 @METRICS.register_module()

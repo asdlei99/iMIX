@@ -82,6 +82,25 @@ class PostProcessor(metaclass=ABCMeta):
     def process(self, *args, **kwargs):
         pass
 
+    @staticmethod
+    def list_to_tensor(list_data: list) -> torch.tensor:
+        # tensor_size = (len(list_data), list_data[0].shape[1])
+        if not isinstance(list_data[0], dict):
+            if len(list_data[0].shape) == 0:
+                tensor_size = (len(list_data), 1)
+            elif len(list_data[0].shape) == 1:
+                tensor_size = (len(list_data), list_data[0].shape[0])
+            else:
+                tensor_size = (len(list_data), list_data[0].shape[1])
+            tensor_dtype = list_data[0].dtype
+            tensor_data = torch.zeros(size=tensor_size, dtype=tensor_dtype)
+            for idx, data in enumerate(list_data):
+                tensor_data[idx] = data
+        else:
+            tensor_data = list_data
+
+        return tensor_data
+
 
 @POST_PROCESSOR.register_module()
 class Evaluator(PostProcessor):
@@ -116,6 +135,9 @@ class Evaluator(PostProcessor):
     @get_predictions_and_labels
     def process(self, *args, **kwargs):
         predictions, labels = kwargs['predictions'], kwargs['labels']
+        labels = self.list_to_tensor(labels)
+        predictions = self.list_to_tensor(predictions)
+
         eval_results = {}
         for metric_obj in self._metrics:
             eval_results[str(metric_obj)] = metric_obj.evaluate(predictions, labels)

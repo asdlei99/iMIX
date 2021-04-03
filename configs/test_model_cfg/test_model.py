@@ -1,4 +1,4 @@
-# 前傳沒問題
+# # 前傳沒問題
 _base_ = [
     '../_base_/models/lxmert_config.py',
     '../_base_/datasets/vqa_dataset.py',
@@ -6,7 +6,14 @@ _base_ = [
     '../_base_/default_runtime.py'
 ]  # yapf:disable
 
-# 前傳沒問題
+# _base_ = [
+#     '../_base_/models/visual_dialog_bert_config.py',
+#     '../_base_/datasets/visual_dialog_dataset.py',
+#     '../_base_/schedules/schedule_visual_dialog.py',
+#     '../_base_/default_runtime.py'
+# ]  # yapf:disable
+
+# 前傳沒問題  TODO(zhaojian)
 # _base_ = [
 #     '../_base_/models/vilbert_config.py',
 #     '../_base_/datasets/vqa_dataset.py',
@@ -46,7 +53,7 @@ _base_ = [
 #     '../_base_/default_runtime.py'
 # ]  # yapf:disable
 
-# 前傳沒問題
+# 前傳沒問題  chao
 # _base_ = [
 #     '../_base_/models/hgl_config.py',
 #     '../_base_/datasets/vcr_dataset.py',
@@ -62,7 +69,7 @@ _base_ = [
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
 
-# 前傳沒問題
+# 前傳沒問題  chao
 # _base_ = [
 #     '../_base_/models/lcgn_config.py',
 #     '../_base_/datasets/gqa_dataset.py',

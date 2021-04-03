@@ -1,11 +1,15 @@
 import warnings
 
 import torch
+import json
 from torch.nn import GroupNorm, LayerNorm
-
-from ..utils.misc import is_list_of
-from ..utils_imix.registry import build_from_cfg
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
+# from ..utils.registry import build_from_cfg, Registry
+from ..utils_imix.registry import build_from_cfg
+# from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
+from ..utils.misc import is_list_of
+# import imix.utils.comm as comm
+# import imix.utils_imix.distributed_info as comm
 
 
 @OPTIMIZER_BUILDERS.register_module()
@@ -212,5 +216,50 @@ class DefaultOptimizerConstructor:
         params = []
         self.add_params(params, model)
         optimizer_cfg['params'] = params
+
+        # return build_from_cfg(optimizer_cfg, OPTIMIZERS)
+        return build_from_cfg(optimizer_cfg, OPTIMIZERS)
+
+
+@OPTIMIZER_BUILDERS.register_module()
+class BertOptimizerConstructor(DefaultOptimizerConstructor):
+
+    def __init__(self, optimizer_cfg, paramwise_cfg=None):
+        self.language_weights_file = paramwise_cfg.pop('language_weights_file', None)
+        super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
+        self.no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+
+    def modify_params(self, params, optimizer_cfg, module, prefix=''):
+        langauge_weights = self.load_language_weight(file=self.language_weights_file)
+
+        for key, value in dict(module.named_parameters()).items():
+            if value.requires_grad:
+                if key in langauge_weights:
+                    lr = optimizer_cfg['lr']
+                else:
+                    lr = optimizer_cfg['image_lr']
+
+                if any(nd in key for nd in self.no_decay):
+                    params += [{'params': [value], 'lr': lr, 'weight_decay': 0}]
+
+                if not any(nd in key for nd in self.no_decay):
+                    params += [{'params': [value], 'lr': lr, 'weight_decay': 0.01}]
+
+    @staticmethod
+    def load_language_weight(file):
+        with open(file) as f:
+            return json.load(f)
+
+    def __call__(self, model):
+        if hasattr(model, 'module'):
+            model = model.module
+
+        optimizer_cfg = self.optimizer_cfg.copy()
+        params = []
+        self.modify_params(params, self.optimizer_cfg, model)
+        optimizer_cfg['params'] = params
+
+        optimizer_cfg.pop('image_lr')
+        optimizer_cfg.pop('training_encoder_lr_multiply')
 
         return build_from_cfg(optimizer_cfg, OPTIMIZERS)

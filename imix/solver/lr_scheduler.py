@@ -1,13 +1,12 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 # TODO(jinliang):jinliang_copy
 import math
-from bisect import bisect, bisect_right
+from bisect import bisect_right, bisect
 from typing import List
 
 import torch
-from torch.optim.lr_scheduler import LambdaLR
-
 from .builder import LR_SCHEDULERS
+from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
 
 # NOTE: PyTorch's LR scheduler interface uses names that assume the LR changes
 # only on epoch boundaries. We typically use iteration based schedules instead.
@@ -19,7 +18,7 @@ from .builder import LR_SCHEDULERS
 
 
 @LR_SCHEDULERS.register_module()
-class WarmupMultiStepLR(torch.optim.lr_scheduler._LRScheduler):
+class WarmupMultiStepLR(_LRScheduler):
 
     def __init__(
         self,
@@ -121,6 +120,33 @@ class MultiStepScheduler(PythiaScheduler):  # TODO(jinliang): modify
             return [base_lr * lr_ratio for base_lr in self.base_lrs]
         else:
             return [base_lr * self.lr_ratio**bisect_right(self.lr_steps, self.last_epoch) for base_lr in self.base_lrs]
+
+
+@LR_SCHEDULERS.register_module()
+class WarmupLinearScheduleNonZero(_LRScheduler):
+    """Linear warmup and then linear decay. Linearly increases learning rate
+    from 0 to max_lr over `warmup_steps` training steps.
+
+    Linearly decreases learning rate linearly to min_lr over remaining `t_total - warmup_steps` steps.
+    """
+
+    def __init__(self, optimizer, t_total, warmup_iterations=0, use_warmup=False, min_lr=1e-5, last_epoch=-1):
+        self.use_warmup = use_warmup
+        self.warmup_iters = warmup_iterations
+        self.t_total = t_total
+        self.min_lr = min_lr
+        super(WarmupLinearScheduleNonZero, self).__init__(optimizer, last_epoch=last_epoch)
+
+    def get_lr(self):
+        step = self.last_epoch
+        if step < self.warmup_iters:
+            lr_factor = float(step) / float(max(1, self.warmup_iters))
+        else:
+            lr_factor = max(0, float(self.t_total - step) / float(max(1.0, self.t_total - self.warmup_iters)))
+
+        return [
+            base_lr * lr_factor if (base_lr * lr_factor) > self.min_lr else self.min_lr for base_lr in self.base_lrs
+        ]
 
 
 def _get_warmup_factor_at_iter(method: str, iter: int, warmup_iters: int, warmup_factor: float) -> float:

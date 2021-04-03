@@ -177,7 +177,8 @@ class GQAInfoCpler(object):
         self.word_dict[self.PAD_TOKEN] = self.PAD_INDEX
         self.word_dict[self.UNK_TOKEN] = self.UNK_INDEX
 
-        index = len(self.itos.keys())
+        # index = len(self.itos.keys())
+        index = 0
         self.total_predefined = len(self.itos.keys())
         with open(self.vocab_path, 'r') as f:
             for line in f:

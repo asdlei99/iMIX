@@ -158,6 +158,7 @@ class imixEngine(CommonEngine):
         self.by_epoch = self.organizer.by_epoch
         self.imixed_precision = self.organizer.imixed_precision if hasattr(self.organizer,
                                                                            'imixed_precision') else False
+        self.work_dir = cfg.work_dir
 
         self.register_hooks(self.organizer.hooks)
 

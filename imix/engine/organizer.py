@@ -10,8 +10,7 @@ from torch.nn.parallel import DistributedDataParallel
 import imix.engine.hooks as hooks
 # import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-from imix.evaluation import (DatasetEvaluator, VQAEvaluator, build_submit_file, build_test_predict_result,
-                             inference_on_dataset)
+from imix.evaluation import (DatasetEvaluator, VQAEvaluator, build_submit_file, build_test_predict_result)
 from imix.models import build_loss, build_model
 from imix.solver import build_lr_scheduler, build_optimizer
 from imix.utils.imix_checkpoint import imixCheckpointer
@@ -20,6 +19,7 @@ from imix.utils.precise_bn import get_bn_modules
 from imix.utils_imix.logger import setup_logger
 from ..data import build_imix_test_loader, build_imix_train_loader
 from ..models.losses.base_loss import Losser
+from ..evaluation.evaluator_mix1 import inference_on_dataset
 
 _AUTOMATIC_imixED_PRECISION = False
 _BY_ITER_TRAIN = False
@@ -90,6 +90,11 @@ class Organizer:
         self.hooks = self.build_hooks()
 
         self.set_by_iter()
+
+        if cfg.get('load_from', None) is not None:
+            self.resume_or_load(cfg.load_from, resume=False)
+        elif cfg.get('resume_from ', None) is not None:
+            self.resume_or_load(cfg.resume_from, resume=True)
 
         logger.info('Created Organizer')
 
@@ -256,7 +261,6 @@ class Organizer:
                     Returns:
                         dict: a dict of result metrics
                     """
-        # from ..evaluation.evaluator_mix1 import inference_on_dataset
         logger = logging.getLogger(__name__)
 
         results = OrderedDict()
@@ -340,3 +344,20 @@ class Organizer:
     def set_by_iter(self):
         global _BY_ITER_TRAIN
         _BY_ITER_TRAIN = False if self._by_epoch else True
+
+    def resume_or_load(self, path, resume=True):
+        """If `resume==True`, and last checkpoint exists, resume from it, load
+        all checkpointables (eg. optimizer and scheduler) and update iteration
+        counter.
+
+        Otherwise, load the model specified by the config (skip all checkpointables) and start from
+        the first iteration.
+
+        Args:
+            resume (bool): whether to do resume or not
+        """
+        checkpoint = self.checkpointer.resume_or_load(path, resume=resume)  # TODO(jinliang)
+        if resume and self.checkpointer.has_checkpoint():
+            self.start_iter = checkpoint.get('iteration', -1) + 1
+            # The checkpoint stores the training iteration that just finished, thus we start
+            # at the next iteration (or iter zero if there's no checkpoint).

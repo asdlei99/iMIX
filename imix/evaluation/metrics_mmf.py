@@ -46,7 +46,7 @@ Example config for above metric::
 import collections
 
 import torch
-from mmf.common.registry import registry
+from mmf.common.registry import registry  # T0DO(jinliang)
 from mmf.datasets.processors.processors import EvalAIAnswerProcessor
 from sklearn.metrics import average_precision_score, f1_score, precision_recall_curve, roc_auc_score
 

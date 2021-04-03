@@ -24,7 +24,7 @@ VOCAB = Registry('vocab')
 PREPROCESSOR = Registry('preprocessor')
 DATASETS = Registry('dataset')
 
-# PROCESSOR = Registry('processor')
+PROCESSOR = Registry('processor')
 
 
 def build(cfg, registry, default_args=None):
