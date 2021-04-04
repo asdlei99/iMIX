@@ -170,7 +170,7 @@ class IterationTimerHook(HookBase):
 
     def after_train_epoch(self):
         epoch_sec = Timer.passed_seconds(self._epoch_start_time, Timer.now())
-        self.trainer.log_buffer.put_scalars(epoch_time=epoch_sec)
+        self.trainer.log_buffer.put_scalar('epoch_time', epoch_sec)
 
     def _write_log(self):
         logger = logging.getLogger(__name__)

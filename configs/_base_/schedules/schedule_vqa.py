@@ -28,4 +28,4 @@ lr_config = dict(
 # max_iter = 118000
 # max_iter = 236000
 # by_iter = True
-total_epochs = 4
+total_epochs = 8

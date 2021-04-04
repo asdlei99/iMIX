@@ -11,7 +11,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._level = PriorityStatus.LOWER
+        self._level = PriorityStatus.LOW
 
     def before_train(self):
         self.max_iter = self.trainer.max_iter

@@ -3,9 +3,9 @@ from contextlib import contextmanager
 
 import torch
 
-from imix.utils_mix.config import MIXEasyDict
 # from imix.utils.history_buffer import HistoryBuffer
-from imix.utils_mix.history_buffer import HistoryBuffer
+from imix.utils_imix.config import imixEasyDict as MIXEasyDict
+from imix.utils_imix.history_buffer import HistoryBuffer
 
 Image = namedtuple('Image', ('name', 'data', 'iter_idx'))
 

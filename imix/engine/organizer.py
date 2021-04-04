@@ -170,6 +170,7 @@ class Organizer:
                 hook_list.append(
                     hooks.PreciseBNHook(cfg.test.eval_period, self.model, self.build_train_loader(cfg),
                                         cfg.test.precise_bn.num_iter))
+
         if comm.is_main_process():
             hook_list.append(
                 hooks.CheckPointHook(

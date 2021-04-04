@@ -11,6 +11,7 @@ import torch
 from operator import itemgetter
 from shutil import copyfile
 import copy
+from .periods.log_buffer_imix import get_log_buffer
 
 
 @HOOKS.register_module()
@@ -34,7 +35,7 @@ class EvaluateHook(HookBase):
         """
         self._period = eval_period
         self._func = eval_function
-        self._level = PriorityStatus.LOWER
+        self._level = PriorityStatus.LOW
         self._file_handle = PathManager.open(eval_json_file, 'w')
         self._all_eval_results = []
 
@@ -69,7 +70,8 @@ class EvaluateHook(HookBase):
             is_final = next_iter == self.trainer.max_iter
             if is_final or (self._period > 0 and next_iter % self._period == 0):
                 results = self._do_eval()
-                self.__wirte_eval_result(results)
+                self._wirte_eval_result(results)
+                self._write_to_tensorboard(results)
 
     def after_train(self):
         # func is likely a closure that holds reference to the trainer
@@ -83,11 +85,19 @@ class EvaluateHook(HookBase):
     def after_train_epoch(self):
         # logger = logging.getLogger(__name__)
         results = self._do_eval()
-        self.__wirte_eval_result(results)
+        self._wirte_eval_result(results)
+        self._write_to_tensorboard(results)
         # logger.info('epoch_{} evaluate accuracy :'.format(
         #     self.trainer.epoch, float(results['classification'])))
 
-    def __wirte_eval_result(self, results):
+    def _write_to_tensorboard(self, eval_result):
+        logger_buffer = get_log_buffer()
+        for k, v in eval_result.items():
+            if isinstance(v, torch.Tensor):
+                v = v.item()
+            logger_buffer.put_scalar(k, v)
+
+    def _wirte_eval_result(self, results):
 
         data = self._train_info()
         data.update(self._eval_result(results))
