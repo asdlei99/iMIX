@@ -9,10 +9,8 @@ from .oscar import OSCARBackbone
 from .uniter import UniterEncoder
 
 __all__ = [
-    'ImageFeatureEncoder', 'TextBertBase', 'VisDialLSTM', 'VisDialANSEncoder',
-    'VisDialPrincipleLSTM', 'VisualBERTBase', 'VisualBERTForClassification',
-    'VisualBERTForPretraining', 'LCGNEncoder', 'ViLBERTBase',
-    'ViLBERTForClassification', 'ViLBERTForPretraining', 'LXMERTBase',
-    'LXMERTForClassification', 'LXMERTForPretraining', 'DarknetEncoder',
+    'ImageFeatureEncoder', 'TextBertBase', 'VisDialLSTM', 'VisDialANSEncoder', 'VisDialPrincipleLSTM', 'VisualBERTBase',
+    'VisualBERTForClassification', 'VisualBERTForPretraining', 'LCGNEncoder', 'ViLBERTBase', 'ViLBERTForClassification',
+    'ViLBERTForPretraining', 'LXMERTBase', 'LXMERTForClassification', 'LXMERTForPretraining', 'DarknetEncoder',
     'OSCARBackbone', 'UniterEncoder'
 ]

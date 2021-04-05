@@ -13,9 +13,7 @@ from ..utils.stream import ItemFeature
 from ..utils.tokenization import BertTokenizer
 
 
-def tokenize_gqa(sentence,
-                 ignoredPunct=['?', '!', '\\', '/', ')', '('],
-                 keptPunct=['.', ',', ';', ':']):
+def tokenize_gqa(sentence, ignoredPunct=['?', '!', '\\', '/', ')', '('], keptPunct=['.', ',', ';', ':']):
     sentence = sentence.lower()
     for punct in keptPunct:
         sentence = sentence.replace(punct, ' ' + punct + ' ')
@@ -29,8 +27,7 @@ class GQAReader(IMIXDataReader):
 
     def __init__(self, cfg):
         super().__init__(cfg)
-        self.tokenizer = BertTokenizer.from_pretrained(
-            'bert-base-uncased', do_lower_case=True)
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
 
     def __len__(self):
         return len(self.mix_annotations)

@@ -33,6 +33,7 @@ class BaseLoss(torch.nn.Module, metaclass=ABCMeta):
 
 
 class Losser:
+
     def __init__(self, losses_cfg):
         self._loss_list: list = self.build_losses(losses_cfg)
 
@@ -70,5 +71,3 @@ class Losser:
 
             losses_log[name] = value.item()
         return loss, losses_log
-
-

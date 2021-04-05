@@ -1,7 +1,6 @@
-from .builder import (ENCODER, EMBEDDING, HEADS, BACKBONES, COMBINE_LAYERS,
-                      LOSSES, VQA_MODELS, build_vqa_models, build_backbone,
-                      build_head, build_combine_layer, build_encoder,
-                      build_embedding, build_model, build_loss)
+from .builder import (ENCODER, EMBEDDING, HEADS, BACKBONES, COMBINE_LAYERS, LOSSES, VQA_MODELS, build_vqa_models,
+                      build_backbone, build_head, build_combine_layer, build_encoder, build_embedding, build_model,
+                      build_loss)
 from .backbones import *
 from .embedding import *
 from .encoder import *

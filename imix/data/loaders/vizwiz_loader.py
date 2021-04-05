@@ -41,13 +41,11 @@ class VizWizDATASET(BaseLoader):
         item = {
             'feature': item_feature.features,  # feature - feature
             'bbox': item_feature.bbox,  # feature - bbox
-            'bbox_normalized':
-            item_feature.bbox_normalized,  # feature - bbox(normalized)
+            'bbox_normalized': item_feature.bbox_normalized,  # feature - bbox(normalized)
             'input_ids': item_feature.input_ids,  # tokens - ids
             'input_mask': item_feature.input_mask,  # tokens - mask
             'input_segment': item_feature.input_segment,  # tokens - segments
-            'input_lm_label_ids':
-            item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
             'question_id': item_feature.question_id,
             'image_id': item_feature.image_id,
         }

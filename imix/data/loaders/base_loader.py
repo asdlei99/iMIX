@@ -14,7 +14,7 @@ class BaseLoader(Dataset):
         if comm.is_main_process():
             cls_name = self.__class__.__name__
             logger = logging.getLogger(__name__)
-            logger.info('start loading'+cls_name)
+            logger.info('start loading' + cls_name)
 
         self.reader = reader_cls(reader)
         self.infocpler = info_cpler_cls(info_cpler)

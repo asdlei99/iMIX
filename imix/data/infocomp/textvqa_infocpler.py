@@ -39,10 +39,8 @@ class TextVQAInfoCpler(BaseInfoCpler):
         if self.if_bert:
             tokens = self.tokenizer.tokenize(itemFeature.question.strip())
 
-            tokens = self.tokenizer.get_limited_tokens(tokens,
-                                                       self.max_seq_length - 2)
-            tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(
-                tokens, self.word_mask_ratio)
+            tokens = self.tokenizer.get_limited_tokens(tokens, self.max_seq_length - 2)
+            tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(tokens, self.word_mask_ratio)
             tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
 
             input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
@@ -50,16 +48,15 @@ class TextVQAInfoCpler(BaseInfoCpler):
             input_segment = [0] * len(tokens)
             input_lm_label_ids = [-1] * len(tokens)
             to_extd_length = self.max_seq_length - len(input_ids)
-            self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0),
-                             (input_segment, 0), (input_lm_label_ids, -1))
+            self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0), (input_segment, 0),
+                             (input_lm_label_ids, -1))
             #while len(input_ids) < self.max_seq_length:
             #    input_ids.append(int(self.pad_idx))
             #    input_mask.append(0)
             #    input_segment.append(0)
             #    input_lm_label_ids.append(-1)
             itemFeature.input_segment = torch.tensor(input_segment, dtype=torch.int)
-            itemFeature.input_lm_label_ids = torch.tensor(
-                input_lm_label_ids, dtype=torch.long)
+            itemFeature.input_lm_label_ids = torch.tensor(input_lm_label_ids, dtype=torch.long)
 
         else:
             tokens = itemFeature.tokens
@@ -75,15 +72,13 @@ class TextVQAInfoCpler(BaseInfoCpler):
 
         # ocr vectors
 
-        ocr_tokens = self.tokenizer.get_limited_tokens(itemFeature.ocr_tokens,
-                                                       self.max_ocr_length)
+        ocr_tokens = self.tokenizer.get_limited_tokens(itemFeature.ocr_tokens, self.max_ocr_length)
         ocr_tokens = [self.word_tokenize(tmp) for tmp in ocr_tokens]
         ocr_tokens, ocr_length = self._pad_tokens(ocr_tokens)
         itemFeature.ocr_vectors_glove = self.get_tokens_glove_vectors(ocr_tokens)
         itemFeature.ocr_vectors_order = self.get_tokens_order_vectors(ocr_tokens)
         itemFeature.ocr_vectors_phoc = self.get_tokens_phoc_vectors(ocr_tokens)
-        itemFeature.ocr_vectors_fasttext = self.get_tokens_fasttext_vectors(
-            ocr_tokens)
+        itemFeature.ocr_vectors_fasttext = self.get_tokens_fasttext_vectors(ocr_tokens)
 
         # ocr features and bboxes
         features_ocr = torch.zeros((self.max_ocr_length, itemFeature.features_ocr.shape[1] if \
@@ -93,43 +88,32 @@ class TextVQAInfoCpler(BaseInfoCpler):
         if itemFeature.features_ocr is not None:
             limit = min(self.max_ocr_length, len(itemFeature.features_ocr))
             features_ocr[:limit] = torch.tensor(itemFeature.features_ocr[:limit])
-            bbox_ocr_normalized[:limit] = torch.tensor(
-                itemFeature.ocr_normalized_boxes[:limit])
+            bbox_ocr_normalized[:limit] = torch.tensor(itemFeature.ocr_normalized_boxes[:limit])
         itemFeature.features_ocr = features_ocr
         itemFeature.ocr_normalized_boxes = bbox_ocr_normalized
 
         # features and bboxes
         img_h = itemFeature.image_height
         img_w = itemFeature.image_width
-        itemFeature.bbox = self._get_bbox_from_normalized(
-            itemFeature.obj_normalized_boxes, img_h, img_w)
+        itemFeature.bbox = self._get_bbox_from_normalized(itemFeature.obj_normalized_boxes, img_h, img_w)
         itemFeature.bbox_normalized = itemFeature.obj_normalized_boxes
-        itemFeature.bbox_ocr = self._get_bbox_from_normalized(
-            itemFeature.ocr_normalized_boxes, img_h, img_w)
+        itemFeature.bbox_ocr = self._get_bbox_from_normalized(itemFeature.ocr_normalized_boxes, img_h, img_w)
         itemFeature.bbox_ocr_normalized = itemFeature.ocr_normalized_boxes
 
         itemFeature.input_ids = torch.tensor(input_ids, dtype=torch.long)
         itemFeature.input_mask = torch.tensor(input_mask, dtype=torch.int)
 
-        itemFeature.qa_ids = [
-            self.qa_ans2id[ans]
-            for ans in itemFeature.answers
-            if ans in self.qa_ans2id
-        ]
+        itemFeature.qa_ids = [self.qa_ans2id[ans] for ans in itemFeature.answers if ans in self.qa_ans2id]
         # itemFeature.qa_allids = [self.qa_ans2id[ans] for ans in itemFeature.all_answers if ans in self.qa_ans2id]
-        itemFeature.answers_scores = self.compute_answers_scores(
-            itemFeature.answers)
+        itemFeature.answers_scores = self.compute_answers_scores(itemFeature.answers)
         answers = self.compute_special_answers(itemFeature, ocr_tokens)
         for k, v in answers.items():
             itemFeature[k] = v
         return itemFeature
 
     def get_tokens_order_vectors(self, tokens):
-        vector = torch.full((self.max_ocr_length, self.max_length),
-                            fill_value=self.PAD_INDEX,
-                            dtype=torch.float)
-        vector[:len(tokens), :len(tokens)] = torch.from_numpy(
-            np.eye(len(tokens), dtype=np.float32))
+        vector = torch.full((self.max_ocr_length, self.max_length), fill_value=self.PAD_INDEX, dtype=torch.float)
+        vector[:len(tokens), :len(tokens)] = torch.from_numpy(np.eye(len(tokens), dtype=np.float32))
         return vector
 
     def compute_answers_scores(self, answers):
@@ -140,25 +124,17 @@ class TextVQAInfoCpler(BaseInfoCpler):
             accs = []
             for gt_answer in gt_answers:
                 other_answers = [item for item in gt_answers if item != gt_answer]
-                matching_answers = [
-                    item for item in other_answers if item[1] == unique_answer
-                ]
+                matching_answers = [item for item in other_answers if item[1] == unique_answer]
                 acc = min(1, float(len(matching_answers)) / 3)
                 accs.append(acc)
             unique_answer_scores[idx] = sum(accs) / len(accs)
-        unique_answer2score = {
-            a: s for a, s in zip(unique_answers, unique_answer_scores)
-        }
+        unique_answer2score = {a: s for a, s in zip(unique_answers, unique_answer_scores)}
         return unique_answer2score
 
-    def match_answer_to_vocab_ocr_seq(self,
-                                      answer,
-                                      vocab2idx_dict,
-                                      ocr2inds_dict,
-                                      max_match_num=20):
-        """Match an answer to a list of sequences of indices each index corresponds
-        to either a fixed vocabulary or an OCR token (in the index address space,
-        the OCR tokens are after the fixed vocab)"""
+    def match_answer_to_vocab_ocr_seq(self, answer, vocab2idx_dict, ocr2inds_dict, max_match_num=20):
+        """Match an answer to a list of sequences of indices each index
+        corresponds to either a fixed vocabulary or an OCR token (in the index
+        address space, the OCR tokens are after the fixed vocab)"""
         num_vocab = len(vocab2idx_dict)
 
         answer_words = answer.split()
@@ -184,9 +160,7 @@ class TextVQAInfoCpler(BaseInfoCpler):
             return []
         idx_seq_list = [()]
         for matched_inds in answer_word_matches:
-            idx_seq_list = [
-                seq + (idx,) for seq in idx_seq_list for idx in matched_inds
-            ]
+            idx_seq_list = [seq + (idx, ) for seq in idx_seq_list for idx in matched_inds]
             if len(idx_seq_list) > max_match_num:
                 idx_seq_list = idx_seq_list[:max_match_num]
 
@@ -201,8 +175,7 @@ class TextVQAInfoCpler(BaseInfoCpler):
 
     def compute_special_answers(self, itemFeature, ocr_tokens):
         unique_answer2score = itemFeature.answers_scores
-        scores = torch.zeros(
-            self.max_copy_steps, self.get_vocab_size(), dtype=torch.float)
+        scores = torch.zeros(self.max_copy_steps, self.get_vocab_size(), dtype=torch.float)
         answers = itemFeature.answers
         ocr2inds_dict = defaultdict(list)
         for idx, token in enumerate(ocr_tokens):
@@ -210,9 +183,7 @@ class TextVQAInfoCpler(BaseInfoCpler):
 
         answer_dec_inds = []
         for a in answers:
-            tmp = self.match_answer_to_vocab_ocr_seq(a,
-                                                     self.answer_vocab.word2idx_dict,
-                                                     ocr2inds_dict)
+            tmp = self.match_answer_to_vocab_ocr_seq(a, self.answer_vocab.word2idx_dict, ocr2inds_dict)
             answer_dec_inds.append(tmp)
 
         all_idx_seq_list = []

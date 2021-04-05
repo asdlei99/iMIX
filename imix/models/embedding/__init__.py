@@ -4,7 +4,6 @@ from .bertimgembedding import BertVisioLinguisticEmbeddings, BertImageFeatureEmb
 from .uniterembedding import UniterImageEmbeddings, UniterTextEmbeddings
 
 __all__ = [
-    'WordEmbedding', 'TextEmbedding', 'BertVisioLinguisticEmbeddings',
-    'BertImageFeatureEmbeddings', 'BiLSTMTextEmbedding',
-    'UniterImageEmbeddings', 'UniterTextEmbeddings'
+    'WordEmbedding', 'TextEmbedding', 'BertVisioLinguisticEmbeddings', 'BertImageFeatureEmbeddings',
+    'BiLSTMTextEmbedding', 'UniterImageEmbeddings', 'UniterTextEmbeddings'
 ]

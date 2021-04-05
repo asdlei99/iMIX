@@ -2,10 +2,7 @@
 model = dict(
     type='ReSC',
     encoder=dict(
-        type='DarknetEncoder',
-        config_path='/home/zrz/code/ReSC/model/yolov3.cfg',
-        img_size=416,
-        obj_out=False),
+        type='DarknetEncoder', config_path='/home/zrz/code/ReSC/model/yolov3.cfg', img_size=416, obj_out=False),
     backbone=dict(
         type='ReSC_BACKBONE',
         emb_size=512,
@@ -18,7 +15,4 @@ model = dict(
         leaky=False),
     weights_file='/home/zrz/code/ReSC/saved_models/yolov3.weights')
 
-loss = [
-    dict(type='YOLOLossV2'),
-    dict(type='DiverseLoss')
-    ]
+loss = [dict(type='YOLOLossV2'), dict(type='DiverseLoss')]

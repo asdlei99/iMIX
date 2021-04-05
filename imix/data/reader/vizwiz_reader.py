@@ -42,8 +42,7 @@ class VizWizReader(IMIXDataReader):
         item_feature.tokens = annotation.get('question_tokens')
         item_feature.img_id = annotation.get('image_id')
         if self.default_feature:
-            feature_info = self.get_featureinfo_from_txns(
-                self.feature_txns, annotation.get('image_id'))
+            feature_info = self.get_featureinfo_from_txns(self.feature_txns, annotation.get('image_id'))
             if feature_info is None:
                 item_feature.error = True
                 item_feature.feature = np.random.random((100, 2048))
@@ -53,7 +52,6 @@ class VizWizReader(IMIXDataReader):
                 #item_feature[k] = v if item_feature.get(
                 #    k) is None else item_feature[k]
             return item_feature
-        feature_path = self.features_pathes[split + '_' +
-                                            str(item_feature.img_id)]
+        feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
         item_feature.feature = torch.load(feature_path)[0]
         return item_feature

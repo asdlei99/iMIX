@@ -20,7 +20,6 @@ from tqdm import tqdm
 
 msgpack_numpy.patch()
 
-
 # def _check_distributed():
 #   try:
 #     dist = hvd.size() != hvd.local_size()
@@ -34,6 +33,7 @@ msgpack_numpy.patch()
 #   if arr.dtype == np.float16 else arr
 #          for k, arr in feat_dict.items()}
 #   return out
+
 
 def compute_num_bb(confs, conf_th, min_bb, max_bb):
     num_bb = max(min_bb, (confs > conf_th).sum())
@@ -51,8 +51,8 @@ def _get_vqa_target(example, num_answers):
 
 
 class DetectFeatLmdb(object):
-    def __init__(self, img_dir, conf_th=0.2, max_bb=100, min_bb=10, num_bb=36,
-                 compress=True):
+
+    def __init__(self, img_dir, conf_th=0.2, max_bb=100, min_bb=10, num_bb=36, compress=True):
         self.img_dir = img_dir
         if conf_th == -1:
             db_name = f'feat_numbb{num_bb}'
@@ -75,10 +75,12 @@ class DetectFeatLmdb(object):
             else:
                 db_name = 'all'
         # only read ahead on single node training
-        self.env = lmdb.open(f'{img_dir}/{db_name}',
-                             readonly=True, create=False,
-                             # readahead=not _check_distributed())
-                             readahead=True)
+        self.env = lmdb.open(
+            f'{img_dir}/{db_name}',
+            readonly=True,
+            create=False,
+            # readahead=not _check_distributed())
+            readahead=True)
         self.txn = self.env.begin(buffers=True)
         if self.name2nbb is None:
             self.name2nbb = self._compute_nbb()
@@ -95,8 +97,7 @@ class DetectFeatLmdb(object):
             else:
                 img_dump = msgpack.loads(dump, raw=False)
                 confs = img_dump['conf']
-            name2nbb[fname] = compute_num_bb(confs, self.conf_th,
-                                             self.min_bb, self.max_bb)
+            name2nbb[fname] = compute_num_bb(confs, self.conf_th, self.min_bb, self.max_bb)
 
         return name2nbb
 
@@ -123,8 +124,7 @@ class DetectFeatLmdb(object):
         if self.compress:
             with io.BytesIO(dump) as reader:
                 img_dump = np.load(reader, allow_pickle=True)
-                img_dump = {'features': img_dump['features'],
-                            'norm_bb': img_dump['norm_bb']}
+                img_dump = {'features': img_dump['features'], 'norm_bb': img_dump['norm_bb']}
         else:
             img_dump = msgpack.loads(dump, raw=False)
         img_feat = torch.tensor(img_dump['features'][:nbb, :]).float()
@@ -133,20 +133,22 @@ class DetectFeatLmdb(object):
 
 
 class TxtLmdb(object):
+
     def __init__(self, db_dir, readonly=True):
         self.readonly = readonly
         if readonly:
             # training
-            self.env = lmdb.open(db_dir,
-                                 readonly=True, create=False,
-                                 # readahead=not _check_distributed())
-                                 readahead=True)
+            self.env = lmdb.open(
+                db_dir,
+                readonly=True,
+                create=False,
+                # readahead=not _check_distributed())
+                readahead=True)
             self.txn = self.env.begin(buffers=True)
             self.write_cnt = None
         else:
             # prepro
-            self.env = lmdb.open(db_dir, readonly=False, create=True,
-                                 map_size=4 * 1024 ** 4)
+            self.env = lmdb.open(db_dir, readonly=False, create=True, map_size=4 * 1024**4)
             self.txn = self.env.begin(write=True)
             self.write_cnt = 0
 
@@ -156,15 +158,13 @@ class TxtLmdb(object):
         self.env.close()
 
     def __getitem__(self, key):
-        return msgpack.loads(decompress(self.txn.get(key.encode('utf-8'))),
-                             raw=False)
+        return msgpack.loads(decompress(self.txn.get(key.encode('utf-8'))), raw=False)
 
     def __setitem__(self, key, value):
         # NOTE: not thread safe
         if self.readonly:
             raise ValueError('readonly text DB')
-        ret = self.txn.put(key.encode('utf-8'),
-                           compress(msgpack.dumps(value, use_bin_type=True)))
+        ret = self.txn.put(key.encode('utf-8'), compress(msgpack.dumps(value, use_bin_type=True)))
         self.write_cnt += 1
         if self.write_cnt % 1000 == 0:
             self.txn.commit()
@@ -174,15 +174,14 @@ class TxtLmdb(object):
 
 
 class TxtTokLmdb(object):
+
     def __init__(self, db_dir, max_txt_len=60):
         if max_txt_len == -1:
             self.id2len = json.load(open(f'{db_dir}/id2len.json'))
         else:
             self.id2len = {
                 id_: len_
-                for id_, len_ in json.load(open(f'{db_dir}/id2len.json')
-                                           ).items()
-                if len_ <= max_txt_len
+                for id_, len_ in json.load(open(f'{db_dir}/id2len.json')).items() if len_ <= max_txt_len
             }
         self.db_dir = db_dir
         self.db = TxtLmdb(db_dir, readonly=True)
@@ -225,14 +224,12 @@ class VQAReaderUNITER(BaseDataReader):
         self.max_txt_len = 60
         path = cfg.mix_features.train
         txt_path = cfg.mix_annotations.train
-        self.img_db = DetectFeatLmdb(path, self.conf_th, self.max_bb,
-                                     self.min_bb, self.num_bb, self.compress)
+        self.img_db = DetectFeatLmdb(path, self.conf_th, self.max_bb, self.min_bb, self.num_bb, self.compress)
         self.txt_db = TxtTokLmdb(txt_path, self.max_txt_len)
         txt_lens, self.ids = self.get_ids_and_lens(self.txt_db)
 
         txt2img = self.txt_db.txt2img
-        self.lens = [tl + self.img_db.name2nbb[txt2img[id_]]
-                     for tl, id_ in zip(txt_lens, self.ids)]
+        self.lens = [tl + self.img_db.name2nbb[txt2img[id_]] for tl, id_ in zip(txt_lens, self.ids)]
 
     def __len__(self):
         return len(self.ids)

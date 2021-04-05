@@ -55,8 +55,7 @@ class TEXTVQADATASET(BaseLoader):
                 'input_ids': itemFeature.input_ids,  # tokens - ids
                 'input_mask': itemFeature.input_mask,  # tokens - mask
                 'input_segment': itemFeature.input_segment,  # tokens - segments
-                'input_lm_label_ids':
-                    itemFeature.input_lm_label_ids,  # tokens - mlm labels
+                'input_lm_label_ids': itemFeature.input_lm_label_ids,  # tokens - mlm labels
                 'question_id': itemFeature.question_id,
                 'image_id': itemFeature.image_id,
                 'train_prev_inds': itemFeature.train_prev_inds,

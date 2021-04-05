@@ -3,6 +3,6 @@ from .group_sampler import GroupSampler, DistributedGroupSampler
 from .grouped_batch_sampler import GroupedBatchSampler
 
 __all__ = [
-    'TrainingSampler', 'RepeatFactorTrainingSampler', 'InferenceSampler',
-    'GroupSampler', 'DistributedGroupSampler', 'GroupedBatchSampler'
+    'TrainingSampler', 'RepeatFactorTrainingSampler', 'InferenceSampler', 'GroupSampler', 'DistributedGroupSampler',
+    'GroupedBatchSampler'
 ]

@@ -25,14 +25,8 @@ class VisualEntailmentReader(IMIXDataReader):
         if isinstance(splits, str):
             splits = [splits]
         self.splits = splits
-        self.mix_features_pathes = {
-            split: cfg['mix_features'][split]
-            for split in self.splits
-        }
-        self.mix_annotations_pathes = {
-            split: cfg['mix_annotations'][split]
-            for split in self.splits
-        }
+        self.mix_features_pathes = {split: cfg['mix_features'][split] for split in self.splits}
+        self.mix_annotations_pathes = {split: cfg['mix_annotations'][split] for split in self.splits}
 
         self.idx_split_index = []
         self.annotations = []
@@ -61,8 +55,7 @@ class VisualEntailmentReader(IMIXDataReader):
             label = None
         text1 = annotation['sentence1']
         text2 = annotation['sentence2']
-        features_info = self.get_featureinfo_from_txns(self.feature_txns,
-                                                       img_id)
+        features_info = self.get_featureinfo_from_txns(self.feature_txns, img_id)
 
         item_dict = {}
         item_dict.update(features_info)
@@ -91,6 +84,4 @@ class VisualEntailmentReader(IMIXDataReader):
 
     def load_image(self, img_name):
         return np.array(
-            Image.open(os.path.join(self.image_dir,
-                                    img_name)).convert('RGB').resize(
-                                        (self.imsize, self.imsize)))
+            Image.open(os.path.join(self.image_dir, img_name)).convert('RGB').resize((self.imsize, self.imsize)))

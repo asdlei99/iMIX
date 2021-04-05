@@ -4,4 +4,4 @@ from .builder import HOOKS
 
 @HOOKS.register_module()
 class MomentumSchedulerHook(HookBase):
-  pass
+    pass

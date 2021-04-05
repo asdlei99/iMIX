@@ -23,14 +23,10 @@ class RefCOCOInfoCpler(BaseInfoCpler):
         self.vocab_name = cfg.get('vocab_name', 'vocabulart_100k')
         self.vocab_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_name)
         self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
-        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab',
-                                                      self.vocab_answer_name)
+        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_answer_name)
 
         self.default_max_length = cfg.default_max_length
-        self.transform = T.Compose([
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+        self.transform = T.Compose([T.ToTensor(), T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
     def read_examples(self, input_line, unique_id):
         """Read a list of `InputExample`s from an input file."""
@@ -118,9 +114,7 @@ class RefCOCOInfoCpler(BaseInfoCpler):
 
         examples = self.read_examples(phrases, item_feature.item)
         features = self.convert_examples_to_features(
-            examples=examples,
-            seq_length=self.default_max_length,
-            tokenizer=self.tokenizer)
+            examples=examples, seq_length=self.default_max_length, tokenizer=self.tokenizer)
         input_ids = np.array(features[0]['input_ids'], dtype=int)
         input_mask = np.array(features[0]['input_mask'], dtype=int)
 

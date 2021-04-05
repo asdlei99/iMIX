@@ -36,4 +36,3 @@ class LXMERTPreTrainDATASET(BaseLoader):
         item_feature = self.infocpler.completeInfo(item_feature)
 
         return item_feature
-

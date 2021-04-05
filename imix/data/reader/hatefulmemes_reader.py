@@ -24,14 +24,8 @@ class HatefulMemesReader(IMIXDataReader):
         if isinstance(splits, str):
             splits = [splits]
         self.splits = splits
-        self.mix_features_pathes = {
-            split: cfg['mix_features'][split]
-            for split in self.splits
-        }
-        self.mix_annotations_pathes = {
-            split: cfg['mix_annotations'][split]
-            for split in self.splits
-        }
+        self.mix_features_pathes = {split: cfg['mix_features'][split] for split in self.splits}
+        self.mix_annotations_pathes = {split: cfg['mix_annotations'][split] for split in self.splits}
 
         self.idx_split_index = []
         self.annotations = []
@@ -47,8 +41,7 @@ class HatefulMemesReader(IMIXDataReader):
                 }.values())))
 
         self.annotations = [
-            ann for ann in self.annotations if self.get_featureinfo_from_txns(
-                self.feature_txns, ann['id']) is not None
+            ann for ann in self.annotations if self.get_featureinfo_from_txns(self.feature_txns, ann['id']) is not None
         ]
 
     def __len__(self):
@@ -61,8 +54,7 @@ class HatefulMemesReader(IMIXDataReader):
         label = annotation['label']
         text = annotation['text']
         img = self.load_image(img_name)
-        features_info = self.get_featureinfo_from_txns(self.feature_txns,
-                                                       img_id)
+        features_info = self.get_featureinfo_from_txns(self.feature_txns, img_id)
 
         item_dict = {}
         item_dict.update(features_info)
@@ -92,6 +84,4 @@ class HatefulMemesReader(IMIXDataReader):
 
     def load_image(self, img_name):
         return np.array(
-            Image.open(os.path.join(self.image_dir,
-                                    img_name)).convert('RGB').resize(
-                                        (self.imsize, self.imsize)))
+            Image.open(os.path.join(self.image_dir, img_name)).convert('RGB').resize((self.imsize, self.imsize)))

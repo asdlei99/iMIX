@@ -78,16 +78,12 @@ class Organizer:
         self.optimizer = self.build_optimizer(cfg, self.model)
         self.scheduler = self.build_lr_scheduler(cfg, self.optimizer)
         self.checkpointer = imixCheckpointer(
-            self.model,
-            cfg.work_dir,
-            optimizer=self.optimizer,
-            scheduler=self.scheduler)
+            self.model, cfg.work_dir, optimizer=self.optimizer, scheduler=self.scheduler)
 
         self._by_epoch = False if hasattr(cfg, 'by_iter') else True
         self.start_epoch = 0
         self.start_iter = 0
-        self.max_iter = cfg.total_epochs * len(
-            self.train_data_loader) if self.by_epoch else cfg.max_iter
+        self.max_iter = cfg.total_epochs * len(self.train_data_loader) if self.by_epoch else cfg.max_iter
         self.max_epoch = cfg.total_epochs if self.by_epoch else 0
 
         self.hooks = self.build_hooks()
@@ -128,8 +124,8 @@ class Organizer:
 
     @classmethod
     def build_evaluator(cls, cfg, dataset_name, output_folder=None):
-        """TODO(jinliang) if there are many types of evaluator,it will be written
-        in the form of dict or hook later,and directly init."""
+        """TODO(jinliang) if there are many types of evaluator,it will be
+        written in the form of dict or hook later,and directly init."""
         if output_folder is None:
             output_folder = os.path.join(cfg.work_dir, 'inference')
 
@@ -155,30 +151,23 @@ class Organizer:
 
         hook_list = []
         if hasattr(self.cfg, 'fp16'):
-            hook_list.append(
-                hooks.Fp16OptimizerHook(self.cfg.optimizer_config.grad_clip,
-                                        self.cfg.fp16))
+            hook_list.append(hooks.Fp16OptimizerHook(self.cfg.optimizer_config.grad_clip, self.cfg.fp16))
             self.set_imixed_precision(True)
         else:
             hook_list.append(hooks.OptimizerHook(self.cfg.optimizer_config.grad_clip))
         hook_list.append(hooks.LRSchedulerHook(self.optimizer, self.scheduler))
         hook_list.append(
             hooks.IterationTimerHook(
-                warmup_iter=self.cfg.lr_config.warmup_iterations if self.cfg
-                    .lr_config.use_warmup else 0))
+                warmup_iter=self.cfg.lr_config.warmup_iterations if self.cfg.lr_config.use_warmup else 0))
         if hasattr(cfg, 'test') and hasattr(cfg.test, 'precise_bn'):
             if cfg.test.precise_bn and get_bn_modules(self.model):
                 hook_list.append(
-                    hooks.PreciseBNHook(cfg.test.eval_period, self.model,
-                                        self.build_train_loader(cfg),
+                    hooks.PreciseBNHook(cfg.test.eval_period, self.model, self.build_train_loader(cfg),
                                         cfg.test.precise_bn.num_iter))
         if comm.is_main_process():
             hook_list.append(
                 hooks.CheckPointHook(
-                    self.checkpointer,
-                    iter_period=cfg.checkpoint_config.period,
-                    epoch_period=1,
-                    max_num_checkpoints=2))
+                    self.checkpointer, iter_period=cfg.checkpoint_config.period, epoch_period=1, max_num_checkpoints=2))
             # hook_list.append(
             #     hooks.CheckPointHook(self.checkpointer,
             #                          cfg.checkpoint_config.period))
@@ -187,8 +176,7 @@ class Organizer:
             hook_list.append(self.add_evaluate_hook())
 
         if comm.is_main_process():
-            hook_list.append(
-                hooks.PeriodicLogger(self.build_writers(), cfg.log_config.period))
+            hook_list.append(hooks.PeriodicLogger(self.build_writers(), cfg.log_config.period))
 
         hook_list.sort(key=lambda obj: obj.level.value)
         return hook_list
@@ -277,11 +265,9 @@ class Organizer:
             results[dataset_name] = results_i
             if comm.is_main_process():
                 assert isinstance(
-                    results_i, dict
-                ), 'Evaluator must return a dict on the main process. Got {} instead.'.format(
-                    results_i)
-                logger.info(
-                    'Evaluation results for {} in csv format:'.format(dataset_name))
+                    results_i,
+                    dict), 'Evaluator must return a dict on the main process. Got {} instead.'.format(results_i)
+                logger.info('Evaluation results for {} in csv format:'.format(dataset_name))
                 # print_csv_format(results_i)
 
         if len(results) == 1:
@@ -309,8 +295,7 @@ class Organizer:
         if isinstance(evaluators, DatasetEvaluator):
             evaluators = [evaluators]
         if evaluators is not None:
-            assert len(cfg.DATASETS.TEST) == len(evaluators), '{} != {}'.format(
-                len(cfg.DATASETS.TEST), len(evaluators))
+            assert len(cfg.DATASETS.TEST) == len(evaluators), '{} != {}'.format(len(cfg.DATASETS.TEST), len(evaluators))
 
         results = OrderedDict()
         for idx, dataset_name in enumerate(cfg.test_datasets):
@@ -323,9 +308,8 @@ class Organizer:
                 try:
                     evaluator = cls.build_evaluator(cfg, dataset_name)
                 except NotImplementedError:
-                    logger.warning(
-                        'No evaluator found. Use `DefaultTrainer.test(evaluators=)`, '
-                        'or implement its `build_evaluator` method.')
+                    logger.warning('No evaluator found. Use `DefaultTrainer.test(evaluators=)`, '
+                                   'or implement its `build_evaluator` method.')
                     results[dataset_name] = {}
                     continue
             if only_test_pred:

@@ -21,9 +21,7 @@ class ReferitInfoCpler(RefCOCOInfoCpler):
         self.vocab_name = cfg.get('vocab_name', 'vocabulart_100k')
         self.vocab_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_name)
         self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
-        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab',
-                                                      self.vocab_answer_name)
-
+        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_answer_name)
 
     # inheriting func
     #def complete_info(self, item_feature: ItemFeature):

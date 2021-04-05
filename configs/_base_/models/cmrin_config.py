@@ -2,10 +2,7 @@
 model = dict(
     type='CMRIN',
     encoder=dict(
-        type='DarknetEncoder',
-        config_path='/home/zrz/code/ReSC/model/yolov3.cfg',
-        img_size=416,
-        obj_out=False),
+        type='DarknetEncoder', config_path='/home/zrz/code/ReSC/model/yolov3.cfg', img_size=416, obj_out=False),
     backbone=dict(
         type='CMRIN_BACKBONE',
         emb_size=512,

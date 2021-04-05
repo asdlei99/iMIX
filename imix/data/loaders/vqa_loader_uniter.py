@@ -61,8 +61,7 @@ class VQADATASETUNITER(BaseLoader):
             'input_ids': item_feature.input_ids,  # tokens - ids
             'input_mask': item_feature.input_mask,  # tokens - mask
             'input_segment': item_feature.input_segment,  # tokens - segments
-            'input_lm_label_ids':
-                item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
             'question_id': item_feature.question_id,
             'image_id': item_feature.image_id,
         }

@@ -34,12 +34,7 @@ class IterDataLoader:
 
 class CommonEngine(EngineBase):
 
-    def __init__(self,
-                 model,
-                 data_loader,
-                 optimizer,
-                 loss_fn,
-                 batch_processor=None):
+    def __init__(self, model, data_loader, optimizer, loss_fn, batch_processor=None):
         super(CommonEngine, self).__init__()
 
         model.train()
@@ -72,11 +67,9 @@ class CommonEngine(EngineBase):
         # loger.info('batch_data keys:{}'.format(batch_data.keys()))
 
         if self.batch_processor is not None:
-            self.output = self.batch_processor(
-                batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
+            self.output = self.batch_processor(batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
         else:
-            with autocast(
-                    enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
+            with autocast(enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
 
                 try:
                     self.model_output = self.model(batch_data)
@@ -178,8 +171,8 @@ class imixEngine(CommonEngine):
         self.max_epoch = self.organizer.max_epoch
         self.cfg = self.organizer.cfg
         self.by_epoch = self.organizer.by_epoch
-        self.imixed_precision = self.organizer.imixed_precision if hasattr(
-            self.organizer, 'imixed_precision') else False
+        self.imixed_precision = self.organizer.imixed_precision if hasattr(self.organizer,
+                                                                           'imixed_precision') else False
 
         self.register_hooks(self.organizer.hooks)
 

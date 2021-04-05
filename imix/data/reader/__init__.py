@@ -14,5 +14,4 @@ from .refclef_reader import RefClefReader
 from .hatefulmemes_reader import HatefulMemesReader
 from .visualentailment_reader import VisualEntailmentReader
 
-
 from .lxmertpretrain_reader import LXMERTPretrainReader

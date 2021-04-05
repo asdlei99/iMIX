@@ -16,8 +16,7 @@ class GQAInfoCpler(BaseInfoCpler):
     def __init__(self, cfg):
         # logger = logging.getLogger(__name__)
         #TODO: shihzh need to confirm
-        self.vocab_name = cfg.get('vocab_name',
-                                  'vocabulary_gqa')  ### bert for vocabulart_100k
+        self.vocab_name = cfg.get('vocab_name', 'vocabulary_gqa')  ### bert for vocabulart_100k
         super().__init__(cfg)
         '''
         self.if_bert = cfg.if_bert
@@ -42,6 +41,7 @@ class GQAInfoCpler(BaseInfoCpler):
         # print('xiix')
         # logger.info("VQAInfoCpler success")
         '''
+
     def completeInfo(self, itemFeature: ItemFeature):
         if self.if_bert:
             return self.completeBertInfo(itemFeature)
@@ -56,7 +56,6 @@ class GQAInfoCpler(BaseInfoCpler):
 
         input_ids = [self.stoi[t] for t in tokens]
         input_mask = [1] * len(input_ids)
-
         '''
         while len(input_ids) < self.max_seq_length:
             input_ids.append(0)
@@ -71,18 +70,9 @@ class GQAInfoCpler(BaseInfoCpler):
 
         if itemFeature.answers is not None:
             itemFeature.answers = self._increase_to_ten(itemFeature.answers)
-            itemFeature.qa_ids = [
-                self.qa_ans2id[ans]
-                for ans in itemFeature.answers
-                if ans in self.qa_ans2id
-            ]
-            itemFeature.qa_allids = [
-                self.qa_ans2id[ans]
-                for ans in itemFeature.all_answers
-                if ans in self.qa_ans2id
-            ]
-            itemFeature.answers_scores = self.compute_answers_scores(
-                torch.Tensor(itemFeature.qa_ids))
+            itemFeature.qa_ids = [self.qa_ans2id[ans] for ans in itemFeature.answers if ans in self.qa_ans2id]
+            itemFeature.qa_allids = [self.qa_ans2id[ans] for ans in itemFeature.all_answers if ans in self.qa_ans2id]
+            itemFeature.answers_scores = self.compute_answers_scores(torch.Tensor(itemFeature.qa_ids))
         return itemFeature
 
     def compute_bboxInfo(self, itemFeature):
@@ -106,8 +96,7 @@ class GQAInfoCpler(BaseInfoCpler):
     def completeBertInfo(self, itemFeature):
         tokens = self.tokenizer.tokenize(itemFeature.question_str.strip())
         tokens = self.tokenizer.get_limited_tokens(tokens, self.max_seq_length - 2)
-        tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(
-            tokens, self.word_mask_ratio)
+        tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(tokens, self.word_mask_ratio)
         tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
 
         itemFeature = self.compute_bboxInfo(itemFeature)
@@ -123,26 +112,13 @@ class GQAInfoCpler(BaseInfoCpler):
         input_segment.extend([0] * to_extend)
         input_lm_label_ids.extend([0] * to_extend)
 
-        itemFeature.input_ids = torch.tensor(
-            input_ids, dtype=torch.long)  # token ids
-        itemFeature.input_mask = torch.tensor(
-            input_mask, dtype=torch.long)  # token mask
-        itemFeature.input_segment = torch.tensor(
-            input_segment, dtype=torch.long)  # token segments
-        itemFeature.input_lm_label_ids = torch.tensor(
-            input_lm_label_ids, dtype=torch.long)  # token mlm labels
-        itemFeature.qa_ids = [
-            self.qa_ans2id[ans]
-            for ans in itemFeature.answers
-            if ans in self.qa_ans2id
-        ]
-        itemFeature.qa_allids = [
-            self.qa_ans2id[ans]
-            for ans in itemFeature.all_answers
-            if ans in self.qa_ans2id
-        ]
-        itemFeature.answers_scores = self.compute_answers_scores(
-            torch.Tensor(itemFeature.qa_ids))
+        itemFeature.input_ids = torch.tensor(input_ids, dtype=torch.long)  # token ids
+        itemFeature.input_mask = torch.tensor(input_mask, dtype=torch.long)  # token mask
+        itemFeature.input_segment = torch.tensor(input_segment, dtype=torch.long)  # token segments
+        itemFeature.input_lm_label_ids = torch.tensor(input_lm_label_ids, dtype=torch.long)  # token mlm labels
+        itemFeature.qa_ids = [self.qa_ans2id[ans] for ans in itemFeature.answers if ans in self.qa_ans2id]
+        itemFeature.qa_allids = [self.qa_ans2id[ans] for ans in itemFeature.all_answers if ans in self.qa_ans2id]
+        itemFeature.answers_scores = self.compute_answers_scores(torch.Tensor(itemFeature.qa_ids))
 
         return itemFeature
 

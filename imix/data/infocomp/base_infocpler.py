@@ -26,16 +26,13 @@ class BaseInfoCpler(object):
         self.vocab_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_name)
 
         self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_vqa')
-        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab',
-                                                      self.vocab_answer_name)
+        self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_answer_name)
 
         self.glove_name = cfg.get('glove_name', 'glove6b300d')
-        self.glove_weights_path = self._get_atr_of_atr(cfg, 'glove_weights',
-                                                       self.glove_name)
+        self.glove_weights_path = self._get_atr_of_atr(cfg, 'glove_weights', self.glove_name)
 
         self.fasttext_name = cfg.get('fasttext_name', 'wiki300d1m')
-        self.fasttext_weights_path = self._get_atr_of_atr(cfg, 'fasttext_weights',
-                                                          self.fasttext_name)
+        self.fasttext_weights_path = self._get_atr_of_atr(cfg, 'fasttext_weights', self.fasttext_name)
 
         self.load_glove_weights()
         self.load_fasttext_weights()
@@ -92,32 +89,25 @@ class BaseInfoCpler(object):
 
     def get_glove_single_id(self, id):
         if id == self.pad_idx:
-            return torch.zeros((300,))
+            return torch.zeros((300, ))
         try:
             return self.glove_weights[id]
         except:
-            return torch.zeros((300,))
+            return torch.zeros((300, ))
 
     def get_tokens_glove_vectors(self, tokens):
-        vector = torch.full((self.max_ocr_length, self.glove_weights_dim),
-                            fill_value=self.PAD_INDEX,
-                            dtype=torch.float)
+        vector = torch.full((self.max_ocr_length, self.glove_weights_dim), fill_value=self.PAD_INDEX, dtype=torch.float)
         for idx, token in enumerate(tokens):
             vector[idx] = torch.tensor(self.get_glove_single_word(token.lower()))
         return vector
 
     def get_tokens_order_vectors(self, tokens):
-        vector = torch.full((self.max_ocr_length, self.glove_weights_dim),
-                            fill_value=self.PAD_INDEX,
-                            dtype=torch.float)
-        vector[:len(tokens), :len(tokens)] = torch.from_numpy(
-            np.eye(len(tokens), dtype=np.float32))
+        vector = torch.full((self.max_ocr_length, self.glove_weights_dim), fill_value=self.PAD_INDEX, dtype=torch.float)
+        vector[:len(tokens), :len(tokens)] = torch.from_numpy(np.eye(len(tokens), dtype=np.float32))
         return vector
 
     def get_tokens_phoc_vectors(self, tokens):
-        vector = torch.full((self.max_ocr_length, self.phoc_weights_dim),
-                            fill_value=self.PAD_INDEX,
-                            dtype=torch.float)
+        vector = torch.full((self.max_ocr_length, self.phoc_weights_dim), fill_value=self.PAD_INDEX, dtype=torch.float)
         for idx, token in enumerate(tokens):
             vector[idx] = torch.tensor(phoc(token))[0]
         return vector
@@ -128,15 +118,12 @@ class BaseInfoCpler(object):
         self.fasttext_model = load_model(self.fasttext_weights_path)
 
     def get_fasttext_single_word(self, word):
-        return np.mean(
-            [self.fasttext_model.get_word_vector(w) for w in word.split(' ')],
-            axis=0)
+        return np.mean([self.fasttext_model.get_word_vector(w) for w in word.split(' ')], axis=0)
 
     def get_tokens_fasttext_vectors(self, tokens):
-        vector = torch.full(
-            (self.max_ocr_length, self.fasttext_model.get_dimension()),
-            fill_value=self.PAD_INDEX,
-            dtype=torch.float)
+        vector = torch.full((self.max_ocr_length, self.fasttext_model.get_dimension()),
+                            fill_value=self.PAD_INDEX,
+                            dtype=torch.float)
         tokens = [self.word_tokenize(tmp) for tmp in tokens]
         for idx, token in enumerate(tokens):
             vector[idx] = torch.from_numpy(self.get_fasttext_single_word(token))
@@ -189,8 +176,7 @@ class BaseInfoCpler(object):
         return self.UNK_INDEX
 
     def _init_tokens(self):
-        self.tokenizer = BertTokenizer.from_pretrained(
-            'bert-base-uncased', do_lower_case=True)
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
         self.PAD_TOKEN = '<pad>'
         self.SOS_TOKEN = '<s>'
         self.EOS_TOKEN = '</s>'

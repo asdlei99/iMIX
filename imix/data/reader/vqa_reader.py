@@ -14,6 +14,7 @@ from ..utils.tokenization import BertTokenizer
 from .base_reader import BaseDataReader
 from ..utils.io import data_dump
 
+
 class VQAReader(IMIXDataReader):
 
     def __init__(self, cfg):

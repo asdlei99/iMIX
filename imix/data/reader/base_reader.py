@@ -46,8 +46,7 @@ class IMIXDataReader(BaseDataReader):
         for data in self.splits:
             self.mix_features_dir.append(cfg.mix_features[data])
             self.mix_annotations_path.append(cfg.mix_annotations[data])
-            annotations_single_split = np.load(
-                cfg.mix_annotations[data], allow_pickle=True)[1:]
+            annotations_single_split = np.load(cfg.mix_annotations[data], allow_pickle=True)[1:]
             self.mix_annotations.extend(annotations_single_split)
             self.item_splits.extend([data] * len(annotations_single_split))
             if self.has_mix_global and self.if_global:
@@ -62,8 +61,7 @@ class IMIXDataReader(BaseDataReader):
             for mix_feature_dir in set(self.mix_features_dir):
                 self.feature_txns.append(lmdb.open(mix_feature_dir).begin())
             for mix_feature_global_dir in set(self.mix_global_features_dir):
-                self.feature_global_txns.append(
-                    lmdb.open(mix_feature_global_dir).begin())
+                self.feature_global_txns.append(lmdb.open(mix_feature_global_dir).begin())
             for mix_feature_ocr_dir in set(self.mix_ocr_features_dir):
                 self.feature_ocr_txns.append(lmdb.open(mix_feature_ocr_dir).begin())
         else:
@@ -72,9 +70,7 @@ class IMIXDataReader(BaseDataReader):
                 mix_features_dir_tmp = self.mix_features_dir[self.splits.index(split)]
                 names = os.listdir(mix_features_dir_tmp)
                 for name in names:
-                    self.features_pathes[split + '_' +
-                                         name.split('.pth')[0]] = os.path.join(
-                        mix_features_dir_tmp, name)
+                    self.features_pathes[split + '_' + name.split('.pth')[0]] = os.path.join(mix_features_dir_tmp, name)
         # self.mix_annotations = self.mix_annotations[:20]
 
     def get_featureinfo_from_txns(self, txns, key):

@@ -9,9 +9,7 @@ from .decoder_mix import VisualDialogueHead, DiscQtDecoderHead, DiscByRoundDecod
     LanguageDecoder
 
 __all__ = [
-    'ClassifierHead', 'BertClassifierHead', 'MLPClassiferHead',
-    'LogitClassifierHead', 'LCGNClassiferHead', 'TripleLinearHead',
-    'VisualDialogueHead', 'DiscQtDecoderHead', 'DiscByRoundDecoderHead',
-    'WeightNormClassifierHead', 'LanguageDecoderHead', 'LanguageDecoder',
-    'R2CHead', 'UNITERHead'
+    'ClassifierHead', 'BertClassifierHead', 'MLPClassiferHead', 'LogitClassifierHead', 'LCGNClassiferHead',
+    'TripleLinearHead', 'VisualDialogueHead', 'DiscQtDecoderHead', 'DiscByRoundDecoderHead', 'WeightNormClassifierHead',
+    'LanguageDecoderHead', 'LanguageDecoder', 'R2CHead', 'UNITERHead'
 ]

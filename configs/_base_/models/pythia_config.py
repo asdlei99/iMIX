@@ -33,18 +33,14 @@ model = dict(
             type='ImageFeatureEmbedding',
             img_dim=2048,
             question_dim=2048,
-            modal_combine=dict(
-                type='non_linear_element_multiply',
-                params=dict(dropout=0, hidden_dim=5000)),
+            modal_combine=dict(type='non_linear_element_multiply', params=dict(dropout=0, hidden_dim=5000)),
             normalization='softmax',
             transform=dict(type='linear', params=dict(out_dim=1))),
         dict(
             type='ImageFeatureEmbedding',
             img_dim=2048,
             question_dim=2048,
-            modal_combine=dict(
-                type='non_linear_element_multiply',
-                params=dict(dropout=0, hidden_dim=5000)),
+            modal_combine=dict(type='non_linear_element_multiply', params=dict(dropout=0, hidden_dim=5000)),
             normalization='softmax',
             transform=dict(type='linear', params=dict(out_dim=1))),
     ],
@@ -56,10 +52,5 @@ model = dict(
         dropout=0,
         hidden_dim=5000,
     ),
-    head=dict(
-        type='LogitClassifierHead',
-        in_dim=5000,
-        out_dim=3129,
-        img_hidden_dim=5000,
-        text_hidden_dim=300))
+    head=dict(type='LogitClassifierHead', in_dim=5000, out_dim=3129, img_hidden_dim=5000, text_hidden_dim=300))
 loss = dict(type='LogitBinaryCrossEntropy')

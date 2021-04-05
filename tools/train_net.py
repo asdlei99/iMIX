@@ -16,7 +16,6 @@ from imix.utils_imix.launch import launch as ddp_launch
 
 from imix.utils_imix.config import Config as imix_config
 
-
 # import argparse
 # import torch
 # from imix.utils.file_io import PathManager
@@ -119,4 +118,4 @@ if __name__ == '__main__':
         nnodes=args.nnodes,
         master_addr=args.master_addr,
         master_port=args.master_port,
-        run_fn_args=(args,))
+        run_fn_args=(args, ))

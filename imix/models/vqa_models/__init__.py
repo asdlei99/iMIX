@@ -17,6 +17,6 @@ from .cmrin import CMRIN
 from .uniter import UNITER
 
 __all__ = [
-    'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN',
-    'VilBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC', 'CMRIN', 'UNITER'
+    'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VilBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
+    'CMRIN', 'UNITER'
 ]

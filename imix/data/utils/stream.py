@@ -7,6 +7,7 @@ import collections
 from collections import OrderedDict
 from copy import deepcopy
 
+
 class ItemFeature(OrderedDict):
     """ItemFeature is the basic stream form of data. All datasets in MIX should
     be changed into an object of ItemFeature.

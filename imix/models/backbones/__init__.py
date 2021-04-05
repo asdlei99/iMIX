@@ -11,7 +11,6 @@ from .resc_backbone import ReSC_BACKBONE
 from .cmrin_backbone import CMRIN_BACKBONE
 
 __all__ = [
-    'ImageFeatureEmbedding', 'MMT', 'R2C_BACKBONE', 'CAGRAPH_BACKBONE',
-    'LCGN_BACKBONE', 'VISDIALPRINCIPLES_BACKBONE', 'TwoBranchEmbedding',
-    'BAN_BACKBONE', 'HGL_BACKBONE', 'ReSC_BACKBONE', 'CMRIN_BACKBONE'
+    'ImageFeatureEmbedding', 'MMT', 'R2C_BACKBONE', 'CAGRAPH_BACKBONE', 'LCGN_BACKBONE', 'VISDIALPRINCIPLES_BACKBONE',
+    'TwoBranchEmbedding', 'BAN_BACKBONE', 'HGL_BACKBONE', 'ReSC_BACKBONE', 'CMRIN_BACKBONE'
 ]

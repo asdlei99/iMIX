@@ -11,6 +11,7 @@ from ..builder import DATASETS
 import imix.utils_imix.distributed_info as comm
 from .base_loader import BaseLoader
 
+
 @DATASETS.register_module()
 class RefCOCODATASET(BaseLoader):
 

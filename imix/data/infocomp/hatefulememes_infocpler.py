@@ -19,10 +19,7 @@ class HatefulMemesInfoCpler(BaseInfoCpler):
     def __init__(self, cfg):
         self._init_tokens()
         self.default_max_length = cfg.default_max_length
-        self.transform = T.Compose([
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+        self.transform = T.Compose([T.ToTensor(), T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
     def complete_info(self, item_feature: ItemFeature):
         item_feature.img = self.transform(item_feature.img)

@@ -11,7 +11,6 @@ import logging
 # import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
 
-
 # VQA_PATH_CONFIG = yaml.load(open("datasets/dataset_vqa.yaml"))["dataset_configs"]
 
 # @DATASETS.register_module()
@@ -81,8 +80,7 @@ class VQADATASET(BaseLoader):
             'input_ids': itemFeature.input_ids,  # tokens - ids
             'input_mask': itemFeature.input_mask,  # tokens - mask
             'input_segment': itemFeature.input_segment,  # tokens - segments
-            'input_lm_label_ids':
-                itemFeature.input_lm_label_ids,  # tokens - mlm labels
+            'input_lm_label_ids': itemFeature.input_lm_label_ids,  # tokens - mlm labels
             'question_id': itemFeature.question_id,
             'image_id': itemFeature.image_id,
         }

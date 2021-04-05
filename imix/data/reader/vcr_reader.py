@@ -39,25 +39,19 @@ class VCRReader(IMIXDataReader):
 
         with open(os.path.join(cfg['coco_cate_dir']), 'r') as f:
             coco_cate = json.load(f)
-        self.coco_objects = ['__background__'] + [
-            x['name']
-            for k, x in sorted(coco_cate.items(), key=lambda x: int(x[0]))
-        ]
+        self.coco_objects = ['__background__'
+                             ] + [x['name'] for k, x in sorted(coco_cate.items(), key=lambda x: int(x[0]))]
         self.coco_obj_to_ind = {o: i for i, o in enumerate(self.coco_objects)}
 
         self.vocab = Vocabulary()
 
         self.img_dir = cfg.image_dir
-        self.annotation_pathes = {
-            split: cfg['annotations'][split] for split in splits
-        }
+        self.annotation_pathes = {split: cfg['annotations'][split] for split in splits}
         self.grp_items_dict = {
-            'answer': {
-                split: cfg['text_infos']['answer'][split] for split in splits
-            },
-            'rationale': {
-                split: cfg['text_infos']['rationale'][split] for split in splits
-            }
+            'answer': {split: cfg['text_infos']['answer'][split]
+                       for split in splits},
+            'rationale': {split: cfg['text_infos']['rationale'][split]
+                          for split in splits}
         }
 
         self.annotations = []
@@ -65,8 +59,7 @@ class VCRReader(IMIXDataReader):
         for split, annotation_path in self.annotation_pathes.items():
             annotations_now = self._load_jsonl(annotation_path)
             self.annotations.extend(annotations_now)
-            self.annotations_idx_split.extend(
-                copy.copy([split] * len(annotations_now)))
+            self.annotations_idx_split.extend(copy.copy([split] * len(annotations_now)))
 
         self.default_answer_idx = cfg.default_answer_idx
         self.annotations = self.annotations[:20]
@@ -90,20 +83,16 @@ class VCRReader(IMIXDataReader):
         #    item_feature[k] = v
 
         if self.mode == 'rationale':
-            conditioned_label = item_feature[
-                'answer_label'] if split != 'test' else self.default_answer_idx
+            conditioned_label = item_feature['answer_label'] if split != 'test' else self.default_answer_idx
             item_feature['question_only'] = copy.deepcopy(item_feature['question'])
-            item_feature['question'] = item_feature['question'] + item_feature[
-                'answer_choices'][conditioned_label]
+            item_feature['question'] = item_feature['question'] + item_feature['answer_choices'][conditioned_label]
             answer_conditioned = item_feature['answer_choices'][conditioned_label]
 
         answer_choices = item_feature['{}_choices'.format(self.mode)]
         dets2use, old_det_to_new_ind = self._get_dets_to_use(annotation)
 
         with h5py.File(self.grp_items_dict[self.mode][split], 'r') as h5:
-            grp_info = {
-                k: np.array(v, dtype=np.float16) for k, v in h5[str(item)].items()
-            }
+            grp_info = {k: np.array(v, dtype=np.float16) for k, v in h5[str(item)].items()}
 
         condition_key = self.default_answer_idx if split == 'test' and self.mode == 'rationale' else ''
         instance_dict = {}
@@ -126,15 +115,13 @@ class VCRReader(IMIXDataReader):
                 old_det_to_new_ind,
                 item_feature['objects'],
                 token_indexers=self.token_indexers,
-                pad_ind=0 if self.add_image_as_a_box else -1)
-            for i, answer in enumerate(answer_choices)
+                pad_ind=0 if self.add_image_as_a_box else -1) for i, answer in enumerate(answer_choices)
         ])
 
         instance_dict['answers'] = ListField(answers_tokenized)
         instance_dict['answer_tags'] = ListField(answer_tags)
         if split != 'test':
-            instance_dict['label'] = LabelField(
-                item_feature['{}_label'.format(self.mode)], skip_indexing=True)
+            instance_dict['label'] = LabelField(item_feature['{}_label'.format(self.mode)], skip_indexing=True)
         instance_dict['metadata'] = MetadataField({
             'annot_id': item_feature['annot_id'],
             'ind': item,
@@ -144,20 +131,14 @@ class VCRReader(IMIXDataReader):
         })
 
         image = load_image(os.path.join(self.img_dir, item_feature['img_fn']))
-        image, window, img_scale, padding = resize_image(
-            image, random_pad=self.is_train)
+        image, window, img_scale, padding = resize_image(image, random_pad=self.is_train)
         image = to_tensor_and_normalize(image)
         c, h, w = image.shape
 
-        with open(os.path.join(self.img_dir, item_feature['metadata_fn']),
-                  'r') as f:
+        with open(os.path.join(self.img_dir, item_feature['metadata_fn']), 'r') as f:
             metadata = json.load(f)
-        segms = np.stack([
-            make_mask(
-                mask_size=14,
-                box=metadata['boxes'][i],
-                polygons_list=metadata['segms'][i]) for i in dets2use
-        ])
+        segms = np.stack(
+            [make_mask(mask_size=14, box=metadata['boxes'][i], polygons_list=metadata['segms'][i]) for i in dets2use])
 
         # Chop off the final dimension, that"s the confidence
         boxes = np.array(metadata['boxes'])[dets2use, :-1]
@@ -165,18 +146,14 @@ class VCRReader(IMIXDataReader):
         boxes *= img_scale
         boxes[:, :2] += np.array(padding[:2])[None]
         boxes[:, 2:] += np.array(padding[:2])[None]
-        obj_labels = [
-            self.coco_obj_to_ind[item_feature['objects'][i]]
-            for i in dets2use.tolist()
-        ]
+        obj_labels = [self.coco_obj_to_ind[item_feature['objects'][i]] for i in dets2use.tolist()]
         if self.add_image_as_a_box:
             boxes = np.row_stack((window, boxes))
             segms = np.concatenate((np.ones((1, 14, 14), dtype=np.float32), segms), 0)
             obj_labels = [self.coco_obj_to_ind['__background__']] + obj_labels
 
         instance_dict['segms'] = ArrayField(segms, padding_value=0)
-        instance_dict['objects'] = ListField(
-            [LabelField(x, skip_indexing=True) for x in obj_labels])
+        instance_dict['objects'] = ListField([LabelField(x, skip_indexing=True) for x in obj_labels])
 
         if not np.all((boxes[:, 0] >= 0.) & (boxes[:, 0] < boxes[:, 2])):
             import ipdb
@@ -207,8 +184,7 @@ class VCRReader(IMIXDataReader):
 
         if self.only_use_relevant_dets:
             dets2use = np.zeros(len(annotation['objects']), dtype=bool)
-            people = np.array([x == 'person' for x in annotation['objects']],
-                              dtype=bool)
+            people = np.array([x == 'person' for x in annotation['objects']], dtype=bool)
             for sent in answer_choices + [question]:
                 for possibly_det_list in sent:
                     if isinstance(possibly_det_list, list):
@@ -225,8 +201,7 @@ class VCRReader(IMIXDataReader):
         # we will use these detections
         dets2use = np.where(dets2use)[0]
 
-        old_det_to_new_ind = np.zeros(
-            len(annotation['objects']), dtype=np.int32) - 1
+        old_det_to_new_ind = np.zeros(len(annotation['objects']), dtype=np.int32) - 1
         old_det_to_new_ind[dets2use] = np.arange(dets2use.shape[0], dtype=np.int32)
 
         # If we add the image as an extra box then the 0th will be the image.

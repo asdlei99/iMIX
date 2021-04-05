@@ -21,11 +21,7 @@ from .loaders.lxmertpretrain_loader import LXMERTPreTrainDATASET
 from .builder import build_imix_test_loader, build_imix_train_loader
 
 __all__ = [
-    'VQADATASET', 'GQADATASET', 'VizWizDATASET', 'ClevrDATASET',
-    'TEXTVQADATASET', 'STVQADATASET', 'OCRVQADATASET', 'VCRDATASET',
-    'RefCOCODATASET', 'RefCOCOpDATASET', 'RefCOCOgDATASET',
-    'RefClefDATASET', 'HatefulMemesDATASET', 'VisualEntailmentDATASET',
-    "LXMERTPreTrainDATASET",
-    'build_imix_train_loader', 'build_imix_test_loader'
+    'VQADATASET', 'GQADATASET', 'VizWizDATASET', 'ClevrDATASET', 'TEXTVQADATASET', 'STVQADATASET', 'OCRVQADATASET',
+    'VCRDATASET', 'RefCOCODATASET', 'RefCOCOpDATASET', 'RefCOCOgDATASET', 'RefClefDATASET', 'HatefulMemesDATASET',
+    'VisualEntailmentDATASET', 'LXMERTPreTrainDATASET', 'build_imix_train_loader', 'build_imix_test_loader'
 ]
-

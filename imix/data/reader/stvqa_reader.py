@@ -35,19 +35,17 @@ class STVQAReader(IMIXDataReader):
         item_feature.tokens = annotation['question_tokens']
         item_feature.img_id = annotation['image_id']
 
-        txn_split = "test_task3" if split == "test" else "train"
+        txn_split = 'test_task3' if split == 'test' else 'train'
 
-        feature_info = self.get_featureinfo_from_txns(
-            self.feature_txns,
-            txn_split + '/' + annotation['image_path'].split(".")[0])
+        feature_info = self.get_featureinfo_from_txns(self.feature_txns,
+                                                      txn_split + '/' + annotation['image_path'].split('.')[0])
         for k, v in feature_info.items():
             item_feature[k] = item_feature.get(k, v)
             #item_feature[k] = v if item_feature.get(
             #    k) is None else item_feature[k]
 
-        feature_ocr_info = self.get_featureinfo_from_txns(
-            self.feature_ocr_txns,
-            txn_split + '/' + annotation['image_path'].split(".")[0])
+        feature_ocr_info = self.get_featureinfo_from_txns(self.feature_ocr_txns,
+                                                          txn_split + '/' + annotation['image_path'].split('.')[0])
         feature_ocr_info['features_ocr'] = feature_ocr_info.pop('features')
         for k, v in feature_ocr_info.items():
             item_feature[k] = item_feature.get(k, v)
