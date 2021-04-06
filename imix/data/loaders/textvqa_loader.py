@@ -37,56 +37,56 @@ class TEXTVQADATASET(BaseLoader):
 
     def __getitem__(self, idx):
         idx = 0
-        itemFeature = self.reader[idx]
-        itemFeature = self.infocpler.completeInfo(itemFeature)
+        item_feature = self.reader[idx]
+        item_feature = self.infocpler.completeInfo(item_feature)
 
         if self.infocpler.if_bert:
             # TODO(jinliang+ce@lxc)
             item = {
-                'feature': itemFeature.features,  # feature - feature
-                'bbox': itemFeature.bbox,  # feature - bbox
-                'bbox_normalized': itemFeature.bbox_normalized,
-                'feature_global': itemFeature.features_global,
-                'feature_ocr': itemFeature.features_ocr,
-                'bbox_ocr': itemFeature.bbox_ocr,
-                'bbox_ocr_normalized': itemFeature.bbox_ocr_normalized,
-                'ocr_vectors_glove': itemFeature.ocr_vectors_glove,
-                'ocr_vectors_fasttext': itemFeature.ocr_vectors_fasttext,
-                'ocr_vectors_phoc': itemFeature.ocr_vectors_phoc,
-                'ocr_vectors_order': itemFeature.ocr_vectors_order,
-                'input_ids': itemFeature.input_ids,  # tokens - ids
-                'input_mask': itemFeature.input_mask,  # tokens - mask
-                'input_segment': itemFeature.input_segment,  # tokens - segments
-                'input_lm_label_ids': itemFeature.input_lm_label_ids,  # tokens - mlm labels
-                'question_id': itemFeature.question_id,
-                'image_id': itemFeature.image_id,
-                'train_prev_inds': itemFeature.train_prev_inds,
-                'train_loss_mask': itemFeature.train_loss_mask,
+                'feature': item_feature.features,  # feature - feature
+                'bbox': item_feature.bbox,  # feature - bbox
+                'bbox_normalized': item_feature.bbox_normalized,
+                'feature_global': item_feature.features_global,
+                'feature_ocr': item_feature.features_ocr,
+                'bbox_ocr': item_feature.bbox_ocr,
+                'bbox_ocr_normalized': item_feature.bbox_ocr_normalized,
+                'ocr_vectors_glove': item_feature.ocr_vectors_glove,
+                'ocr_vectors_fasttext': item_feature.ocr_vectors_fasttext,
+                'ocr_vectors_phoc': item_feature.ocr_vectors_phoc,
+                'ocr_vectors_order': item_feature.ocr_vectors_order,
+                'input_ids': item_feature.input_ids,  # tokens - ids
+                'input_mask': item_feature.input_mask,  # tokens - mask
+                'input_segment': item_feature.input_segment,  # tokens - segments
+                'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
+                'question_id': item_feature.question_id,
+                'image_id': item_feature.image_id,
+                'train_prev_inds': item_feature.train_prev_inds,
+                'train_loss_mask': item_feature.train_loss_mask,
             }
         else:
             # TODO(jinliang+ce@lxc)
             item = {
-                'feature': itemFeature.features,  # feature - feature
-                'bbox': itemFeature.bbox,  # feature - bbox
-                'bbox_normalized': itemFeature.bbox_normalized,
-                'feature_global': itemFeature.features_global,
-                'feature_ocr': itemFeature.features_ocr,
-                'bbox_ocr': itemFeature.bbox_ocr,
-                'bbox_ocr_normalized': itemFeature.bbox_ocr_normalized,
-                'ocr_vectors_glove': itemFeature.ocr_vectors_glove,
-                'ocr_vectors_fasttext': itemFeature.ocr_vectors_fasttext,
-                'ocr_vectors_phoc': itemFeature.ocr_vectors_phoc,
-                'ocr_vectors_order': itemFeature.ocr_vectors_order,
-                'input_ids': itemFeature.input_ids,  # tokens - ids
-                'input_mask': itemFeature.input_mask,  # tokens - mask
-                'question_id': itemFeature.question_id,
-                'image_id': itemFeature.image_id,
-                'train_prev_inds': itemFeature.train_prev_inds,
-                'train_loss_mask': itemFeature.train_loss_mask,
+                'feature': item_feature.features,  # feature - feature
+                'bbox': item_feature.bbox,  # feature - bbox
+                'bbox_normalized': item_feature.bbox_normalized,
+                'feature_global': item_feature.features_global,
+                'feature_ocr': item_feature.features_ocr,
+                'bbox_ocr': item_feature.bbox_ocr,
+                'bbox_ocr_normalized': item_feature.bbox_ocr_normalized,
+                'ocr_vectors_glove': item_feature.ocr_vectors_glove,
+                'ocr_vectors_fasttext': item_feature.ocr_vectors_fasttext,
+                'ocr_vectors_phoc': item_feature.ocr_vectors_phoc,
+                'ocr_vectors_order': item_feature.ocr_vectors_order,
+                'input_ids': item_feature.input_ids,  # tokens - ids
+                'input_mask': item_feature.input_mask,  # tokens - mask
+                'question_id': item_feature.question_id,
+                'image_id': item_feature.image_id,
+                'train_prev_inds': item_feature.train_prev_inds,
+                'train_loss_mask': item_feature.train_loss_mask,
             }
 
-        if itemFeature.answers_scores is not None:
-            item['answers_scores'] = itemFeature.answers_scores
+        if item_feature.answers_scores is not None:
+            item['answers_scores'] = item_feature.answers_scores
 
         if 'test' in self.splits or 'oneval' in self.splits:
             item['quesid2ans'] = self.infocpler.qa_id2ans

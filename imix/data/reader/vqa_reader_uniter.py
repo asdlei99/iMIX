@@ -255,7 +255,7 @@ class VQAReaderUNITER(BaseDataReader):
         target = _get_vqa_target(example, self.num_answers)
 
         attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
-        # itemFeature = ItemFeature()
+        # item_feature = ItemFeature()
 
         return input_ids, img_feat, img_pos_feat, attn_masks, target
 
@@ -267,25 +267,25 @@ class VQAReaderUNITER(BaseDataReader):
 
     # annotation = self.mix_annotations[item]
     # split = self.item_splits[item]
-    # itemFeature = ItemFeature()
-    # itemFeature.error = False
+    # item_feature = ItemFeature()
+    # item_feature.error = False
     # for k, v in annotation.items():
-    #   itemFeature[k] = v
+    #   item_feature[k] = v
     #
     # # TODO(jinliang)
-    # # itemFeature.tokens = annotation["question_tokens"]
-    # # itemFeature.answers = annotation["answers"]
-    # # itemFeature.all_answers = annotation["all_answers"]
+    # # item_feature.tokens = annotation["question_tokens"]
+    # # item_feature.answers = annotation["answers"]
+    # # item_feature.all_answers = annotation["all_answers"]
     # # print(item)
-    # # itemFeature.ocr_tokens = annotation["ocr_tokens"]
+    # # item_feature.ocr_tokens = annotation["ocr_tokens"]
     #
     # if split is not 'test':
-    #   itemFeature.answers = annotation['answers']
-    #   itemFeature.all_answers = annotation['all_answers']
+    #   item_feature.answers = annotation['answers']
+    #   item_feature.all_answers = annotation['all_answers']
     #
     #
-    # itemFeature.tokens = annotation['question_tokens']
-    # itemFeature.img_id = annotation['image_id']
+    # item_feature.tokens = annotation['question_tokens']
+    # item_feature.img_id = annotation['image_id']
     # if self.default_feature:
     #   feature_info = None
     #   for txn in self.feature_txns:
@@ -301,16 +301,16 @@ class VQAReaderUNITER(BaseDataReader):
     #       feature_global_info['global_feature_path'] = feature_global_info.pop('feature_path')
     #       feature_global_info['global_features'] = feature_global_info.pop('features')
     #   if feature_info is None or feature_global_info is None:
-    #     itemFeature.error = True
-    #     itemFeature.feature = np.random.random((100, 2048))
-    #     itemFeature.global_feature = np.random.random((100, 2048))
-    #     return itemFeature
+    #     item_feature.error = True
+    #     item_feature.feature = np.random.random((100, 2048))
+    #     item_feature.global_feature = np.random.random((100, 2048))
+    #     return item_feature
     #
     #   for k, v in feature_info.items():
-    #     itemFeature[k] = v
+    #     item_feature[k] = v
     #   for k, v in feature_global_info.items():
-    #     itemFeature[k] = v
-    #   return itemFeature
-    # feature_path = self.features_pathes[split + '_' + str(itemFeature.img_id)]
-    # itemFeature.feature = torch.load(feature_path)[0]
-    # return itemFeature
+    #     item_feature[k] = v
+    #   return item_feature
+    # feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
+    # item_feature.feature = torch.load(feature_path)[0]
+    # return item_feature

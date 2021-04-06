@@ -38,8 +38,8 @@ class VQAReader(IMIXDataReader):
         # item_feature.ocr_tokens = annotation["ocr_tokens"]
 
         # if split != 'test':
-        #     itemFeature.answers = annotation['answers']
-        #     itemFeature.all_answers = annotation['all_answers']
+        #     item_feature.answers = annotation['answers']
+        #     item_feature.all_answers = annotation['all_answers']
 
         item_feature.tokens = annotation['question_tokens']
         item_feature.img_id = annotation['image_id']

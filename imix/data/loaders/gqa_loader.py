@@ -51,41 +51,41 @@ class GQADATASET(BaseLoader):
 
     def __getitem__(self, idx):
         # idx = 0
-        itemFeature = self.reader[idx]
-        itemFeature = self.infocpler.completeInfo(itemFeature)
+        item_feature = self.reader[idx]
+        item_feature = self.infocpler.completeInfo(item_feature)
 
         # Only test for GQA LCGN ########## TODO zhangrunze
         feature = torch.zeros([36, 2048], dtype=torch.float)
         bbox = torch.zeros([36, 4], dtype=torch.float)
-        for idx in range(itemFeature.features.shape[0]):
-            bbox[idx] = torch.tensor(itemFeature.bbox[idx])
-            feature[idx] = torch.tensor(itemFeature.features[idx])
-        itemFeature.bbox = bbox
-        itemFeature.features = feature
+        for idx in range(item_feature.features.shape[0]):
+            bbox[idx] = torch.tensor(item_feature.bbox[idx])
+            feature[idx] = torch.tensor(item_feature.features[idx])
+        item_feature.bbox = bbox
+        item_feature.features = feature
         ###################################################
 
         # TODO(jinliang+ce@lxc)
         item = {
-            'feature': itemFeature.features,  # feature - feature
-            'cls_prob': itemFeature.cls_prob,  # 1601 cls_prob
-            'bbox': itemFeature.bbox,  # feature - bbox
-            'image_dim': itemFeature.num_boxes,  # feature - bbox_Num
-            'input_ids': itemFeature.input_ids,  # tokens - ids
-            'questionLengths': itemFeature.tokens_len,
-            'input_mask': itemFeature.input_mask,  # tokens - mask
-            'input_segment': itemFeature.input_segment,  # tokens - segments
-            'input_lm_label_ids': itemFeature.input_lm_label_ids,  # tokens - mlm labels
-            'question_id': itemFeature.question_id,
-            'image_id': itemFeature.image_id,
+            'feature': item_feature.features,  # feature - feature
+            'cls_prob': item_feature.cls_prob,  # 1601 cls_prob
+            'bbox': item_feature.bbox,  # feature - bbox
+            'image_dim': item_feature.num_boxes,  # feature - bbox_Num
+            'input_ids': item_feature.input_ids,  # tokens - ids
+            'questionLengths': item_feature.tokens_len,
+            'input_mask': item_feature.input_mask,  # tokens - mask
+            'input_segment': item_feature.input_segment,  # tokens - segments
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'question_id': item_feature.question_id,
+            'image_id': item_feature.image_id,
         }
 
-        if itemFeature.answers_scores is not None:
-            item['answers_scores'] = itemFeature.answers_scores
-        # return itemFeature.feature, itemFeature.input_ids, itemFeature.answers_scores, itemFeature.input_mask
+        if item_feature.answers_scores is not None:
+            item['answers_scores'] = item_feature.answers_scores
+        # return item_feature.feature, item_feature.input_ids, item_feature.answers_scores, item_feature.input_mask
 
         if 'test' in self.splits or 'oneval' in self.splits:
             item['quesid2ans'] = self.infocpler.qa_id2ans
 
         return remove_None_value_elements(item)
 
-        # return itemFeature
+        # return item_feature
