@@ -3,15 +3,16 @@ author: lxc
 created time: 2021/1/26
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
 import json
+import os
+import pickle
+
+import lmdb
+import numpy as np
 from PIL import Image
-from .base_reader import IMIXDataReader
+
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class HatefulMemesReader(IMIXDataReader):

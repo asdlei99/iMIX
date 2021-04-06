@@ -1,13 +1,11 @@
-import torch
 from collections import defaultdict
-# from ..vqadata.stream import ItemFeature
-import logging
-import numpy as np
 
-from ..utils.tokenization import BertTokenizer
+import numpy as np
+import torch
+
+from ..utils.common import VocabDict
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
-from ..utils.common import VocabDict
 
 
 class TextVQAInfoCpler(BaseInfoCpler):
@@ -81,10 +79,13 @@ class TextVQAInfoCpler(BaseInfoCpler):
         itemFeature.ocr_vectors_fasttext = self.get_tokens_fasttext_vectors(ocr_tokens)
 
         # ocr features and bboxes
-        features_ocr = torch.zeros((self.max_ocr_length, itemFeature.features_ocr.shape[1] if \
-            itemFeature.features_ocr is not None else 2048), dtype=torch.float)
-        bbox_ocr_normalized = torch.zeros((self.max_ocr_length, itemFeature.ocr_normalized_boxes.shape[1] if \
-            itemFeature.ocr_normalized_boxes is not None else 4), dtype=torch.float)
+        features_ocr = torch.zeros(
+            (self.max_ocr_length, itemFeature.features_ocr.shape[1] if itemFeature.features_ocr is not None else 2048),
+            dtype=torch.float)
+        bbox_ocr_normalized = torch.zeros(
+            (self.max_ocr_length,
+             itemFeature.ocr_normalized_boxes.shape[1] if itemFeature.ocr_normalized_boxes is not None else 4),
+            dtype=torch.float)
         if itemFeature.features_ocr is not None:
             limit = min(self.max_ocr_length, len(itemFeature.features_ocr))
             features_ocr[:limit] = torch.tensor(itemFeature.features_ocr[:limit])

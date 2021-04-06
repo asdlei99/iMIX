@@ -1,26 +1,13 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
 import os
+
+import torch
+import torch.nn as nn
+from transformers.modeling_bert import (ACT2FN, BertAttention, BertConfig, BertEmbeddings, BertIntermediate, BertLayer,
+                                        BertOutput, BertPooler, BertPredictionHeadTransform, BertPreTrainedModel,
+                                        BertSelfAttention, BertSelfOutput)
+
 from imix.utils_imix.config import ToExpanduser
-import logging
-from copy import deepcopy
-import pickle
-import math
-from transformers.modeling_bert import (
-    ACT2FN,
-    BertAttention,
-    BertConfig,
-    BertEmbeddings,
-    BertIntermediate,
-    BertLayer,
-    BertOutput,
-    BertPooler,
-    BertPredictionHeadTransform,
-    BertPreTrainedModel,
-    BertSelfAttention,
-    BertSelfOutput,
-)
+from ..builder import ENCODER
 
 
 class GeLU(nn.Module):
@@ -448,7 +435,7 @@ class LXMERTForPretraining(nn.Module):
 
         lang_prediction_scores, cross_relationship_score = self.cls(lang_output, pooled_output)
 
-        ## KEEP TRACK OF OUTPUTS HERE
+        # KEEP TRACK OF OUTPUTS HERE
         output = {
             'lang_prediction_scores': lang_prediction_scores,
             'cross_relationship_score': cross_relationship_score,
@@ -489,7 +476,7 @@ class LXMERTForClassification(nn.Module):
         self.bert = LXMERTBase.from_pretrained(
             self.config['bert_model_name'],
             config=self.bert_config,
-            cache_dir=ToExpanduser.modify_path(os.path.join('~/.cache/torch', 'transformers'.format(-1))),
+            cache_dir=ToExpanduser.modify_path(os.path.join('~/.cache/torch', 'transformers')),
         )
 
         self.training_head_type = self.config['training_head_type']

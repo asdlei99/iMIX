@@ -1,11 +1,9 @@
-import torch
 from collections import defaultdict
-# from ..vqadata.stream import ItemFeature
-import logging
+import torch
 
-from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
+from ..utils.tokenization import BertTokenizer
 
 #WORD_MASK_RATIO = 0.15
 #MAX_SEQ_LENGTH = 14
@@ -25,8 +23,7 @@ class GQAInfoCpler(BaseInfoCpler):
         self.max_seq_length = cfg.get('max_seg_lenth', 14)
         self.word_mask_ratio = cfg.get('word_mask_ratio', 0.15)
 
-        self.vocab_name = cfg.get('vocab_name',
-                                  'vocabulary_gqa')  ### bert for vocabulart_100k
+        self.vocab_name = cfg.get('vocab_name', 'vocabulary_gqa')  # bert for vocabulart_100k
         self.vocab_path = cfg['mix_vocab'][self.vocab_name]
 
         self.vocab_answer_name = cfg.get('vocab_answer_name', 'answers_gqa')

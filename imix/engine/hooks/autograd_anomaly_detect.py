@@ -1,6 +1,7 @@
+from torch.autograd import set_detect_anomaly
+
 from .base_hook import HookBase
 from .builder import HOOKS
-from torch.autograd import set_detect_anomaly
 
 
 @HOOKS.register_module()

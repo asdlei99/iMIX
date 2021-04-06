@@ -1,18 +1,8 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
 import torch
-import numpy as np
-import math
-import torch.nn.functional as F
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
+
+from ..builder import VQA_MODELS
+from ..encoder import ViLBERTForClassification, ViLBERTForPretraining
 from .base_model import BaseModel
-from ..encoder import ViLBERTForPretraining, ViLBERTForClassification
 
 
 @VQA_MODELS.register_module()
@@ -90,8 +80,8 @@ class VilBERT(BaseModel):
             'ans': answers
         }
 
-    def get_optimizer_parameters(self, config):
-        return get_optimizer_parameters_for_bert(self.model, config)
+    # def get_optimizer_parameters(self, config):
+    #     return get_optimizer_parameters_for_bert(self.model, config)
 
     def forward_train(self, data):
         params = self.get_image_and_text_features(data)

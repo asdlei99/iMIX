@@ -3,12 +3,9 @@ author: lxc
 created time: 2021/1/11
 """
 
-import torch
 import numpy as np
-from collections import defaultdict
-import logging
+from torchvision import transforms as T
 
-from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
 from .refcoco2_infocpler import RefCOCOInfoCpler
 from torchvision import transforms as T

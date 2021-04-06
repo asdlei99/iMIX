@@ -1,11 +1,22 @@
-import torch.nn as nn
-import torch
-from ..builder import EMBEDDING
-import numpy as np
 import json
-import torch.nn.functional as F
-from typing import Optional, Tuple, Type
 import math
+from typing import Optional, Tuple, Type
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.autograd import Variable
+from ..builder import EMBEDDING
+
+
+class Identity(nn.Module):
+
+    def __init__(self, **kwargs):
+        super().__init__()
+
+    def forward(self, x):
+        return x
 
 
 @EMBEDDING.register_module()
@@ -30,14 +41,14 @@ class TextEmbedding(nn.Module):
         if emb_type == 'identity':
             self.module = Identity()
             self.module.text_out_dim = self.embedding_dim
-        elif emb_type == 'vocab':
-            self.module = VocabEmbedding(**kwargs)
-            self.module.text_out_dim = self.embedding_dim
-        elif emb_type == 'projection':
-            self.module = ProjectionEmbedding(**kwargs)
-            self.module.text_out_dim = self.module.out_dim
-        elif emb_type == 'preextracted':
-            self.module = PreExtractedEmbedding(**kwargs)
+        # elif emb_type == 'vocab':
+        #     self.module = VocabEmbedding(**kwargs)
+        #     self.module.text_out_dim = self.embedding_dim
+        # elif emb_type == 'projection':
+        #     self.module = ProjectionEmbedding(**kwargs)
+        #     self.module.text_out_dim = self.module.out_dim
+        # elif emb_type == 'preextracted':
+        #     self.module = PreExtractedEmbedding(**kwargs)
         elif emb_type == 'bilstm':
             self.module = BiLSTMTextEmbedding(hidden_dim, embedding_dim, num_layers, dropout, **kwargs)
 
@@ -273,9 +284,7 @@ class share_Linear(nn.Module):
         return F.linear(input, self.weight, self.bias)
 
     def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + str(self.in_features) + ' -> ' \
-               + str(self.out_features) + ')'
+        return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
 
 
 class SAEmbedding(nn.Module):
@@ -411,7 +420,7 @@ class AttnPool1d(nn.Module):
         score = self.linear(query).transpose(-2, -1)
         if mask is not None:
             from imix.engine.organizer import get_masked_fill_value
-            #score.data.masked_fill_(mask.unsqueeze(1), -1e9)
+            # score.data.masked_fill_(mask.unsqueeze(1), -1e9)
             score.data.masked_fill_(mask.unsqueeze(1), get_masked_fill_value())
         self.p_attn = nn.functional.softmax(score, dim=-1)
 

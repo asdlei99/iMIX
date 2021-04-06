@@ -1,10 +1,10 @@
-import torch.nn as nn
 import torch
-from ..builder import HEADS
-import os
-import pickle
-from imix.models.combine_layers import ReLUWithWeightNormFC
+import torch.nn as nn
+
 from imix.models.backbones.lcgn_backbone import Linear
+from imix.models.combine_layers import ReLUWithWeightNormFC
+from ..builder import HEADS
+from torch.nn.utils.weight_norm import weight_norm
 
 
 @HEADS.register_module()
@@ -18,7 +18,8 @@ class ClassifierLayer(nn.Module):
         elif classifier_type == 'logit':
             self.module = LogitClassifier(in_dim, out_dim, **kwargs)
         elif classifier_type == 'language_decoder':
-            self.module = LanguageDecoder(in_dim, out_dim, **kwargs)
+            # self.module = LanguageDecoder(in_dim, out_dim, **kwargs)
+            self.module = None
         elif classifier_type == 'bert':
             self.module = BertClassifierHead(in_dim, out_dim, kwargs.get('config', None)).module
         elif classifier_type == 'mlp':

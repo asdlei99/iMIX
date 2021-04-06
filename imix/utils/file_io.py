@@ -11,6 +11,7 @@ from typing import IO, Any, Callable, Dict, List, MutableMapping, Optional, Unio
 from urllib.parse import urlparse
 
 import portalocker  # type: ignore
+
 from imix.utils.download import download
 
 __all__ = ['LazyPath', 'PathManager', 'get_cache_dir', 'file_lock']
@@ -76,10 +77,10 @@ class LazyPath(os.PathLike):
 
     def __init__(self, func: Callable[[], str]) -> None:
         """
-        Args:
-            func: a function that takes no arguments and returns the
-                actual path as a str. It will be called at most once.
-        """
+            Args:
+                func: a function that takes no arguments and returns the
+                    actual path as a str. It will be called at most once.
+            """
         self._func = func
         self._value: Optional[str] = None
 
@@ -136,9 +137,9 @@ class PathHandler:
 
     def _get_supported_prefixes(self) -> List[str]:
         """
-        Returns:
-            List[str]: the list of URI prefixes this PathHandler can support
-        """
+            Returns:
+                List[str]: the list of URI prefixes this PathHandler can support
+            """
         raise NotImplementedError()
 
     def _get_local_path(self, path: str, **kwargs: Any) -> str:
@@ -550,13 +551,13 @@ class PathManagerBase:
     def __init__(self) -> None:
         self._path_handlers: MutableMapping[str, PathHandler] = OrderedDict()
         """
-        Dict from path prefix to handler.
-        """
+            Dict from path prefix to handler.
+            """
 
         self._native_path_handler: PathHandler = NativePathHandler()
         """
-        A NativePathHandler that works on posix paths. This is used as the fallback.
-        """
+            A NativePathHandler that works on posix paths. This is used as the fallback.
+            """
 
     def __get_path_handler(self, path: Union[str, os.PathLike]) -> PathHandler:
         """Finds a PathHandler that supports the given path. Falls back to the

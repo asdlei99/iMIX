@@ -3,13 +3,15 @@ author: lxc
 created time: 2021/1/26
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
-from ..reader import VisualEntailmentReader as Reader
-from ..infocomp import VisualEntailmentInfoCpler as InfoCpler
-from ..builder import DATASETS
+
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
 from .base_loader import BaseLoader
+from ..builder import DATASETS
+from ..infocomp import VisualEntailmentInfoCpler as InfoCpler
+from ..reader import VisualEntailmentReader as Reader
 
 
 @DATASETS.register_module()

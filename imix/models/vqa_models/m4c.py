@@ -1,21 +1,14 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
-import torch
 import math
+
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
+
+from ..builder import VQA_MODELS, build_backbone, build_encoder, build_head
 from .base_model import BaseModel
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
-
-# from ..losses import M4CDecodingBCEWithMaskLoss
 
 
-### test forward####
+# test forward####
 def init_weights(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
@@ -52,20 +45,11 @@ class M4C(BaseModel):
         self.finetune_modules.append({
             'module': self.encoder_model[0].text_bert,
             'lr_scale': 0.1
-        }  #self.config.lr_scale_text_bert
-                                     )
+        })  # self.config.lr_scale_text_bert
 
-        self.finetune_modules.append({
-            'module': self.encoder_model[1],
-            'lr_scale': 0.1
-        }  #self.config.lr_scale_frcn
-                                     )
+        self.finetune_modules.append({'module': self.encoder_model[1], 'lr_scale': 0.1})  # self.config.lr_scale_frcn
 
-        self.finetune_modules.append({
-            'module': self.encoder_model[2],
-            'lr_scale': 0.1
-        }  #self.config.lr_scale_frcn
-                                     )
+        self.finetune_modules.append({'module': self.encoder_model[2], 'lr_scale': 0.1})  # self.config.lr_scale_frcn
 
         # self.init_weights()
         # apply smaller lr to pretrained Faster R-CNN fc7
@@ -101,7 +85,7 @@ class M4C(BaseModel):
 
     def _forward_txt_encoding(self, data, fwd_results):
         fwd_results['txt_inds'] = data['input_ids'].cuda()
-        text_len = data['input_ids'].shape[1] * torch.ones(data['input_ids'].shape[0])
+        # text_len = data['input_ids'].shape[1] * torch.ones(data['input_ids'].shape[0])
         # binary mask of valid text (question words) vs padding
         # fwd_results['txt_mask'] = _get_mask(text_len, data['input_ids'].size(1)).cuda()
         fwd_results['txt_mask'] = data['input_mask'].cuda()

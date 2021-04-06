@@ -1,5 +1,6 @@
-from typing import Dict, Optional
 import inspect
+from typing import Dict, Optional
+
 from tabulate import tabulate
 
 

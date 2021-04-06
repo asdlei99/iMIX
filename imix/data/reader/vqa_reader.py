@@ -3,16 +3,13 @@ author: lxc
 created time: 2020/8/18
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
 import pickle
-from .base_reader import IMIXDataReader
+
+import numpy as np
+import torch
+
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
-from .base_reader import BaseDataReader
-from ..utils.io import data_dump
+from .base_reader import IMIXDataReader
 
 
 class VQAReader(IMIXDataReader):
@@ -40,9 +37,9 @@ class VQAReader(IMIXDataReader):
         # print(item)
         # item_feature.ocr_tokens = annotation["ocr_tokens"]
 
-        if split is not 'test':
-            item_feature.answers = annotation['answers']
-            item_feature.all_answers = annotation['all_answers']
+        # if split != 'test':
+        #     itemFeature.answers = annotation['answers']
+        #     itemFeature.all_answers = annotation['all_answers']
 
         item_feature.tokens = annotation['question_tokens']
         item_feature.img_id = annotation['image_id']

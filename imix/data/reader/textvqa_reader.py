@@ -3,13 +3,8 @@ author: lxc
 created time: 2020/8/19
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
-from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class TextVQAReader(IMIXDataReader):
@@ -155,7 +150,8 @@ class TextVQAReader(IMIXDataReader):
 #
 #         # load image features and bounding boxes
 #         img_feats = np.load(os.path.join(self.frcnn_featrure_dirs[split_idx], img_id+".npy"))
-#         img_feats_info = np.load(os.path.join(self.frcnn_featrure_dirs[split_idx], img_id+"_info.npy"), allow_pickle=True)[()]
+#         img_feats_info = np.load(os.path.join(self.frcnn_featrure_dirs[split_idx], img_id+"_info.npy"),
+#         allow_pickle=True)[()]
 #         img_boxes = img_feats_info["boxes"]
 #         w = item_feature["img_width"]
 #         h = item_feature["img_height"]

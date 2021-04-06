@@ -1,27 +1,17 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 # TODO(jinliang):jinliang_imitate
-import contextlib
 import copy
-import io
 import itertools
 import json
 import logging
-import numpy as np
 import os
-import pickle
 from collections import OrderedDict
 
 import torch
-from .evaluator import DatasetEvaluator
 
-from tabulate import tabulate
-from imix.utils.file_io import PathManager
-# from iopath.common.file_io import PathManager
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-import json
-
-from imix.utils.logger import create_small_table
+from imix.utils.file_io import PathManager
+from .evaluator import DatasetEvaluator
 
 
 def get_predictions(func):
@@ -50,8 +40,8 @@ class VQAEvaluator(DatasetEvaluator):
         Args:
             dataset_name (str): The name of the dataset to be evaluated.
             cfg (Config): Config instance
-            distributed (True): if True,the results will be collected in all ranks and run evaluation in the main process,
-                Otherwize , will evaluate in the current process
+            distributed (True): if True,the results will be collected in all ranks and run evaluation in the main
+             process, Otherwize , will evaluate in the current process
             output_dir (str): optional,an output directory to save all results predicted on the dataset
         """
         self._dataset_name = dataset_name

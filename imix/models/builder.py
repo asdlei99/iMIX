@@ -2,13 +2,14 @@ from torch import nn
 import torch
 # from imix.utils.registry import Registry, build_from_cfg
 from imix.utils_imix.registry import Registry, build_from_cfg
-from imix.data.parallel.distributed import MMDistributedDataParallel
-from imix.data.parallel.data_parallel import MMDataParallel
+# from imix.data.parallel.distributed import MMDistributedDataParallel
+# from imix.data.parallel.data_parallel import MMDataParallel
 
 EMBEDDING = Registry('embedding')
 ENCODER = Registry('encoder')
 BACKBONES = Registry('backbone')
 COMBINE_LAYERS = Registry('combine_layers')
+POOLERS = Registry('pooler')
 HEADS = Registry('head')
 LOSSES = Registry('loss')
 VQA_MODELS = Registry('vqa_models')
@@ -44,6 +45,10 @@ def build_encoder(cfg):
     return build(cfg, ENCODER)
 
 
+def build_pooler(cfg):
+    return build(cfg, POOLERS)
+
+
 def build_backbone(cfg):
     """Build backbone."""
     return build(cfg, BACKBONES)
@@ -54,9 +59,9 @@ def build_combine_layer(cfg):
     return build(cfg, COMBINE_LAYERS)
 
 
-def build_head(cfg):
+def build_head(cfg, default_args=None):
     """Build head."""
-    return build(cfg, HEADS)
+    return build(cfg, HEADS, default_args)
 
 
 def build_loss(cfg):

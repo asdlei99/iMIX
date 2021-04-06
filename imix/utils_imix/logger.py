@@ -1,9 +1,12 @@
-from termcolor import colored
-import logging
 import functools
-import sys
+import logging
 import os.path as osp
+import sys
+
+from termcolor import colored
+
 from imix.utils.file_io import PathManager
+
 # from iopath.common.file_io import PathManager
 
 

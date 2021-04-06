@@ -1,8 +1,4 @@
 import torch
-from collections import defaultdict
-import logging
-
-from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
 
@@ -39,10 +35,14 @@ class STVQAInfoCpler(BaseInfoCpler):
         item_feature.ocr_vectors_fasttext = self.get_tokens_fasttext_vectors(ocr_tokens)
 
         # ocr features and bboxes
-        features_ocr = torch.zeros((self.max_ocr_length, item_feature.features_ocr.shape[1] if \
-            item_feature.features_ocr is not None else 2048), dtype=torch.float)
-        bbox_ocr_normalized = torch.zeros((self.max_ocr_length, item_feature.ocr_normalized_boxes.shape[1] if \
-            item_feature.ocr_normalized_boxes is not None else 4), dtype=torch.float)
+        features_ocr = torch.zeros(
+            (self.max_ocr_length,
+             item_feature.features_ocr.shape[1] if item_feature.features_ocr is not None else 2048),
+            dtype=torch.float)
+        bbox_ocr_normalized = torch.zeros(
+            (self.max_ocr_length,
+             item_feature.ocr_normalized_boxes.shape[1] if item_feature.ocr_normalized_boxes is not None else 4),
+            dtype=torch.float)
         if item_feature.features_ocr is not None:
             limit = min(self.max_ocr_length, len(item_feature.features_ocr))
             features_ocr[:limit] = torch.tensor(item_feature.features_ocr[:limit])
@@ -50,7 +50,7 @@ class STVQAInfoCpler(BaseInfoCpler):
         item_feature.features_ocr = features_ocr
         item_feature.ocr_normalized_boxes = bbox_ocr_normalized
 
-        #features and bboxes
+        # features and bboxes
         img_h = item_feature.image_height
         img_w = item_feature.image_width
         item_feature.bbox = self._get_bbox_from_normalized(item_feature.obj_normalized_boxes, img_h, img_w)

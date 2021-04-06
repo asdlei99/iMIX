@@ -1,10 +1,11 @@
-import torch
 import random
-import numpy as np
-from collections import defaultdict
 
-from ..utils.tokenization import BertTokenizer
+import numpy as np
+import torch
+
 from ..utils.stream import ItemFeature
+from ..utils.tokenization import BertTokenizer
+
 
 
 class LXMERTPreTrainInfoCpler(object):

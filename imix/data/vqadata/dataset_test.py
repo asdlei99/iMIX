@@ -1,10 +1,9 @@
-from models.builder import build_vqa_models
-from mmcv import Config
-from mmcv.utils import Registry, build_from_cfg
-import torch
-import numpy as np
 from collections import OrderedDict
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict
+import collections
+
+import numpy as np
+import torch
 
 
 class VQA2Dataset(torch.utils.data.Dataset):
@@ -33,7 +32,8 @@ class VQA2Dataset(torch.utils.data.Dataset):
             self.data = self.db
 
     def init_processors(self):
-        self.text_processor = Vocab
+        # self.text_processor = Vocab
+        self.text_processor = None
 
     def get(self, item):
         feature_path = item.get(self.feature_key, None)

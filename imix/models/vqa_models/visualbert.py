@@ -1,17 +1,7 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
 import torch
-import math
-import torch.nn.functional as F
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
 
-from ..encoder import VisualBERTForPretraining, VisualBERTForClassification
+from ..builder import VQA_MODELS
+from ..encoder import VisualBERTForClassification, VisualBERTForPretraining
 from .base_model import BaseModel
 
 
@@ -92,8 +82,8 @@ class VisualBERT(BaseModel):
 
         return data
 
-    def get_optimizer_parameters(self, config):
-        return get_optimizer_parameters_for_bert(self.model, config)
+    # def get_optimizer_parameters(self, config):
+    #     return get_optimizer_parameters_for_bert(self.model, config)
 
     def flatten_for_bert(self, sample_list, **kwargs):
         to_be_flattened = [
@@ -111,44 +101,44 @@ class VisualBERT(BaseModel):
         flattened = self.flatten(sample_list, to_be_flattened, to_be_flattened_dim)
         return flattened
 
-    def update_sample_list_based_on_head(self, data):
-        bert_input_ids = data['input_ids']
-        bert_input_mask = data['input_mask']
-        bert_input_type_ids = data['input_segment']
+    # def update_sample_list_based_on_head(self, data):
+    #     bert_input_ids = data['input_ids']
+    #     bert_input_mask = data['input_mask']
+    #     bert_input_type_ids = data['input_segment']
 
-        # if self.config.training_head_type == 'nlvr2':
-        #     bert_input_ids = torch.cat([bert_input_ids, bert_input_ids])
-        #     bert_input_mask = torch.cat([bert_input_mask, bert_input_mask])
-        #     bert_input_type_ids = torch.cat(
-        #         [bert_input_type_ids, bert_input_type_ids])
-        #
-        #     # image input
-        #     img0 = getattr(sample_list, 'img0', {})
-        #     image_info = getattr(img0, 'image_info_0', {})
-        #     image_dim_variable_0 = getattr(image_info, 'max_features', None)
-        #     image_feat_variable_0 = getattr(img0, 'image_feature_0', None)
-        #
-        #     img1 = getattr(sample_list, 'img1', {})
-        #     image_info = getattr(img1, 'image_info_0', {})
-        #     image_dim_variable_1 = getattr(image_info, 'max_features', None)
-        #     image_feat_variable_1 = getattr(img1, 'image_feature_0', None)
-        #
-        #     image_feat_variable = torch.cat(
-        #         [image_feat_variable_0, image_feat_variable_1])
-        #     image_dim_variable = torch.cat(
-        #         [image_dim_variable_0, image_dim_variable_1])
-        # else:
-        # image_info = getattr(data, 'image_info_0', {})
-        # image_dim_variable = getattr(image_info, 'max_features', None)
-        # image_feat_variable = getattr(sample_list, 'image_feature_0', None)
-        image_feat_variable = data['features']
-
-        sample_list.visual_embeddings = image_feat_variable
-        sample_list.image_dim = image_dim_variable
-        sample_list.input_ids = bert_input_ids
-        sample_list.input_mask = bert_input_mask
-        sample_list.token_type_ids = bert_input_type_ids
-        return sample_list
+    # if self.config.training_head_type == 'nlvr2':
+    #     bert_input_ids = torch.cat([bert_input_ids, bert_input_ids])
+    #     bert_input_mask = torch.cat([bert_input_mask, bert_input_mask])
+    #     bert_input_type_ids = torch.cat(
+    #         [bert_input_type_ids, bert_input_type_ids])
+    #
+    #     # image input
+    #     img0 = getattr(sample_list, 'img0', {})
+    #     image_info = getattr(img0, 'image_info_0', {})
+    #     image_dim_variable_0 = getattr(image_info, 'max_features', None)
+    #     image_feat_variable_0 = getattr(img0, 'image_feature_0', None)
+    #
+    #     img1 = getattr(sample_list, 'img1', {})
+    #     image_info = getattr(img1, 'image_info_0', {})
+    #     image_dim_variable_1 = getattr(image_info, 'max_features', None)
+    #     image_feat_variable_1 = getattr(img1, 'image_feature_0', None)
+    #
+    #     image_feat_variable = torch.cat(
+    #         [image_feat_variable_0, image_feat_variable_1])
+    #     image_dim_variable = torch.cat(
+    #         [image_dim_variable_0, image_dim_variable_1])
+    # else:
+    # image_info = getattr(data, 'image_info_0', {})
+    # image_dim_variable = getattr(image_info, 'max_features', None)
+    # image_feat_variable = getattr(sample_list, 'image_feature_0', None)
+    # image_feat_variable = data['features']
+    #
+    # sample_list.visual_embeddings = image_feat_variable
+    # sample_list.image_dim = image_dim_variable
+    # sample_list.input_ids = bert_input_ids
+    # sample_list.input_mask = bert_input_mask
+    # sample_list.token_type_ids = bert_input_type_ids
+    # return sample_list
 
     def add_custom_params(self, data):
         visual_embeddings = data['feature']

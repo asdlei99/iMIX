@@ -1,9 +1,10 @@
-import torch.nn as nn
-import torch
-from ..builder import EMBEDDING
 from collections import defaultdict
-import os
+
+import torch
+import torch.nn as nn
 from torchtext.vocab import GloVe
+
+from ..builder import EMBEDDING
 
 
 @EMBEDDING.register_module()

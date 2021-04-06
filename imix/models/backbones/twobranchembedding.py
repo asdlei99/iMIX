@@ -1,9 +1,11 @@
-import torch.nn as nn
+from typing import Optional, Tuple, Type
+
 import torch
+import torch.nn as nn
+from torchvision.ops.misc import FrozenBatchNorm2d
+
 from imix.models.embedding.textembedding import AttnPool1d, MovieMcanMultiHeadAttention
 from ..builder import BACKBONES
-from torchvision.ops.misc import FrozenBatchNorm2d
-from typing import Optional, Tuple, Type
 
 
 def conv1x1(in_planes, out_planes, stride=1):

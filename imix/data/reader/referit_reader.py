@@ -2,18 +2,17 @@
 author: lxc
 created time: 2021/1/11
 """
-import numpy as np
 import os
-import torch
-import lmdb
-import pickle
-from .base_reader import IMIXDataReader
-from ..utils.stream import ItemFeature
-from ..utils.image_utils import letterbox, random_affine
-from PIL import Image
-import cv2
-from scipy.io import loadmat
 import random
+
+import cv2
+import numpy as np
+from PIL import Image
+from scipy.io import loadmat
+
+from ..utils.image_utils import letterbox, random_affine
+from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class ReferitReader(IMIXDataReader):
@@ -59,7 +58,8 @@ class ReferitReader(IMIXDataReader):
 
         img = Image.open(img_path)
         mask = loadmat(mask_path)['segimg_t'].astype(np.uint8)
-        # imga = Image.fromarray(np.concatenate([np.array(img).transpose(2, 0, 1), mask[np.newaxis, :, :]]).transpose(1, 2, 0), mode="RGBA")
+        # imga = Image.fromarray(np.concatenate(
+        # [np.array(img).transpose(2, 0, 1), mask[np.newaxis, :, :]]).transpose(1, 2, 0), mode="RGBA")
 
         img = np.array(img)
         mask_where = np.where(mask == 0)
@@ -81,9 +81,10 @@ class ReferitReader(IMIXDataReader):
         return item_feature
 
     def augment(self, img, bbox, phrase):
-        h, w = img.shape[0], img.shape[1]
+        # h, w = img.shape[0], img.shape[1]
+        w = img.shape[1]
         if self.augment:
-            ## random horizontal flip
+            # random horizontal flip
             if self.augment_flip and random.random() > 0.5:
                 img = cv2.flip(img, 1)
                 bbox[0], bbox[2] = w - bbox[2] - 1, w - bbox[0] - 1
@@ -91,7 +92,7 @@ class ReferitReader(IMIXDataReader):
                     p.replace('right', '*&^special^&*').replace('left', 'right').replace('*&^special^&*', 'left')
                     for p in phrase
                 ]
-            ## random intensity, saturation change
+            # random intensity, saturation change
             if self.augment_hsv:
                 fraction = 0.50
                 img_hsv = cv2.cvtColor(cv2.cvtColor(img, cv2.COLOR_RGB2BGR), cv2.COLOR_BGR2HSV)
@@ -111,11 +112,11 @@ class ReferitReader(IMIXDataReader):
             img, _, ratio, dw, dh = letterbox(img, None, self.imsize)
             bbox[0], bbox[2] = bbox[0] * ratio + dw, bbox[2] * ratio + dw
             bbox[1], bbox[3] = bbox[1] * ratio + dh, bbox[3] * ratio + dh
-            ## random affine transformation
+            # random affine transformation
             if self.augment_affine:
                 img, _, bbox, M = random_affine(
                     img, None, bbox, degrees=(-5, 5), translate=(0.10, 0.10), scale=(0.90, 1.10))
-        else:  ## should be inference, or specified training
+        else:  # should be inference, or specified training
             img, _, ratio, dw, dh = letterbox(img, None, self.imsize)
             bbox[0], bbox[2] = bbox[0] * ratio + dw, bbox[2] * ratio + dw
             bbox[1], bbox[3] = bbox[1] * ratio + dh, bbox[3] * ratio + dh

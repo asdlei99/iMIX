@@ -65,7 +65,7 @@ class MMDataParallel(DataParallel):
         inputs, kwargs = self.scatter(inputs, kwargs, self.device_ids)
         return self.module.train_step(*inputs[0], **kwargs[0])
 
-        #return self.module.train_step[inputs[0][0], inputs[0][1]]
+        # return self.module.train_step[inputs[0][0], inputs[0][1]]
 
     def val_step(self, *inputs, **kwargs):
         if not self.device_ids:

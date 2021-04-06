@@ -1,8 +1,9 @@
 # TODO(jinliang):jinliang_copy_and_imitate
 from .base_hook import HookBase, PriorityStatus
+from .builder import HOOKS
 # from imix.utils.events import EventWriter
 from .periods import LogBufferWriter
-from .builder import HOOKS
+from .periods.tensorboard_logger import TensorboardLoggerHook
 
 
 @HOOKS.register_module()
@@ -17,7 +18,7 @@ class PeriodicLogger(HookBase):
             assert isinstance(logger, LogBufferWriter), logger
         self._loggers = loggers
         self._period_iter = log_config_period
-        self._level = PriorityStatus.LOW
+        self._level = PriorityStatus.LOWER
 
     def before_train(self):  # TODO(jinliang) delete?
         # TODO(jinliang) 通过self.trainer.cfg(EngineBase)获取iter间隔次数和epoch间隔次数
@@ -41,9 +42,13 @@ class PeriodicLogger(HookBase):
             logger.close()
 
     def after_train_epoch(self):  # TODO(jinliang): modify:write epoch log
-        if self.trainer.epoch == self.trainer.max_epoch - 1:
-            for logger in self._loggers:
+        for logger in self._loggers:
+            if isinstance(logger, TensorboardLoggerHook):
                 logger.write()
+
+        # if self.trainer.epoch == self.trainer.max_epoch - 1:
+        #     for logger in self._loggers:
+        #         logger.write()
 
     @property
     def level(self):

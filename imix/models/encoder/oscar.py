@@ -1,14 +1,11 @@
-from transformers.modeling_bert import (BertSelfAttention, BertAttention, BertEncoder, BertLayer, BertSelfOutput,
-                                        BertIntermediate, BertOutput, BertPooler, BertPreTrainedModel)
-
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
-import os
-import logging
-from copy import deepcopy
-import pickle
 import math
+
+import torch
+import torch.nn as nn
+from transformers.modeling_bert import (BertAttention, BertEncoder, BertIntermediate, BertLayer, BertOutput, BertPooler,
+                                        BertPreTrainedModel, BertSelfAttention, BertSelfOutput)
+
+from ..builder import ENCODER
 
 
 class CaptionBertSelfAttention(BertSelfAttention):

@@ -2,9 +2,8 @@
 author: lxc
 created time: 2021/1/11
 """
-from ..utils.stream import ItemFeature
+
 from .refcoco2_infocpler import RefCOCOInfoCpler
-from torchvision import transforms as T
 
 
 class RefCOCOpInfoCpler(RefCOCOInfoCpler):

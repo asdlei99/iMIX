@@ -1,9 +1,9 @@
-from ..base_hook import HookBase, PriorityStatus
-# from imix.utils.checkpoint import PeriodicCheckpointer
-from imix.utils_imix.checkpoint import PeriodicCheckpointer
-from ..builder import HOOKS
 # import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
+# from imix.utils.checkpoint import PeriodicCheckpointer
+from imix.utils_imix.checkpoint import PeriodicCheckpointer
+from ..base_hook import HookBase, PriorityStatus
+from ..builder import HOOKS
 
 
 @HOOKS.register_module()
@@ -11,7 +11,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._level = PriorityStatus.LOWER
+        self._level = PriorityStatus.LOW
 
     def before_train(self):
         self.max_iter = self.trainer.max_iter

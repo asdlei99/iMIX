@@ -1,5 +1,6 @@
 from collections import namedtuple
-from numpy import median, mean
+
+from numpy import mean, median
 
 Scalar = namedtuple('Scalar', ('data', 'iter'))
 

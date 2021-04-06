@@ -1,11 +1,7 @@
 import torch.nn as nn
-import torch
+
 from ..builder import BACKBONES
-import torch.nn.functional as F
-import numpy as np
-from ..combine_layers import ModalCombineLayer, BCNet, BiAttention, FCNet
-from torch.nn.utils.weight_norm import weight_norm
-from torch.autograd import Variable
+from ..combine_layers import BCNet, BiAttention, FCNet
 
 
 @BACKBONES.register_module()

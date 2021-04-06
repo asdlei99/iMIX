@@ -1,17 +1,9 @@
-import functools
-import logging
-import math
-import torch.nn as nn
 import torch
-from ..builder import BACKBONES
+import torch.nn as nn
 import torch.nn.functional as F
-from transformers.modeling_bert import (
-    BertConfig,
-    # BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
+from transformers.modeling_bert import BertConfig, BertEncoder, BertPreTrainedModel  # BertEmbeddings,; BertLayerNorm,
+
+from ..builder import BACKBONES
 
 
 @BACKBONES.register_module()

@@ -1,13 +1,11 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-import pickle
-# from imix.utils.checkpoint import Checkpointer
-from imix.utils.file_io import PathManager
-# import imix.utils.comm as comm
+import os.path as osp
+from typing import Any
+
+from torch.nn import Module
+
 import imix.utils_imix.distributed_info as comm
 from imix.utils_imix.checkpoint import Checkpointer
-from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
-from torch.nn import Module
-import os.path as osp
 
 # from .c2_model_loading import align_and_update_state_dicts #TODO(jinliang)
 
@@ -112,7 +110,7 @@ class imixCheckpointer(Checkpointer):
         :return:
         """
         file_format = osp.splitext(file_path)[-1]
-        if file_format is not '.pth':
+        if file_format != '.pth':
             raise Exception('the format of file_path:{} is {},currently only supports pth'.format(
                 file_path, file_format))
         checkpoint = super()._load_file_from_path(file_path=file_path)  # load native checkpoint

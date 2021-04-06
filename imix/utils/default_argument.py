@@ -1,15 +1,17 @@
 # TODO(jinliang): copy det2
 
 import argparse
-import sys
 import os
-from .collect_env import collect_env_info
+import sys
+
+import torch
+
 # import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-from .file_io import PathManager
+from .collect_env import collect_env_info
 from .env import seed_all_rng
+from .file_io import PathManager
 from .logger import setup_logger
-import torch
 
 
 def default_argument_parser(epilog=None):
@@ -96,7 +98,7 @@ def default_setup(cfg, args):
     if comm.is_main_process() and output_dir:
         # Note: some of our scripts may expect the existence of
         # config.yaml in output directory
-        path = os.path.join(output_dir, 'config.yaml')  #TODO(jinliang):very slow
+        path = os.path.join(output_dir, 'config.yaml')  # TODO(jinliang):very slow
         # with PathManager.open(path, "w") as f:
         #     f.write(cfg.dump())
         logger.info('Full config saved to {}'.format(path))

@@ -1,9 +1,10 @@
-import torch.nn.functional as F
-from ..builder import LOSSES
-from torch.autograd import Variable
-from .base_loss import BaseLoss
-import torch
 import numpy as np
+import torch
+import torch.nn.functional as F
+from torch.autograd import Variable
+
+from ..builder import LOSSES
+from .base_loss import BaseLoss
 
 
 @LOSSES.register_module()
@@ -53,9 +54,9 @@ class YOLOLoss(BaseLoss):
     def compute_loss(pred_anchor_list, bbox, anchors_full):
         gt_param, gi, gj, best_n_list = YOLOLoss.build_target(bbox, pred_anchor_list, anchors_full)
         for ii in range(len(pred_anchor_list)):
-            pred_anchor_list[ii] = pred_anchor_list[ii].view( \
-                pred_anchor_list[ii].size(0), 3, 5, pred_anchor_list[ii].size(2), pred_anchor_list[ii].size(3))
-        ## loss
+            pred_anchor_list[ii] = pred_anchor_list[ii].view(pred_anchor_list[ii].size(0), 3, 5,
+                                                             pred_anchor_list[ii].size(2), pred_anchor_list[ii].size(3))
+        # loss
         loss = YOLOLoss.calculate_loss(pred_anchor_list, gt_param, gi, gj, best_n_list)
         return loss
         # losses = {'loss': loss}
@@ -123,25 +124,23 @@ class YOLOLoss(BaseLoss):
 
                 anchor_idxs = [x + 3 * scale_ii for x in [0, 1, 2]]
                 anchors = [anchors_full[i] for i in anchor_idxs]
-                scaled_anchors = [(x[0] / (anchor_imsize / grid), \
-                                   x[1] / (anchor_imsize / grid)) for x in anchors]
+                scaled_anchors = [(x[0] / (anchor_imsize / grid), x[1] / (anchor_imsize / grid)) for x in anchors]
 
-                ## Get shape of gt box
+                # Get shape of gt box
                 gt_box = torch.FloatTensor(np.array([0, 0, gw, gh], dtype=np.float32)).unsqueeze(0)
-                ## Get shape of anchor box
+                # Get shape of anchor box
                 anchor_shapes = torch.FloatTensor(
                     np.concatenate((np.zeros((len(scaled_anchors), 2)), np.array(scaled_anchors)), 1))
-                ## Calculate iou between gt and anchor shapes
+                # Calculate iou between gt and anchor shapes
                 anch_ious += list(YOLOLoss.bbox_iou(gt_box, anchor_shapes))
-            ## Find the best matching anchor box
+            # Find the best matching anchor box
             best_n = np.argmax(np.array(anch_ious))
             best_scale = best_n // 3
 
             batch, grid = raw_coord.size(0), size // (32 / (2**best_scale))
             anchor_idxs = [x + 3 * best_scale for x in [0, 1, 2]]
             anchors = [anchors_full[i] for i in anchor_idxs]
-            scaled_anchors = [(x[0] / (anchor_imsize / grid), \
-                               x[1] / (anchor_imsize / grid)) for x in anchors]
+            scaled_anchors = [(x[0] / (anchor_imsize / grid), x[1] / (anchor_imsize / grid)) for x in anchors]
 
             gi = coord_list[best_scale][ii, 0].long()
             gj = coord_list[best_scale][ii, 1].long()

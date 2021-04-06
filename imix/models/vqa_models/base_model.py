@@ -1,8 +1,6 @@
+from abc import ABCMeta
+
 import torch.nn as nn
-from typing import Dict, Tuple
-from collections import OrderedDict
-import torch.distributed as dist
-import torch
 
 # class BaseModel(nn.Module):
 #
@@ -43,11 +41,6 @@ import torch
 #
 #       losses_log[name] = value.item()
 #     return loss, losses_log
-
-import torch.nn as nn
-from abc import abstractmethod, ABCMeta
-from typing import Dict, Tuple
-import torch
 
 
 class BaseModel(nn.Module, metaclass=ABCMeta):

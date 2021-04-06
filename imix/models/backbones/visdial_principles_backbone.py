@@ -1,10 +1,7 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
+
 from ..builder import BACKBONES
-import torch.nn.functional as F
-from ..combine_layers import ModalCombineLayer
-from torch.nn.utils.weight_norm import weight_norm
-from torch.autograd import Variable
 
 
 @BACKBONES.register_module()
@@ -19,7 +16,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         self.img_feature_size = img_feature_size
         self.dropout_fc = dropout_fc
         self.dropout = nn.Dropout(p=self.dropout)
-        ##q c att on img
+        # q c att on img
         self.Wq2 = nn.Sequential(self.dropout, nn.Linear(self.nhid * 2, self.nhid))
         self.Wi2 = nn.Sequential(self.dropout, nn.Linear(self.img_feature_size, self.nhid))
         self.Wall2 = nn.Linear(self.nhid, 1)
@@ -41,11 +38,11 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         self.Wq1 = nn.Sequential(self.dropout, nn.Linear(self.nhid, self.nhid))
         self.Wh1 = nn.Sequential(self.dropout, nn.Linear(self.nhid, self.nhid))
         self.Wqh1 = nn.Linear(self.nhid, 1)
-        ###cap att img
+        # cap att img
         self.Wc4 = nn.Sequential(self.dropout, nn.Linear(self.nhid * 2, self.nhid))
         self.Wi4 = nn.Sequential(self.dropout, nn.Linear(self.img_feature_size, self.nhid))
         self.Wall4 = nn.Linear(self.nhid, 1)
-        ##fusion
+        # fusion
         self.i2i = nn.Sequential(self.dropout, nn.Linear(self.img_feature_size, self.nhid))
         self.fusion_1 = nn.Sequential(
             nn.Dropout(p=self.dropout_fc), nn.Linear(self.nhid * 2 + self.img_feature_size + self.nhid, self.nhid),
@@ -108,7 +105,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
     def q_att_on_img(self, ques_feat, img_feat):
         batch_size = ques_feat.size(0)
         region_size = img_feat.size(1)
-        device = ques_feat.device
+        # device = ques_feat.device
         q_emb = self.Wq2(ques_feat).view(batch_size, -1, self.nhid)
         i_emb = self.Wi2(img_feat).view(batch_size, -1, self.nhid)
         all_score = self.Wall2(self.dropout(torch.tanh(i_emb * q_emb.repeat(1, region_size, 1)))).view(batch_size, -1)
@@ -118,18 +115,18 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
     def c_att_on_img(self, cap_feat, img_feat):
         batch_size = cap_feat.size(0)
         region_size = img_feat.size(1)
-        device = cap_feat.device
+        # device = cap_feat.device
         c_emb = self.Wc4(cap_feat).view(batch_size, -1, self.nhid)
         i_emb = self.Wi4(img_feat).view(batch_size, -1, self.nhid)
         all_score = self.Wall4(self.dropout(torch.tanh(i_emb * c_emb.repeat(1, region_size, 1)))).view(batch_size, -1)
         img_final_feat = torch.bmm(torch.softmax(all_score, dim=-1).view(batch_size, 1, -1), img_feat)
         return img_final_feat.view(batch_size, -1)
 
-    ################################################add h
+    # add h
     def ques_att_on_his(self, ques_feat, his_feat):
         batch_size = ques_feat.size(0)
         rnd = his_feat.size(1)
-        device = ques_feat.device
+        # device = ques_feat.device
         q_emb = self.Wq1(ques_feat).view(batch_size, -1, self.nhid)
         h_emb = self.Wh1(his_feat)
 
@@ -138,7 +135,7 @@ class VISDIALPRINCIPLES_BACKBONE(nn.Module):
         atted_his_feat = torch.bmm(weight.view(batch_size, 1, -1), his_feat)
         return atted_his_feat
 
-    #####################################################
+    #
 
     def forward(self, ques_encoded, cap_encoded, his_feat, q_output, c_output, ques_len, cap_len, ques_embed, cap_emb,
                 img, batch_size):

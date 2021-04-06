@@ -3,13 +3,15 @@ author: lxc
 created time: 2021/1/11
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
-from ..reader import ClevrReader as Reader
-from ..infocomp import ClevrInfoCpler as InfoCpler
-from ..builder import DATASETS
+
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
 from .base_loader import BaseLoader
+from ..builder import DATASETS
+from ..infocomp import ClevrInfoCpler as InfoCpler
+from ..reader import ClevrReader as Reader
 
 
 @DATASETS.register_module()

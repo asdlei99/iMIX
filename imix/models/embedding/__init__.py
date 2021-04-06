@@ -1,7 +1,7 @@
-from .wordembedding import WordEmbedding
-from .textembedding import TextEmbedding, BiLSTMTextEmbedding
-from .bertimgembedding import BertVisioLinguisticEmbeddings, BertImageFeatureEmbeddings
+from .bertimgembedding import BertImageFeatureEmbeddings, BertVisioLinguisticEmbeddings
+from .textembedding import BiLSTMTextEmbedding, TextEmbedding
 from .uniterembedding import UniterImageEmbeddings, UniterTextEmbeddings
+from .wordembedding import WordEmbedding
 
 __all__ = [
     'WordEmbedding', 'TextEmbedding', 'BertVisioLinguisticEmbeddings', 'BertImageFeatureEmbeddings',

@@ -1,20 +1,11 @@
-import functools
-import logging
-import math
-import torch.nn as nn
-import torch
-from ..builder import BACKBONES
 from collections import OrderedDict
+
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 from torch.nn.init import kaiming_normal, kaiming_uniform
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
+from torch.autograd import Variable
+from ..builder import BACKBONES
 
 
 def generate_coord(batch, height, width):
@@ -28,10 +19,17 @@ def generate_coord(batch, height, width):
     yv_ctr = (yv_min + yv_max) / 2
     hmap = torch.ones(height, width) * (1. / height)
     wmap = torch.ones(height, width) * (1. / width)
-    coord = torch.autograd.Variable(torch.cat([xv_min.unsqueeze(0), yv_min.unsqueeze(0),\
-        xv_max.unsqueeze(0), yv_max.unsqueeze(0),\
-        xv_ctr.unsqueeze(0), yv_ctr.unsqueeze(0),\
-        hmap.unsqueeze(0), wmap.unsqueeze(0)], dim=0).cuda())
+    data = [
+        xv_min.unsqueeze(0),
+        yv_min.unsqueeze(0),
+        xv_max.unsqueeze(0),
+        yv_max.unsqueeze(0),
+        xv_ctr.unsqueeze(0),
+        yv_ctr.unsqueeze(0),
+        hmap.unsqueeze(0),
+        wmap.unsqueeze(0)
+    ]
+    coord = torch.autograd.Variable(torch.cat(data, dim=0).cuda())
     coord = coord.unsqueeze(0).repeat(batch, 1, 1, 1)
     return coord
 
@@ -58,9 +56,9 @@ class CMRIN_BACKBONE(nn.Module):
         self.mstage = mstage
         self.convlstm = convlstm
         self.tunebert = tunebert
-        self.textdim = 768  #'bert-base-uncased'
+        self.textdim = 768  # 'bert-base-uncased'
 
-        ## Mapping module
+        # Mapping module
         self.mapping_lang = torch.nn.Sequential(
             nn.Linear(self.textdim, emb_size),
             nn.BatchNorm1d(emb_size),
@@ -145,7 +143,7 @@ class CMRIN_BACKBONE(nn.Module):
         batch_size = raw_flang.size(0)
         flangvisu = []
         for ii in range(len(fvisu)):
-            flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).\
+            flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1). \
                 repeat(1, 1, fvisu[ii].size(2), fvisu[ii].size(3))
             if self.coordmap:
                 coord = generate_coord(batch_size, fvisu[ii].size(2), fvisu[ii].size(3))
@@ -153,7 +151,7 @@ class CMRIN_BACKBONE(nn.Module):
             else:
                 flangvisu.append(torch.cat([fvisu[ii], flang_tile], dim=1))
 
-        ## fcn
+        # fcn
         intmd_fea, outbox = [], []
         for ii in range(len(fvisu)):
             intmd_fea.append(self.fcn_emb._modules[str(ii)](flangvisu[ii]))
@@ -206,6 +204,64 @@ class ConvBatchNormReLU(nn.Sequential):
 
     def forward(self, x):
         return super(ConvBatchNormReLU, self).forward(x)
+
+
+class ConvLSTMCell(nn.Module):
+
+    def __init__(self, input_size, input_dim, hidden_dim, kernel_size, bias):
+        """Initialize ConvLSTM cell.
+
+        Parameters
+        ----------
+        input_size: (int, int)
+            Height and width of input tensor as (height, width).
+        input_dim: int
+            Number of channels of input tensor.
+        hidden_dim: int
+            Number of channels of hidden state.
+        kernel_size: (int, int)
+            Size of the convolutional kernel.
+        bias: bool
+            Whether or not to add the bias.
+        """
+
+        super(ConvLSTMCell, self).__init__()
+
+        self.height, self.width = input_size
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+
+        self.kernel_size = kernel_size
+        self.padding = kernel_size[0] // 2, kernel_size[1] // 2
+        self.bias = bias
+
+        self.conv = nn.Conv2d(
+            in_channels=self.input_dim + self.hidden_dim,
+            out_channels=4 * self.hidden_dim,
+            kernel_size=self.kernel_size,
+            padding=self.padding,
+            bias=self.bias)
+
+    def forward(self, input_tensor, cur_state):
+        h_cur, c_cur = cur_state
+
+        combined = torch.cat([input_tensor, h_cur], dim=1)  # concatenate along channel axis
+
+        combined_conv = self.conv(combined)
+        cc_i, cc_f, cc_o, cc_g = torch.split(combined_conv, self.hidden_dim, dim=1)
+        i = torch.sigmoid(cc_i)
+        f = torch.sigmoid(cc_f)
+        o = torch.sigmoid(cc_o)
+        g = torch.tanh(cc_g)
+
+        c_next = f * c_cur + i * g
+        h_next = o * torch.tanh(c_next)
+
+        return h_next, c_next
+
+    def init_hidden(self, batch_size):
+        return (Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda(),
+                Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda())
 
 
 class ConvLSTM(nn.Module):
@@ -333,7 +389,7 @@ def mask_softmax(attn_score, word_mask, tempuature=10., clssep=False, lstm=False
                 word_mask_cp[ii, word_mask_cp[ii, :].sum() - 1] = 0
             else:
                 word_mask_cp[ii, 0] = 0
-                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  ## set one to 0 already
+                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  # set one to 0 already
     mask_score = score * word_mask_cp.float()
     mask_score = mask_score / (mask_score.sum(1) + 1e-8).view(mask_score.size(0), 1).expand(
         mask_score.size(0), mask_score.size(1))

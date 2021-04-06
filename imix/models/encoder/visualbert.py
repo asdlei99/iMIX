@@ -1,12 +1,13 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
-import os
 import logging
-import pickle
-from transformers.modeling_bert import (BertConfig, BertEmbeddings, BertEncoder, BertPreTrainedModel,
-                                        BertPredictionHeadTransform, BertPooler)
+import os
+from omegaconf import OmegaConf
+import torch
+import torch.nn as nn
+from transformers.modeling_bert import (BertConfig, BertEncoder, BertPooler, BertPredictionHeadTransform, BertLayer,
+                                        BertForPreTraining, BertPreTrainedModel)
+from copy import deepcopy
 from imix.models.embedding import BertVisioLinguisticEmbeddings
+from ..builder import ENCODER
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,7 @@ class VisualBERTForPretraining(nn.Module):
             self.bert = VisualBERTBase.from_pretrained(
                 self.config.bert_model_name,
                 config=self.bert_config,
-                cache_dir=os.path.join(get_mmf_cache_dir(), 'distributed_{}'.format(-1)),
+                cache_dir=os.path.join(self.config.cache_dir, 'distributed_{}'.format(-1)),  # TODO zrz cache_dir
                 visual_embedding_dim=self.config.visual_embedding_dim,
                 embedding_strategy=self.config.embedding_strategy,
                 bypass_transformer=self.config.bypass_transformer,
@@ -165,7 +166,7 @@ class VisualBERTForPretraining(nn.Module):
         else:
             bert_masked_lm = BertForPreTraining.from_pretrained(
                 self.config.bert_model_name,
-                cache_dir=os.path.join(get_mmf_cache_dir(), 'distributed_{}'.format(-1)),
+                cache_dir=os.path.join(self.connfig.cache_dir, 'distributed_{}'.format(-1)),  # todo zrz cache_dir
             )
         self.cls = deepcopy(bert_masked_lm.cls)
         self.loss_fct = nn.CrossEntropyLoss(ignore_index=-1)
@@ -259,7 +260,7 @@ class VisualBERTForClassification(nn.Module):
             self.bert = VisualBERTBase.from_pretrained(
                 self.config['bert_model_name'],
                 config=self.bert_config,
-                cache_dir=os.path.join('/home/zrz/.cache/torch', 'transformers'.format(-1)),
+                cache_dir=os.path.join('/home/zrz/.cache/torch', 'transformers'),
                 visual_embedding_dim=self.config['visual_embedding_dim'],
                 embedding_strategy=self.config['embedding_strategy'],
                 bypass_transformer=self.config['bypass_transformer'],

@@ -1,14 +1,16 @@
-import logging
-from contextlib import contextmanager
-import torch
-from ..utils_imix.registry import Registry, build_from_cfg
-from typing import Optional, Dict
-from ..utils_imix import distributed_info as comm
 import itertools
 import json
-import pickle as pkl
+import logging
 import os
-from abc import abstractmethod, ABCMeta
+import pickle as pkl
+from abc import ABCMeta, abstractmethod
+from contextlib import contextmanager
+from typing import Dict, Optional
+
+import torch
+
+from ..utils_imix import distributed_info as comm
+from ..utils_imix.registry import Registry, build_from_cfg
 
 METRICS = Registry('metric')
 DATASET_CONVERTER = Registry('DatasetConverter')
@@ -80,6 +82,25 @@ class PostProcessor(metaclass=ABCMeta):
     def process(self, *args, **kwargs):
         pass
 
+    @staticmethod
+    def list_to_tensor(list_data: list) -> torch.tensor:
+        # tensor_size = (len(list_data), list_data[0].shape[1])
+        if not isinstance(list_data[0], dict):
+            if len(list_data[0].shape) == 0:
+                tensor_size = (len(list_data), 1)
+            elif len(list_data[0].shape) == 1:
+                tensor_size = (len(list_data), list_data[0].shape[0])
+            else:
+                tensor_size = (len(list_data), list_data[0].shape[1])
+            tensor_dtype = list_data[0].dtype
+            tensor_data = torch.zeros(size=tensor_size, dtype=tensor_dtype)
+            for idx, data in enumerate(list_data):
+                tensor_data[idx] = data
+        else:
+            tensor_data = list_data
+
+        return tensor_data
+
 
 @POST_PROCESSOR.register_module()
 class Evaluator(PostProcessor):
@@ -114,6 +135,9 @@ class Evaluator(PostProcessor):
     @get_predictions_and_labels
     def process(self, *args, **kwargs):
         predictions, labels = kwargs['predictions'], kwargs['labels']
+        labels = self.list_to_tensor(labels)
+        predictions = self.list_to_tensor(predictions)
+
         eval_results = {}
         for metric_obj in self._metrics:
             eval_results[str(metric_obj)] = metric_obj.evaluate(predictions, labels)

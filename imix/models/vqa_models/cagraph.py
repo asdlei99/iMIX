@@ -1,10 +1,11 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
+import random
+
 import torch
-from .pythia import PYTHIA
+import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-import random
+
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder
 
 
 @VQA_MODELS.register_module()
@@ -14,19 +15,19 @@ class CAGRAPH(nn.Module):
         super(CAGRAPH, self).__init__()
         self.embedding_model = build_embedding(embedding)
         self.encoder = build_encoder(encoder)
-        self.backbone = build_backbone(backbone)  ###包括two_branch_embedding(MCAN), BERT
+        self.backbone = build_backbone(backbone)  # 包括two_branch_embedding(MCAN), BERT
 
         self.ques_hidden = self.backbone.init_hidden(batch_size)
         self.his_hidden = self.backbone.init_hidden(batch_size)
         self.real_hidden = self.backbone.init_hidden(batch_size)
-        self.wrong_hidden = self.backbone.init_hidden(batch_size)  ## question dataset
+        self.wrong_hidden = self.backbone.init_hidden(batch_size)  # question dataset
         self.nhid = 512
         self.img_embed = nn.Linear(2048, self.nhid)
 
     def forward_rnd(self, ques_emb, his_emb, img, ques_hidden, his_hidden, rnd):
 
-        b = img.size(0)
-        L = ques_emb.size(0)
+        # b = img.size(0)
+        # L = ques_emb.size(0)
         r_feat = img.contiguous().view(-1, 36, 2048)
         r_feat = r_feat / (r_feat.norm(p=2, dim=2, keepdim=True) + 1e-12).expand_as(r_feat)
         rcnn_feat = F.tanh(self.img_embed(r_feat))
@@ -45,18 +46,18 @@ class CAGRAPH(nn.Module):
         image = data['image']
         history = data['history']
         question = data['question']
-        answer = data['answer']
+        # answer = data['answer']
         answerT = data['answerT']
-        answerLen = data['answerLen']
+        # answerLen = data['answerLen']
         answerIdx = data['answerIdx']
-        questionL = data['questionL']
+        # questionL = data['questionL']
         opt_answerT = data['opt_answerT']
-        opt_answerLen = data['opt_answerLen']
+        # opt_answerLen = data['opt_answerLen']
         opt_answerIdx = data['opt_answerIdx']
 
         batch_size = question.size(0)
 
-        image = image.view(-1, 36, 2048)  #   image : batchx36x2048
+        image = image.view(-1, 36, 2048)  # image : batchx36x2048
         # img_input.data.resize_(image.size()).copy_(image)
         img_input = image
 
@@ -74,12 +75,12 @@ class CAGRAPH(nn.Module):
             ques = question[:, rnd, :].t()
             his = history[:, :rnd + 1, :].clone().view(-1, 24).t()  # his_length=24
 
-            ans = answer[:, rnd, :].t()
+            # ans = answer[:, rnd, :].t()
             tans = answerT[:, rnd, :].t()
             wrong_ans = opt_answerT[:, rnd, :].clone().view(-1, 9).t()  # ans_length=9
 
-            real_len = answerLen[:, rnd]
-            wrong_len = opt_answerLen[:, rnd, :].clone().view(-1)
+            # real_len = answerLen[:, rnd]
+            # wrong_len = opt_answerLen[:, rnd, :].clone().view(-1)
 
             # ques_input.resize_(ques.size()).copy_(ques)
             ques_input = ques
@@ -91,7 +92,7 @@ class CAGRAPH(nn.Module):
             # ans_target.resize_(tans.size()).copy_(tans)
             # wrong_ans_input.resize_(wrong_ans.size()).copy_(wrong_ans)
 
-            ans_input = ans
+            # ans_input = ans
             ans_target = tans
             wrong_ans_input = wrong_ans
 

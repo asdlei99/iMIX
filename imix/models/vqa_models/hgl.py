@@ -1,23 +1,7 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
 import torch
-import math
-import torch.nn.functional as F
-import allennlp
-from allennlp.modules import TextFieldEmbedder, Seq2SeqEncoder, FeedForward, InputVariationalDropout, TimeDistributed
-from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
-import torchvision
-from mmcv.ops import RoIAlign  ##TODO need to squeeze from mmdet(zhangrunze)
-from torchvision.models import resnet
-from .base_model import BaseModel
+
+from ..builder import VQA_MODELS
 from .r2c import R2C
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
 
 
 @VQA_MODELS.register_module()

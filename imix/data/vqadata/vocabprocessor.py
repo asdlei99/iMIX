@@ -1,6 +1,8 @@
-from .baseprocessor import BaseProcessor
-from ..builder import VOCAB
 import torch
+
+from ..builder import VOCAB
+from .baseprocessor import BaseProcessor
+
 # @PROCESSOR.register_module()
 # class SimpleSentenceProcessor(BaseProcessor):
 #     """Tokenizes a sentence and processes it.
@@ -69,9 +71,11 @@ class VocabProcessor(BaseProcessor):
                  **kwargs):
 
         # self.vocab = Vocab(*args, **config.vocab, **kwargs)
-        self.vocab = build_vocab(vocab)
+        # self.vocab = build_vocab(vocab)
+        self.vocab = None  # (TODO jinliang)
         self.max_length = self.MAX_LENGTH_DEFAULT
-        self.preprocessor = build_preprocessor(preprocessor)
+        # self.preprocessor = build_preprocessor(preprocessor)
+        self.preprocessor = None  # (TODO jinliang)
 
         # self._init_extras(config)
 

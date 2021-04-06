@@ -1,16 +1,17 @@
 import copy
+import itertools
 import logging
-from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
 import os.path as osp
 from collections import defaultdict
-import numpy as np
-import itertools
+from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
 
+import numpy as np
 import torch
 from torch.nn.modules import Module
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
 from imix.utils.file_io import PathManager
+
 # from iopath.common.file_io import PathManager
 
 __all__ = ['Checkpointer', 'PeriodicCheckpointer']

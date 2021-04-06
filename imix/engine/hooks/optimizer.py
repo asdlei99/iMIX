@@ -1,7 +1,8 @@
-from .base_hook import HookBase, PriorityStatus
-from torch.nn.utils import clip_grad
-from .builder import HOOKS
 from torch.cuda.amp.grad_scaler import GradScaler
+from torch.nn.utils import clip_grad
+
+from .base_hook import HookBase, PriorityStatus
+from .builder import HOOKS
 
 # @HOOKS.register_module()
 # class OptimizerHook(HookBase):

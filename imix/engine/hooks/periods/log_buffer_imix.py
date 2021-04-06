@@ -1,9 +1,11 @@
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
+from contextlib import contextmanager
+
 import torch
+
 from imix.utils_imix.config import imixEasyDict
 # from imix.utils.history_buffer import HistoryBuffer
 from imix.utils_imix.history_buffer import HistoryBuffer
-from contextlib import contextmanager
 
 Image = namedtuple('Image', ('name', 'data', 'iter_idx'))
 

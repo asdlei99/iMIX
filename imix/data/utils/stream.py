@@ -17,7 +17,7 @@ class ItemFeature(OrderedDict):
     """
 
     def __init__(self, init_dict=None):
-        if init_dict == None:
+        if init_dict is None:
             init_dict = {}
         super().__init__(init_dict)
         for key, value in init_dict.items():

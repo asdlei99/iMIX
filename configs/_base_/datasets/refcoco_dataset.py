@@ -17,7 +17,7 @@ reader_train_cfg = dict(
         refs_unc=data_root + 'refs(unc).p',
     ),
     datasets=train_datasets,  # used datasets
-    augment=False,  #True
+    augment=False,  # True
     is_train=True,
     img_size=256,
 )
@@ -55,7 +55,7 @@ train_data = dict(
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
-    samples_per_gpu=8,  #16
+    samples_per_gpu=8,  # 16
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",

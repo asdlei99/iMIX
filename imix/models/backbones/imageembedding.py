@@ -1,8 +1,9 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
+from torch.nn.utils.weight_norm import weight_norm
+
 from ..builder import BACKBONES
 from ..combine_layers import ModalCombineLayer
-from torch.nn.utils.weight_norm import weight_norm
 
 
 class AttentionLayer(nn.Module):

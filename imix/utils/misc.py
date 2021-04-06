@@ -19,21 +19,21 @@ def is_str(x):
 def import_modules_from_strings(imports, allow_failed_imports=False):
     """Import modules from the given list of strings.
 
-    Args:
-        imports (list | str | None): The given module names to be imported.
-        allow_failed_imports (bool): If True, the failed imports will return
-            None. Otherwise, an ImportError is raise. Default: False.
+      Args:
+          imports (list | str | None): The given module names to be imported.
+          allow_failed_imports (bool): If True, the failed imports will return
+              None. Otherwise, an ImportError is raise. Default: False.
 
-    Returns:
-        list[module] | module | None: The imported modules.
+      Returns:
+          list[module] | module | None: The imported modules.
 
-    Examples:
-        >>> osp, sys = import_modules_from_strings(
-        ...     ['os.path', 'sys'])
-        >>> import os.path as osp_
-        >>> import sys as sys_
-        >>> assert osp == osp_
-        >>> assert sys == sys_
+      Examples:
+          >>> osp, sys = import_modules_from_strings(
+          ...     ['os.path', 'sys'])
+          >>> import os.path as osp_
+          >>> import sys as sys_
+          >>> assert osp == osp_
+          >>> assert sys == sys_
     """
     if not imports:
         return
@@ -183,7 +183,7 @@ def check_prerequisites(
         prerequisites,
         checker,
         msg_tmpl='Prerequisites "{}" are required in method "{}" but not '
-        'found, please install them first.'):  # yapf: disable
+                 'found, please install them first.'):  # yapf: disable
     """A decorator factory to check if prerequisites are satisfied.
 
     Args:
@@ -235,15 +235,15 @@ def _check_executable(cmd):
 def requires_package(prerequisites):
     """A decorator to check if some python packages are installed.
 
-    Example:
-        >>> @requires_package('numpy')
-        >>> func(arg1, args):
-        >>>     return numpy.zeros(1)
-        array([0.])
-        >>> @requires_package(['numpy', 'non_package'])
-        >>> func(arg1, args):
-        >>>     return numpy.zeros(1)
-        ImportError
+      Example:
+          >>> @requires_package('numpy')
+          >>> func(arg1, args):
+          >>>     return numpy.zeros(1)
+          array([0.])
+          >>> @requires_package(['numpy', 'non_package'])
+          >>> func(arg1, args):
+          >>>     return numpy.zeros(1)
+          ImportError
     """
     return check_prerequisites(prerequisites, checker=_check_py_package)
 
@@ -251,11 +251,11 @@ def requires_package(prerequisites):
 def requires_executable(prerequisites):
     """A decorator to check if some executable files are installed.
 
-    Example:
-        >>> @requires_executable('ffmpeg')
-        >>> func(arg1, args):
-        >>>     print(1)
-        1
+      Example:
+          >>> @requires_executable('ffmpeg')
+          >>> func(arg1, args):
+          >>>     print(1)
+          1
     """
     return check_prerequisites(prerequisites, checker=_check_executable)
 

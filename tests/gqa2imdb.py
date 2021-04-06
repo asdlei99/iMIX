@@ -1,7 +1,9 @@
-import pickle
-import lmdb
 import os
+import pickle
+
+import lmdb
 import numpy as np
+
 feats_dir = '/home/zrz/.cache/torch/mmf/data/datasets/gqa/defaults/features/new_output'
 
 env = lmdb.open('/home/zrz/.cache/torch/mmf/data/datasets/gqa/defaults/features/gqa', map_size=1099511627776)

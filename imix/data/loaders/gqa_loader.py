@@ -1,5 +1,3 @@
-from torch.utils.data import Dataset, IterableDataset
-import yaml
 from ..reader.gqa_reader import GQAReader as Reader
 from ..infocomp.gqa_infocpler import GQAInfoCpler as InfoCpler
 from ..builder import DATASETS
@@ -7,7 +5,10 @@ import numpy as np
 import torch
 
 import logging
-# import imix.utils.comm as comm
+
+import torch
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
 from .base_loader import BaseLoader
 
@@ -53,7 +54,7 @@ class GQADATASET(BaseLoader):
         itemFeature = self.reader[idx]
         itemFeature = self.infocpler.completeInfo(itemFeature)
 
-        ### Only test for GQA LCGN ########## TODO zhangrunze
+        # Only test for GQA LCGN ########## TODO zhangrunze
         feature = torch.zeros([36, 2048], dtype=torch.float)
         bbox = torch.zeros([36, 4], dtype=torch.float)
         for idx in range(itemFeature.features.shape[0]):

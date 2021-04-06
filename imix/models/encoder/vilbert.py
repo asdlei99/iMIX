@@ -1,16 +1,16 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
-import os
 import logging
-from copy import deepcopy
-import pickle
 import math
-from transformers.modeling_bert import (BertConfig, BertEmbeddings, BertEncoder, BertPreTrainedModel,
-                                        BertPredictionHeadTransform, BertPooler, BertLayer, BertOutput,
-                                        BertIntermediate, ACT2FN)
-from imix.models.embedding import BertVisioLinguisticEmbeddings, BertImageFeatureEmbeddings
+import os
+from copy import deepcopy
+import torch
 
+import torch.nn as nn
+from transformers.modeling_bert import (ACT2FN, BertConfig, BertEmbeddings, BertIntermediate, BertLayer, BertOutput,
+                                        BertForPreTraining, BertPredictionHeadTransform, BertPreTrainedModel)
+
+from imix.models.embedding import BertImageFeatureEmbeddings
+from ..builder import ENCODER
+from omegaconf import OmegaConf
 logger = logging.getLogger(__name__)
 
 TEXT_BERT_HIDDEN_SIZE = 768
@@ -357,7 +357,6 @@ class BertBiOutput(nn.Module):
         self.q_dropout2 = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, hidden_states1, input_tensor1, hidden_states2, input_tensor2):
-
         context_state1 = self.dense1(hidden_states1)
         context_state1 = self.dropout1(context_state1)
 
@@ -393,7 +392,6 @@ class BertConnectionLayer(nn.Module):
         co_attention_mask=None,
         use_co_attention_mask=False,
     ):
-
         bi_output1, bi_output2, co_attention_probs = self.biattention(
             input_tensor1,
             attention_mask1,
@@ -757,7 +755,7 @@ class ViLBERTForPretraining(nn.Module):
             self.bert = ViLBERTBase.from_pretrained(
                 self.config.bert_model_name,
                 config=self.bert_config,
-                cache_dir=os.path.join(get_mmf_cache_dir(), 'distributed_{}'.format(-1)),
+                cache_dir=os.path.join(self.config.cache_dir, 'distributed_{}'.format(-1)),  # todo zrz cache_dir
                 # visual_embedding_dim=self.config.visual_embedding_dim,
                 # embedding_strategy=self.config.embedding_strategy,
                 # bypass_transformer=self.config.bypass_transformer,
@@ -777,7 +775,7 @@ class ViLBERTForPretraining(nn.Module):
         else:
             bert_masked_lm = BertForPreTraining.from_pretrained(
                 self.config.bert_model_name,
-                cache_dir=os.path.join(get_mmf_cache_dir(), 'distributed_{}'.format(-1)),
+                cache_dir=os.path.join(self.config.cache_dir, 'distributed_{}'.format(-1)),  # todo zrz cache_dir
             )
         self.cls = deepcopy(bert_masked_lm.cls)
         self.loss_fct = nn.CrossEntropyLoss(ignore_index=-1)
@@ -871,7 +869,7 @@ class ViLBERTForClassification(nn.Module):
             self.bert = ViLBERTBase.from_pretrained(
                 self.config['bert_model_name'],
                 config=self.bert_config,
-                cache_dir=os.path.join('/home/jinliang/.cache/torch', 'transformers'.format(-1)),
+                cache_dir=os.path.join('/home/jinliang/.cache/torch', 'transformers'),
                 # visual_embedding_dim=self.config["visual_embedding_dim"],
                 # embedding_strategy=self.config["embedding_strategy"],
                 # bypass_transformer=self.config["bypass_transformer"],

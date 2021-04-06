@@ -1,7 +1,3 @@
-from ..builder import EMBEDDING
-import torch
-
-
 class BaseProcessor:
     """Every processor in IMIX needs to inherit this class for compatibility
     with IMIX. End user mainly needs to implement ``__call__`` function.
@@ -40,12 +36,14 @@ class Processor:
     """
 
     def __init__(self, config, *args, **kwargs):
-        self.writer = registry.get('writer')
+        # self.writer = registry.get('writer')
+        self.writer = None
 
         if not hasattr(config, 'type'):
             raise AttributeError("Config must have 'type' attribute to specify type of processor")
 
-        processor_class = registry.get_processor_class(config.type)
+        # processor_class = registry.get_processor_class(config.type)
+        processor_class = None
 
         params = {}
         if not hasattr(config, 'params'):
@@ -81,32 +79,33 @@ class Vocab:
             if params['vocab_file'] is None:
                 raise ValueError('No vocab path passed for vocab')
 
-            self.vocab = BaseVocab(*args, **params)
+            # self.vocab = BaseVocab(*args, **params)
+            self.vocab = None  # unused
 
-        elif vocab_type == 'custom':
-            if params['vocab_file'] is None or params['embedding_file'] is None:
-                raise ValueError('No vocab path or embedding_file passed for vocab')
-            self.vocab = CustomVocab(*args, **params)
-
-        elif vocab_type == 'pretrained':
-            self.vocab = PretrainedVocab(*args, **params)
-
-        elif vocab_type == 'intersected':
-            if params['vocab_file'] is None or params['embedding_name'] is None:
-                raise ValueError('No vocab path or embedding_name passed for vocab')
-
-            self.vocab = IntersectedVocab(*args, **params)
-
-        elif vocab_type == 'extracted':
-            if params['base_path'] is None or params['embedding_dim'] is None:
-                raise ValueError('No base_path or embedding_dim passed for vocab')
-            self.vocab = ExtractedVocab(*args, **params)
-
-        elif vocab_type == 'model':
-            if params['name'] is None or params['model_file'] is None:
-                raise ValueError('No name or model_file passed for vocab')
-            if params['name'] == 'fasttext':
-                self.vocab = ModelVocab(*args, **params)
+        # elif vocab_type == 'custom':
+        #     if params['vocab_file'] is None or params['embedding_file'] is None:
+        #         raise ValueError('No vocab path or embedding_file passed for vocab')
+        #     self.vocab = CustomVocab(*args, **params)
+        #
+        # elif vocab_type == 'pretrained':
+        #     self.vocab = PretrainedVocab(*args, **params)
+        #
+        # elif vocab_type == 'intersected':
+        #     if params['vocab_file'] is None or params['embedding_name'] is None:
+        #         raise ValueError('No vocab path or embedding_name passed for vocab')
+        #
+        #     self.vocab = IntersectedVocab(*args, **params)
+        #
+        # elif vocab_type == 'extracted':
+        #     if params['base_path'] is None or params['embedding_dim'] is None:
+        #         raise ValueError('No base_path or embedding_dim passed for vocab')
+        #     self.vocab = ExtractedVocab(*args, **params)
+        #
+        # elif vocab_type == 'model':
+        #     if params['name'] is None or params['model_file'] is None:
+        #         raise ValueError('No name or model_file passed for vocab')
+        #     if params['name'] == 'fasttext':
+        #         self.vocab = ModelVocab(*args, **params)
         else:
             raise ValueError('Unknown vocab type: %s' % vocab_type)
 

@@ -3,15 +3,10 @@ author: lxc
 created time: 2021/1/11
 """
 
-import torch
-from collections import defaultdict
-import logging
 import numpy as np
 
-from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
-# from torchvision import transforms as T
 
 
 class VisualEntailmentInfoCpler(BaseInfoCpler):

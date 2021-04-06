@@ -75,7 +75,7 @@ vqa_info_cpler_cfg = dict(
         answers_vqa=data_root + vocab_path + 'answers_vqa.txt',
         vocabulart_100k=data_root + vocab_path + 'vocabulary_100k.txt',
         vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'),
-    max_seg_lenth=20,  #20,
+    max_seg_lenth=20,  # 20,
     word_mask_ratio=0.0,
     vocab_name='vocabulart_100k',
     vocab_answer_name='answers_vqa',
@@ -84,7 +84,7 @@ vqa_info_cpler_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=2,  #16
+    samples_per_gpu=2,  # 16
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=vqa_info_cpler_cfg, limit_nums=800))

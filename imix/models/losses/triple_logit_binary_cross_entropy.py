@@ -1,10 +1,12 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..builder import LOSSES
-import torch
-from .base_loss import BaseLoss
 from torch.nn import CrossEntropyLoss as TorchCrossEntropyLoss
 from torch.nn import SmoothL1Loss as TorchSmoothL1Loss
+
+from ..builder import LOSSES
+from .base_loss import BaseLoss
+from torch.nn.utils.rnn import pack_padded_sequence
 
 
 @LOSSES.register_module()
@@ -196,7 +198,7 @@ class M4CDecodingBCEWithMaskLoss(BaseLoss):
         self.one = torch.Tensor([1.0])
 
     def __str__(self):
-        return 'M4CDecodingBCEWithMaskLoss'
+        return 'M4CDecodingBCEWithMask_loss'
 
     def forward(self, model_output):
 
@@ -212,8 +214,8 @@ class M4CDecodingBCEWithMaskLoss(BaseLoss):
         loss = torch.sum(losses) / count
         return loss
 
-    def __str__(self):
-        return 'lxmert_pretrain_loss_v0'
+    # def __str__(self):
+    #     return 'lxmert_pretrain_loss_v0'
 
 
 @LOSSES.register_module()
@@ -276,7 +278,7 @@ class LXMERTPreTrainLossV0(BaseLoss):
         total_loss += answer_loss
         losses += (answer_loss.detach(), )
 
-        return total_loss  #, torch.stack(losses).unsqueeze(0), answer_score.detach()
+        return total_loss  # , torch.stack(losses).unsqueeze(0), answer_score.detach()
 
     def __str__(self):
         return 'lxmert_pretrain_loss_v0'

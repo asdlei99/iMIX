@@ -1,16 +1,10 @@
-from torch.utils.data import Dataset, IterableDataset
-import yaml
-from ..reader.vqa_reader import VQAReader
-from ..reader.vqa_reader_uniter import VQAReaderUNITER as Reader
-from ..infocomp.vqa_infocpler import VQAInfoCpler as InfoCpler
-from ..builder import DATASETS
-import numpy as np
-import torch
-
 import logging
-# import imix.utils.comm as comm
+
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
-from .base_loader import BaseLoader
+from ..builder import DATASETS
+from ..reader.vqa_reader_uniter import VQAReaderUNITER
 
 
 def remove_None_value_elements(input_dict):
@@ -29,15 +23,14 @@ def remove_None_value_elements(input_dict):
 
 
 @DATASETS.register_module()
-class VQADATASETUNITER(BaseLoader):
+class VQADATASETUNITER(Dataset):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
-        super().__init__(Reader, reader, InfoCpler, info_cpler, limit_nums)
-        #if comm.is_main_process():
-        #    logger = logging.getLogger(__name__)
-        #    logger.info('start loading vqadata')
+    if comm.is_main_process():
+      logger = logging.getLogger(__name__)
+      logger.info('start loading vqadata')
 
-        #self.reader = VQAReaderUNITER(reader)
+    self.reader = VQAReaderUNITER(reader)
         # self.infocpler = VQAInfoCpler(info_cpler)
         # self._limit_sample_nums = limit_nums
         # self.splits = reader.datasets

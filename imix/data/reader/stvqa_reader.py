@@ -3,13 +3,8 @@ author: lxc
 created time: 2020/8/19
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
-from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class STVQAReader(IMIXDataReader):

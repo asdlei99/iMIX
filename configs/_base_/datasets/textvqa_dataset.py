@@ -105,7 +105,7 @@ textvqa_info_cpler_cfg = dict(
         fixed_answer_vocab_textvqa_5k=data_root + vocab_path + 'fixed_answer_vocab_textvqa_5k.txt',
         vocabulary_100k=data_root + vocab_path + 'vocabulary_100k.txt',
     ),
-    max_seg_lenth=14,  #20
+    max_seg_lenth=14,  # 20
     max_ocr_lenth=100,
     max_txt_lenth=50,
     max_copy_steps=12,

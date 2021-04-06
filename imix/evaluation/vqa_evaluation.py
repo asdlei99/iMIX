@@ -1,27 +1,17 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 # TODO(jinliang):jinliang_imitate
-import contextlib
 import copy
-import io
 import itertools
 import json
 import logging
-import numpy as np
 import os
-import pickle
 from collections import OrderedDict
 
 import torch
-from .evaluator import DatasetEvaluator
 
-from tabulate import tabulate
-from imix.utils.file_io import PathManager
-# from iopath.common.file_io import PathManager
 import imix.utils.comm as comm
-import json
-
-from imix.utils.logger import create_small_table
-from imix.models.vqa_models.mcan import list2dict
+from imix.utils.file_io import PathManager
+from .evaluator import DatasetEvaluator
 
 
 class VQAEvaluator(DatasetEvaluator):

@@ -1,14 +1,7 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
-import torch
-import math
-import torch.nn.functional as F
-from imix.models.backbones.lcgn_backbone import Linear, apply_mask1d
-from .base_model import BaseModel
 from pytorch_pretrained_bert.modeling import BertModel
-import numpy as np
-import torch.nn.functional as F
-from torch.autograd import Variable
+
+from ..builder import VQA_MODELS, build_backbone, build_encoder
+from .base_model import BaseModel
 
 # def yolo_loss(input,
 #               target,
@@ -256,7 +249,7 @@ class ReSC(BaseModel):
         super().__init__()
 
         self.encoder_model = build_encoder(encoder)
-        self.encoder_model.load_weights(weights_file)  ###TODO zhangrunze
+        self.encoder_model.load_weights(weights_file)  # TODO zhangrunze
         self.textmodel = BertModel.from_pretrained('bert-base-uncased')
         self.backbone = build_backbone(backbone)
         # anchors = '10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326'
@@ -298,13 +291,13 @@ class ReSC(BaseModel):
         raw_fvisu = self.encoder_model(image)
         raw_fvisu = raw_fvisu[2]
 
-        ## Language Module
+        # Language Module
         all_encoder_layers, _ = self.textmodel(input_ids, token_type_ids=None, attention_mask=input_mask)
-        ## Sentence feature at the first position [cls]
-        raw_flang = (all_encoder_layers[-1][:, 0, :] + all_encoder_layers[-2][:, 0, :] \
-                     + all_encoder_layers[-3][:, 0, :] + all_encoder_layers[-4][:, 0, :]) / 4
-        raw_fword = (all_encoder_layers[-1] + all_encoder_layers[-2] \
-                     + all_encoder_layers[-3] + all_encoder_layers[-4]) / 4
+        # Sentence feature at the first position [cls]
+        raw_flang = (all_encoder_layers[-1][:, 0, :] + all_encoder_layers[-2][:, 0, :] +
+                     all_encoder_layers[-3][:, 0, :] + all_encoder_layers[-4][:, 0, :]) / 4
+        raw_fword = (all_encoder_layers[-1] + all_encoder_layers[-2] + all_encoder_layers[-3] +
+                     all_encoder_layers[-4]) / 4
         raw_flang = raw_flang.detach()
         raw_fword = raw_fword.detach()
 

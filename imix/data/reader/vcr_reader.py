@@ -3,25 +3,20 @@ author: lxc
 created time: 2021/1/19
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
 import copy
 import json
-import h5py
-from .base_reader import IMIXDataReader
-from ..utils.stream import ItemFeature
+import os
 
-from allennlp.data.fields import TextField, ListField, LabelField, SequenceLabelField, ArrayField, MetadataField
-from allennlp.data.instance import Instance
+import h5py
+import numpy as np
+from allennlp.data.fields import ArrayField, LabelField, ListField, MetadataField
 from allennlp.data.token_indexers import ELMoTokenCharactersIndexer
-from allennlp.data.tokenizers import Token
 from allennlp.data.vocabulary import Vocabulary
-from allennlp.nn.util import get_text_field_mask
-from ..utils.vcr_utils import _fix_tokenization, make_mask
+
 from ..utils.image_utils import load_image, resize_image, to_tensor_and_normalize
+from ..utils.stream import ItemFeature
+from ..utils.vcr_utils import _fix_tokenization, make_mask
+from .base_reader import IMIXDataReader
 
 
 class VCRReader(IMIXDataReader):
@@ -63,7 +58,7 @@ class VCRReader(IMIXDataReader):
 
         self.default_answer_idx = cfg.default_answer_idx
         self.annotations = self.annotations[:20]
-        flag = True
+        # flag = True
 
     def _load_jsonl(self, annotation_path):
         with open(annotation_path, 'r') as f:
@@ -86,7 +81,7 @@ class VCRReader(IMIXDataReader):
             conditioned_label = item_feature['answer_label'] if split != 'test' else self.default_answer_idx
             item_feature['question_only'] = copy.deepcopy(item_feature['question'])
             item_feature['question'] = item_feature['question'] + item_feature['answer_choices'][conditioned_label]
-            answer_conditioned = item_feature['answer_choices'][conditioned_label]
+            # answer_conditioned = item_feature['answer_choices'][conditioned_label]
 
         answer_choices = item_feature['{}_choices'.format(self.mode)]
         dets2use, old_det_to_new_ind = self._get_dets_to_use(annotation)

@@ -1,11 +1,11 @@
 # TODO(jinliang):jinliang_imitate
 
 # import sys
+# import os
 #
-# sys.path.append('/home/jinliang/code/imix/imix')
+# sys.path.append(os.path.abspath('.'))
 
-import os
-from imix.utils.config import Config
+# from imix.utils.config import Config
 from imix.engine.imix_engine import imixEngine
 from imix.engine.organizer import Organizer
 from imix.utils.imix_checkpoint import imixCheckpointer
@@ -42,6 +42,10 @@ def del_some_args(args):
         del args.seed
     if args.work_dir is None:
         del args.work_dir
+    if not args.load_from:
+        del args.load_from
+    if not args.resume_from:
+        del args.resume_from
 
 
 def merge_args_to_cfg(args, cfg):
@@ -72,6 +76,8 @@ def init_set(args):
 
 
 def test(cfg):
+    assert cfg.get('load_from', None), '--load-from is empty '
+
     model = Organizer.build_model(cfg)
     imix_ck = imixCheckpointer(model, save_dir=cfg.work_dir)
     imix_ck.resume_or_load(cfg.load_from, resume=False)
@@ -114,8 +120,8 @@ if __name__ == '__main__':
 
     ddp_launch(
         run_fn=main,
-        nproc_per_node=args.nproc_per_node,
-        nnodes=args.nnodes,
+        gpus=args.gpus,
+        machines=args.machines,
         master_addr=args.master_addr,
         master_port=args.master_port,
         run_fn_args=(args, ))

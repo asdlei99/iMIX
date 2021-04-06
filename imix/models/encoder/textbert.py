@@ -1,16 +1,9 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
-import os
 import logging
-import pickle
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
+import torch.nn as nn
+from transformers.modeling_bert import BertConfig, BertEmbeddings, BertEncoder, BertPreTrainedModel  # BertLayerNorm,
+
+from ..builder import ENCODER
+
 logger = logging.getLogger(__name__)
 
 TEXT_BERT_HIDDEN_SIZE = 768
@@ -27,10 +20,10 @@ class TextBertBase(nn.Module):
         hidden_size = kwargs['hidden_size']
         self.text_bert_config = BertConfig(**params)
 
-        ################TEST FORWARD #################  TODO ZHANGRUNZE
+        # TEST FORWARD #################  TODO ZHANGRUNZE
         self.text_bert_config.hidden_dropout_prob = 0.0
         self.text_bert_config.attention_probs_dropout_prob = 0.0
-        ###################################################
+        #
 
         if text_bert_init_from_bert_base:
             self.text_bert = TextBert.from_pretrained('bert-base-uncased', config=self.text_bert_config)

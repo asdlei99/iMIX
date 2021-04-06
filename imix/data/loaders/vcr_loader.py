@@ -3,14 +3,15 @@ author: lxc
 created time: 2021/1/19
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
-import numpy as np
-from ..reader.vcr_reader import VCRReader as Reader
-from ..infocomp.vcr_infocpler import VCRInfoCpler as InfoCpler
-from ..builder import DATASETS
+
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
 from .base_loader import BaseLoader
+from ..builder import DATASETS
+from ..infocomp.vcr_infocpler import VCRInfoCpler as InfoCpler
+from ..reader.vcr_reader import VCRReader as Reader
 
 
 @DATASETS.register_module()

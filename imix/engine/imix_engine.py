@@ -1,16 +1,11 @@
-from .base_engine import EngineBase
-from .organizer import Organizer, is_mixed_precision
-import logging
-import torch
-# import imix.utils.comm as comm
-import imix.utils_imix.distributed_info as comm
-import numpy as np
-from imix.evaluation import verify_results
-from torch.cuda.amp.autocast_mode import autocast
-from imix.utils_imix.logger import setup_logger
-from .hooks.periods import write_metrics
-from imix.utils_imix.Timer import Timer
 import time
+
+from torch.cuda.amp.autocast_mode import autocast
+
+from imix.utils_imix.Timer import Timer
+from .base_engine import EngineBase
+from .hooks.periods import write_metrics
+from .organizer import Organizer, is_mixed_precision
 
 
 class IterDataLoader:
@@ -56,7 +51,7 @@ class CommonEngine(EngineBase):
         # batch_data = next(self.data_loader_iter)
         # data_time = Timer.passed_seconds(start=start_time, end=Timer.now())
         # metrics_dict['data_time'] = data_time
-        loger = logging.getLogger(__name__)
+        # loger = logging.getLogger(__name__)
 
         @Timer.run_time
         def load_data():
@@ -70,18 +65,8 @@ class CommonEngine(EngineBase):
             self.output = self.batch_processor(batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
         else:
             with autocast(enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
-
-                try:
-                    self.model_output = self.model(batch_data)
-
-                    self.output = self.loss_fn(self.model_output)
-
-                except:
-                    self.model_output = self.model(batch_data)
-                    self.output = self.loss_fn(self.model_output)
-                # self.output = self.loss_fn.loss(
-                #     scores=self.model_output['scores'],
-                #     targets=self.model_output['target'])
+                self.model_output = self.model(batch_data)
+                self.output = self.loss_fn(self.model_output)
 
         # self.output['loss'] /= comm.get_world_size()
         metrics_dict.update(self.output)
@@ -173,6 +158,7 @@ class imixEngine(CommonEngine):
         self.by_epoch = self.organizer.by_epoch
         self.imixed_precision = self.organizer.imixed_precision if hasattr(self.organizer,
                                                                            'imixed_precision') else False
+        self.work_dir = cfg.work_dir
 
         self.register_hooks(self.organizer.hooks)
 

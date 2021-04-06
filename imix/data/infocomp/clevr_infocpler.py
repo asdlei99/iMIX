@@ -1,9 +1,5 @@
 import torch
-from collections import defaultdict
-# from ..vqadata.stream import ItemFeature
-import logging
 
-from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
 

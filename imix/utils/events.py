@@ -6,6 +6,7 @@ import os
 import time
 from collections import defaultdict
 from contextlib import contextmanager
+
 import torch
 from fvcore.common.file_io import PathManager
 from fvcore.common.history_buffer import HistoryBuffer
@@ -15,10 +16,10 @@ _CURRENT_STORAGE_STACK = []
 
 def get_event_storage():
     """
-    Returns:
-        The :class:`EventStorage` object that's currently being used.
-        Throws an error if no :class:`EventStorage` is currently enabled.
-    """
+      Returns:
+          The :class:`EventStorage` object that's currently being used.
+          Throws an error if no :class:`EventStorage` is currently enabled.
+      """
     assert len(
         _CURRENT_STORAGE_STACK), "get_event_storage() has to be called inside a 'with EventStorage(...)' context!"
     return _CURRENT_STORAGE_STACK[-1]
@@ -81,11 +82,11 @@ class JSONWriter(EventWriter):
 
     def __init__(self, json_file, window_size=20):
         """
-        Args:
-            json_file (str): path to the json file. New data will be appended if the file exists.
-            window_size (int): the window size of median smoothing for the scalars whose
-                `smoothing_hint` are True.
-        """
+            Args:
+                json_file (str): path to the json file. New data will be appended if the file exists.
+                window_size (int): the window size of median smoothing for the scalars whose
+                    `smoothing_hint` are True.
+            """
         self._file_handle = PathManager.open(json_file, 'a')
         self._window_size = window_size
 
@@ -109,12 +110,12 @@ class TensorboardXWriter(EventWriter):
 
     def __init__(self, log_dir: str, window_size: int = 20, **kwargs):
         """
-        Args:
-            log_dir (str): the directory to save the output events
-            window_size (int): the scalars will be median-smoothed by this window size
+            Args:
+                log_dir (str): the directory to save the output events
+                window_size (int): the scalars will be median-smoothed by this window size
 
-            kwargs: other arguments passed to `torch.utils.tensorboard.SummaryWriter(...)`
-        """
+                kwargs: other arguments passed to `torch.utils.tensorboard.SummaryWriter(...)`
+            """
         self._window_size = window_size
         from torch.utils.tensorboard import SummaryWriter
 
@@ -156,10 +157,10 @@ class CommonMetricPrinter(EventWriter):
 
     def __init__(self, max_iter):
         """
-        Args:
-            max_iter (int): the maximum number of iterations to train.
-                Used to compute ETA.
-        """
+            Args:
+                max_iter (int): the maximum number of iterations to train.
+                    Used to compute ETA.
+            """
         self.logger = logging.getLogger(__name__)
         self._max_iter = max_iter
         self._recorder_iter_time = None
@@ -222,9 +223,9 @@ class EventStorage:
 
     def __init__(self, start_iter=0):
         """
-        Args:
-            start_iter (int): the iteration number to start with
-        """
+            Args:
+                start_iter (int): the iteration number to start with
+            """
         self._history = defaultdict(HistoryBuffer)
         self._smoothing_hints = {}
         self._latest_scalars = {}
@@ -312,9 +313,9 @@ class EventStorage:
 
     def history(self, name):
         """
-        Returns:
-            HistoryBuffer: the scalar history for name
-        """
+            Returns:
+                HistoryBuffer: the scalar history for name
+            """
         ret = self._history.get(name, None)
         if ret is None:
             raise KeyError('No history metric available for {}!'.format(name))
@@ -322,16 +323,16 @@ class EventStorage:
 
     def histories(self):
         """
-        Returns:
-            dict[name -> HistoryBuffer]: the HistoryBuffer for all scalars
-        """
+            Returns:
+                dict[name -> HistoryBuffer]: the HistoryBuffer for all scalars
+            """
         return self._history
 
     def latest(self):
         """
-        Returns:
-            dict[name -> number]: the scalars that's added in the current iteration.
-        """
+            Returns:
+                dict[name -> number]: the scalars that's added in the current iteration.
+            """
         return self._latest_scalars
 
     def latest_with_smoothing_hint(self, window_size=20):
@@ -348,10 +349,10 @@ class EventStorage:
 
     def smoothing_hints(self):
         """
-        Returns:
-            dict[name -> bool]: the user-provided hint on whether the scalar
-                is noisy and needs smoothing.
-        """
+            Returns:
+                dict[name -> bool]: the user-provided hint on whether the scalar
+                    is noisy and needs smoothing.
+            """
         return self._smoothing_hints
 
     def step(self):
@@ -383,10 +384,10 @@ class EventStorage:
     @contextmanager
     def name_scope(self, name):
         """
-        Yields:
-            A context within which all the events added to this storage
-            will be prefixed by the name scope.
-        """
+            Yields:
+                A context within which all the events added to this storage
+                will be prefixed by the name scope.
+            """
         old_prefix = self._current_prefix
         self._current_prefix = name.rstrip('/') + '/'
         yield

@@ -1,9 +1,10 @@
-from ..builder import BACKBONES
-from .r2c_backbone import R2C_BACKBONE
 import torch
-from allennlp.nn.util import masked_softmax, weighted_sum, replace_masked_values
 import torch.nn as nn
 import torch.nn.functional as F
+from allennlp.nn.util import masked_softmax, replace_masked_values
+
+from ..builder import BACKBONES
+from .r2c_backbone import R2C_BACKBONE
 
 
 @BACKBONES.register_module()

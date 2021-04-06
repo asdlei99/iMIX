@@ -3,10 +3,11 @@ author: lxc
 created time: 2020/8/17
 """
 
-import numpy as np
-import lmdb
 import os
 import pickle
+
+import lmdb
+import numpy as np
 
 
 class BaseDataReader(object):

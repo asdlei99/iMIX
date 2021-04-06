@@ -5,9 +5,12 @@ import os
 import sys
 import time
 from collections import Counter
+
 from tabulate import tabulate
 from termcolor import colored
+
 from .file_io import PathManager
+
 # from iopath.common.file_io import PathManager
 
 
@@ -108,10 +111,10 @@ https://github.com/abseil/abseil-py/blob/master/absl/logging/__init__.py
 
 def _find_caller():
     """
-    Returns:
-        str: module name of the caller
-        tuple: a hashable key to be used to identify different callers
-    """
+      Returns:
+          str: module name of the caller
+          tuple: a hashable key to be used to identify different callers
+      """
     frame = sys._getframe(2)
     while frame:
         code = frame.f_code

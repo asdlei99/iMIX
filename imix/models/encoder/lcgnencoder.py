@@ -1,10 +1,9 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
 import numpy as np
-import os
-import pickle
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
+
+from ..builder import ENCODER
 
 
 @ENCODER.register_module()

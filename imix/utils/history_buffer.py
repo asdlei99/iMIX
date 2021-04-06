@@ -11,11 +11,11 @@ class HistoryBuffer:
 
     def __init__(self, max_length: int = 1000000) -> None:
         """
-        Args:
-            max_length: maximal number of values that can be stored in the
-                buffer. When the capacity of the buffer is exhausted, old
-                values will be removed.
-        """
+            Args:
+                max_length: maximal number of values that can be stored in the
+                    buffer. When the capacity of the buffer is exhausted, old
+                    values will be removed.
+            """
         self._max_length: int = max_length
         self._data: List[Tuple[float, float]] = []  # (value, iteration) pairs
         self._count: int = 0
@@ -57,7 +57,7 @@ class HistoryBuffer:
 
     def values(self) -> List[Tuple[float, float]]:
         """
-        Returns:
-            list[(number, iteration)]: content of the current buffer.
-        """
+            Returns:
+                list[(number, iteration)]: content of the current buffer.
+            """
         return self._data

@@ -1,14 +1,12 @@
-from torch.utils.data import Dataset, IterableDataset
-import yaml
+import logging
 from ..reader.vqa_reader import VQAReader as Reader
 from ..infocomp.vqa_infocpler import VQAInfoCpler as InfoCpler
 from ..builder import DATASETS
-import numpy as np
-import torch
 from .base_loader import BaseLoader
 
-import logging
-# import imix.utils.comm as comm
+
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
 
 # VQA_PATH_CONFIG = yaml.load(open("datasets/dataset_vqa.yaml"))["dataset_configs"]

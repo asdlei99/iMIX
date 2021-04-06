@@ -3,21 +3,21 @@ author: lxc
 created time: 2021/1/26
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
 import json
+import os
 import pickle
 import time
+
+import numpy as np
+import pyximport
+from external import mask
 from PIL import Image
 
-from .referit_reader import ReferitReader
 from ..utils.file_utils import StrToBytes
 from ..utils.stream import ItemFeature
-import pyximport
+from .referit_reader import ReferitReader
+
 pyximport.install()
-from external import mask
 
 
 class RefCOCOReader(ReferitReader):
@@ -57,7 +57,7 @@ class RefCOCOReader(ReferitReader):
         img = self.load_image_from_ref(ref)
         mask_info = self.getMask(ref)
         mask = mask_info['mask']
-        area = mask_info['area']
+        # area = mask_info['area']
 
         # get phrases
         phrase_info = ref['sentences']

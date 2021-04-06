@@ -1,19 +1,13 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
-import os
 import logging
-from torch.autograd import Variable
+
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-import pickle
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
+
+from ..builder import ENCODER
+
 logger = logging.getLogger(__name__)
 
 TEXT_BERT_HIDDEN_SIZE = 768
@@ -102,7 +96,7 @@ class VisDialANSEncoder(nn.Module):
             mask = Variable(mask, volatile=input_feat.volatile)
 
         # Doing self attention here.
-        #pdb.set_trace()
+        # pdb.set_trace()
         atten = self.W2(F.dropout(F.tanh(self.W1(output.view(-1, self.nhid))), self.d,
                                   training=self.training)).view(idx.size())
         atten.masked_fill_(mask, -99999)

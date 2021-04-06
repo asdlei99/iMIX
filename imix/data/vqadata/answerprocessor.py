@@ -1,9 +1,31 @@
-from .baseprocessor import BaseProcessor
-from ..builder import EMBEDDING
 import torch
-from mmcv.utils import Registry, build_from_cfg
+from mmcv.utils import Registry, build_from_cfg  # TODO(jinliang) mmcv ?
+import os
+from ..builder import EMBEDDING
+from .baseprocessor import BaseProcessor
+from imix.utils.file_io import PathManager
+import re
 
 VOCAB = Registry('vocab')
+SENTENCE_SPLIT_REGEX = re.compile(r'(\W+)')
+
+
+def tokenize(sentence, regex=SENTENCE_SPLIT_REGEX, keep=None, remove=None):
+    if keep is None:
+        keep = ["'s"]
+    if remove is None:
+        remove = [',', '?']
+    sentence = sentence.lower()
+
+    for token in keep:
+        sentence = sentence.replace(token, ' ' + token)
+
+    for token in remove:
+        sentence = sentence.replace(token, '')
+
+    tokens = regex.split(sentence)
+    tokens = [t.strip() for t in tokens if len(t.strip()) > 0]
+    return tokens
 
 
 def build_vocab(cfg):
@@ -58,7 +80,8 @@ class VocabDict:
     def __init__(self, vocab_file, data_dir=None):
         if not os.path.isabs(vocab_file) and data_dir is not None:
             # mmf_root = get_mmf_root()
-            vocab_file = os.path.abspath(os.path.join(mmf_root, data_dir, vocab_file))
+            # vocab_file = os.path.abspath(os.path.join(mmf_root, data_dir, vocab_file))
+            vocab_file = os.path.abspath(os.path.join(data_dir, vocab_file))
 
         if not PathManager.exists(vocab_file):
             raise RuntimeError(f"Vocab file {vocab_file} for vocab dict doesn't exist")

@@ -3,15 +3,16 @@ author: lxc
 created time: 2021/1/26
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
 import json
+import os
+import pickle
+
+import lmdb
+import numpy as np
 from PIL import Image
-from .base_reader import IMIXDataReader
+
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class VisualEntailmentReader(IMIXDataReader):
@@ -41,7 +42,8 @@ class VisualEntailmentReader(IMIXDataReader):
                     for split in list(self.mix_features_pathes.keys())
                 }.values())))
 
-        # self.annotations = [ann for ann in self.annotations if self.get_featureinfo_from_txns(self.feature_txns, ann["id"]) is not None]
+        # self.annotations = [ann for ann in self.annotations if
+        #                     self.get_featureinfo_from_txns(self.feature_txns, ann["id"]) is not None]
 
     def __len__(self):
         return len(self.annotations)
@@ -51,7 +53,7 @@ class VisualEntailmentReader(IMIXDataReader):
         img_id = annotation['Flikr30kID'].split('.')[0]
         try:
             label = self.label_mb.index(annotation['gold_label'])
-        except:
+        except Exception:
             label = None
         text1 = annotation['sentence1']
         text2 = annotation['sentence2']

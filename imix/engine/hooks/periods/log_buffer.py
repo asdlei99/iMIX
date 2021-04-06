@@ -1,10 +1,10 @@
 # TODO(jinliang):jinliang_copy
-from abc import ABCMeta, abstractmethod
-from contextlib import contextmanager
 from collections import defaultdict
-from imix.utils.history_buffer import HistoryBuffer
+from contextlib import contextmanager
+
 import torch
-import weakref
+
+from imix.utils.history_buffer import HistoryBuffer
 
 # TODO(jinliang) logBufferStorage在_CURRENT_LOG_BUFFER_STACK存入数据,
 # 而LogBufferWriter将存入数据写文件或终端输出，因此所有logBuffer数据仅有一份，

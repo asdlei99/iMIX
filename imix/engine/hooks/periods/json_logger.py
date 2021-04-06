@@ -1,11 +1,10 @@
 # TODO(jinliang):jinliang_copy
-#from .log_buffer import LogBufferWriter, get_log_buffer
-from .log_buffer_imix import get_log_buffer, LogBufferWriter
-from imix.utils.file_io import PathManager
-# from iopath.common.file_io import PathManager
-from ..builder import HOOKS
 import json
 import os
+
+from imix.utils.file_io import PathManager
+from ..builder import HOOKS
+from .log_buffer_imix import LogBufferWriter
 
 # @HOOKS.register_module()
 # class JSONLoggerHook(LogBufferWriter):

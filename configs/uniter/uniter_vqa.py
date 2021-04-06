@@ -3,7 +3,7 @@ _base_ = [
     '../_base_/datasets/vqa_dataset.py',
     '../_base_/schedules/schedule_vqa.py',
     '../_base_/default_runtime.py'
-] # yapf:disable
+]  # yapf:disable
 
 dataset_type = 'VQADATASET'
 data_root = '/home/datasets/mix_data/mmf/'

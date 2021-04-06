@@ -1,12 +1,19 @@
-# 前傳沒問題
-# _base_ = [
-#     '../_base_/models/lxmert_config.py',
-#     '../_base_/datasets/vqa_dataset.py',
-#     '../_base_/schedules/schedule_vqa.py',
-#     '../_base_/default_runtime.py'
-# ] # yapf:disable
+# # 前傳沒問題
+_base_ = [
+    '../_base_/models/lxmert_config.py',
+    '../_base_/datasets/vqa_dataset.py',
+    '../_base_/schedules/schedule_vqa.py',
+    '../_base_/default_runtime.py'
+]  # yapf:disable
 
-# 前傳沒問題
+# _base_ = [
+#     '../_base_/models/visual_dialog_bert_config.py',
+#     '../_base_/datasets/visual_dialog_dataset.py',
+#     '../_base_/schedules/schedule_visual_dialog.py',
+#     '../_base_/default_runtime.py'
+# ]  # yapf:disable
+
+# 前傳沒問題  TODO(zhaojian)
 # _base_ = [
 #     '../_base_/models/vilbert_config.py',
 #     '../_base_/datasets/vqa_dataset.py',
@@ -21,7 +28,6 @@
 #     '../_base_/schedules/schedule_vqa.py',
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
-
 
 # 前傳沒問題
 # _base_ = [
@@ -39,7 +45,6 @@
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
 
-
 # 前傳沒問題
 # _base_ = [
 #     '../_base_/models/r2c_config.py',
@@ -48,7 +53,7 @@
 #     '../_base_/default_runtime.py'
 # ]  # yapf:disable
 
-# 前傳沒問題
+# 前傳沒問題  chao
 # _base_ = [
 #     '../_base_/models/hgl_config.py',
 #     '../_base_/datasets/vcr_dataset.py',
@@ -64,7 +69,7 @@
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
 
-# 前傳沒問題
+# 前傳沒問題  chao
 # _base_ = [
 #     '../_base_/models/lcgn_config.py',
 #     '../_base_/datasets/gqa_dataset.py',
@@ -88,7 +93,6 @@
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
 
-
 # 前傳沒問題
 # _base_ = [
 #     '../_base_/models/resc_config.py',
@@ -98,13 +102,12 @@
 # ] # yapf:disable
 
 # 前傳沒問題 UNITER
-_base_ = [
-    '../_base_/models/uniter_config.py',
-    '../_base_/datasets/vqa_dataset_uniter.py',
-    '../_base_/schedules/schedule_vqa.py',
-    '../_base_/default_runtime.py'
-] # yapf:disable
-
+# _base_ = [
+#     '../_base_/models/uniter_config.py',
+#     '../_base_/datasets/vqa_dataset_uniter.py',
+#     '../_base_/schedules/schedule_vqa.py',
+#     '../_base_/default_runtime.py'
+# ] # yapf:disable
 
 # 前傳沒問題 pretrain for lxmert
 # _base_ = [

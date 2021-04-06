@@ -1,5 +1,4 @@
-from torch.utils.data import Dataset, IterableDataset
-import yaml
+from torch.utils.data import Dataset
 from ..reader.lxmertpretrain_reader import LXMERTPretrainReader as Reader
 from ..infocomp.lxmertpretrain_infocpler import LXMERTPreTrainInfoCpler as InfoCpler
 from ..builder import DATASETS

@@ -3,14 +3,14 @@ author: zrz
 created time: 2021/1/14
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
 import pickle
-from .base_reader import IMIXDataReader
+
+import numpy as np
+import torch
+
 from ..utils.stream import ItemFeature
 from ..utils.tokenization import BertTokenizer
+from .base_reader import IMIXDataReader
 
 
 def tokenize_gqa(sentence, ignoredPunct=['?', '!', '\\', '/', ')', '('], keptPunct=['.', ',', ';', ':']):
@@ -51,7 +51,7 @@ class GQAReader(IMIXDataReader):
         #    item_feature.answers = annotation['answers']
         #    item_feature.all_answers = annotation['all_answers']
 
-        ###bert use self.tokenizer TODO zhangrunze
+        # bert use self.tokenizer TODO zhangrunze
 
         item_feature.tokens = tokenize_gqa(annotation['question_str'])
         item_feature.tokens_len = len(item_feature.tokens)

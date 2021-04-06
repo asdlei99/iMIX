@@ -23,9 +23,7 @@ class Registry:
         return self.get(key) is not None
 
     def __repr__(self):
-        format_str = self.__class__.__name__ + \
-                     f'(name={self._name}, ' \
-                     f'items={self._module_dict})'
+        format_str = self.__class__.__name__ + f'(name={self._name}, ' f'items={self._module_dict})'
         return format_str
 
     @property
@@ -69,32 +67,32 @@ class Registry:
     def register_module(self, name=None, force=False, module=None):
         """Register a module.
 
-        A record will be added to `self._module_dict`, whose key is the class
-        name or the specified name, and value is the class itself.
-        It can be used as a decorator or a normal function.
+            A record will be added to `self._module_dict`, whose key is the class
+            name or the specified name, and value is the class itself.
+            It can be used as a decorator or a normal function.
 
-        Example:
-            >>> backbones = Registry('backbone')
-            >>> @backbones.register_module()
-            >>> class ResNet:
-            >>>     pass
+            Example:
+                >>> backbones = Registry('backbone')
+                >>> @backbones.register_module()
+                >>> class ResNet:
+                >>>     pass
 
-            >>> backbones = Registry('backbone')
-            >>> @backbones.register_module(name='mnet')
-            >>> class MobileNet:
-            >>>     pass
+                >>> backbones = Registry('backbone')
+                >>> @backbones.register_module(name='mnet')
+                >>> class MobileNet:
+                >>>     pass
 
-            >>> backbones = Registry('backbone')
-            >>> class ResNet:
-            >>>     pass
-            >>> backbones.register_module(ResNet)
+                >>> backbones = Registry('backbone')
+                >>> class ResNet:
+                >>>     pass
+                >>> backbones.register_module(ResNet)
 
-        Args:
-            name (str | None): The module name to be registered. If not
-                specified, the class name will be used.
-            force (bool, optional): Whether to override an existing class with
-                the same name. Default: False.
-            module (type): Module class to be registered.
+            Args:
+                name (str | None): The module name to be registered. If not
+                    specified, the class name will be used.
+                force (bool, optional): Whether to override an existing class with
+                    the same name. Default: False.
+                module (type): Module class to be registered.
         """
         if not isinstance(force, bool):
             raise TypeError(f'force must be a boolean, but got {type(force)}')

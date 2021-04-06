@@ -1,10 +1,8 @@
-import os
-import random
-import numpy as np
-import scipy
 import math
+import random
+
 import cv2
-import warnings
+import numpy as np
 from torchvision.datasets.folder import default_loader
 from torchvision.transforms import functional
 
@@ -110,8 +108,10 @@ def random_affine(img,
         maskw = None
 
     # Return warped points also
-    if type(targets) == type([1]):
-        if type(targets[0]) == type([1]):
+    # if type(targets) == type([1]):
+    if isinstance(targets, list):
+        # if type(targets[0]) == type([1]):
+        if isinstance(targets[0], list):
             targetlist = []
             for bbox in targets:
                 targetlist.append(wrap_points(bbox, M, height, a))
@@ -125,7 +125,7 @@ def random_affine(img,
         for ii in range(all_bbox.shape[0]):
             all_bbox[ii, :] = wrap_points(all_bbox[ii, :], M, height, a)
         return imw, maskw, targets, all_bbox, M
-    elif targets is not None:  ## previous main
+    elif targets is not None:  # previous main
         targets = wrap_points(targets, M, height, a)
         return imw, maskw, targets, M
     else:
@@ -137,7 +137,7 @@ def wrap_points(targets, M, height, a):
     # points = targets[:, 1:5].copy()
     points = targets.copy()
     # area0 = (points[:, 2] - points[:, 0]) * (points[:, 3] - points[:, 1])
-    area0 = (points[2] - points[0]) * (points[3] - points[1])
+    # area0 = (points[2] - points[0]) * (points[3] - points[1])
 
     # warp points
     xy = np.ones((4, 3))
@@ -160,14 +160,14 @@ def wrap_points(targets, M, height, a):
 
     # reject warped points outside of image
     np.clip(xy, 0, height, out=xy)
-    w = xy[:, 2] - xy[:, 0]
-    h = xy[:, 3] - xy[:, 1]
-    area = w * h
-    ar = np.maximum(w / (h + 1e-16), h / (w + 1e-16))
-    i = (w > 4) & (h > 4) & (area / (area0 + 1e-16) > 0.1) & (ar < 10)
+    # w = xy[:, 2] - xy[:, 0]
+    # h = xy[:, 3] - xy[:, 1]
+    # area = w * h
+    # ar = np.maximum(w / (h + 1e-16), h / (w + 1e-16))
+    # i = (w > 4) & (h > 4) & (area / (area0 + 1e-16) > 0.1) & (ar < 10)
 
-    ## print(targets, xy)
-    ## [ 56  36 108 210] [[ 47.80464857  15.6096533  106.30993434 196.71267693]]
+    # print(targets, xy)
+    # [ 56  36 108 210] [[ 47.80464857  15.6096533  106.30993434 196.71267693]]
     # targets = targets[i]
     # targets[:, 1:5] = xy[i]
     targets = xy[0]

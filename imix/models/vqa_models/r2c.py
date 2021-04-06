@@ -1,22 +1,13 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
 import torch
-import math
-import torch.nn.functional as F
-import allennlp
-from allennlp.modules import TextFieldEmbedder, Seq2SeqEncoder, FeedForward, InputVariationalDropout, TimeDistributed
+import torch.nn as nn
+import torch.utils.model_zoo as model_zoo
+from allennlp.modules import InputVariationalDropout, TimeDistributed
 from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
-import torchvision
-from mmcv.ops import RoIAlign  ##import from mmcv
+from mmcv.ops import RoIAlign  # #import from mmcv
 from torchvision.models import resnet
+
+from ..builder import VQA_MODELS, build_backbone, build_head
 from .base_model import BaseModel
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
 
 
 class Flattener(nn.Module):
@@ -161,8 +152,8 @@ def _load_resnet_imagenet(pretrained=True):
 
 def pad_sequence(sequence, lengths):
     """
-    :param sequence: [\sum b, .....] sequence
-    :param lengths: [b1, b2, b3...] that sum to \sum b
+    :param sequence: [sum b, .....] sequence
+    :param lengths: [b1, b2, b3...] that sum to sum b
     :return: [len(lengths), maxlen(b), .....] tensor
     """
     output = sequence.new_zeros(len(lengths), max(lengths), *sequence.shape[1:])

@@ -1,6 +1,4 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
-import torch
+from ..builder import VQA_MODELS
 from .pythia import PYTHIA
 
 

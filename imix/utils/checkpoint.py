@@ -9,9 +9,10 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
-from .file_io import PathManager
 from termcolor import colored
 from torch.nn.parallel import DataParallel, DistributedDataParallel
+
+from .file_io import PathManager
 
 __all__ = ['Checkpointer', 'PeriodicCheckpointer']
 

@@ -1,7 +1,7 @@
 import torch
+
+from ..builder import VQA_MODELS, build_embedding, build_encoder, build_head
 from .base_model import BaseModel
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-from ..encoder import OSCARBackbone
 
 
 @VQA_MODELS.register_module()
@@ -17,7 +17,7 @@ class UNITER(BaseModel):
         ckpt = torch.load(pretrained_path)
         self.load_my_state_dict(ckpt)
 
-    #### not load head weights from pretrained weights
+    # not load head weights from pretrained weights
     def load_my_state_dict(self, state_dict):
         own_state = self.state_dict()
         for name, param in state_dict.items():
@@ -100,7 +100,7 @@ class UNITER(BaseModel):
         logits = self.head(pooled_output)
         try:
             model_outputs = {'scores': logits, 'target': data['answers_scores'].cuda()}
-        except:
+        except Exception:
             pass
         return model_outputs
 

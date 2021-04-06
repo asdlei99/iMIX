@@ -1,10 +1,6 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
 import torch
-import torch.distributed as dist
-from collections import OrderedDict
-import torch.nn.functional as func
-from torch.cuda.amp.autocast_mode import autocast  # TODO(jinliang)
+
+from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
 from .base_model import BaseModel
 
 
@@ -20,8 +16,8 @@ class MCAN(BaseModel):
         self.embedding_model = build_embedding(embedding)
         self.encoder_model = build_encoder(encoder)
         self.backbone = build_backbone(backbone)
-        self.combine_model = build_combine_layer(combine_model)  ###combine text and image
-        self.head = build_head(head)  ###包括 classification head， generation head
+        self.combine_model = build_combine_layer(combine_model)  # combine text and image
+        self.head = build_head(head)  # 包括 classification head， generation head
 
     def get_optimizer_parameters(self, optimizer_params_lr, training_encoder_lr_multiply):
         combine_layer = self.combine_model

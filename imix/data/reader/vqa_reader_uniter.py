@@ -3,20 +3,18 @@ author: lxc
 created time: 2020/8/18
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
-from .base_reader import BaseDataReader
-from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
 import json
-from lz4.frame import compress, decompress
-import horovod.torch as hvd
+import os
+import io
+import lmdb
 import msgpack
 import msgpack_numpy
+import numpy as np
+import torch
+from lz4.frame import compress, decompress
 from tqdm import tqdm
+from collections import defaultdict
+from .base_reader import BaseDataReader
 
 msgpack_numpy.patch()
 
@@ -28,11 +26,11 @@ msgpack_numpy.patch()
 #     dist = False
 #   return dist
 #
-# def _fp16_to_fp32(feat_dict):
-#   out = {k: arr.astype(np.float32)
-#   if arr.dtype == np.float16 else arr
-#          for k, arr in feat_dict.items()}
-#   return out
+
+
+def _fp16_to_fp32(feat_dict):
+    out = {k: arr.astype(np.float32) if arr.dtype == np.float16 else arr for k, arr in feat_dict.items()}
+    return out
 
 
 def compute_num_bb(confs, conf_th, min_bb, max_bb):
@@ -245,6 +243,7 @@ class VQAReaderUNITER(BaseDataReader):
         return lens, ids
 
     def __getitem__(self, item):
+
         id_ = self.ids[item]
         example = self.txt_db[id_]
         img_feat, img_pos_feat, num_bb = self._get_img_feat(example['img_fname'])
@@ -256,7 +255,7 @@ class VQAReaderUNITER(BaseDataReader):
         target = _get_vqa_target(example, self.num_answers)
 
         attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
-        itemFeature = ItemFeature()
+        # itemFeature = ItemFeature()
 
         return input_ids, img_feat, img_pos_feat, attn_masks, target
 

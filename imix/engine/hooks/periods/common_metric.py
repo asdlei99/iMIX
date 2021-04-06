@@ -1,12 +1,12 @@
 # TODO(jinliang):jinliang_copy
-# from .log_buffer import LogBufferWriter, get_log_buffer
-from .log_buffer_imix import get_log_buffer, LogBufferWriter
-import logging
 import datetime
-import time
-import torch
-from imix.utils_imix.Timer import Timer
+import logging
 from typing import NamedTuple, Optional
+
+import torch
+
+from imix.utils_imix.Timer import Timer
+from .log_buffer_imix import LogBufferWriter, get_log_buffer
 
 # from imix.utils.logger import setup_logger
 
@@ -26,7 +26,8 @@ from typing import NamedTuple, Optional
 #     #     pass
 #
 #     def write(self):  # TODO(jinliang):modify
-#         #self.logger.info("get_world_size{}  get_local_rank{} get_rank{}".format(comm.get_world_size(),comm.get_local_rank(),comm.get_rank()))
+#         #self.logger.info("get_world_size{}  get_local_rank{} get_rank{}".format(
+#           comm.get_world_size(),comm.get_local_rank(),comm.get_rank()))
 #         storage = get_log_buffer()
 #         iteration = storage.iter
 #
@@ -69,7 +70,8 @@ from typing import NamedTuple, Optional
 #         if storage.by_epoch:
 #             # NOTE: max_mem is parsed by grep in "dev/parse_results.sh"
 #             self.logger.info(
-#                 ' {eta}  epoch:{epoch}   {inner_iter}/{single_epoch_iters}   iter: {iter}  max_iter:{max_iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
+#                 ' {eta}  epoch:{epoch}   {inner_iter}/{single_epoch_iters}   iter: {iter}
+#                   max_iter:{max_iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
 #                 .format(
 #                     eta=f'eta: {eta_string}  ' if eta_string else '',
 #                     epoch=storage.epoch,
@@ -173,7 +175,8 @@ class CommonMetricLoggerHook(LogBufferWriter):
     #         max_mem_mb = None
     #
     #     self.logger.info(
-    #         ' {eta}  epoch:{epoch}   {inner_iter}/{single_epoch_iters}   iter: {iter}  max_iter:{max_iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
+    #         ' {eta}  epoch:{epoch}   {inner_iter}/{single_epoch_iters}
+    #           iter: {iter}  max_iter:{max_iter}  {losses}  {time}{data_time}lr: {lr}  {memory}'
     #             .format(
     #             eta=f'eta: {eta_string}  ' if eta_string else '',
     #             epoch=storage.epoch,

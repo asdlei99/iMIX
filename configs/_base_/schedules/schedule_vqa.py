@@ -27,5 +27,5 @@ lr_config = dict(
     policy='MultiStepScheduler')
 # max_iter = 118000
 # max_iter = 236000
-#by_iter = True
-total_epochs = 4
+# by_iter = True
+total_epochs = 8

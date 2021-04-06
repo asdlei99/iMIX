@@ -1,20 +1,12 @@
-import functools
-import logging
-import math
-import torch.nn as nn
-import torch
-from ..builder import BACKBONES
 from collections import OrderedDict
+
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.nn.init import kaiming_normal, kaiming_uniform
-from transformers.modeling_bert import (
-    BertConfig,
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
+
+from ..builder import BACKBONES
 
 
 def generate_coord(batch, height, width):
@@ -28,10 +20,17 @@ def generate_coord(batch, height, width):
     yv_ctr = (yv_min + yv_max) / 2
     hmap = torch.ones(height, width) * (1. / height)
     wmap = torch.ones(height, width) * (1. / width)
-    coord = torch.autograd.Variable(torch.cat([xv_min.unsqueeze(0), yv_min.unsqueeze(0),\
-        xv_max.unsqueeze(0), yv_max.unsqueeze(0),\
-        xv_ctr.unsqueeze(0), yv_ctr.unsqueeze(0),\
-        hmap.unsqueeze(0), wmap.unsqueeze(0)], dim=0).cuda())
+    data = [
+        xv_min.unsqueeze(0),
+        yv_min.unsqueeze(0),
+        xv_max.unsqueeze(0),
+        yv_max.unsqueeze(0),
+        xv_ctr.unsqueeze(0),
+        yv_ctr.unsqueeze(0),
+        hmap.unsqueeze(0),
+        wmap.unsqueeze(0)
+    ]
+    coord = torch.autograd.Variable(torch.cat(data, dim=0).cuda())
     coord = coord.unsqueeze(0).repeat(batch, 1, 1, 1)
     return coord
 
@@ -57,7 +56,7 @@ class ReSC_BACKBONE(nn.Module):
         self.mstage = mstage
         self.convlstm = convlstm
         self.tunebert = tunebert
-        self.textdim = 768  #'bert-base-uncased'
+        self.textdim = 768  # 'bert-base-uncased'
 
         # #### test forward
         # seed = 13
@@ -70,7 +69,7 @@ class ReSC_BACKBONE(nn.Module):
         # jemb_drop_out = 0.0
         # ###########
 
-        ## Mapping module
+        # Mapping module
         self.mapping_visu = ConvBatchNormReLU(512 if self.convlstm else 256, emb_size, 1, 1, 0, 1, leaky=leaky)
 
         self.mapping_lang = torch.nn.Sequential(
@@ -78,13 +77,18 @@ class ReSC_BACKBONE(nn.Module):
             nn.ReLU())
 
         textdim = emb_size
-        self.film = FiLMedConvBlock_multihop(NFilm=NFilm,textdim=textdim,visudim=emb_size,\
-            emb_size=emb_size,fusion=fusion,intmd=(intmd or mstage or convlstm))
+        self.film = FiLMedConvBlock_multihop(
+            NFilm=NFilm,
+            textdim=textdim,
+            visudim=emb_size,
+            emb_size=emb_size,
+            fusion=fusion,
+            intmd=(intmd or mstage or convlstm))
 
-        ## output head
+        # output head
         output_emb = emb_size
         if self.mstage:
-            selfn_out = nn.ModuleDict()
+            # selfn_out = nn.ModuleDict()
             modules = OrderedDict()
             for n in range(0, NFilm):
                 modules['out%d' % n] = torch.nn.Sequential(
@@ -118,8 +122,9 @@ class ReSC_BACKBONE(nn.Module):
         for ii in range(raw_fword.shape[0]):
             ntoken = (word_mask[ii] != 0).sum()
             fword[ii, :ntoken, :] = F.normalize(self.mapping_lang(raw_fword[ii, :ntoken, :]), p=2, dim=1)
-            ## [CLS], [SEP]
-            # fword[ii,1:ntoken-1,:] = F.normalize(self.mapping_lang(raw_fword[ii,1:ntoken-1,:].view(-1,self.textdim)), p=2, dim=1)
+            # [CLS], [SEP]
+            # fword[ii,1:ntoken-1,:] = F.normalize(
+            # self.mapping_lang(raw_fword[ii,1:ntoken-1,:].view(-1,self.textdim)), p=2, dim=1)
         raw_fword = fword
 
         coord = generate_coord(batch_size, raw_fvisu.size(2), raw_fvisu.size(3))
@@ -131,12 +136,14 @@ class ReSC_BACKBONE(nn.Module):
         elif self.convlstm:
             x = torch.stack(x, dim=1)
             output, state = self.global_out(x)
-            output, hidden, cell = output[-1], state[-1][0], state[-1][1]
+            # output, hidden = output[-1], state[-1][0]
+            # output, hidden, cell = output[-1], state[-1][0], state[-1][1]
+            output, hidden = output[-1], state[-1][0]
             outbox = [self.fcn_out(hidden)]
         else:
             x = torch.stack(x, dim=1).view(batch_size, -1, raw_fvisu.size(2), raw_fvisu.size(3))
             outbox = [self.fcn_out(x)]
-        return outbox, attnscore_list  ## list
+        return outbox, attnscore_list  # list
 
 
 class ConvBatchNormReLU(nn.Sequential):
@@ -184,6 +191,64 @@ class ConvBatchNormReLU(nn.Sequential):
 
     def forward(self, x):
         return super(ConvBatchNormReLU, self).forward(x)
+
+
+class ConvLSTMCell(nn.Module):
+
+    def __init__(self, input_size, input_dim, hidden_dim, kernel_size, bias):
+        """Initialize ConvLSTM cell.
+
+        Parameters
+        ----------
+        input_size: (int, int)
+            Height and width of input tensor as (height, width).
+        input_dim: int
+            Number of channels of input tensor.
+        hidden_dim: int
+            Number of channels of hidden state.
+        kernel_size: (int, int)
+            Size of the convolutional kernel.
+        bias: bool
+            Whether or not to add the bias.
+        """
+
+        super(ConvLSTMCell, self).__init__()
+
+        self.height, self.width = input_size
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+
+        self.kernel_size = kernel_size
+        self.padding = kernel_size[0] // 2, kernel_size[1] // 2
+        self.bias = bias
+
+        self.conv = nn.Conv2d(
+            in_channels=self.input_dim + self.hidden_dim,
+            out_channels=4 * self.hidden_dim,
+            kernel_size=self.kernel_size,
+            padding=self.padding,
+            bias=self.bias)
+
+    def forward(self, input_tensor, cur_state):
+        h_cur, c_cur = cur_state
+
+        combined = torch.cat([input_tensor, h_cur], dim=1)  # concatenate along channel axis
+
+        combined_conv = self.conv(combined)
+        cc_i, cc_f, cc_o, cc_g = torch.split(combined_conv, self.hidden_dim, dim=1)
+        i = torch.sigmoid(cc_i)
+        f = torch.sigmoid(cc_f)
+        o = torch.sigmoid(cc_o)
+        g = torch.tanh(cc_g)
+
+        c_next = f * c_cur + i * g
+        h_next = o * torch.tanh(c_next)
+
+        return h_next, c_next
+
+    def init_hidden(self, batch_size):
+        return (Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda(),
+                Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).cuda())
 
 
 class ConvLSTM(nn.Module):
@@ -311,7 +376,7 @@ def mask_softmax(attn_score, word_mask, tempuature=10., clssep=False, lstm=False
                 word_mask_cp[ii, word_mask_cp[ii, :].sum() - 1] = 0
             else:
                 word_mask_cp[ii, 0] = 0
-                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  ## set one to 0 already
+                word_mask_cp[ii, word_mask_cp[ii, :].sum()] = 0  # set one to 0 already
     mask_score = score * word_mask_cp.float()
     mask_score = mask_score / (mask_score.sum(1) + 1e-8).view(mask_score.size(0), 1).expand(
         mask_score.size(0), mask_score.size(1))
@@ -368,7 +433,7 @@ class FiLMedConvBlock_context(nn.Module):
                  baseline=False):
         super(FiLMedConvBlock_context, self).__init__()
 
-        self.cont_map = cont_map  ## mapping context with language feature
+        self.cont_map = cont_map  # mapping context with language feature
         self.lstm = lstm
         self.emb_size = emb_size
         self.with_residual = with_residual
@@ -382,7 +447,7 @@ class FiLMedConvBlock_context(nn.Module):
         if self.fusion == 'cat':
             self.attn_map = nn.Conv1d(textdim + visudim, emb_size // 2, kernel_size=1)
         elif self.fusion == 'prod':
-            assert (textdim == visudim)  ## if product fusion
+            assert (textdim == visudim)  # if product fusion
             self.attn_map = nn.Conv1d(visudim, emb_size // 2, kernel_size=1)
 
         self.attn_score = nn.Conv1d(emb_size // 2, 1, kernel_size=1)
@@ -406,23 +471,27 @@ class FiLMedConvBlock_context(nn.Module):
             fsent = F.normalize(F.relu(self.sent_map(fsent)), p=2, dim=1)
             fcont = torch.matmul(context_score.view(B, 1, N), fword.permute(0, 2, 1)).squeeze(1)
             fcontext = F.relu(self.context_map(fsent * fcont)).unsqueeze(2).repeat(1, 1, N)
-            ## word attention
+            # word attention
             tile_visu = torch.mean(fvisu.view(B, Dvisu, -1), dim=2, keepdim=True).repeat(1, 1, N)
             if self.fusion == 'cat':
-                context_tile = torch.cat([tile_visu,\
-                    fword, fcontext], dim=1)
+                context_tile = torch.cat([tile_visu, fword, fcontext], dim=1)
             elif self.fusion == 'prod':
-                context_tile = tile_visu * \
-                    fword * fcontext
+                context_tile = tile_visu * fword * fcontext
         else:
-            ## word attention
+            # word attention
             tile_visu = torch.mean(fvisu.view(B, Dvisu, -1), dim=2, keepdim=True).repeat(1, 1, N)
             if self.fusion == 'cat':
-                context_tile = torch.cat([tile_visu,\
-                    fword * context_score.view(B, 1, N).repeat(1, Dlang, 1,)], dim=1)
+                context_tile = torch.cat([tile_visu, fword * context_score.view(B, 1, N).repeat(
+                    1,
+                    Dlang,
+                    1,
+                )], dim=1)
             elif self.fusion == 'prod':
-                context_tile = tile_visu * \
-                    fword * context_score.view(B, 1, N).repeat(1, Dlang, 1,)
+                context_tile = tile_visu * fword * context_score.view(B, 1, N).repeat(
+                    1,
+                    Dlang,
+                    1,
+                )
 
         attn_feat = F.tanh(self.attn_map(context_tile))
         attn_score = self.attn_score(attn_feat).squeeze(1)
@@ -431,16 +500,19 @@ class FiLMedConvBlock_context(nn.Module):
         attn_lang = attn_lang.view(B, Dlang).squeeze(1)
 
         if self.baseline:
-            fmodu = self.fusion_layer(torch.cat([fvisu,\
-                attn_lang.unsqueeze(2).unsqueeze(2).repeat(1,1,fvisu.shape[-1],fvisu.shape[-1]),fcoord],dim=1))
+            fmodu = self.fusion_layer(
+                torch.cat(
+                    [fvisu,
+                     attn_lang.unsqueeze(2).unsqueeze(2).repeat(1, 1, fvisu.shape[-1], fvisu.shape[-1]), fcoord],
+                    dim=1))
         else:
-            ## lang-> gamma, beta
+            # lang-> gamma, beta
             film_param = self.gamme_decode(attn_lang)
             film_param = film_param.view(B, 2 * self.emb_size, 1, 1).repeat(1, 1, H, W)
             gammas, betas = torch.split(film_param, self.emb_size, dim=1)
             gammas, betas = F.tanh(gammas), F.tanh(betas)
 
-            ## modulate visu feature
+            # modulate visu feature
             fmodu = self.bn1(self.conv1(torch.cat([fvisu, fcoord], dim=1)))
             fmodu = self.film(fmodu, gammas, betas)
             fmodu = F.relu(fmodu)
@@ -526,7 +598,7 @@ class FiLMedConvBlock_multihop(nn.Module):
             x = self.modulesdict['conv%d' % n](x)
             x, _, attn_score = self.modulesdict['film%d' % n](
                 x, fword, (1 - score), fcoord, fsent=fsent, word_mask=word_mask)
-            attnscore_list.append(attn_score.view(B, N, 1, 1))  ## format match div loss in main func
+            attnscore_list.append(attn_score.view(B, N, 1, 1))  # format match div loss in main func
             if self.intmd:
                 intmd_feat.append(x)
             elif n == self.NFilm - 1:

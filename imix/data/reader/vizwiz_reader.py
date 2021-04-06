@@ -4,12 +4,10 @@ created time: 2020/8/18
 """
 
 import numpy as np
-import os
 import torch
-import lmdb
-import pickle
-from .base_reader import IMIXDataReader
+
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class VizWizReader(IMIXDataReader):

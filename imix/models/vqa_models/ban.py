@@ -1,9 +1,4 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
-import torch
-import math
-import torch.nn.functional as F
-from imix.models.backbones.lcgn_backbone import Linear, apply_mask1d
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_head
 from .base_model import BaseModel
 
 
@@ -17,7 +12,7 @@ class BAN(BaseModel):
         # self.encoder_model = build_encoder(encoder)
         self.backbone = build_backbone(backbone)
         # self.combine_model = build_combine_layer(combine_model)
-        self.head = build_head(head)  ###包括 classification head， generation head
+        self.head = build_head(head)  # 包括 classification head， generation head
 
     def forward_train(self, data):
         v = data['feature'].cuda()

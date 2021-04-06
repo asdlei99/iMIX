@@ -3,21 +3,19 @@ author: lxc
 created time: 2020/8/18
 """
 
-import numpy as np
-import sys
-import os
-import torch
-import json
-import pickle
 import base64
-import time
-import csv
-import random
 import copy
+import csv
+import json
+import random
+import sys
+import time
+
+import numpy as np
 from tqdm import tqdm
-from .base_reader import IMIXDataReader
+
 from ..utils.stream import ItemFeature
-from ..utils.tokenization import BertTokenizer
+from .base_reader import IMIXDataReader
 
 
 class LXMERTPretrainReader(IMIXDataReader):

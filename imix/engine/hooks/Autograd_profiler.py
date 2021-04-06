@@ -1,10 +1,12 @@
 # TODO(jinliang):jinliang_copy
-from .base_hook import HookBase
-from imix.utils.file_io import PathManager
 # from iopath.common.file_io import PathManager
 import os
-import torch
 import tempfile
+
+import torch
+
+from imix.utils.file_io import PathManager
+from .base_hook import HookBase
 from .builder import HOOKS
 
 

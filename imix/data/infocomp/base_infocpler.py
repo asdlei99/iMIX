@@ -1,13 +1,11 @@
-import torch
 from collections import defaultdict
+
 import numpy as np
-import logging
-import io
+import torch
 from fasttext import load_model
 
-from ..utils.tokenization import BertTokenizer
-from ..utils.stream import ItemFeature
 from ..utils.phoc import phoc
+from ..utils.tokenization import BertTokenizer
 
 
 class BaseInfoCpler(object):
@@ -84,7 +82,7 @@ class BaseInfoCpler(object):
     def get_glove_single_word(self, word):
         try:
             return self.glove_weights[self.glove_vocab_dict[word]]
-        except:
+        except Exception:
             return ([0] * 300).copy()
 
     def get_glove_single_id(self, id):
@@ -92,7 +90,7 @@ class BaseInfoCpler(object):
             return torch.zeros((300, ))
         try:
             return self.glove_weights[id]
-        except:
+        except Exception:
             return torch.zeros((300, ))
 
     def get_tokens_glove_vectors(self, tokens):
@@ -206,7 +204,7 @@ class BaseInfoCpler(object):
         try:
             out = cfg.get(at1).get(at2)
             return out
-        except:
+        except Exception:
             return None
 
     def info_extend(self, length, *to_be_extend):

@@ -1,11 +1,10 @@
+import enum
 import functools
-import logging
-import numpy as np
 import pickle
+
+import numpy as np
 import torch
 import torch.distributed as dist
-import enum
-from itertools import repeat
 
 _LOCAL_PROCESS_GROUP = None
 G_NCCL = 'nccl'
@@ -57,9 +56,9 @@ def get_rank() -> int:
 
 def get_local_rank() -> int:
     """
-        Returns:
-            The rank of the current process within the local (per-machine) process group.
-    """
+          Returns:
+              The rank of the current process within the local (per-machine) process group.
+      """
     status = get_dist_status()
     if status in (DistributedStatus.AVAILABLE, DistributedStatus.INITIALIZED):
         return 0
@@ -70,10 +69,10 @@ def get_local_rank() -> int:
 
 def get_local_size() -> int:
     """
-        Returns:
-            The size of the per-machine process group,
-            i.e. the number of processes per machine.
-    """
+          Returns:
+              The size of the per-machine process group,
+              i.e. the number of processes per machine.
+      """
     status = get_dist_status()
     if status in (DistributedStatus.AVAILABLE, DistributedStatus.INITIALIZED):
         return 0
@@ -121,10 +120,10 @@ def _serialize_to_tensor(data, group):  # TODO(jinliang):serialize2tensor -> is_
 
 def _pad_to_largest_tensor(tensor: torch.Tensor, group) -> tuple:  # TODO(jinliang):alignment_tensor
     """
-        Returns:
-            list[int]: size of the tensor, on each rank
-            Tensor: padded tensor that has the max size
-    """
+          Returns:
+              list[int]: size of the tensor, on each rank
+              Tensor: padded tensor that has the max size
+      """
 
     world_size = dist.get_world_size(group=group)
     if world_size < 1:
@@ -245,13 +244,13 @@ def gather(data, *, dst_rank=0, group=None) -> list:  # TODO(jinliang): gather -
 
 def shared_random_seed(low=2**31, select_idx=0) -> int:  # TODO(jinliang): get_common_random_seed
     """
-        Returns:
-            int: a random number that is the same across all workers.
-                If workers need a shared RNG, they can use this shared seed to
-                create one.
+          Returns:
+              int: a random number that is the same across all workers.
+                  If workers need a shared RNG, they can use this shared seed to
+                  create one.
 
-        All workers must call this function, otherwise it will deadlock.
-        """
+          All workers must call this function, otherwise it will deadlock.
+          """
     random_ints = np.random.randint(low)
     all_random_ints = all_gather(random_ints)
     if len(all_random_ints) < select_idx:

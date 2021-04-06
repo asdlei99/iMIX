@@ -1,11 +1,10 @@
-import torch
 from collections import defaultdict
-# from ..vqadata.stream import ItemFeature
-import logging
 
-from ..utils.tokenization import BertTokenizer
+import torch
+
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
+from ..utils.tokenization import BertTokenizer
 
 WORD_MASK_RATIO = 0.15
 MAX_SEQ_LENGTH = 14
@@ -158,7 +157,7 @@ class VQAInfoCpler(BaseInfoCpler):
     def get_glove_single_word(self, word):
         try:
             return self.glove_weights[self.glove_vocab_dict[word]]
-        except:
+        except Exception:
             return ([0] * 300).copy()
 
     def get_glove_single_id(self, id):
@@ -166,7 +165,7 @@ class VQAInfoCpler(BaseInfoCpler):
             return torch.zeros((300, ))
         try:
             return self.glove_weights[id]
-        except:
+        except Exception:
             return torch.zeros((300, ))
 
     def load_vocab(self):

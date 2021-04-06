@@ -1,11 +1,13 @@
-import torch
-import sys
-import numpy as np
 import os
 import subprocess
+import sys
 from collections import defaultdict
+
+import numpy as np
 import PIL
+import torch
 from tabulate import tabulate
+import re
 
 __all__ = ['collect_env_info']
 

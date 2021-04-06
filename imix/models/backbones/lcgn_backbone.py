@@ -1,11 +1,9 @@
-import torch.nn as nn
-import torch
-from ..builder import BACKBONES
-import torch.nn.functional as F
 import numpy as np
-from ..combine_layers import ModalCombineLayer
-from torch.nn.utils.weight_norm import weight_norm
-from torch.autograd import Variable
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+from ..builder import BACKBONES
 
 
 class Linear(nn.Linear):
@@ -61,7 +59,7 @@ def apply_mask2d(attention, image_locs):
 
 def generate_scaled_var_drop_mask(shape, keep_prob):
     assert keep_prob > 0. and keep_prob <= 1.
-    mask = torch.rand(shape, device='cpu').le(keep_prob).cuda()  ##cuda
+    mask = torch.rand(shape, device='cpu').le(keep_prob).cuda()  # cuda
     mask = mask.float() / keep_prob
     return mask
 
@@ -90,7 +88,7 @@ class LCGN_BACKBONE(nn.Module):
         self.build_propagate_message()
 
     def build_loc_ctx_init(self):
-        assert self.STEM_LINEAR == True
+        assert self.STEM_LINEAR
         if self.STEM_LINEAR:
             self.initKB = Linear(self.D_FEAT, self.CTX_DIM)
             self.x_loc_drop = nn.Dropout(1 - self.stemDropout)

@@ -4,14 +4,33 @@ created time: 2020/8/20
 """
 
 import unicodedata
+import re
+SENTENCE_SPLIT_REGEX = re.compile(r'(\W+)')
+
+
+def tokenize(sentence, regex=SENTENCE_SPLIT_REGEX, keep=None, remove=None):
+    if keep is None:
+        keep = ["'s"]
+    if remove is None:
+        remove = [',', '?']
+    sentence = sentence.lower()
+
+    for token in keep:
+        sentence = sentence.replace(token, ' ' + token)
+
+    for token in remove:
+        sentence = sentence.replace(token, '')
+
+    tokens = regex.split(sentence)
+    tokens = [t.strip() for t in tokens if len(t.strip()) > 0]
+    return tokens
 
 
 def _is_punctuation(char):
     if char == '-':
         return False
     cp = ord(char)
-    if (cp>=33 and cp<=47) or (cp>=58 and cp<=64) or \
-            (cp>=91 and cp<=96) or (cp>=123 and cp<=126):
+    if (cp >= 33 and cp <= 47) or (cp >= 58 and cp <= 64) or (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126):
         return True
     cat = unicodedata.category(char)
     if cat.startswith('P'):

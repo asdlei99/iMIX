@@ -1,10 +1,15 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
-import os
 import pickle
-import numpy as np
 from collections import defaultdict
+
+import numpy as np
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+from ..builder import ENCODER
+import math
+from collections import OrderedDict
+
+catmap_dict = OrderedDict()
 
 
 @ENCODER.register_module()
@@ -17,9 +22,9 @@ class ImageFeatureEncoder(nn.Module):
             self.module = Identity()
             self.module.in_dim = in_dim
             self.module.out_dim = in_dim
-        elif encoder_type == 'projection':
-            module_type = kwargs.pop('module', 'linear')
-            self.module = ProjectionEmbedding(module_type, in_dim, **kwargs)
+        # elif encoder_type == 'projection':
+        #     module_type = kwargs.pop('module', 'linear')
+        #     self.module = ProjectionEmbedding(module_type, in_dim, **kwargs)
         elif encoder_type == 'finetune_faster_rcnn_fpn_fc7':
             self.module = FinetuneFasterRcnnFpnFc7(in_dim, weights_file, bias_file, **kwargs)
         else:
@@ -86,6 +91,53 @@ class MyUpsample2(nn.Module):
                                                            x.size(3) * 2)
 
 
+def xyxy2xywh(x):  # Convert bounding box format from [x1, y1, x2, y2] to [x, y, w, h]
+    y = torch.zeros(x.shape) if x.dtype is torch.float32 else np.zeros(x.shape)
+    y[:, 0] = (x[:, 0] + x[:, 2]) / 2
+    y[:, 1] = (x[:, 1] + x[:, 3]) / 2
+    y[:, 2] = x[:, 2] - x[:, 0]
+    y[:, 3] = x[:, 3] - x[:, 1]
+    return y
+
+
+def xywh2xyxy(x):  # Convert bounding box format from [x, y, w, h] to [x1, y1, x2, y2]
+    y = torch.zeros(x.shape) if x.dtype is torch.float32 else np.zeros(x.shape)
+    y[:, 0] = (x[:, 0] - x[:, 2] / 2)
+    y[:, 1] = (x[:, 1] - x[:, 3] / 2)
+    y[:, 2] = (x[:, 0] + x[:, 2] / 2)
+    y[:, 3] = (x[:, 1] + x[:, 3] / 2)
+    return y
+
+
+def bbox_iou(box1, box2, x1y1x2y2=True):
+    """Returns the IoU of two bounding boxes."""
+    if x1y1x2y2:
+        # Get the coordinates of bounding boxes
+        b1_x1, b1_y1, b1_x2, b1_y2 = box1[:, 0], box1[:, 1], box1[:, 2], box1[:, 3]
+        b2_x1, b2_y1, b2_x2, b2_y2 = box2[:, 0], box2[:, 1], box2[:, 2], box2[:, 3]
+    else:
+        # Transform from center and width to exact coordinates
+        b1_x1, b1_x2 = box1[:, 0] - box1[:, 2] / 2, box1[:, 0] + box1[:, 2] / 2
+        b1_y1, b1_y2 = box1[:, 1] - box1[:, 3] / 2, box1[:, 1] + box1[:, 3] / 2
+        b2_x1, b2_x2 = box2[:, 0] - box2[:, 2] / 2, box2[:, 0] + box2[:, 2] / 2
+        b2_y1, b2_y2 = box2[:, 1] - box2[:, 3] / 2, box2[:, 1] + box2[:, 3] / 2
+
+    # get the coordinates of the intersection rectangle
+    inter_rect_x1 = torch.max(b1_x1, b2_x1)
+    inter_rect_y1 = torch.max(b1_y1, b2_y1)
+    inter_rect_x2 = torch.min(b1_x2, b2_x2)
+    inter_rect_y2 = torch.min(b1_y2, b2_y2)
+    # Intersection area
+    inter_area = torch.clamp(inter_rect_x2 - inter_rect_x1, 0) * torch.clamp(inter_rect_y2 - inter_rect_y1, 0)
+    # Union Area
+    b1_area = (b1_x2 - b1_x1) * (b1_y2 - b1_y1)
+    b2_area = (b2_x2 - b2_x1) * (b2_y2 - b2_y1)
+
+    # print(box1, box1.shape)
+    # print(box2, box2.shape)
+    return inter_area / (b1_area + b2_area - inter_area + 1e-16)
+
+
 def parse_model_config(path):
     """Parses the yolo-v3 layer configuration file and returns module
     definitions."""
@@ -105,6 +157,75 @@ def parse_model_config(path):
             value = value.strip()
             module_defs[-1][key.rstrip()] = value.strip()
     return module_defs
+
+
+def build_object_targets(pred_boxes, pred_conf, pred_cls, target, anchors, num_anchors, num_classes, grid_size,
+                         ignore_thres, img_dim):
+    nB = target.size(0)
+    nA = num_anchors
+    nC = num_classes
+    nG = grid_size
+    mask = torch.zeros(nB, nA, nG, nG)
+    conf_mask = torch.ones(nB, nA, nG, nG)
+    tx = torch.zeros(nB, nA, nG, nG)
+    ty = torch.zeros(nB, nA, nG, nG)
+    tw = torch.zeros(nB, nA, nG, nG)
+    th = torch.zeros(nB, nA, nG, nG)
+    tconf = torch.ByteTensor(nB, nA, nG, nG).fill_(0)
+    tcls = torch.ByteTensor(nB, nA, nG, nG, nC).fill_(0)
+
+    nGT = 0
+    nCorrect = 0
+    for b in range(nB):
+        for t in range(target.shape[1]):
+            if target[b, t].sum() == 0:
+                continue
+            nGT += 1
+            # Convert to position relative to box
+            gx = target[b, t, 1] * nG
+            gy = target[b, t, 2] * nG
+            gw = target[b, t, 3] * nG
+            gh = target[b, t, 4] * nG
+            # Get grid box indices
+            gi = int(gx)
+            gj = int(gy)
+            # Get shape of gt box
+            gt_box = torch.FloatTensor(np.array([0, 0, gw, gh])).unsqueeze(0)
+            # Get shape of anchor box
+            anchor_shapes = torch.FloatTensor(np.concatenate((np.zeros((len(anchors), 2)), np.array(anchors)), 1))
+            # Calculate iou between gt and anchor shapes
+            anch_ious = bbox_iou(gt_box, anchor_shapes)
+            # Where the overlap is larger than threshold set mask to zero (ignore)
+            conf_mask[b, anch_ious > ignore_thres, gj, gi] = 0
+            # Find the best matching anchor box
+            best_n = np.argmax(anch_ious)
+            # Get ground truth box
+            gt_box = torch.FloatTensor(np.array([gx, gy, gw, gh])).unsqueeze(0)
+            # Get the best prediction
+            pred_box = pred_boxes[b, best_n, gj, gi].unsqueeze(0)
+            # Masks
+            mask[b, best_n, gj, gi] = 1
+            conf_mask[b, best_n, gj, gi] = 1
+            # Coordinates
+            tx[b, best_n, gj, gi] = gx - gi
+            ty[b, best_n, gj, gi] = gy - gj
+            # Width and height
+            tw[b, best_n, gj, gi] = math.log(gw / anchors[best_n][0] + 1e-16)
+            th[b, best_n, gj, gi] = math.log(gh / anchors[best_n][1] + 1e-16)
+            # One-hot encoding of label
+            target_label = int(target[b, t, 0])
+            target_label = catmap_dict[target_label]
+            tcls[b, best_n, gj, gi, target_label] = 1
+            tconf[b, best_n, gj, gi] = 1
+
+            # Calculate iou between ground truth and best matching prediction
+            iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)
+            pred_label = torch.argmax(pred_cls[b, best_n, gj, gi])
+            score = pred_conf[b, best_n, gj, gi]
+            if iou > 0.5 and pred_label == target_label and score > 0.5:
+                nCorrect += 1
+
+    return nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls
 
 
 def create_modules(module_defs):
@@ -172,7 +293,7 @@ def create_modules(module_defs):
             anchors = [(anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)]
             anchors = [anchors[i] for i in anchor_idxs]
             num_classes = int(module_def['classes'])
-            img_height = int(hyperparams['height'])
+            # img_height = int(hyperparams['height'])
             # Define detection layer
             # yolo_layer = YOLOLayer(anchors, num_classes, img_height)
             yolo_layer = YOLOLayer(anchors, num_classes, 256)
@@ -339,7 +460,7 @@ class DarknetEncoder(nn.Module):
         self.loss_names = ['x', 'y', 'w', 'h', 'conf', 'cls', 'recall', 'precision']
 
     def forward(self, x, targets=None):
-        batch = x.shape[0]
+        # batch = x.shape[0]
         is_training = targets is not None
         output, output_obj = [], []
         self.losses = defaultdict(float)
@@ -354,7 +475,7 @@ class DarknetEncoder(nn.Module):
                 layer_i = int(module_def['from'])
                 x = layer_outputs[-1] + layer_outputs[layer_i]
             elif module_def['type'] == 'yoloconvolutional':
-                output.append(x)  ## save final feature block
+                output.append(x)  # save final feature block
                 x = module(x)
             elif module_def['type'] == 'yolo':
                 # Train phase: get loss

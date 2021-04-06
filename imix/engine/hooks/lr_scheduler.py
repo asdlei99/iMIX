@@ -1,7 +1,9 @@
 # TODO(jinliang):jinliang_copy
-from .base_hook import HookBase
 from collections import Counter
+
 import torch
+
+from .base_hook import HookBase
 from .builder import HOOKS
 
 # @HOOKS.register_module()

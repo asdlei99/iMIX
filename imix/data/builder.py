@@ -1,28 +1,30 @@
 # from imix.utils.registry import Registry, build_from_cfg
-from imix.utils_imix.registry import Registry, build_from_cfg
+import logging
+import random
+from functools import partial
+
+import numpy as np
 from torch import nn
 from torch.utils.data import DataLoader
-from torch.utils.data.sampler import BatchSampler
 from torch.utils.data.distributed import DistributedSampler
-from functools import partial
-import numpy as np
-import random
+from torch.utils.data.sampler import BatchSampler
+
+# import imix.utils.comm as comm
+import imix.utils_imix.distributed_info as comm
 # from .sampler import DistributedGroupSampler, DistributedSampler, GroupSampler
 from imix.utils.dist_utils import get_dist_info
-from .parallel.collate import collate
-import logging
 # from imix.utils.comm import get_world_size
 # import imix.utils_imix.distributed_info as comm
 from imix.utils.env import seed_all_rng
-from .sampler import TrainingSampler, InferenceSampler
-# import imix.utils.comm as comm
-import imix.utils_imix.distributed_info as comm
+from imix.utils_imix.registry import Registry, build_from_cfg
+from .parallel.collate import collate
+from .sampler import InferenceSampler, TrainingSampler
 
 VOCAB = Registry('vocab')
 PREPROCESSOR = Registry('preprocessor')
 DATASETS = Registry('dataset')
 
-# PROCESSOR = Registry('processor')
+PROCESSOR = Registry('processor')
 
 
 def build(cfg, registry, default_args=None):
@@ -88,6 +90,7 @@ def build_dataloader(dataset,
     Returns:
         DataLoader: A PyTorch dataloader.
     """
+    from .sampler.group_sampler import DistributedGroupSampler, GroupSampler
     rank, world_size = get_dist_info()
     if dist:
         # DistributedGroupSampler will definitely shuffle the data to satisfy
@@ -165,8 +168,8 @@ def build_data_loader_by_iter(dataset, cfg, is_training=True):
     # worker_init_reset_seed = lambda worker_id: seed_all_rng(np.random.randint(2 ** 31) + worker_id)
 
     if is_training:
-        world_size = get_world_size()
-        total_batch_size = world_size * cfg.train_data.samples_per_gpu  # multimachine ? *
+        # world_size = get_world_size()
+        # total_batch_size = world_size * cfg.train_data.samples_per_gpu  # multimachine ? *
         # assert (
         #         total_batch_size > 0 and total_batch_size % world_size == 0
         # ), "Total batch size ({}) must be divisible by the number of gpus ({}).".format(

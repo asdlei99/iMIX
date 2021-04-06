@@ -119,7 +119,8 @@ work_dirs/
 *.py~
 *.sh~
 
-#Vim tmp file
+#vim
 *.swp
-#shihzh custom
-shihzh*
+
+#sphinx
+*.rst

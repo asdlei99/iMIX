@@ -1,8 +1,8 @@
 # Copyright (c) Open-MMLab. All rights reserved.
 import torch
-from torch.nn.parallel.distributed import (DistributedDataParallel, _find_tensors)
-
 from mmcv.utils import TORCH_VERSION
+from torch.nn.parallel.distributed import DistributedDataParallel, _find_tensors
+
 from .scatter_gather import scatter_kwargs
 
 

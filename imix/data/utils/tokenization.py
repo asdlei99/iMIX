@@ -16,10 +16,11 @@
 import collections
 import logging
 import os
+import random
 import unicodedata
 from io import open
+
 import torch
-import random
 
 from .file_utils import cached_path
 

@@ -1,16 +1,12 @@
-import torch.nn as nn
 import torch
-from ..builder import BACKBONES
-from ..combine_layers import ModalCombineLayer
-from torch.nn.utils.weight_norm import weight_norm
-import allennlp
-from allennlp.modules import TextFieldEmbedder, Seq2SeqEncoder, FeedForward, InputVariationalDropout, TimeDistributed
-from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
-
+import torch.nn as nn
+from allennlp.modules import InputVariationalDropout, TimeDistributed
 from allennlp.modules.matrix_attention import BilinearMatrixAttention
+from allennlp.modules.seq2seq_encoders.pytorch_seq2seq_wrapper import PytorchSeq2SeqWrapper
 from allennlp.nn import InitializerApplicator
+from allennlp.nn.util import masked_softmax, replace_masked_values
 
-from allennlp.nn.util import masked_softmax, weighted_sum, replace_masked_values
+from ..builder import BACKBONES
 
 
 @BACKBONES.register_module()
@@ -44,7 +40,8 @@ class R2C_BACKBONE(nn.Module):
                  pool_question=True):
         super().__init__()
 
-        # self.detector = SimpleDetector(pretrained=pretrained, average_pool=average_pool, semantic=semantic, final_dim=final_dim)
+        # self.detector = SimpleDetector(pretrained=pretrained,
+        #   average_pool=average_pool, semantic=semantic, final_dim=final_dim)
         self.reasoning_encoder = TimeDistributed(
             PytorchSeq2SeqWrapper(torch.nn.LSTM(1536, 256, num_layers=2, batch_first=True, bidirectional=True)))
         self.rnn_input_dropout = TimeDistributed(InputVariationalDropout(input_dropout)) if input_dropout > 0 else None

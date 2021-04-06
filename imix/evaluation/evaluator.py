@@ -2,15 +2,16 @@
 # TODO(jinliang):jinliang_copy_and_modify
 import datetime
 import logging
+import pickle as pkl
 import time
 from collections import OrderedDict
 from contextlib import contextmanager
+
 import torch
 
+from imix.utils.logger import log_every_n_seconds
 # from imix.utils.comm import get_world_size, is_main_process
 from imix.utils_imix.distributed_info import get_world_size, is_main_process
-from imix.utils.logger import log_every_n_seconds
-import pickle as pkl
 
 
 class DatasetEvaluator:

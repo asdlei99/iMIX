@@ -15,8 +15,9 @@ from .hgl import HGL
 from .resc import ReSC
 from .cmrin import CMRIN
 from .uniter import UNITER
+from .visual_dialog_bert import VisDiaBERT
 
 __all__ = [
     'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VilBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
-    'CMRIN', 'UNITER'
+    'CMRIN', 'UNITER', 'VisDiaBERT'
 ]

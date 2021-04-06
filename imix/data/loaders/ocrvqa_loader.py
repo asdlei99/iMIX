@@ -3,8 +3,9 @@ author: lxc
 created time: 2021/1/14
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
+
+from torch.utils.data import Dataset
 
 from ..reader import OCRVQAReader as Reader
 from ..infocomp import OCRVQAInfoCpler as InfoCpler

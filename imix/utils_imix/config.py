@@ -1,13 +1,14 @@
-from easydict import EasyDict
-import os
-import tempfile
-import shutil
-import regex
-import sys
-from importlib import import_module
 import ast
-from typing import Dict, List
+import os
 import os.path as osp
+import shutil
+import sys
+import tempfile
+from importlib import import_module
+from typing import Dict
+
+import regex
+from easydict import EasyDict
 
 BASE_KEY = '_base_'
 DELETE_KEY = '_delete_'
@@ -103,7 +104,7 @@ def _validate_py_syntax(py_file):
 
     try:
         ast.parse(py_content)
-    except SyntaxError as e:
+    except SyntaxError:
         raise SyntaxError('In the {} ,there are some syntax errors', format(py_file))
 
 
@@ -133,8 +134,8 @@ class Config:
         if not os.path.exists(file_path):
             raise FileNotFoundError('{} does not exist'.format(file_path))
         ext_name = os.path.splitext(file_path)[-1]
-        assert ext_name in SUPPORTED_FILE_EXT, 'Only json/py/yaml/yml extensions are supported,but get extension is {}'.format(
-            ext_name)
+        assert ext_name in SUPPORTED_FILE_EXT, 'Only json/py/yaml/yml extensions are supported,' \
+                                               'but get extension is {}'.format(ext_name)
         cfg_dict, cfg_content = file2buffer(
             filename=file_name, file_ext_name=ext_name, use_predefined_var=use_predefined_var)
 
