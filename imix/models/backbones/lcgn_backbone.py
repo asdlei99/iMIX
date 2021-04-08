@@ -33,7 +33,7 @@ activations = {
 
 
 def apply_mask1d(attention: Tensor, image_locs: Tensor) -> Tensor:
-    """ apply mask on image locations
+    """apply mask on image locations.
 
     Args:
         attention: the attention results to generate textual command
@@ -41,15 +41,14 @@ def apply_mask1d(attention: Tensor, image_locs: Tensor) -> Tensor:
 
     Returns:
         Tensor: mask for 1 dimension
-
     """
     attention = attention.float()
-    batch_size, num_loc = attention.size() # (127, 128)
-    tmp1 = attention.new_zeros(num_loc) # 128
+    batch_size, num_loc = attention.size()  # (127, 128)
+    tmp1 = attention.new_zeros(num_loc)  # 128
     tmp1[:num_loc] = torch.arange(0, num_loc, dtype=attention.dtype).unsqueeze(0)
 
-    tmp1 = tmp1.expand(batch_size, num_loc)# (127, 128)
-    tmp2 = image_locs.type(tmp1.type())#(127)
+    tmp1 = tmp1.expand(batch_size, num_loc)  # (127, 128)
+    tmp2 = image_locs.type(tmp1.type())  #(127)
     tmp2 = tmp2.unsqueeze(dim=1).expand(batch_size, num_loc)
     mask = torch.ge(tmp1, tmp2)
     attention = attention.masked_fill(mask, -1e30)
@@ -57,7 +56,7 @@ def apply_mask1d(attention: Tensor, image_locs: Tensor) -> Tensor:
 
 
 def apply_mask2d(attention: Tensor, image_locs: Tensor) -> Tensor:
-    """ mask the unshowed entity
+    """mask the unshowed entity.
 
     Args:
         attention:edge score between different entities
@@ -65,7 +64,6 @@ def apply_mask2d(attention: Tensor, image_locs: Tensor) -> Tensor:
 
     Returns:
         Tensor: mask for two dimension
-
     """
     attention = attention.float()
     batch_size, num_loc, _ = attention.size()
@@ -82,7 +80,7 @@ def apply_mask2d(attention: Tensor, image_locs: Tensor) -> Tensor:
 
 
 def generate_scaled_var_drop_mask(shape: Tensor, keep_prob: Tensor) -> Tensor:
-    """ generate a mask tensor respect to the context feature
+    """generate a mask tensor respect to the context feature.
 
     Args:
         shape: : context feature's shape, shaped of batch_size x 36 x 512
@@ -90,7 +88,6 @@ def generate_scaled_var_drop_mask(shape: Tensor, keep_prob: Tensor) -> Tensor:
 
     Returns:
         Tensor: generated mask.
-
     """
     assert keep_prob > 0. and keep_prob <= 1.
     mask = torch.rand(shape, device='cpu').le(keep_prob).cuda()  ##cuda
@@ -104,7 +101,7 @@ class LCGN_BACKBONE(nn.Module):
     def __init__(self, stem_linear: bool, D_FEAT: int, CTX_DIM: int, CMD_DIM: int, MSG_ITER_NUM: int,
                  stemDropout: float, readDropout: float, memoryDropout: float, CMD_INPUT_ACT: str,
                  STEM_NORMALIZE: bool) -> None:
-        """ the initialization of LCGN backbone
+        """the initialization of LCGN backbone.
 
         Args:
             stem_linear: bool to identify if do linear operation in loc_ctx_init
@@ -147,9 +144,10 @@ class LCGN_BACKBONE(nn.Module):
     def build_extract_textual_command(self):
         self.qInput = Linear(self.CMD_DIM, self.CMD_DIM)
         for t in range(self.MSG_ITER_NUM):
-            qInput_layer2 = Linear(self.CMD_DIM, self.CMD_DIM) # generated different input_layer2 for every message passing
+            qInput_layer2 = Linear(self.CMD_DIM,
+                                   self.CMD_DIM)  # generated different input_layer2 for every message passing
             setattr(self, 'qInput%d' % t, qInput_layer2)
-        self.cmd_inter2logits = Linear(self.CMD_DIM, 1) # the dimension of logits is 1!
+        self.cmd_inter2logits = Linear(self.CMD_DIM, 1)  # the dimension of logits is 1!
 
     def build_propagate_message(self):
         self.read_drop = nn.Dropout(1 - self.readDropout)
@@ -163,8 +161,11 @@ class LCGN_BACKBONE(nn.Module):
         self.mem_update = Linear(2 * self.CTX_DIM, self.CTX_DIM)
         self.combine_kb = Linear(2 * self.CTX_DIM, self.CTX_DIM)
 
-    def forward(self, images: Tensor, q_encoding: Tensor, lstm_outputs: Tensor, q_length: Tensor, entity_num: Tensor) -> Tensor:
-        """ The backbone network including message passing process based on the graph constructed by detected areas, which are seen as nodes in a graph
+    def forward(self, images: Tensor, q_encoding: Tensor, lstm_outputs: Tensor, q_length: Tensor,
+                entity_num: Tensor) -> Tensor:
+        """The backbone network including message passing process based on the
+        graph constructed by detected areas, which are seen as nodes in a
+        graph.
 
         Args:
             images:  image features from object detection models
@@ -175,18 +176,16 @@ class LCGN_BACKBONE(nn.Module):
 
         Returns:
             Tensor: the output feature containing local representation and context representation
-
         """
         x_loc, x_ctx, x_ctx_var_drop = self.loc_ctx_init(images)
         for t in range(self.MSG_ITER_NUM):
-            x_ctx = self.run_message_passing_iter(q_encoding, lstm_outputs, q_length,
-                                                  x_loc, x_ctx, x_ctx_var_drop,
+            x_ctx = self.run_message_passing_iter(q_encoding, lstm_outputs, q_length, x_loc, x_ctx, x_ctx_var_drop,
                                                   entity_num, t)
         x_out = self.combine_kb(torch.cat([x_loc, x_ctx], dim=-1))
         return x_out
 
     def extract_textual_command(self, q_encoding: Tensor, lstm_outputs: Tensor, q_length: Tensor, t: int) -> Tensor:
-        """ to extract command feature from text
+        """to extract command feature from text.
 
         Args:
             q_encoding: the question encoding of final hidden states, sized of batch_size x 512
@@ -196,20 +195,19 @@ class LCGN_BACKBONE(nn.Module):
 
         Returns:
             Tensor: textual command feature during the t iteration.
-
         """
         qInput_layer2 = getattr(self, 'qInput%d' % t)
         act_fun = activations[self.CMD_INPUT_ACT]
         q_cmd = qInput_layer2(act_fun(self.qInput(q_encoding)))
-        raw_att = self.cmd_inter2logits(q_cmd[:, None, :] *
-                                        lstm_outputs).squeeze(-1)
-        raw_att = apply_mask1d(raw_att, q_length) # (batch_size, 128)
+        raw_att = self.cmd_inter2logits(q_cmd[:, None, :] * lstm_outputs).squeeze(-1)
+        raw_att = apply_mask1d(raw_att, q_length)  # (batch_size, 128)
         att = F.softmax(raw_att, dim=-1)
-        cmd = torch.bmm(att[:, None, :], lstm_outputs).squeeze(1) #(127, 1, 128) (127,128,512)
+        cmd = torch.bmm(att[:, None, :], lstm_outputs).squeeze(1)  #(127, 1, 128) (127,128,512)
         return cmd
 
-    def propagate_message(self, cmd: Tensor, x_loc: Tensor, x_ctx: Tensor, x_ctx_var_drop: Tensor, entity_num: Tensor) -> Tensor:
-        """ let's do message passing for one time
+    def propagate_message(self, cmd: Tensor, x_loc: Tensor, x_ctx: Tensor, x_ctx_var_drop: Tensor,
+                          entity_num: Tensor) -> Tensor:
+        """let's do message passing for one time.
 
         Args:
             cmd: textual command feature during the t iteration. (batch_size, 512)
@@ -220,28 +218,26 @@ class LCGN_BACKBONE(nn.Module):
 
         Returns:
             Tensor: the new context feature after one time message propagation
-
         """
         x_ctx = x_ctx * x_ctx_var_drop
         proj_x_loc = self.project_x_loc(self.read_drop(x_loc))
         proj_x_ctx = self.project_x_ctx(self.read_drop(x_ctx))
-        x_joint = torch.cat([x_loc, x_ctx, proj_x_loc * proj_x_ctx], dim=-1) #(127, 36, 1536)
+        x_joint = torch.cat([x_loc, x_ctx, proj_x_loc * proj_x_ctx], dim=-1)  #(127, 36, 1536)
 
-        queries = self.queries(x_joint) #(127, 36, 512)
+        queries = self.queries(x_joint)  #(127, 36, 512)
         keys = self.keys(x_joint) * self.proj_keys(cmd)[:, None, :]
-        vals = self.vals(x_joint) * self.proj_vals(cmd)[:, None, :] #(batch_size, 36, 512)
-        edge_score = (
-                torch.bmm(queries, torch.transpose(keys, 1, 2)) / np.sqrt(self.CTX_DIM))
+        vals = self.vals(x_joint) * self.proj_vals(cmd)[:, None, :]  #(batch_size, 36, 512)
+        edge_score = (torch.bmm(queries, torch.transpose(keys, 1, 2)) / np.sqrt(self.CTX_DIM))
         edge_score = apply_mask2d(edge_score, entity_num)
-        edge_prob = F.softmax(edge_score, dim=-1)#(batch_size, 36, 36)
-        message = torch.bmm(edge_prob, vals) #(batch_size, 36, 512)
+        edge_prob = F.softmax(edge_score, dim=-1)  #(batch_size, 36, 36)
+        message = torch.bmm(edge_prob, vals)  #(batch_size, 36, 512)
 
         x_ctx_new = self.mem_update(torch.cat([x_ctx, message], dim=-1))
         return x_ctx_new
 
     def run_message_passing_iter(self, q_encoding: Tensor, lstm_outputs: Tensor, q_length: Tensor, x_loc: Tensor,
                                  x_ctx: Tensor, x_ctx_var_drop: Tensor, entity_num: Tensor, t: int) -> Tensor:
-        """ one time for message passing, let's go for one time.
+        """one time for message passing, let's go for one time.
 
         Args:
             q_encoding: the question encoding of final hidden states?
@@ -254,11 +250,9 @@ class LCGN_BACKBONE(nn.Module):
             t: the iterable number to record the message passing number
         Returns:
             Tensor: the new context feature after one time message propagation
-
         """
         cmd = self.extract_textual_command(q_encoding, lstm_outputs, q_length, t)
-        x_ctx = self.propagate_message(cmd, x_loc, x_ctx, x_ctx_var_drop,
-                                       entity_num)
+        x_ctx = self.propagate_message(cmd, x_loc, x_ctx, x_ctx_var_drop, entity_num)
         return x_ctx
 
     def loc_ctx_init(self, images: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
@@ -281,7 +275,7 @@ class LCGN_BACKBONE(nn.Module):
             # print(images.size()[-1])
             x_loc = self.initKB(images)
 
-            x_loc = self.x_loc_drop(x_loc) # batch_size x 36 x 512
+            x_loc = self.x_loc_drop(x_loc)  # batch_size x 36 x 512
 
         # if self.STEM_RENORMALIZE:
         #     x_loc = F.normalize(x_loc, dim=-1)
