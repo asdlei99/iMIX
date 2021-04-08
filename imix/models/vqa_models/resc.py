@@ -1,15 +1,7 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
-import torch.nn as nn
-import torch
-import math
-import torch.nn.functional as F
-from imix.models.backbones.lcgn_backbone import Linear, apply_mask1d
-from .base_model import BaseModel
 from pytorch_pretrained_bert.modeling import BertModel
-import numpy as np
-import torch.nn.functional as F
-from torch.autograd import Variable
 
+from ..builder import VQA_MODELS, build_backbone, build_encoder
+from .base_model import BaseModel
 
 # def yolo_loss(input,
 #               target,
@@ -253,76 +245,78 @@ from torch.autograd import Variable
 @VQA_MODELS.register_module()
 class ReSC(BaseModel):
 
-  def __init__(self, encoder, backbone, weights_file):
-    super().__init__()
+    def __init__(self, encoder, backbone, weights_file):
+        super().__init__()
 
-    self.encoder_model = build_encoder(encoder)
-    self.encoder_model.load_weights(weights_file)  ###TODO zhangrunze
-    self.textmodel = BertModel.from_pretrained('bert-base-uncased')
-    self.backbone = build_backbone(backbone)
-    # anchors = '10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326'
-    # anchors = [float(x) for x in anchors.split(',')]
-    # self.anchors_full = [
-    #     (anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)
-    # ][::-1]
-    # self.head = build_head(
-    #     head)  ###包括 classification head， generation head
+        self.encoder_model = build_encoder(encoder)
+        self.encoder_model.load_weights(weights_file)  # TODO zhangrunze
+        self.textmodel = BertModel.from_pretrained('bert-base-uncased')
+        self.backbone = build_backbone(backbone)
+        # anchors = '10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326'
+        # anchors = [float(x) for x in anchors.split(',')]
+        # self.anchors_full = [
+        #     (anchors[i], anchors[i + 1]) for i in range(0, len(anchors), 2)
+        # ][::-1]
+        # self.head = build_head(
+        #     head)  ###包括 classification head， generation head
 
-  # def compute_loss(self, pred_anchor_list, bbox, anchors_full, attnscore_list,
-  #                  word_mask):
-  #   loss = 0.
-  #   for pred_anchor in pred_anchor_list:
-  #     ## convert gt box to center+offset format
-  #     gt_param, gi, gj, best_n_list = build_target(bbox, pred_anchor,
-  #                                                  anchors_full)
-  #     ## flatten anchor dim at each scale
-  #     pred_anchor = pred_anchor.view( \
-  #         pred_anchor.size(0), 9, 5, pred_anchor.size(2), pred_anchor.size(3))
-  #     ## loss
-  #     loss += yolo_loss(pred_anchor, gt_param, gi, gj, best_n_list)
-  #   losses = {'loss': loss}
-  #
-  #   pred_anchor = pred_anchor_list[-1].view(pred_anchor_list[-1].size(0), \
-  #                                           9, 5, pred_anchor_list[-1].size(2), pred_anchor_list[-1].size(3))
-  #
-  #   ## diversity regularization
-  #   w_div = 0.125
-  #   div_loss = diverse_loss(attnscore_list, word_mask) * w_div
-  #   losses['div_loss'] = div_loss
-  #   return losses
+    # def compute_loss(self, pred_anchor_list, bbox, anchors_full, attnscore_list,
+    #                  word_mask):
+    #   loss = 0.
+    #   for pred_anchor in pred_anchor_list:
+    #     ## convert gt box to center+offset format
+    #     gt_param, gi, gj, best_n_list = build_target(bbox, pred_anchor,
+    #                                                  anchors_full)
+    #     ## flatten anchor dim at each scale
+    #     pred_anchor = pred_anchor.view( \
+    #         pred_anchor.size(0), 9, 5, pred_anchor.size(2), pred_anchor.size(3))
+    #     ## loss
+    #     loss += yolo_loss(pred_anchor, gt_param, gi, gj, best_n_list)
+    #   losses = {'loss': loss}
+    #
+    #   pred_anchor = pred_anchor_list[-1].view(pred_anchor_list[-1].size(0), \
+    #                                           9, 5, pred_anchor_list[-1].size(2), pred_anchor_list[-1].size(3))
+    #
+    #   ## diversity regularization
+    #   w_div = 0.125
+    #   div_loss = diverse_loss(attnscore_list, word_mask) * w_div
+    #   losses['div_loss'] = div_loss
+    #   return losses
 
-  def forward_train(self, data):
-    input_mask = data['input_mask'].cuda()
-    image = data['image'].cuda()
-    input_ids = data['input_ids'].cuda()
+    def forward_train(self, data):
+        input_mask = data['input_mask'].cuda()
+        image = data['image'].cuda()
+        input_ids = data['input_ids'].cuda()
 
-    raw_fvisu = self.encoder_model(image)
-    raw_fvisu = raw_fvisu[2]
+        raw_fvisu = self.encoder_model(image)
+        raw_fvisu = raw_fvisu[2]
 
-    ## Language Module
-    all_encoder_layers, _ = self.textmodel(
-        input_ids, token_type_ids=None, attention_mask=input_mask)
-    ## Sentence feature at the first position [cls]
-    raw_flang = (all_encoder_layers[-1][:, 0, :] + all_encoder_layers[-2][:, 0, :] \
-                 + all_encoder_layers[-3][:, 0, :] + all_encoder_layers[-4][:, 0, :]) / 4
-    raw_fword = (all_encoder_layers[-1] + all_encoder_layers[-2] \
-                 + all_encoder_layers[-3] + all_encoder_layers[-4]) / 4
-    raw_flang = raw_flang.detach()
-    raw_fword = raw_fword.detach()
+        # Language Module
+        all_encoder_layers, _ = self.textmodel(input_ids, token_type_ids=None, attention_mask=input_mask)
+        # Sentence feature at the first position [cls]
+        raw_flang = (all_encoder_layers[-1][:, 0, :] + all_encoder_layers[-2][:, 0, :] +
+                     all_encoder_layers[-3][:, 0, :] + all_encoder_layers[-4][:, 0, :]) / 4
+        raw_fword = (all_encoder_layers[-1] + all_encoder_layers[-2] + all_encoder_layers[-3] +
+                     all_encoder_layers[-4]) / 4
+        raw_flang = raw_flang.detach()
+        raw_fword = raw_fword.detach()
 
-    pred_anchor_list, attnscore_list = self.backbone(raw_fword, raw_fvisu,
-                                                     input_mask)
-    bbox = data['bbox'].cuda()
-    # anchors_full = self.anchors_full
+        pred_anchor_list, attnscore_list = self.backbone(raw_fword, raw_fvisu, input_mask)
+        bbox = data['bbox'].cuda()
+        # anchors_full = self.anchors_full
 
-    # losses = self.compute_loss(pred_anchor_list, bbox, anchors_full,
-    #                            attnscore_list, input_mask)
+        # losses = self.compute_loss(pred_anchor_list, bbox, anchors_full,
+        #                            attnscore_list, input_mask)
 
-    model_output = {'scores': pred_anchor_list, 'target':bbox, 'input_mask': input_mask, "attnscore_list": attnscore_list}
+        model_output = {
+            'scores': pred_anchor_list,
+            'target': bbox,
+            'input_mask': input_mask,
+            'attnscore_list': attnscore_list
+        }
 
-    return model_output
+        return model_output
 
-
-  def forward_test(self, data):
-    model_output = self.forward_train(data)
-    return model_output
+    def forward_test(self, data):
+        model_output = self.forward_train(data)
+        return model_output

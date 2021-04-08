@@ -1,8 +1,10 @@
-from typing import Dict, Tuple
+from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from typing import Dict, Tuple
+
 import torch
 import torch.distributed as dist
-from abc import abstractmethod, ABCMeta
+
 from ..builder import build_loss
 
 
@@ -18,6 +20,9 @@ class BaseLoss(torch.nn.Module, metaclass=ABCMeta):
         # return NotImplementedError
         pass
 
+    def __str__(self):
+        return self.loss_name
+
     # def loss(self, *args, **kwargs):
     #     pass
 
@@ -32,7 +37,25 @@ class BaseLoss(torch.nn.Module, metaclass=ABCMeta):
     #     pass
 
 
+# class BaseLoss(metaclass=ABCMeta):
+#     loss_name = 'base_loss'
+#
+#     @abstractmethod
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.loss_fn = None
+#
+#     def forward(self, model_output):
+#         # return NotImplementedError
+#         predict_scores, target = model_output['scores'], model_output['target']
+#         return self.loss_fn(predict_scores, target)
+#
+#     def __str__(self):
+#         return self.loss_name
+
+
 class Losser:
+
     def __init__(self, losses_cfg):
         self._loss_list: list = self.build_losses(losses_cfg)
 
@@ -45,7 +68,11 @@ class Losser:
         losses_dict = {}
         for loss_obj in self._loss_list:
             # losses = {str(loss_obj): loss_obj.forward(*args, **kwargs)}
-            losses = {str(loss_obj): loss_obj.forward(model_output)}
+            losses = loss_obj.forward(model_output)
+            if isinstance(losses, Dict):
+                losses.pop(str(loss_obj))
+            else:
+                losses = {str(loss_obj): losses}
             losses_dict.update(losses)
 
         losses, losses_log = self.parse_losses(losses=losses_dict)
@@ -70,5 +97,3 @@ class Losser:
 
             losses_log[name] = value.item()
         return loss, losses_log
-
-

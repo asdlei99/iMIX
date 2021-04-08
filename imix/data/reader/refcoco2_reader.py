@@ -3,21 +3,21 @@ author: lxc
 created time: 2021/1/26
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
 import json
+import os
 import pickle
 import time
+
+import numpy as np
+import pyximport
+from external import mask
 from PIL import Image
 
-from .referit_reader import ReferitReader
 from ..utils.file_utils import StrToBytes
 from ..utils.stream import ItemFeature
-import pyximport
+from .referit_reader import ReferitReader
+
 pyximport.install()
-from external import mask
 
 
 class RefCOCOReader(ReferitReader):
@@ -42,9 +42,8 @@ class RefCOCOReader(ReferitReader):
         print('DONE (t=%.2fs)' % (time.time() - tic))
 
         self.is_train = cfg.is_train
-        self.augment_flip, self.augment_hsv, self.augment_affine = [
-            True, True, True
-        ] if self.is_train else [False, False, False]
+        self.augment_flip, self.augment_hsv, self.augment_affine = [True, True, True
+                                                                    ] if self.is_train else [False, False, False]
         self.imsize = cfg.get('img_size', 256)
 
     def __len__(self):
@@ -58,14 +57,13 @@ class RefCOCOReader(ReferitReader):
         img = self.load_image_from_ref(ref)
         mask_info = self.getMask(ref)
         mask = mask_info['mask']
-        area = mask_info['area']
+        # area = mask_info['area']
 
         # get phrases
         phrase_info = ref['sentences']
         phrase = [info['sent'] for info in phrase_info]
         mask_where = np.where(mask > 0)
-        x_1, y_1, x_2, y_2 = mask_where[1].min(), mask_where[0].min(
-        ), mask_where[1].max(), mask_where[0].max()
+        x_1, y_1, x_2, y_2 = mask_where[1].min(), mask_where[0].min(), mask_where[1].max(), mask_where[0].max()
         bbox = [x_1, y_1, x_2, y_2]
 
         img, bbox, phrase, dw, dh = self.augment(img, bbox, phrase)
@@ -101,8 +99,7 @@ class RefCOCOReader(ReferitReader):
         Anns, Imgs, Cats, imgToAnns = {}, {}, {}, {}
         for ann in self.data['annotations']:
             Anns[ann['id']] = ann
-            imgToAnns[ann['image_id']] = imgToAnns.get(ann['image_id'],
-                                                       []) + [ann]
+            imgToAnns[ann['image_id']] = imgToAnns.get(ann['image_id'], []) + [ann]
         for img in self.data['images']:
             Imgs[img['id']] = img
         for cat in self.data['categories']:
@@ -153,21 +150,16 @@ class RefCOCOReader(ReferitReader):
         ann = self.refToAnn[ref['ref_id']]
         image = self.Imgs[ref['image_id']]
         if type(ann['segmentation'][0]) == list:  # polygon
-            rle = mask.frPyObjects(ann['segmentation'], image['height'],
-                                   image['width'])
+            rle = mask.frPyObjects(ann['segmentation'], image['height'], image['width'])
         else:
             rle = ann['segmentation']
         m = mask.decode(rle)
-        m = np.sum(
-            m, axis=2
-        )  # sometimes there are multiple binary map (corresponding to multiple segs)
+        m = np.sum(m, axis=2)  # sometimes there are multiple binary map (corresponding to multiple segs)
         m = m.astype(np.uint8)  # convert to np.uint8
         # compute area
         area = sum(mask.area(rle))  # should be close to ann['area']
         return {'mask': m, 'area': area}
 
     def load_image_from_ref(self, ref):
-        img_path = os.path.join(
-            self.image_dir,
-            '_'.join(ref['file_name'].split('_')[:-1]) + '.jpg')
+        img_path = os.path.join(self.image_dir, '_'.join(ref['file_name'].split('_')[:-1]) + '.jpg')
         return np.array(Image.open(img_path).convert('RGB'))

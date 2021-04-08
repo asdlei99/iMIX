@@ -3,63 +3,53 @@ author: lxc
 created time: 2020/8/19
 """
 
-import numpy as np
-import os
-import torch
-import lmdb
-import pickle
-from .base_reader import IMIXDataReader
 from ..utils.stream import ItemFeature
+from .base_reader import IMIXDataReader
 
 
 class TextVQAReader(IMIXDataReader):
 
-  def __init__(self, cfg):
-    super().__init__(cfg)
-    assert self.default_feature, ('Not support non-default features now.')
+    def __init__(self, cfg):
+        super().__init__(cfg)
+        assert self.default_feature, ('Not support non-default features now.')
 
-  def __len__(self):
-    return len(self.mix_annotations)
+    def __len__(self):
+        return len(self.mix_annotations)
 
-  def __getitem__(self, item):
-    annotation = self.mix_annotations[item]
-    split = self.item_splits[item]
-    itemFeature = ItemFeature()
-    itemFeature.error = False
-    for k, v in annotation.items():
-      itemFeature[k] = v
+    def __getitem__(self, item):
+        annotation = self.mix_annotations[item]
+        split = self.item_splits[item]
+        itemFeature = ItemFeature()
+        itemFeature.error = False
+        for k, v in annotation.items():
+            itemFeature[k] = v
 
-    if split != 'test':
-      itemFeature.answers = annotation['answers']
+        if split != 'test':
+            itemFeature.answers = annotation['answers']
 
-    itemFeature.tokens = annotation['question_tokens']
-    itemFeature.img_id = annotation['image_id']
+        itemFeature.tokens = annotation['question_tokens']
+        itemFeature.img_id = annotation['image_id']
 
-    feature_info = self.get_featureinfo_from_txns(
-        self.feature_txns,
-        annotation['set_name'] + '/' + annotation['image_name'])
-    for k, v in feature_info.items():
-      itemFeature[k] = v if itemFeature.get(k) is None else itemFeature[k]
+        feature_info = self.get_featureinfo_from_txns(self.feature_txns,
+                                                      annotation['set_name'] + '/' + annotation['image_name'])
+        for k, v in feature_info.items():
+            itemFeature[k] = v if itemFeature.get(k) is None else itemFeature[k]
 
-    feature_global_info = self.get_featureinfo_from_txns(
-        self.feature_global_txns,
-        annotation['set_name'] + '/' + annotation['image_name'])
-    feature_global_info['features_global'] = feature_global_info.pop('features')
+        feature_global_info = self.get_featureinfo_from_txns(self.feature_global_txns,
+                                                             annotation['set_name'] + '/' + annotation['image_name'])
+        feature_global_info['features_global'] = feature_global_info.pop('features')
 
-    for k, v in feature_global_info.items():
-      itemFeature[k] = v if itemFeature.get(k) is None else itemFeature[k]
+        for k, v in feature_global_info.items():
+            itemFeature[k] = v if itemFeature.get(k) is None else itemFeature[k]
 
-    feature_ocr_info = self.get_featureinfo_from_txns(
-        self.feature_ocr_txns,
-        annotation['set_name'] + '/' + annotation['image_name'])
-    feature_ocr_info['features_ocr'] = feature_ocr_info.pop('features')
-    for k, v in feature_ocr_info.items():
-      itemFeature[k] = v if itemFeature.get(k) is None else itemFeature[k]
-    itemFeature.error = None in [
-        feature_info, feature_global_info, feature_ocr_info
-    ]
+        feature_ocr_info = self.get_featureinfo_from_txns(self.feature_ocr_txns,
+                                                          annotation['set_name'] + '/' + annotation['image_name'])
+        feature_ocr_info['features_ocr'] = feature_ocr_info.pop('features')
+        for k, v in feature_ocr_info.items():
+            itemFeature[k] = v if itemFeature.get(k) is None else itemFeature[k]
+        itemFeature.error = None in [feature_info, feature_global_info, feature_ocr_info]
 
-    return itemFeature
+        return itemFeature
 
 
 #
@@ -157,7 +147,8 @@ class TextVQAReader(IMIXDataReader):
 #
 #         # load image features and bounding boxes
 #         img_feats = np.load(os.path.join(self.frcnn_featrure_dirs[split_idx], img_id+".npy"))
-#         img_feats_info = np.load(os.path.join(self.frcnn_featrure_dirs[split_idx], img_id+"_info.npy"), allow_pickle=True)[()]
+#         img_feats_info = np.load(os.path.join(self.frcnn_featrure_dirs[split_idx], img_id+"_info.npy"),
+#         allow_pickle=True)[()]
 #         img_boxes = img_feats_info["boxes"]
 #         w = item_feature["img_width"]
 #         h = item_feature["img_height"]

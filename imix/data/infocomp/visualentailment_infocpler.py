@@ -3,15 +3,10 @@ author: lxc
 created time: 2021/1/11
 """
 
-import torch
-from collections import defaultdict
-import logging
 import numpy as np
 
-from ..utils.tokenization import BertTokenizer
 from ..utils.stream import ItemFeature
 from .base_infocpler import BaseInfoCpler
-# from torchvision import transforms as T
 
 
 class VisualEntailmentInfoCpler(BaseInfoCpler):
@@ -23,9 +18,7 @@ class VisualEntailmentInfoCpler(BaseInfoCpler):
     def complete_info(self, item_feature: ItemFeature):
         tokens1 = self.tokenizer.tokenize(item_feature.text1.strip())
         tokens2 = self.tokenizer.tokenize(item_feature.text2.strip())
-        tokens = [self._CLS_TOKEN] + tokens1 + [self._SEP_TOEKN] + tokens2 + [
-            self._SEP_TOEKN
-        ]
+        tokens = [self._CLS_TOKEN] + tokens1 + [self._SEP_TOEKN] + tokens2 + [self._SEP_TOEKN]
         input_mask = [1] * len(tokens)
         input_type_ids = [0] * (len(tokens1) + 2) + [1] * (len(tokens2) + 1)
         while len(tokens) < self.default_max_length:

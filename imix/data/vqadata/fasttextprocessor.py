@@ -1,160 +1,181 @@
-from .baseprocessor import BaseProcessor
-from ..builder import EMBEDDING
-from .vocabprocessor import VocabProcessor
+import os
+import warnings
+from torch import distributed as dist
 import torch
 from mmcv.utils import Registry, build_from_cfg
-import os, warnings
+import numpy as np
+from ..builder import EMBEDDING
+from .vocabprocessor import VocabProcessor
+from imix.utils.file_io import PathManager
 
 VOCAB = Registry('vocab')
 
 
 def build_vocab(cfg):
-  """Build vocab."""
-  return build_from_cfg(cfg, VOCAB)
+    """Build vocab."""
+    return build_from_cfg(cfg, VOCAB)
 
 
 PREPROCESSOR = Registry('preprocessor')
 
 
+def synchronize():
+    if not dist.is_available():
+        return
+    if not dist.is_nccl_available():
+        return
+    if not dist.is_initialized():
+        return
+
+    world_size = dist.get_world_size()
+
+    if world_size == 1:
+        return
+
+    dist.barrier()
+
+
 def build_preprocessor(cfg):
-  """Build preprocessor."""
-  return build_from_cfg(cfg, PREPROCESSOR)
+    """Build preprocessor."""
+    return build_from_cfg(cfg, PREPROCESSOR)
 
 
 class WordToVectorDict:
 
-  def __init__(self, model):
-    self.model = model
+    def __init__(self, model):
+        self.model = model
 
-  def __getitem__(self, word):
-    # Check if mean for word split needs to be done here
-    return np.mean([self.model.get_word_vector(w) for w in word.split(' ')],
-                   axis=0)
+    def __getitem__(self, word):
+        # Check if mean for word split needs to be done here
+        return np.mean([self.model.get_word_vector(w) for w in word.split(' ')], axis=0)
 
 
 @EMBEDDING.register_module()
 class FastTextProcessor(VocabProcessor):
-  """FastText processor, similar to GloVe processor but returns FastText
-  vectors.
+    """FastText processor, similar to GloVe processor but returns FastText
+    vectors.
 
-  Args:
-      config (DictConfig): Configuration values for the processor.
-  """
+    Args:
+        config (DictConfig): Configuration values for the processor.
+    """
 
-  def __init__(self, max_length, model_file, *args, **kwargs):
-    # self._init_extras(config)
-    # self.config = config
-    self.model_file = model_file
-    self._download_initially = config.get('download_initially', True)
-    self._already_downloaded = False
-    self._already_loaded = False
+    def __init__(self, max_length, model_file, *args, **kwargs):
+        # self._init_extras(config)
+        # self.config = config
+        self.model_file = model_file
+        # self._download_initially = config.get('download_initially', True)
+        self._download_initially = False
+        self._already_downloaded = False
+        self._already_loaded = False
 
-    if self._download_initially:
-      self._try_download()
+        if self._download_initially:
+            self._try_download()
 
-  def _try_download(self):
-    _is_master = is_master()
+    def _try_download(self):
+        # _is_master = is_master()
+        _is_master = False
 
-    if self._already_downloaded:
-      return
+        if self._already_downloaded:
+            return
 
-    needs_download = False
+        needs_download = False
 
-    if not hasattr(self.config, 'model_file'):
-      if _is_master:
-        warnings.warn("'model_file' key is required but missing "
-                      "from FastTextProcessor's config.")
-      needs_download = True
+        if not hasattr(self.config, 'model_file'):
+            if _is_master:
+                warnings.warn("'model_file' key is required but missing " "from FastTextProcessor's config.")
+            needs_download = True
 
-    model_file = self.model_file
-    # If model_file is already an existing path don't join to cache dir
-    if not PathManager.exists(model_file):
-      model_file = os.path.join(get_mmf_cache_dir(), model_file)
+        model_file = self.model_file
+        # If model_file is already an existing path don't join to cache dir
+        if not PathManager.exists(model_file):
+            # model_file = os.path.join(get_mmf_cache_dir(), model_file)
+            model_file = model_file  # todo cache_dir
 
-    if not PathManager.exists(model_file):
-      if _is_master:
-        warnings.warn(f'No model file present at {model_file}.')
-      needs_download = True
+        if not PathManager.exists(model_file):
+            if _is_master:
+                warnings.warn(f'No model file present at {model_file}.')
+            needs_download = True
 
-    if needs_download:
-      self.writer.write('Downloading FastText bin', 'info')
-      model_file = self._download_model()
+        if needs_download:
+            self.writer.write('Downloading FastText bin', 'info')
+            model_file = self._download_model()
 
-    self.model_file = model_file
-    self._already_downloaded = True
-    synchronize()
+        self.model_file = model_file
+        self._already_downloaded = True
+        synchronize()
 
-  def _download_model(self):
-    _is_master = is_master()
+    def _download_model(self):
+        # _is_master = is_master()
+        _is_master = False
 
-    model_file_path = os.path.join(get_mmf_cache_dir(), 'wiki.en.bin')
+        # model_file_path = os.path.join(get_mmf_cache_dir(), 'wiki.en.bin')
+        model_file_path = 'wiki.en.bin'
 
-    if not _is_master:
-      return model_file_path
+        if not _is_master:
+            return model_file_path
 
-    if PathManager.exists(model_file_path):
-      self.writer.write(f'Vectors already present at {model_file_path}.',
-                        'info')
-      return model_file_path
+        if PathManager.exists(model_file_path):
+            self.writer.write(f'Vectors already present at {model_file_path}.', 'info')
+            return model_file_path
 
-    import requests
-    from mmf.common.constants import FASTTEXT_WIKI_URL
-    from tqdm import tqdm
+        import requests
+        from mmf.common.constants import FASTTEXT_WIKI_URL
+        from tqdm import tqdm
 
-    PathManager.mkdirs(os.path.dirname(model_file_path))
-    response = requests.get(FASTTEXT_WIKI_URL, stream=True)
+        PathManager.mkdirs(os.path.dirname(model_file_path))
+        response = requests.get(FASTTEXT_WIKI_URL, stream=True)
 
-    with PathManager.open(model_file_path, 'wb') as f:
-      pbar = tqdm(
-          total=int(response.headers['Content-Length']) / 4096,
-          miniters=50,
-          disable=not _is_master,
-      )
+        with PathManager.open(model_file_path, 'wb') as f:
+            pbar = tqdm(
+                total=int(response.headers['Content-Length']) / 4096,
+                miniters=50,
+                disable=not _is_master,
+            )
 
-      idx = 0
-      for data in response.iter_content(chunk_size=4096):
-        if data:
-          if idx % 50 == 0:
-            pbar.update(len(data))
-          f.write(data)
-          idx += 1
+            idx = 0
+            for data in response.iter_content(chunk_size=4096):
+                if data:
+                    if idx % 50 == 0:
+                        pbar.update(len(data))
+                    f.write(data)
+                    idx += 1
 
-      pbar.close()
+            pbar.close()
 
-    self.writer.write(f'fastText bin downloaded at {model_file_path}.', 'info')
+        self.writer.write(f'fastText bin downloaded at {model_file_path}.', 'info')
 
-    return model_file_path
+        return model_file_path
 
-  def _load_fasttext_model(self, model_file):
-    if self._already_loaded:
-      return
+    def _load_fasttext_model(self, model_file):
+        if self._already_loaded:
+            return
 
-    from fasttext import load_model
+        from fasttext import load_model
 
-    self.writer.write('Loading fasttext model now from %s' % model_file)
+        self.writer.write('Loading fasttext model now from %s' % model_file)
 
-    self.model = load_model(model_file)
-    # String to Vector
-    self.stov = WordToVectorDict(self.model)
-    self.writer.write('Finished loading fasttext model')
+        self.model = load_model(model_file)
+        # String to Vector
+        self.stov = WordToVectorDict(self.model)
+        self.writer.write('Finished loading fasttext model')
 
-    self._already_loaded = True
+        self._already_loaded = True
 
-  def _map_strings_to_indices(self, tokens):
-    length = min(len(tokens), self.max_length)
-    tokens = tokens[:length]
+    def _map_strings_to_indices(self, tokens):
+        length = min(len(tokens), self.max_length)
+        tokens = tokens[:length]
 
-    output = torch.full(
-        (self.max_length, self.model.get_dimension()),
-        fill_value=self.PAD_INDEX,
-        dtype=torch.float,
-    )
+        output = torch.full(
+            (self.max_length, self.model.get_dimension()),
+            fill_value=self.PAD_INDEX,
+            dtype=torch.float,
+        )
 
-    for idx, token in enumerate(tokens):
-      output[idx] = torch.from_numpy(self.stov[token])
+        for idx, token in enumerate(tokens):
+            output[idx] = torch.from_numpy(self.stov[token])
 
-    return output
+        return output
 
-  def __call__(self, item):
-    self._load_fasttext_model(self.model_file)
-    return super().__call__(item)
+    def __call__(self, item):
+        self._load_fasttext_model(self.model_file)
+        return super().__call__(item)

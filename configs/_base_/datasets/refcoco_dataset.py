@@ -9,7 +9,7 @@ reader_train_cfg = dict(
     type='RefCOCOReader',
     card='default',
     data_type='unc',
-    imgset_dir='/home/wbq/code/ReSC/data/unc',
+    imgset_dir='/home/zrz/code/ReSC/data/unc',
     image_dir='/home/datasets/COCO2014/train2014',
     annotations=dict(
         instances=data_root + 'instances.json',
@@ -17,7 +17,7 @@ reader_train_cfg = dict(
         refs_unc=data_root + 'refs(unc).p',
     ),
     datasets=train_datasets,  # used datasets
-    augment=False,  #True
+    augment=False,  # True
     is_train=True,
     img_size=256,
 )
@@ -51,25 +51,17 @@ train_data = dict(
     samples_per_gpu=8,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
-    data=dict(
-        type=dataset_type,
-        reader=reader_train_cfg,
-        info_cpler=info_cpler_cfg))
-# ,
-#         limit_nums=800
+    data=dict(type=dataset_type, reader=reader_train_cfg, info_cpler=info_cpler_cfg, limit_nums=800))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
-    samples_per_gpu=8,  #16
+    samples_per_gpu=8,  # 16
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(
-        type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
+    data=dict(type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
 
 # evaluator_type = 'RefCOCO'  # TODO(jinliang)
 post_processor = dict(
-    type='Evaluator',
-    metrics=[dict(type='VQAAccuracyMetric')],
-    dataset_converters=[dict(type='VQADatasetConverter')])
+    type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])

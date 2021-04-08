@@ -7,10 +7,10 @@ model = dict(
         task_obj_predict=True,
         task_matched=True,
         task_qa=True,
-        visual_losses="obj,attr,feat",
+        visual_losses='obj,attr,feat',
         visual_loss_config=dict(
-            obj=(1600, 'ce', (-1,), 1 / 0.15),
-            attr=(400, 'ce', (-1,), 1 / 0.15),
+            obj=(1600, 'ce', (-1, ), 1 / 0.15),
+            attr=(400, 'ce', (-1, ), 1 / 0.15),
             feat=(2048, 'l2', (-1, 2048), 1 / 0.15),
         ),
         random_initialize=False,
@@ -51,16 +51,16 @@ model = dict(
         model='bert',
         training_head_type='pretraining',
         bert_model_name='bert-base-uncased',
-        base_cache_dir="/home/zrz/.cache/torch/transformers",
+        base_cache_dir='/home/zrz/.cache/torch/transformers',
     ))
 
 # loss = dict(type='BinaryCrossEntropyWithLogits')
 loss = dict(
     type='LXMERTPreTrainLossV0',
-    visual_losses="obj,attr,feat",
+    visual_losses='obj,attr,feat',
     visual_loss_config=dict(
-        obj=(1600, 'ce', (-1,), 1 / 0.15),
-        attr=(400, 'ce', (-1,), 1 / 0.15),
+        obj=(1600, 'ce', (-1, ), 1 / 0.15),
+        attr=(400, 'ce', (-1, ), 1 / 0.15),
         feat=(2048, 'l2', (-1, 2048), 1 / 0.15),
     ),
     vocab_size=30522,

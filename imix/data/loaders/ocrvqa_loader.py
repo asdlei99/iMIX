@@ -3,13 +3,14 @@ author: lxc
 created time: 2021/1/14
 """
 
-from torch.utils.data import Dataset, IterableDataset
 import logging
 
-from ..reader import OCRVQAReader as Reader
-from ..infocomp import OCRVQAInfoCpler as InfoCpler
-from ..builder import DATASETS
+from torch.utils.data import Dataset
+
 import imix.utils_imix.distributed_info as comm
+from ..builder import DATASETS
+from ..infocomp import OCRVQAInfoCpler as InfoCpler
+from ..reader import OCRVQAReader as Reader
 
 
 @DATASETS.register_module()
@@ -52,8 +53,7 @@ class OCRVQADATASET(Dataset):
             'input_ids': item_feature.input_ids,  # tokens - ids
             'input_mask': item_feature.input_mask,  # tokens - mask
             'input_segment': item_feature.input_segment,  # tokens - segments
-            'input_lm_label_ids':
-            item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
             'question_id': item_feature.question_id,
             'image_id': item_feature.image_id,
         }

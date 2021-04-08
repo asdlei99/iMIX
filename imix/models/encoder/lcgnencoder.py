@@ -1,6 +1,3 @@
-import torch.nn as nn
-import torch
-from ..builder import ENCODER
 import numpy as np
 import os
 import pickle
@@ -13,6 +10,19 @@ from typing import Tuple
 @ENCODER.register_module()
 class LCGNEncoder(nn.Module):
 
+    def __init__(self, WRD_EMB_INIT_FILE, encInputDropout, qDropout, WRD_EMB_DIM, ENC_DIM, WRD_EMB_FIXED):
+        super().__init__()
+        self.WRD_EMB_INIT_FILE = WRD_EMB_INIT_FILE
+        self.encInputDropout = encInputDropout
+        self.qDropout = qDropout
+        self.WRD_EMB_DIM = WRD_EMB_DIM
+        self.ENC_DIM = ENC_DIM
+        self.WRD_EMB_FIXED = WRD_EMB_FIXED
+        embInit = np.load(self.WRD_EMB_INIT_FILE)
+        self.embeddingsVar = nn.Parameter(torch.Tensor(embInit), requires_grad=(not self.WRD_EMB_FIXED)).cuda()
+        self.enc_input_drop = nn.Dropout(1 - self.encInputDropout)
+        self.rnn0 = BiLSTM(self.WRD_EMB_DIM, self.ENC_DIM)
+        self.question_drop = nn.Dropout(1 - self.qDropout)
     def __init__(self, WRD_EMB_INIT_FILE: str, encInputDropout: float, qDropout: float, WRD_EMB_DIM: int, ENC_DIM: int,
                  WRD_EMB_FIXED: bool) -> None:
         """Initialization of LCGNEncoder.
@@ -38,6 +48,14 @@ class LCGNEncoder(nn.Module):
         self.rnn0 = BiLSTM(self.WRD_EMB_DIM, self.ENC_DIM)
         self.question_drop = nn.Dropout(1 - self.qDropout)
 
+    def forward(self, qIndices, questionLengths):
+        # Word embedding
+        # embeddingsVar = self.embeddingsVar.cuda()
+        # embeddings = torch.cat(
+        #     [torch.zeros(1, self.WRD_EMB_DIM, device='cuda'), embeddingsVar],
+        #     dim=0)
+        embeddingsVar = self.embeddingsVar
+        embeddings = torch.cat([torch.zeros(1, self.WRD_EMB_DIM, device='cpu').cuda(), embeddingsVar], dim=0)
     def forward(self, qIndices: Tensor, questionLengths: Tensor) -> Tuple[Tensor, Tensor]:
         """forward computatuion of LCGNEncoder, based on inputs.
 
@@ -69,6 +87,10 @@ class LCGNEncoder(nn.Module):
 
 class BiLSTM(nn.Module):
 
+    def __init__(self, WRD_EMB_DIM, ENC_DIM, forget_gate_bias=1.):
+        super().__init__()
+        self.WRD_EMB_DIM = WRD_EMB_DIM
+        self.ENC_DIM = ENC_DIM
     def __init__(self, WRD_EMB_DIM: int, ENC_DIM: int, forget_gate_bias: float = 1.) -> None:
         """Initialization of BiLSTM.
 
@@ -108,6 +130,11 @@ class BiLSTM(nn.Module):
         self.bilstm.bias_hh_l0_reverse.data[...] = 0.
         self.bilstm.bias_hh_l0_reverse.requires_grad = False
 
+    def forward(self, questions, questionLengths):
+        # sort samples according to question length (descending)
+        sorted_lengths, indices = torch.sort(questionLengths, descending=True)
+        sorted_questions = questions[indices]
+        _, desorted_indices = torch.sort(indices, descending=False)
     def forward(self, questions: Tensor, questionLengths: Tensor) -> Tuple[Tensor, Tensor]:
         """encoder based on BiLSTM.
 

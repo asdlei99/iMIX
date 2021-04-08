@@ -1,13 +1,14 @@
-from easydict import EasyDict
-import os
-import tempfile
-import shutil
-import regex
-import sys
-from importlib import import_module
 import ast
-from typing import Dict, List
+import os
 import os.path as osp
+import shutil
+import sys
+import tempfile
+from importlib import import_module
+from typing import Dict
+
+import regex
+from easydict import EasyDict
 
 BASE_KEY = '_base_'
 DELETE_KEY = '_delete_'
@@ -65,17 +66,14 @@ class ToExpanduser:  # ~  ->  /home/xxxx/
             return path
 
 
-def file2buffer(filename: str,
-                file_ext_name: str,
-                use_predefined_var: bool = True) -> (dict, str):
+def file2buffer(filename: str, file_ext_name: str, use_predefined_var: bool = True) -> (dict, str):
     file_content = filename + ':\n'
     with open(filename, 'r') as rf:
         file_content += rf.read()
 
     cfg_dict = dict()
     with tempfile.TemporaryDirectory() as tmp_cfg_dir:
-        tmp_cfg_file = tempfile.NamedTemporaryFile(
-            suffix=file_ext_name, dir=tmp_cfg_dir)
+        tmp_cfg_file = tempfile.NamedTemporaryFile(suffix=file_ext_name, dir=tmp_cfg_dir)
         tmp_cfg_file_name = os.path.basename(tmp_cfg_file.name)
         if use_predefined_var:
             _copy_file_content_by_predefined_vars(filename, tmp_cfg_file.name)
@@ -106,9 +104,8 @@ def _validate_py_syntax(py_file):
 
     try:
         ast.parse(py_content)
-    except SyntaxError as e:
-        raise SyntaxError('In the {} ,there are some syntax errors',
-                          format(py_file))
+    except SyntaxError:
+        raise SyntaxError('In the {} ,there are some syntax errors', format(py_file))
 
 
 def _copy_file_content_by_predefined_vars(filename, tmp_file_name):
@@ -116,10 +113,7 @@ def _copy_file_content_by_predefined_vars(filename, tmp_file_name):
     dir_name = os.path.dirname(filename)
     file_name_no_ext, ext_name = os.path.splitext(base_name)
     support_template = dict(
-        DirName=dir_name,
-        BaseName=base_name,
-        fileBaseNameNoExt=file_name_no_ext,
-        FileExtName=ext_name)
+        DirName=dir_name, BaseName=base_name, fileBaseNameNoExt=file_name_no_ext, FileExtName=ext_name)
     with open(filename, 'r') as rf:
         cfg_content = rf.read()
 
@@ -140,24 +134,20 @@ class Config:
         if not os.path.exists(file_path):
             raise FileNotFoundError('{} does not exist'.format(file_path))
         ext_name = os.path.splitext(file_path)[-1]
-        assert ext_name in SUPPORTED_FILE_EXT, 'Only json/py/yaml/yml extensions are supported,but get extension is {}'.format(
-            ext_name)
+        assert ext_name in SUPPORTED_FILE_EXT, 'Only json/py/yaml/yml extensions are supported,' \
+                                               'but get extension is {}'.format(ext_name)
         cfg_dict, cfg_content = file2buffer(
-            filename=file_name,
-            file_ext_name=ext_name,
-            use_predefined_var=use_predefined_var)
+            filename=file_name, file_ext_name=ext_name, use_predefined_var=use_predefined_var)
 
         if BASE_KEY in cfg_dict:
             file_dir = os.path.dirname(file_path)
             basekey_filename = cfg_dict.pop(BASE_KEY)
-            basekey_filename = basekey_filename if isinstance(
-                basekey_filename, list) else [basekey_filename]
+            basekey_filename = basekey_filename if isinstance(basekey_filename, list) else [basekey_filename]
 
             dict_list = []
             content_list = []
             for file in basekey_filename:
-                single_dict, single_content = Config._file2dict(
-                    os.path.join(file_dir, file))
+                single_dict, single_content = Config._file2dict(os.path.join(file_dir, file))
                 dict_list.append(single_dict)
                 content_list.append(single_content)
 
@@ -179,8 +169,7 @@ class Config:
     def _merge_x_2_y(x: dict, y: dict):
         y = y.copy()
         for key, value in x.items():
-            if key in y and isinstance(
-                    value, dict) and value.pop(DELETE_KEY, False) is False:
+            if key in y and isinstance(value, dict) and value.pop(DELETE_KEY, False) is False:
                 if isinstance(y[key], dict):
                     y[key] = Config._merge_x_2_y(value, y[key])
             else:
@@ -195,15 +184,10 @@ class Config:
         cfg_dict = ToExpanduser.generate_obj(cfg_dict).to_expanduser()
         return Config(cfg_dict, cfg_content=cfg_content, file_name=file_name)
 
-    def __init__(self,
-                 cfg_dict: dict = None,
-                 cfg_content: str = None,
-                 file_name: str = None):
+    def __init__(self, cfg_dict: dict = None, cfg_content: str = None, file_name: str = None):
         if cfg_dict is None:
             cfg_dict = dict()
-        assert isinstance(cfg_dict,
-                          dict), 'cfg_dict must be  a dict type, but got {}'.format(
-            type(cfg_dict))
+        assert isinstance(cfg_dict, dict), 'cfg_dict must be  a dict type, but got {}'.format(type(cfg_dict))
         for k in cfg_dict:
             if k in RESERVED_KEYS:
                 raise KeyError(f'the {k} in  cfg_dict is a reserved field!')
@@ -235,8 +219,7 @@ class Config:
         self._cfg_eDict.__setitem__(key, value)
 
     def __repr__(self):
-        return 'Config path:{} \n content:{}'.format(self.filename,
-                                                     self._cfg_eDict.__repr__())
+        return 'Config path:{} \n content:{}'.format(self.filename, self._cfg_eDict.__repr__())
 
     @property
     def filename(self):
