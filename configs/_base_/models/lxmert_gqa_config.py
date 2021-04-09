@@ -46,8 +46,6 @@ model = dict(
         visualization=False,  # need to implement
         max_seq_length=20,
         model='bert',
-        pretrained_path='/home/datasets/mix_data/mmf/data/models/model_LXRT.pth'
-    ))
-
+        pretrained_path='/home/datasets/mix_data/mmf/data/models/model_LXRT.pth'))
 
 loss = dict(type='LogitBinaryCrossEntropy')

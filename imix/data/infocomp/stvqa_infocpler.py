@@ -21,12 +21,13 @@ class STVQAInfoCpler(BaseInfoCpler):
         to_extd_length = self.max_seq_length - len(input_ids)
         self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0), (input_segment, 0),
                          (input_lm_label_ids, -1))
-        #while len(input_ids) < self.max_seq_length:
-        #    input_ids.append(int(self.pad_idx))
-        #    input_mask.append(0)
-        #    input_segment.append(0)
-        #    input_lm_label_ids.append(-1)
-
+        '''
+        while len(input_ids) < self.max_seq_length:
+            input_ids.append(int(self.pad_idx))
+            input_mask.append(0)
+            input_segment.append(0)
+            input_lm_label_ids.append(-1)
+        '''
         # ocr vectors
         ocr_tokens = self.tokenizer.get_limited_tokens(item_feature.ocr_tokens, self.max_ocr_length)
         item_feature.ocr_vectors_glove = self.get_tokens_glove_vectors(ocr_tokens)

@@ -24,11 +24,12 @@ class VQAReader(IMIXDataReader):
         annotation = self.mix_annotations[item]
         split = self.item_splits[item]
         item_feature = ItemFeature(annotation)
-        #item_feature = ItemFeature()
+        '''
+        item_feature = ItemFeature()
 
-        #for k, v in annotation.items():
-        #    item_feature[k] = v
-
+        for k, v in annotation.items():
+            item_feature[k] = v
+        '''
         item_feature.error = False
         # TODO(jinliang)
         # item_feature.tokens = annotation["question_tokens"]

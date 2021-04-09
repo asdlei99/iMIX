@@ -3,12 +3,7 @@ author: lxc
 created time: 2021/1/11
 """
 
-import numpy as np
-from torchvision import transforms as T
-
-from ..utils.stream import ItemFeature
 from .refcoco2_infocpler import RefCOCOInfoCpler
-from torchvision import transforms as T
 
 
 class ReferitInfoCpler(RefCOCOInfoCpler):
@@ -21,7 +16,7 @@ class ReferitInfoCpler(RefCOCOInfoCpler):
         self.vocab_answer_path = self._get_atr_of_atr(cfg, 'mix_vocab', self.vocab_answer_name)
 
     # inheriting func
-    #def complete_info(self, item_feature: ItemFeature):
+    # def complete_info(self, item_feature: ItemFeature):
     #    item_feature.img = self.transform(item_feature.img)
     #    phrases = item_feature.phrase
     #    tokenss = [self.tokenizer.tokenize(phrase.strip()) for phrase in phrases]

@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors and The HuggingFace Inc. team.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,13 +24,15 @@ from .file_utils import cached_path
 logger = logging.getLogger(__name__)
 
 PRETRAINED_VOCAB_ARCHIVE_MAP = {
-    'bert-base-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased-vocab.txt",
-    'bert-large-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-vocab.txt",
-    'bert-base-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-cased-vocab.txt",
-    'bert-large-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-cased-vocab.txt",
-    'bert-base-multilingual-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-uncased-vocab.txt",
-    'bert-base-multilingual-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-cased-vocab.txt",
-    'bert-base-chinese': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt",
+    'bert-base-uncased': 'https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased-vocab.txt',
+    'bert-large-uncased': 'https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-vocab.txt',
+    'bert-base-cased': 'https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-cased-vocab.txt',
+    'bert-large-cased': 'https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-cased-vocab.txt',
+    'bert-base-multilingual-uncased':
+    'https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-uncased-vocab.txt',
+    'bert-base-multilingual-cased':
+    'https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-cased-vocab.txt',
+    'bert-base-chinese': 'https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt',
 }
 PRETRAINED_VOCAB_POSITIONAL_EMBEDDINGS_SIZE_MAP = {
     'bert-base-uncased': 512,
@@ -49,7 +50,7 @@ def load_vocab(vocab_file):
     """Loads a vocabulary file into a dictionary."""
     vocab = collections.OrderedDict()
     index = 0
-    with open(vocab_file, "r", encoding="utf-8") as reader:
+    with open(vocab_file, 'r', encoding='utf-8') as reader:
         while True:
             token = reader.readline()
             if not token:
@@ -70,10 +71,14 @@ def whitespace_tokenize(text):
 
 
 class BertTokenizer(object):
-    """Runs end-to-end tokenization: punctuation splitting + wordpiece"""
+    """Runs end-to-end tokenization: punctuation splitting + wordpiece."""
 
-    def __init__(self, vocab_file, do_lower_case=True, max_len=None, do_basic_tokenize=True,
-                 never_split=("[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]")):
+    def __init__(self,
+                 vocab_file,
+                 do_lower_case=True,
+                 max_len=None,
+                 do_basic_tokenize=True,
+                 never_split=('[UNK]', '[SEP]', '[PAD]', '[CLS]', '[MASK]')):
         """Constructs a BertTokenizer.
 
         Args:
@@ -91,25 +96,23 @@ class BertTokenizer(object):
         if not os.path.isfile(vocab_file):
             raise ValueError(
                 "Can't find a vocabulary file at path '{}'. To load the vocabulary from a Google pretrained "
-                "model use `tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL_NAME)`".format(vocab_file))
+                'model use `tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL_NAME)`'.format(vocab_file))
         self.vocab = load_vocab(vocab_file)
-        self.ids_to_tokens = collections.OrderedDict(
-            [(ids, tok) for tok, ids in self.vocab.items()])
+        self.ids_to_tokens = collections.OrderedDict([(ids, tok) for tok, ids in self.vocab.items()])
         self.do_basic_tokenize = do_basic_tokenize
         if do_basic_tokenize:
-          self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case,
-                                                never_split=never_split)
+            self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case, never_split=never_split)
         self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
         self.max_len = max_len if max_len is not None else int(1e12)
 
     def tokenize(self, text):
         if self.do_basic_tokenize:
-          split_tokens = []
-          for token in self.basic_tokenizer.tokenize(text):
-              for sub_token in self.wordpiece_tokenizer.tokenize(token):
-                  split_tokens.append(sub_token)
+            split_tokens = []
+            for token in self.basic_tokenizer.tokenize(text):
+                for sub_token in self.wordpiece_tokenizer.tokenize(token):
+                    split_tokens.append(sub_token)
         else:
-          split_tokens = self.wordpiece_tokenizer.tokenize(text)
+            split_tokens = self.wordpiece_tokenizer.tokenize(text)
         return split_tokens
 
     def convert_tokens_to_ids(self, tokens):
@@ -118,11 +121,9 @@ class BertTokenizer(object):
         for token in tokens:
             ids.append(self.vocab[token])
         if len(ids) > self.max_len:
-            logger.warning(
-                "Token indices sequence length is longer than the specified maximum "
-                " sequence length for this BERT model ({} > {}). Running this"
-                " sequence through BERT will result in indexing errors".format(len(ids), self.max_len)
-            )
+            logger.warning('Token indices sequence length is longer than the specified maximum '
+                           ' sequence length for this BERT model ({} > {}). Running this'
+                           ' sequence through BERT will result in indexing errors'.format(len(ids), self.max_len))
         return ids
 
     def convert_ids_to_tokens(self, ids):
@@ -134,8 +135,8 @@ class BertTokenizer(object):
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path, cache_dir=None, *inputs, **kwargs):
-        """
-        Instantiate a PreTrainedBertModel from a pre-trained model file.
+        """Instantiate a PreTrainedBertModel from a pre-trained model file.
+
         Download and cache the pre-trained model file if needed.
         """
         if pretrained_model_name_or_path in PRETRAINED_VOCAB_ARCHIVE_MAP:
@@ -148,19 +149,16 @@ class BertTokenizer(object):
         try:
             resolved_vocab_file = cached_path(vocab_file, cache_dir=cache_dir)
         except EnvironmentError:
-            logger.error(
-                "Model name '{}' was not found in model name list ({}). "
-                "We assumed '{}' was a path or url but couldn't find any file "
-                "associated to this path or url.".format(
-                    pretrained_model_name_or_path,
-                    ', '.join(PRETRAINED_VOCAB_ARCHIVE_MAP.keys()),
-                    vocab_file))
+            logger.error("Model name '{}' was not found in model name list ({}). "
+                         "We assumed '{}' was a path or url but couldn't find any file "
+                         'associated to this path or url.'.format(pretrained_model_name_or_path,
+                                                                  ', '.join(PRETRAINED_VOCAB_ARCHIVE_MAP.keys()),
+                                                                  vocab_file))
             return None
         if resolved_vocab_file == vocab_file:
-            logger.info("loading vocabulary file {}".format(vocab_file))
+            logger.info('loading vocabulary file {}'.format(vocab_file))
         else:
-            logger.info("loading vocabulary file {} from cache at {}".format(
-                vocab_file, resolved_vocab_file))
+            logger.info('loading vocabulary file {} from cache at {}'.format(vocab_file, resolved_vocab_file))
         if pretrained_model_name_or_path in PRETRAINED_VOCAB_POSITIONAL_EMBEDDINGS_SIZE_MAP:
             # if we're using a pretrained model, ensure the tokenizer wont index sequences longer
             # than the number of positional embeddings
@@ -174,9 +172,7 @@ class BertTokenizer(object):
 class BasicTokenizer(object):
     """Runs basic tokenization (punctuation splitting, lower casing, etc.)."""
 
-    def __init__(self,
-                 do_lower_case=True,
-                 never_split=("[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]")):
+    def __init__(self, do_lower_case=True, never_split=('[UNK]', '[SEP]', '[PAD]', '[CLS]', '[MASK]')):
         """Constructs a BasicTokenizer.
 
         Args:
@@ -203,19 +199,19 @@ class BasicTokenizer(object):
                 token = self._run_strip_accents(token)
             split_tokens.extend(self._run_split_on_punc(token))
 
-        output_tokens = whitespace_tokenize(" ".join(split_tokens))
+        output_tokens = whitespace_tokenize(' '.join(split_tokens))
         return output_tokens
 
     def _run_strip_accents(self, text):
         """Strips accents from a piece of text."""
-        text = unicodedata.normalize("NFD", text)
+        text = unicodedata.normalize('NFD', text)
         output = []
         for char in text:
             cat = unicodedata.category(char)
-            if cat == "Mn":
+            if cat == 'Mn':
                 continue
             output.append(char)
-        return "".join(output)
+        return ''.join(output)
 
     def _run_split_on_punc(self, text):
         """Splits punctuation on a piece of text."""
@@ -237,7 +233,7 @@ class BasicTokenizer(object):
                 output[-1].append(char)
             i += 1
 
-        return ["".join(x) for x in output]
+        return [''.join(x) for x in output]
 
     def _tokenize_chinese_chars(self, text):
         """Adds whitespace around any CJK character."""
@@ -245,12 +241,12 @@ class BasicTokenizer(object):
         for char in text:
             cp = ord(char)
             if self._is_chinese_char(cp):
-                output.append(" ")
+                output.append(' ')
                 output.append(char)
-                output.append(" ")
+                output.append(' ')
             else:
                 output.append(char)
-        return "".join(output)
+        return ''.join(output)
 
     def _is_chinese_char(self, cp):
         """Checks whether CP is the codepoint of a CJK character."""
@@ -263,35 +259,35 @@ class BasicTokenizer(object):
         # space-separated words, so they are not treated specially and handled
         # like the all of the other languages.
         if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #
-                (cp >= 0x3400 and cp <= 0x4DBF) or  #
-                (cp >= 0x20000 and cp <= 0x2A6DF) or  #
-                (cp >= 0x2A700 and cp <= 0x2B73F) or  #
-                (cp >= 0x2B740 and cp <= 0x2B81F) or  #
-                (cp >= 0x2B820 and cp <= 0x2CEAF) or
-                (cp >= 0xF900 and cp <= 0xFAFF) or  #
-                (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
+            (cp >= 0x3400 and cp <= 0x4DBF) or  #
+            (cp >= 0x20000 and cp <= 0x2A6DF) or  #
+            (cp >= 0x2A700 and cp <= 0x2B73F) or  #
+            (cp >= 0x2B740 and cp <= 0x2B81F) or  #
+            (cp >= 0x2B820 and cp <= 0x2CEAF) or (cp >= 0xF900 and cp <= 0xFAFF) or  #
+            (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
             return True
 
         return False
 
     def _clean_text(self, text):
-        """Performs invalid character removal and whitespace cleanup on text."""
+        """Performs invalid character removal and whitespace cleanup on
+        text."""
         output = []
         for char in text:
             cp = ord(char)
             if cp == 0 or cp == 0xfffd or _is_control(char):
                 continue
             if _is_whitespace(char):
-                output.append(" ")
+                output.append(' ')
             else:
                 output.append(char)
-        return "".join(output)
+        return ''.join(output)
 
 
 class WordpieceTokenizer(object):
     """Runs WordPiece tokenization."""
 
-    def __init__(self, vocab, unk_token="[UNK]", max_input_chars_per_word=100):
+    def __init__(self, vocab, unk_token='[UNK]', max_input_chars_per_word=100):
         self.vocab = vocab
         self.unk_token = unk_token
         self.max_input_chars_per_word = max_input_chars_per_word
@@ -328,9 +324,9 @@ class WordpieceTokenizer(object):
                 end = len(chars)
                 cur_substr = None
                 while start < end:
-                    substr = "".join(chars[start:end])
+                    substr = ''.join(chars[start:end])
                     if start > 0:
-                        substr = "##" + substr
+                        substr = '##' + substr
                     if substr in self.vocab:
                         cur_substr = substr
                         break
@@ -352,10 +348,10 @@ def _is_whitespace(char):
     """Checks whether `chars` is a whitespace character."""
     # \t, \n, and \r are technically contorl characters but we treat them
     # as whitespace since they are generally considered as such.
-    if char == " " or char == "\t" or char == "\n" or char == "\r":
+    if char == ' ' or char == '\t' or char == '\n' or char == '\r':
         return True
     cat = unicodedata.category(char)
-    if cat == "Zs":
+    if cat == 'Zs':
         return True
     return False
 
@@ -364,10 +360,10 @@ def _is_control(char):
     """Checks whether `chars` is a control character."""
     # These are technically control characters but we count them as whitespace
     # characters.
-    if char == "\t" or char == "\n" or char == "\r":
+    if char == '\t' or char == '\n' or char == '\r':
         return False
     cat = unicodedata.category(char)
-    if cat.startswith("C"):
+    if cat.startswith('C'):
         return True
     return False
 
@@ -379,10 +375,9 @@ def _is_punctuation(char):
     # Characters such as "^", "$", and "`" are not in the Unicode
     # Punctuation class but we treat them as punctuation anyways, for
     # consistency.
-    if ((cp >= 33 and cp <= 47) or (cp >= 58 and cp <= 64) or
-            (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126)):
+    if ((cp >= 33 and cp <= 47) or (cp >= 58 and cp <= 64) or (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126)):
         return True
     cat = unicodedata.category(char)
-    if cat.startswith("P"):
+    if cat.startswith('P'):
         return True
     return False

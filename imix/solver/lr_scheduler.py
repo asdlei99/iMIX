@@ -7,11 +7,10 @@ from typing import List
 import torch
 from .builder import LR_SCHEDULERS
 from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
-from .default_constructor import BertAdam, LXMERT_BertAdam
+from .default_constructor import BertAdam
 import imix.utils_imix.distributed_info as comm
 import logging
 from transformers.optimization import (
-    get_cosine_schedule_with_warmup,
     get_linear_schedule_with_warmup,
     get_constant_schedule,
 )
@@ -199,16 +198,22 @@ def warmup_cosine(x, warmup=0.002):
 
 
 def warmup_constant(x, warmup=0.002):
-    """ Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
-        Learning rate is 1. afterwards. """
+    """Linearly increases learning rate over `warmup`*`t_total` (as provided to
+    BertAdam) training steps.
+
+    Learning rate is 1. afterwards.
+    """
     if x < warmup:
         return x / warmup
     return 1.0
 
 
 def warmup_linear(x, warmup=0.002):
-    """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to BertAdam) training step.
-        After `t_total`-th training step, learning rate is zero. """
+    """Specifies a triangular learning rate schedule where peak is reached at
+    `warmup`*`t_total`-th (as provided to BertAdam) training step.
+
+    After `t_total`-th training step, learning rate is zero.
+    """
     if x < warmup:
         return x / warmup
     return max((x - 1.) / (warmup - 1.), 0)
@@ -240,9 +245,9 @@ class BertWarmupLinearLR(torch.optim.lr_scheduler._LRScheduler):
         last_epoch: int = -1,
     ):
         if warmup_method not in SCHEDULES:
-            raise ValueError("Invalid schedule parameter: {}".format(warmup_method))
+            raise ValueError('Invalid schedule parameter: {}'.format(warmup_method))
         if not 0.0 <= warmup < 1.0 and not warmup == -1:
-            raise ValueError("Invalid warmup: {} - should be in [0.0, 1.0[ or -1".format(warmup))
+            raise ValueError('Invalid warmup: {} - should be in [0.0, 1.0[ or -1'.format(warmup))
 
         self.max_iters = max_iters
         self.warmup = warmup
@@ -259,7 +264,7 @@ class BertWarmupLinearLR(torch.optim.lr_scheduler._LRScheduler):
             progress = self.last_epoch / self.max_iters
             lr_cur = [base_lr * schedule_fct(progress, self.warmup) for base_lr in self.base_lrs]
             # warning for exceeding t_total (only active with warmup_linear
-            if self.warmup_method == "warmup_linear" and progress > 1. and not self.warned_for_t_total:
+            if self.warmup_method == 'warmup_linear' and progress > 1. and not self.warned_for_t_total:
                 if comm.is_main_process():
                     logger.info(
                         "Training beyond specified 't_total' steps with schedule '{}'. Learning rate set to {}. "

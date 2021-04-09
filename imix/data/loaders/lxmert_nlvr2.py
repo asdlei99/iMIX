@@ -27,6 +27,7 @@ class NLVR2Dataset:
         "uid": "nlvr2_train_0"
     }
     """
+
     def __init__(self, cfg):
 
         splits = cfg.datasets
@@ -43,13 +44,10 @@ class NLVR2Dataset:
             path = cfg.annotations.get(split, None)
             if path:
                 self.data.extend(json.load(open(path)))
-        print("Load %d data from split(s) %s." % (len(self.data), self.name))
+        print('Load %d data from split(s) %s.' % (len(self.data), self.name))
 
         # List to dict (for evaluation and others)
-        self.id2datum = {
-            datum['uid']: datum
-            for datum in self.data
-        }
+        self.id2datum = {datum['uid']: datum for datum in self.data}
 
     def __len__(self):
         return len(self.data)
@@ -62,8 +60,10 @@ FIELDNAMES = ["img_id", "img_h", "img_w", "objects_id", "objects_conf",
 FIELDNAMES would be keys in the dict returned by load_obj_tsv.
 """
 
+
 @DATASETS.register_module()
 class NLVR2TorchDataset(Dataset):
+
     def __init__(self, reader):
         super().__init__()
         self.raw_dataset = NLVR2Dataset(reader)
@@ -85,7 +85,7 @@ class NLVR2TorchDataset(Dataset):
         for datum in self.raw_dataset.data:
             if datum['img0'] in self.imgid2img and datum['img1'] in self.imgid2img:
                 self.data.append(datum)
-        print("Use %d data in torch dataset" % (len(self.data)))
+        print('Use %d data in torch dataset' % (len(self.data)))
 
     def __len__(self):
         return len(self.data)

@@ -39,7 +39,7 @@ class LXMERT_VQADatasetConverter(BaseDatasetConverter):
 
     def predict(self, batch_data, model_outputs, *args, **kwargs):
         pass
-    
+
     def data_pre_process(self, model_outputs, labels, *args, **kwargs):
         return model_outputs, labels
 
@@ -58,8 +58,7 @@ class LXMERT_VQAAccuracyMetric(BaseMetric):
         elif self.task == 'NLVR':
             self.data = NLVR2Dataset(cfg)
 
-    def calculate(self, predictions: torch.Tensor, labels: torch.Tensor,
-                  **kwargs):
+    def calculate(self, predictions: torch.Tensor, labels: torch.Tensor, **kwargs):
         score = 0.
         for pred in predictions:
             [(quesid, l)] = pred.items()

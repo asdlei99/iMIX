@@ -22,22 +22,23 @@ class ClevrReader(IMIXDataReader):
         annotation = self.mix_annotations[item]
         split = self.item_splits[item]
         item_feature = ItemFeature(annotation)
-        #item_feature = ItemFeature()
+        # item_feature = ItemFeature()
         item_feature.error = False
-        #for k, v in annotation.items():
-        #    item_feature[k] = v
+        '''
+        for k, v in annotation.items():
+            item_feature[k] = v
 
         # TODO(jinliang)
-        # item_feature.tokens = annotation["question_tokens"]
-        # item_feature.answers = annotation["answers"]
-        # item_feature.all_answers = annotation["all_answers"]
-        # print(item)
-        # item_feature.ocr_tokens = annotation["ocr_tokens"]
+         item_feature.tokens = annotation["question_tokens"]
+         item_feature.answers = annotation["answers"]
+         item_feature.all_answers = annotation["all_answers"]
+         print(item)
+         item_feature.ocr_tokens = annotation["ocr_tokens"]
 
-        #if split != 'test':
-        #    item_feature.answers = annotation['answers']
-        #    item_feature.all_answers = annotation['all_answers']
-
+        if split != 'test':
+            item_feature.answers = annotation['answers']
+            item_feature.all_answers = annotation['all_answers']
+        '''
         item_feature.tokens = annotation['question_tokens']
         item_feature.img_id = annotation['image_id']
         if self.default_feature:
@@ -48,8 +49,10 @@ class ClevrReader(IMIXDataReader):
                 return item_feature
             for k, v in feature_info.items():
                 item_feature[k] = item_feature.get(k, v)
-                #item_feature[k] = v if item_feature.get(
-                #    k) is None else item_feature[k]
+                '''
+                item_feature[k] = v if item_feature.get(
+                    k) is None else item_feature[k]
+                '''
             return item_feature
         feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
         item_feature.feature = torch.load(feature_path)[0]

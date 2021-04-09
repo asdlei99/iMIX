@@ -6,11 +6,11 @@ import logging
 import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
+import imix.utils_imix.distributed_info as comm
 
 mp.set_sharing_strategy('file_system')
 
 # import imix.utils.comm as comm
-import imix.utils_imix.distributed_info as comm
 
 __all__ = ['launch']
 

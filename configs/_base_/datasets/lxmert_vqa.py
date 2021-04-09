@@ -16,8 +16,7 @@ vqa_reader_train_cfg = dict(
     answer_2_label=data_root + annotation_path + 'trainval_ans2label.json',
     label_2_answer=data_root + annotation_path + 'trainval_label2ans.json',
     datasets=train_datasets,  # used datasets
-
-    #topk=32,
+    topk=32,
     img_feature=dict(
         train=data_root + feature_path + 'train2014_obj36.tsv',
         valid=data_root + feature_path + 'val2014_obj36.tsv',
@@ -35,7 +34,7 @@ vqa_reader_test_cfg = dict(
     ),
     answer_2_label=data_root + annotation_path + 'trainval_ans2label.json',
     label_2_answer=data_root + annotation_path + 'trainval_label2ans.json',
-    #topk=32,
+    topk=32,
     datasets=test_datasets,  # used datasets
     img_feature=dict(
         train=data_root + feature_path + 'train2014_obj36.tsv',
@@ -52,11 +51,11 @@ train_data = dict(
     data=dict(
         type=dataset_type,
         reader=vqa_reader_train_cfg,
-        #limit_nums=400,
+        # limit_nums=400,
     ),
     drop_last=True,
     shuffle=True,
-    )
+)
 
 test_data = dict(
     samples_per_gpu=1024,
@@ -66,14 +65,9 @@ test_data = dict(
     drop_last=False,
     shuffle=False,
     eval_period=5000,
-    )  # eval_period set to 0 to disable
+)  # eval_period set to 0 to disable
 
 post_processor = dict(
     type='Evaluator',
-    metrics=[
-        dict(
-            type='LXMERT_VQAAccuracyMetric',
-            cfg=vqa_reader_test_cfg,
-            task='VQA')
-    ],
+    metrics=[dict(type='LXMERT_VQAAccuracyMetric', cfg=vqa_reader_test_cfg, task='VQA')],
     dataset_converters=[dict(type='LXMERT_VQADatasetConverter')])

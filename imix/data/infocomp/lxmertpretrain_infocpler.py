@@ -7,7 +7,6 @@ from ..utils.stream import ItemFeature
 from ..utils.tokenization import BertTokenizer
 
 
-
 class LXMERTPreTrainInfoCpler(object):
 
     def __init__(self, cfg):
@@ -37,7 +36,7 @@ class LXMERTPreTrainInfoCpler(object):
         segment_ids = [0] * len(input_ids)
 
         # Zero-pad up to the sequence length.
-        #while len(input_ids) < self.max_seq_length:
+        # while len(input_ids) < self.max_seq_length:
         #    input_ids.append(0)
         #    input_mask.append(0)
         #    segment_ids.append(0)

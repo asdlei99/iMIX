@@ -23,11 +23,11 @@ class HatefulMemesInfoCpler(BaseInfoCpler):
         tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
         input_mask = [1] * len(tokens)
         input_type_ids = [0] * self.default_max_length
-
-        #to_extd_length = self.default_max_length - len(tokens)
-        #tokens.extend([self._PAD_TOKEN] * to_extend)
-        #input_mask.extend([0] * to_extend)
-
+        '''
+        to_extd_length = self.default_max_length - len(tokens)
+        tokens.extend([self._PAD_TOKEN] * to_extend)
+        input_mask.extend([0] * to_extend)
+        '''
         to_extd_length = self.default_max_length - len(tokens)
         self.info_extend(to_extd_length, (tokens, self.PAD_TOKEN), (input_mask, 0))
 

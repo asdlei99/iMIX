@@ -37,7 +37,7 @@ class GQAReader(IMIXDataReader):
         split = self.item_splits[item]
         item_feature = ItemFeature(annotation)
         item_feature.error = False
-        #for k, v in annotation.items():
+        # for k, v in annotation.items():
         #    item_feature[k] = v
 
         # TODO(jinliang)
@@ -47,7 +47,7 @@ class GQAReader(IMIXDataReader):
         # print(item)
         # item_feature.ocr_tokens = annotation["ocr_tokens"]
 
-        #if split is not 'test':
+        # if split is not 'test':
         #    item_feature.answers = annotation['answers']
         #    item_feature.all_answers = annotation['all_answers']
 
@@ -68,7 +68,7 @@ class GQAReader(IMIXDataReader):
                 item_feature.feature = np.random.random((100, 2048))
                 return item_feature
             item_feature.update(feature_info.items())
-            #for k, v in feature_info.items():
+            # for k, v in feature_info.items():
             #    item_feature[k] = v
             return item_feature
 

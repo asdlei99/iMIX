@@ -273,6 +273,7 @@ class BertOptimizerConstructor(DefaultOptimizerConstructor):
 @OPTIMIZERS.register_module()
 class BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
+
     Params:
         betas: Adams b1. Default: 0.9
                Adams b2. Default: 0.999
@@ -291,13 +292,13 @@ class BertAdam(Optimizer):
         b1 = betas[0]
         b2 = betas[1]
         if lr is not required and lr < 0.0:
-            raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
+            raise ValueError('Invalid learning rate: {} - should be >= 0.0'.format(lr))
         if not 0.0 <= b1 < 1.0:
-            raise ValueError("Invalid b1 parameter: {} - should be in [0.0, 1.0[".format(b1))
+            raise ValueError('Invalid b1 parameter: {} - should be in [0.0, 1.0['.format(b1))
         if not 0.0 <= b2 < 1.0:
-            raise ValueError("Invalid b2 parameter: {} - should be in [0.0, 1.0[".format(b2))
+            raise ValueError('Invalid b2 parameter: {} - should be in [0.0, 1.0['.format(b2))
         if not eps >= 0.0:
-            raise ValueError("Invalid epsilon value: {} - should be >= 0.0".format(eps))
+            raise ValueError('Invalid epsilon value: {} - should be >= 0.0'.format(eps))
         defaults = dict(lr=lr, b1=b1, b2=b2, e=eps, weight_decay=weight_decay, max_grad_norm=max_grad_norm)
         super(BertAdam, self).__init__(params, defaults)
 
@@ -369,9 +370,10 @@ class BertAdam(Optimizer):
 
 @OPTIMIZERS.register_module()
 class TansformerAdamW(Optimizer):
-    """
-    Implements Adam algorithm with weight decay fix as introduced in
-    `Decoupled Weight Decay Regularization <https://arxiv.org/abs/1711.05101>`__.
+    """Implements Adam algorithm with weight decay fix as introduced in
+    `Decoupled Weight Decay Regularization.
+
+    <https://arxiv.org/abs/1711.05101>`__.
 
     Parameters:
         params (:obj:`Iterable[torch.nn.parameter.Parameter]`):
@@ -398,19 +400,18 @@ class TansformerAdamW(Optimizer):
         correct_bias: bool = True,
     ):
         if lr < 0.0:
-            raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
+            raise ValueError('Invalid learning rate: {} - should be >= 0.0'.format(lr))
         if not 0.0 <= betas[0] < 1.0:
-            raise ValueError("Invalid beta parameter: {} - should be in [0.0, 1.0[".format(betas[0]))
+            raise ValueError('Invalid beta parameter: {} - should be in [0.0, 1.0['.format(betas[0]))
         if not 0.0 <= betas[1] < 1.0:
-            raise ValueError("Invalid beta parameter: {} - should be in [0.0, 1.0[".format(betas[1]))
+            raise ValueError('Invalid beta parameter: {} - should be in [0.0, 1.0['.format(betas[1]))
         if not 0.0 <= eps:
-            raise ValueError("Invalid epsilon value: {} - should be >= 0.0".format(eps))
+            raise ValueError('Invalid epsilon value: {} - should be >= 0.0'.format(eps))
         defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, correct_bias=correct_bias)
         super().__init__(params, defaults)
 
     def step(self, closure: Callable = None):
-        """
-        Performs a single optimization step.
+        """Performs a single optimization step.
 
         Arguments:
             closure (:obj:`Callable`, `optional`): A closure that reevaluates the model and returns the loss.
@@ -420,38 +421,38 @@ class TansformerAdamW(Optimizer):
             loss = closure()
 
         for group in self.param_groups:
-            for p in group["params"]:
+            for p in group['params']:
                 if p.grad is None:
                     continue
                 grad = p.grad.data
                 if grad.is_sparse:
-                    raise RuntimeError("Adam does not support sparse gradients, please consider SparseAdam instead")
+                    raise RuntimeError('Adam does not support sparse gradients, please consider SparseAdam instead')
 
                 state = self.state[p]
 
                 # State initialization
                 if len(state) == 0:
-                    state["step"] = 0
+                    state['step'] = 0
                     # Exponential moving average of gradient values
-                    state["exp_avg"] = torch.zeros_like(p.data)
+                    state['exp_avg'] = torch.zeros_like(p.data)
                     # Exponential moving average of squared gradient values
-                    state["exp_avg_sq"] = torch.zeros_like(p.data)
+                    state['exp_avg_sq'] = torch.zeros_like(p.data)
 
-                exp_avg, exp_avg_sq = state["exp_avg"], state["exp_avg_sq"]
-                beta1, beta2 = group["betas"]
+                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
+                beta1, beta2 = group['betas']
 
-                state["step"] += 1
+                state['step'] += 1
 
                 # Decay the first and second moment running average coefficient
                 # In-place operations to update the averages at the same time
                 exp_avg.mul_(beta1).add_(grad, alpha=1.0 - beta1)
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1.0 - beta2)
-                denom = exp_avg_sq.sqrt().add_(group["eps"])
+                denom = exp_avg_sq.sqrt().add_(group['eps'])
 
-                step_size = group["lr"]
-                if group["correct_bias"]:  # No bias correction for Bert
-                    bias_correction1 = 1.0 - beta1**state["step"]
-                    bias_correction2 = 1.0 - beta2**state["step"]
+                step_size = group['lr']
+                if group['correct_bias']:  # No bias correction for Bert
+                    bias_correction1 = 1.0 - beta1**state['step']
+                    bias_correction2 = 1.0 - beta2**state['step']
                     step_size = step_size * math.sqrt(bias_correction2) / bias_correction1
 
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
@@ -464,8 +465,8 @@ class TansformerAdamW(Optimizer):
                 # with the m/v parameters. This is equivalent to adding the square
                 # of the weights to the loss with plain (non-momentum) SGD.
                 # Add weight decay at the end (fixed version)
-                if group["weight_decay"] > 0.0:
-                    p.data.add_(p.data, alpha=-group["lr"] * group["weight_decay"])
+                if group['weight_decay'] > 0.0:
+                    p.data.add_(p.data, alpha=-group['lr'] * group['weight_decay'])
 
         return loss
 
@@ -477,16 +478,22 @@ def warmup_cosine(x, warmup=0.002):
 
 
 def warmup_constant(x, warmup=0.002):
-    """ Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
-        Learning rate is 1. afterwards. """
+    """Linearly increases learning rate over `warmup`*`t_total` (as provided to
+    BertAdam) training steps.
+
+    Learning rate is 1. afterwards.
+    """
     if x < warmup:
         return x / warmup
     return 1.0
 
 
 def warmup_linear(x, warmup=0.002):
-    """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to BertAdam) training step.
-        After `t_total`-th training step, learning rate is zero. """
+    """Specifies a triangular learning rate schedule where peak is reached at
+    `warmup`*`t_total`-th (as provided to BertAdam) training step.
+
+    After `t_total`-th training step, learning rate is zero.
+    """
     if x < warmup:
         return x / warmup
     return max((x - 1.) / (warmup - 1.), 0)
@@ -502,6 +509,7 @@ SCHEDULES = {
 @OPTIMIZERS.register_module()
 class LXMERT_BertAdam(Optimizer):
     """Implements BERT version of Adam algorithm with weight decay fix.
+
     Params:
         lr: learning rate
         warmup: portion of t_total for the warmup, -1  means no warmup. Default: -1
@@ -527,17 +535,17 @@ class LXMERT_BertAdam(Optimizer):
                  weight_decay=0.01,
                  max_grad_norm=1.0):
         if lr is not required and lr < 0.0:
-            raise ValueError("Invalid learning rate: {} - should be >= 0.0".format(lr))
+            raise ValueError('Invalid learning rate: {} - should be >= 0.0'.format(lr))
         if schedule not in SCHEDULES:
-            raise ValueError("Invalid schedule parameter: {}".format(schedule))
+            raise ValueError('Invalid schedule parameter: {}'.format(schedule))
         if not 0.0 <= warmup < 1.0 and not warmup == -1:
-            raise ValueError("Invalid warmup: {} - should be in [0.0, 1.0[ or -1".format(warmup))
+            raise ValueError('Invalid warmup: {} - should be in [0.0, 1.0[ or -1'.format(warmup))
         if not 0.0 <= b1 < 1.0:
-            raise ValueError("Invalid b1 parameter: {} - should be in [0.0, 1.0[".format(b1))
+            raise ValueError('Invalid b1 parameter: {} - should be in [0.0, 1.0['.format(b1))
         if not 0.0 <= b2 < 1.0:
-            raise ValueError("Invalid b2 parameter: {} - should be in [0.0, 1.0[".format(b2))
+            raise ValueError('Invalid b2 parameter: {} - should be in [0.0, 1.0['.format(b2))
         if not e >= 0.0:
-            raise ValueError("Invalid epsilon value: {} - should be >= 0.0".format(e))
+            raise ValueError('Invalid epsilon value: {} - should be >= 0.0'.format(e))
         defaults = dict(
             lr=lr,
             schedule=schedule,
@@ -628,12 +636,11 @@ class LXMERT_BertAdam(Optimizer):
                     progress = state['step'] / group['t_total']
                     lr_scheduled = group['lr'] * schedule_fct(progress, group['warmup'])
                     # warning for exceeding t_total (only active with warmup_linear
-                    if group['schedule'] == "warmup_linear" and progress > 1. and not warned_for_t_total:
+                    if group['schedule'] == 'warmup_linear' and progress > 1. and not warned_for_t_total:
                         if comm.is_main_process():
-                            logger.warning(
-                                "Training beyond specified 't_total' steps with schedule '{}'. Learning rate set to {}. "
-                                "Please set 't_total' of {} correctly.".format(group['schedule'], lr_scheduled,
-                                                                               self.__class__.__name__))
+                            logger.warning("Training beyond specified 't_total' steps with schedule '{}'. "
+                                           "Learning rate set to {}. Please set 't_total' of {} correctly.".format(
+                                               group['schedule'], lr_scheduled, self.__class__.__name__))
                         warned_for_t_total = True
                     # end warning
                 else:

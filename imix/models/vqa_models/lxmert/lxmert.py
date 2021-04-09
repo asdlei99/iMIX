@@ -3,9 +3,6 @@ import torch
 from imix.models.builder import ENCODER
 import os
 from imix.utils_imix.config import ToExpanduser
-import logging
-from copy import deepcopy
-import pickle
 import math
 from transformers.modeling_bert import (
     BertConfig,
@@ -29,21 +26,25 @@ from transformers.modeling_bert import (
 )
 '''
 
+
 def gelu(x):
-    """Implementation of the gelu activation function.
-        For information: OpenAI GPT's gelu is slightly different (and gives slightly different results):
-        0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
-        Also see https://arxiv.org/abs/1606.08415
+    """Implementation of the gelu activation function. For information: OpenAI
+    GPT's gelu is slightly different (and gives slightly different results):
+
+    0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
+    Also see https://arxiv.org/abs/1606.08415
     """
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
 
 class GeLU(nn.Module):
-    """Implementation of the gelu activation function.
-        For information: OpenAI GPT's gelu is slightly different (and gives slightly different results):
-        0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
-        Also see https://arxiv.org/abs/1606.08415
+    """Implementation of the gelu activation function. For information: OpenAI
+    GPT's gelu is slightly different (and gives slightly different results):
+
+    0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
+    Also see https://arxiv.org/abs/1606.08415
     """
+
     def __init__(self):
         super().__init__()
 
@@ -55,9 +56,7 @@ def swish(x):
     return x * torch.sigmoid(x)
 
 
-ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
-
-
+ACT2FN = {'gelu': gelu, 'relu': torch.nn.functional.relu, 'swish': swish}
 '''
 class BertConfig(object):
     """Configuration class to store the configuration of a `BertModel`.
@@ -153,20 +152,16 @@ class BertConfig(object):
 
 BertLayerNorm = torch.nn.LayerNorm
 
+
 class BertEmbeddings(nn.Module):
-    """Construct the embeddings from word, position and token_type embeddings.
-    """
+    """Construct the embeddings from word, position and token_type
+    embeddings."""
+
     def __init__(self, config):
         super(BertEmbeddings, self).__init__()
-        self.word_embeddings = nn.Embedding(config.vocab_size,
-                                            config.hidden_size,
-                                            padding_idx=0)
-        self.position_embeddings = nn.Embedding(config.max_position_embeddings,
-                                                config.hidden_size,
-                                                padding_idx=0)
-        self.token_type_embeddings = nn.Embedding(config.type_vocab_size,
-                                                  config.hidden_size,
-                                                  padding_idx=0)
+        self.word_embeddings = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=0)
+        self.position_embeddings = nn.Embedding(config.max_position_embeddings, config.hidden_size, padding_idx=0)
+        self.token_type_embeddings = nn.Embedding(config.type_vocab_size, config.hidden_size, padding_idx=0)
 
         # self.LayerNorm is not snake-cased to stick with TensorFlow model variable name and be able to load
         # any TensorFlow checkpoint file
@@ -175,9 +170,7 @@ class BertEmbeddings(nn.Module):
 
     def forward(self, input_ids, token_type_ids=None):
         seq_length = input_ids.size(1)
-        position_ids = torch.arange(seq_length,
-                                    dtype=torch.long,
-                                    device=input_ids.device)
+        position_ids = torch.arange(seq_length, dtype=torch.long, device=input_ids.device)
         position_ids = position_ids.unsqueeze(0).expand_as(input_ids)
         if token_type_ids is None:
             token_type_ids = torch.zeros_like(input_ids)
@@ -193,16 +186,14 @@ class BertEmbeddings(nn.Module):
 
 
 class BertAttention(nn.Module):
+
     def __init__(self, config, ctx_dim=None):
         super().__init__()
         if config.hidden_size % config.num_attention_heads != 0:
-            raise ValueError(
-                "The hidden size (%d) is not a multiple of the number of attention "
-                "heads (%d)" %
-                (config.hidden_size, config.num_attention_heads))
+            raise ValueError('The hidden size (%d) is not a multiple of the number of attention '
+                             'heads (%d)' % (config.hidden_size, config.num_attention_heads))
         self.num_attention_heads = config.num_attention_heads
-        self.attention_head_size = int(config.hidden_size /
-                                       config.num_attention_heads)
+        self.attention_head_size = int(config.hidden_size / config.num_attention_heads)
         self.all_head_size = self.num_attention_heads * self.attention_head_size
 
         # visual_dim = 2048
@@ -215,8 +206,7 @@ class BertAttention(nn.Module):
         self.dropout = nn.Dropout(config.attention_probs_dropout_prob)
 
     def transpose_for_scores(self, x):
-        new_x_shape = x.size()[:-1] + (self.num_attention_heads,
-                                       self.attention_head_size)
+        new_x_shape = x.size()[:-1] + (self.num_attention_heads, self.attention_head_size)
         x = x.view(*new_x_shape)
         return x.permute(0, 2, 1, 3)
 
@@ -230,10 +220,8 @@ class BertAttention(nn.Module):
         value_layer = self.transpose_for_scores(mixed_value_layer)
 
         # Take the dot product between "query" and "key" to get the raw attention scores.
-        attention_scores = torch.matmul(query_layer,
-                                        key_layer.transpose(-1, -2))
-        attention_scores = attention_scores / math.sqrt(
-            self.attention_head_size)
+        attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
+        attention_scores = attention_scores / math.sqrt(self.attention_head_size)
         # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
         if attention_mask is not None:
             attention_scores = attention_scores + attention_mask
@@ -247,13 +235,13 @@ class BertAttention(nn.Module):
 
         context_layer = torch.matmul(attention_probs, value_layer)
         context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
-        new_context_layer_shape = context_layer.size()[:-2] + (
-            self.all_head_size, )
+        new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size, )
         context_layer = context_layer.view(*new_context_layer_shape)
         return context_layer
 
 
 class BertAttOutput(nn.Module):
+
     def __init__(self, config):
         super(BertAttOutput, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
@@ -268,6 +256,7 @@ class BertAttOutput(nn.Module):
 
 
 class BertCrossattLayer(nn.Module):
+
     def __init__(self, config):
         super().__init__()
         self.att = BertAttention(config)
@@ -280,6 +269,7 @@ class BertCrossattLayer(nn.Module):
 
 
 class BertSelfattLayer(nn.Module):
+
     def __init__(self, config):
         super(BertSelfattLayer, self).__init__()
         self.self = BertAttention(config)
@@ -293,12 +283,11 @@ class BertSelfattLayer(nn.Module):
 
 
 class BertIntermediate(nn.Module):
+
     def __init__(self, config):
         super(BertIntermediate, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.intermediate_size)
-        if isinstance(config.hidden_act,
-                      str) or (sys.version_info[0] == 2
-                               and isinstance(config.hidden_act, unicode)):
+        if isinstance(config.hidden_act, str) or (sys.version_info[0] == 2 and isinstance(config.hidden_act, unicode)):
             self.intermediate_act_fn = ACT2FN[config.hidden_act]
         else:
             self.intermediate_act_fn = config.hidden_act
@@ -310,6 +299,7 @@ class BertIntermediate(nn.Module):
 
 
 class BertOutput(nn.Module):
+
     def __init__(self, config):
         super(BertOutput, self).__init__()
         self.dense = nn.Linear(config.intermediate_size, config.hidden_size)
@@ -324,6 +314,7 @@ class BertOutput(nn.Module):
 
 
 class BertLayer(nn.Module):
+
     def __init__(self, config):
         super(BertLayer, self).__init__()
         self.attention = BertSelfattLayer(config)
@@ -346,145 +337,127 @@ class BertLayer(nn.Module):
 
 class LXRTXLayer(nn.Module):
 
-  def __init__(self, config):
-    super().__init__()
-    # The cross-attention Layer
-    self.visual_attention = BertCrossattLayer(config)
+    def __init__(self, config):
+        super().__init__()
+        # The cross-attention Layer
+        self.visual_attention = BertCrossattLayer(config)
 
-    # Self-attention Layers
-    self.lang_self_att = BertSelfattLayer(config)
-    self.visn_self_att = BertSelfattLayer(config)
+        # Self-attention Layers
+        self.lang_self_att = BertSelfattLayer(config)
+        self.visn_self_att = BertSelfattLayer(config)
 
-    # Intermediate and Output Layers (FFNs)
-    self.lang_inter = BertIntermediate(config)
-    self.lang_output = BertOutput(config)
-    self.visn_inter = BertIntermediate(config)
-    self.visn_output = BertOutput(config)
+        # Intermediate and Output Layers (FFNs)
+        self.lang_inter = BertIntermediate(config)
+        self.lang_output = BertOutput(config)
+        self.visn_inter = BertIntermediate(config)
+        self.visn_output = BertOutput(config)
 
-  def cross_att(self, lang_input, lang_attention_mask, visn_input,
-                visn_attention_mask):
-    # Cross Attention
-    lang_att_output = self.visual_attention(
-        lang_input, visn_input, ctx_att_mask=visn_attention_mask)
-    visn_att_output = self.visual_attention(
-        visn_input, lang_input, ctx_att_mask=lang_attention_mask)
-    return lang_att_output, visn_att_output
+    def cross_att(self, lang_input, lang_attention_mask, visn_input, visn_attention_mask):
+        # Cross Attention
+        lang_att_output = self.visual_attention(lang_input, visn_input, ctx_att_mask=visn_attention_mask)
+        visn_att_output = self.visual_attention(visn_input, lang_input, ctx_att_mask=lang_attention_mask)
+        return lang_att_output, visn_att_output
 
-  def self_att(self, lang_input, lang_attention_mask, visn_input,
-               visn_attention_mask):
-    # Self Attention
-    lang_att_output = self.lang_self_att(lang_input, lang_attention_mask)#[0]
-    visn_att_output = self.visn_self_att(visn_input, visn_attention_mask)#[0]
-    return lang_att_output, visn_att_output
+    def self_att(self, lang_input, lang_attention_mask, visn_input, visn_attention_mask):
+        # Self Attention
+        lang_att_output = self.lang_self_att(lang_input, lang_attention_mask)  # [0]
+        visn_att_output = self.visn_self_att(visn_input, visn_attention_mask)  # [0]
+        return lang_att_output, visn_att_output
 
-  def output_fc(self, lang_input, visn_input):
-    # FC layers
-    lang_inter_output = self.lang_inter(lang_input)
-    visn_inter_output = self.visn_inter(visn_input)
+    def output_fc(self, lang_input, visn_input):
+        # FC layers
+        lang_inter_output = self.lang_inter(lang_input)
+        visn_inter_output = self.visn_inter(visn_input)
 
-    # Layer output
-    lang_output = self.lang_output(lang_inter_output, lang_input)
-    visn_output = self.visn_output(visn_inter_output, visn_input)
-    return lang_output, visn_output
+        # Layer output
+        lang_output = self.lang_output(lang_inter_output, lang_input)
+        visn_output = self.visn_output(visn_inter_output, visn_input)
+        return lang_output, visn_output
 
-  def forward(self, lang_feats, lang_attention_mask, visn_feats,
-              visn_attention_mask):
-    lang_att_output = lang_feats
-    visn_att_output = visn_feats
-    lang_att_output, visn_att_output = self.cross_att(lang_att_output,
-                                                      lang_attention_mask,
-                                                      visn_att_output,
-                                                      visn_attention_mask)
-    lang_att_output, visn_att_output = self.self_att(lang_att_output,
-                                                     lang_attention_mask,
-                                                     visn_att_output,
-                                                     visn_attention_mask)
-    lang_output, visn_output = self.output_fc(lang_att_output, visn_att_output)
+    def forward(self, lang_feats, lang_attention_mask, visn_feats, visn_attention_mask):
+        lang_att_output = lang_feats
+        visn_att_output = visn_feats
+        lang_att_output, visn_att_output = self.cross_att(lang_att_output, lang_attention_mask, visn_att_output,
+                                                          visn_attention_mask)
+        lang_att_output, visn_att_output = self.self_att(lang_att_output, lang_attention_mask, visn_att_output,
+                                                         visn_attention_mask)
+        lang_output, visn_output = self.output_fc(lang_att_output, visn_att_output)
 
-    return lang_output, visn_output
-
+        return lang_output, visn_output
 
 
 class VisualFeatEncoder(nn.Module):
 
-  def __init__(self, config):
-    super().__init__()
-    feat_dim = config.visual_feat_dim
-    pos_dim = config.visual_pos_dim
+    def __init__(self, config):
+        super().__init__()
+        feat_dim = config.visual_feat_dim
+        pos_dim = config.visual_pos_dim
 
-    # Object feature encoding
-    self.visn_fc = nn.Linear(feat_dim, config.hidden_size)
-    self.visn_layer_norm = nn.LayerNorm(config.hidden_size, eps=1e-12)
+        # Object feature encoding
+        self.visn_fc = nn.Linear(feat_dim, config.hidden_size)
+        self.visn_layer_norm = nn.LayerNorm(config.hidden_size, eps=1e-12)
 
-    # Box position encoding
-    self.box_fc = nn.Linear(pos_dim, config.hidden_size)
-    self.box_layer_norm = nn.LayerNorm(config.hidden_size, eps=1e-12)
+        # Box position encoding
+        self.box_fc = nn.Linear(pos_dim, config.hidden_size)
+        self.box_layer_norm = nn.LayerNorm(config.hidden_size, eps=1e-12)
 
-    self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
-  def forward(self, visn_input):
-    feats, boxes = visn_input
+    def forward(self, visn_input):
+        feats, boxes = visn_input
 
-    x = self.visn_fc(feats)
-    x = self.visn_layer_norm(x)
-    if boxes is not None:
-      y = self.box_fc(boxes)
-      y = self.box_layer_norm(y)
-      output = (x + y) / 2
-    else:
-      output = x
+        x = self.visn_fc(feats)
+        x = self.visn_layer_norm(x)
+        if boxes is not None:
+            y = self.box_fc(boxes)
+            y = self.box_layer_norm(y)
+            output = (x + y) / 2
+        else:
+            output = x
 
-    output = self.dropout(output)
-    return output
-
+        output = self.dropout(output)
+        return output
 
 
 class LXRTEncoder(nn.Module):
 
-  def __init__(self, config):
-    super().__init__()
+    def __init__(self, config):
+        super().__init__()
 
-    # Obj-level image embedding layer
-    self.visn_fc = VisualFeatEncoder(config)
+        # Obj-level image embedding layer
+        self.visn_fc = VisualFeatEncoder(config)
 
-    # Number of layers
-    self.num_l_layers = config.l_layers
-    self.num_x_layers = config.x_layers
-    self.num_r_layers = config.r_layers
-    self.layer = nn.ModuleList(
-        [BertLayer(config) for _ in range(self.num_l_layers)])
-    self.x_layers = nn.ModuleList(
-        [LXRTXLayer(config) for _ in range(self.num_x_layers)])
-    self.r_layers = nn.ModuleList(
-        [BertLayer(config) for _ in range(self.num_r_layers)])
+        # Number of layers
+        self.num_l_layers = config.l_layers
+        self.num_x_layers = config.x_layers
+        self.num_r_layers = config.r_layers
+        self.layer = nn.ModuleList([BertLayer(config) for _ in range(self.num_l_layers)])
+        self.x_layers = nn.ModuleList([LXRTXLayer(config) for _ in range(self.num_x_layers)])
+        self.r_layers = nn.ModuleList([BertLayer(config) for _ in range(self.num_r_layers)])
 
-  def forward(self,
-              lang_feats,
-              lang_attention_mask,
-              visn_feats,
-              visn_attention_mask=None):
-    # Run visual embedding layer
-    # Note: Word embedding layer was executed outside this module.
-    #       Keep this design to allow loading BERT weights.
-    visn_feats = self.visn_fc(visn_feats)
+    def forward(self, lang_feats, lang_attention_mask, visn_feats, visn_attention_mask=None):
+        # Run visual embedding layer
+        # Note: Word embedding layer was executed outside this module.
+        #       Keep this design to allow loading BERT weights.
+        visn_feats = self.visn_fc(visn_feats)
 
-    # Run language layers
-    for layer_module in self.layer:
-      lang_feats = layer_module(lang_feats, lang_attention_mask)#[0]
+        # Run language layers
+        for layer_module in self.layer:
+            lang_feats = layer_module(lang_feats, lang_attention_mask)
 
-    # Run relational layers
-    for layer_module in self.r_layers:
-      visn_feats = layer_module(visn_feats, visn_attention_mask)#[0]
+        # Run relational layers
+        for layer_module in self.r_layers:
+            visn_feats = layer_module(visn_feats, visn_attention_mask)
 
-    # Run cross-modality layers
-    for layer_module in self.x_layers:
-      lang_feats, visn_feats = layer_module(lang_feats, lang_attention_mask,
-                                            visn_feats, visn_attention_mask)
+        # Run cross-modality layers
+        for layer_module in self.x_layers:
+            lang_feats, visn_feats = layer_module(lang_feats, lang_attention_mask, visn_feats, visn_attention_mask)
 
-    return lang_feats, visn_feats
+        return lang_feats, visn_feats
 
 
 class BertPooler(nn.Module):
+
     def __init__(self, config):
         super(BertPooler, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
@@ -499,14 +472,12 @@ class BertPooler(nn.Module):
         return pooled_output
 
 
-
 class BertPredictionHeadTransform(nn.Module):
+
     def __init__(self, config):
         super(BertPredictionHeadTransform, self).__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
-        if isinstance(config.hidden_act,
-                      str) or (sys.version_info[0] == 2
-                               and isinstance(config.hidden_act, unicode)):
+        if isinstance(config.hidden_act, str) or (sys.version_info[0] == 2 and isinstance(config.hidden_act, unicode)):
             self.transform_act_fn = ACT2FN[config.hidden_act]
         else:
             self.transform_act_fn = config.hidden_act
@@ -521,193 +492,185 @@ class BertPredictionHeadTransform(nn.Module):
 
 class BertLMPredictionHead(nn.Module):
 
-  def __init__(self, config, bert_model_embedding_weights):
-    super(BertLMPredictionHead, self).__init__()
-    self.transform = BertPredictionHeadTransform(config)
+    def __init__(self, config, bert_model_embedding_weights):
+        super(BertLMPredictionHead, self).__init__()
+        self.transform = BertPredictionHeadTransform(config)
 
-    # The output weights are the same as the input embeddings, but there is
-    # an output-only bias for each token.
-    self.decoder = nn.Linear(
-        bert_model_embedding_weights.size(1),
-        bert_model_embedding_weights.size(0),
-        bias=False,
-    )
-    self.decoder.weight = bert_model_embedding_weights
-    self.bias = nn.Parameter(torch.zeros(bert_model_embedding_weights.size(0)))
+        # The output weights are the same as the input embeddings, but there is
+        # an output-only bias for each token.
+        self.decoder = nn.Linear(
+            bert_model_embedding_weights.size(1),
+            bert_model_embedding_weights.size(0),
+            bias=False,
+        )
+        self.decoder.weight = bert_model_embedding_weights
+        self.bias = nn.Parameter(torch.zeros(bert_model_embedding_weights.size(0)))
 
-  def forward(self, hidden_states):
-    hidden_states = self.transform(hidden_states)
-    hidden_states = self.decoder(hidden_states) + self.bias
-    return hidden_states
+    def forward(self, hidden_states):
+        hidden_states = self.transform(hidden_states)
+        hidden_states = self.decoder(hidden_states) + self.bias
+        return hidden_states
 
 
 class BertVisualAnswerHead(nn.Module):
 
-  def __init__(self, config, num_answers):
-    super().__init__()
-    hid_dim = config['hidden_size']
- 
-    self.logit_fc = nn.Sequential(
-        nn.Linear(hid_dim, hid_dim * 2),
-        GeLU(),
-        nn.LayerNorm(hid_dim * 2, eps=1e-12),
-        nn.Linear(hid_dim * 2, num_answers),
-    )
+    def __init__(self, config, num_answers):
+        super().__init__()
+        hid_dim = config['hidden_size']
 
-  def forward(self, hidden_states):
-      return self.logit_fc(hidden_states)
+        self.logit_fc = nn.Sequential(
+            nn.Linear(hid_dim, hid_dim * 2),
+            GeLU(),
+            nn.LayerNorm(hid_dim * 2, eps=1e-12),
+            nn.Linear(hid_dim * 2, num_answers),
+        )
+
+    def forward(self, hidden_states):
+        return self.logit_fc(hidden_states)
 
 
 class BertVisualObjHead(nn.Module):
 
-  def __init__(self, config):
-    super().__init__()
-    self.transform = BertPredictionHeadTransform(config)
+    def __init__(self, config):
+        super().__init__()
+        self.transform = BertPredictionHeadTransform(config)
 
-    self.visual_losses = config.visual_losses.split(",")
+        self.visual_losses = config.visual_losses.split(',')
 
-    # The output weights are the same as the input embeddings, but there is
-    # an output-only bias for each token.
-    self.decoder_dict = nn.ModuleDict({
-        key: nn.Linear(config.hidden_size, config.visual_loss_config[key][0])
-        for key in self.visual_losses
-    })
+        # The output weights are the same as the input embeddings, but there is
+        # an output-only bias for each token.
+        self.decoder_dict = nn.ModuleDict(
+            {key: nn.Linear(config.hidden_size, config.visual_loss_config[key][0])
+             for key in self.visual_losses})
 
-  def forward(self, hidden_states):
-    hidden_states = self.transform(hidden_states)
-    output = {}
-    for key in self.visual_losses:
-      output[key] = self.decoder_dict[key](hidden_states)
-    return output
+    def forward(self, hidden_states):
+        hidden_states = self.transform(hidden_states)
+        output = {}
+        for key in self.visual_losses:
+            output[key] = self.decoder_dict[key](hidden_states)
+        return output
 
 
 class BertPreTrainingHeads(nn.Module):
 
-  def __init__(self, config, bert_model_embedding_weights):
-    super(BertPreTrainingHeads, self).__init__()
-    self.predictions = BertLMPredictionHead(config,
-                                            bert_model_embedding_weights)
-    self.seq_relationship = nn.Linear(config.hidden_size, 2)
+    def __init__(self, config, bert_model_embedding_weights):
+        super(BertPreTrainingHeads, self).__init__()
+        self.predictions = BertLMPredictionHead(config, bert_model_embedding_weights)
+        self.seq_relationship = nn.Linear(config.hidden_size, 2)
 
-  def forward(self, sequence_output, pooled_output):
-    prediction_scores = self.predictions(sequence_output)
-    seq_relationship_score = self.seq_relationship(pooled_output)
-    return prediction_scores, seq_relationship_score
+    def forward(self, sequence_output, pooled_output):
+        prediction_scores = self.predictions(sequence_output)
+        seq_relationship_score = self.seq_relationship(pooled_output)
+        return prediction_scores, seq_relationship_score
 
 
 @ENCODER.register_module()
 class LXMERTForPretraining(nn.Module):
 
-  def __init__(self, config):
-    super().__init__()
-    # Configuration
-    self.config = config
+    def __init__(self, config):
+        super().__init__()
+        # Configuration
+        self.config = config
 
-    # LXMERT backbone
-    self.bert = LXMERTModel.from_pretrained(
-        self.config.bert_model_name,
-        config=BertConfig.from_dict(self.config),
-    )
+        # LXMERT backbone
+        self.bert = LXMERTModel.from_pretrained(
+            self.config.bert_model_name,
+            config=BertConfig.from_dict(self.config),
+        )
 
-    self.num_labels = config.num_labels
-    self.gqa_labels = config.gqa_labels
-    self.task_mask_lm = config.task_mask_lm
-    self.task_obj_predict = config.task_obj_predict
-    self.task_matched = config.task_matched
-    self.task_qa = config.task_qa
-    self.visual_losses = config.visual_losses
-    self.visual_loss_config = config.visual_loss_config
+        self.num_labels = config.num_labels
+        self.gqa_labels = config.gqa_labels
+        self.task_mask_lm = config.task_mask_lm
+        self.task_obj_predict = config.task_obj_predict
+        self.task_matched = config.task_matched
+        self.task_qa = config.task_qa
+        self.visual_losses = config.visual_losses
+        self.visual_loss_config = config.visual_loss_config
 
-    # Pre-training heads
-    self.cls = BertPreTrainingHeads(config,
-                                    self.bert.embeddings.word_embeddings.weight)
+        # Pre-training heads
+        self.cls = BertPreTrainingHeads(config, self.bert.embeddings.word_embeddings.weight)
 
-    if self.task_obj_predict:
-      self.obj_predict_head = BertVisualObjHead(config)
-    if self.task_qa:
-      self.answer_head = BertVisualAnswerHead(
-          config, [self.num_labels, self.gqa_labels])
+        if self.task_obj_predict:
+            self.obj_predict_head = BertVisualObjHead(config)
+        if self.task_qa:
+            self.answer_head = BertVisualAnswerHead(config, [self.num_labels, self.gqa_labels])
 
-    # # loss functions
-    # self.loss_fcts = {
-    #     'l2': SmoothL1Loss(reduction='none'),
-    #     'ce': CrossEntropyLoss(ignore_index=-1, reduction='none'),
-    #     'ce_lang': CrossEntropyLoss(ignore_index=-1),
-    # }
+        # # loss functions
+        # self.loss_fcts = {
+        #     'l2': SmoothL1Loss(reduction='none'),
+        #     'ce': CrossEntropyLoss(ignore_index=-1, reduction='none'),
+        #     'ce_lang': CrossEntropyLoss(ignore_index=-1),
+        # }
 
-  def init_weights(self):
-    if self.config.random_initialize is False:
-      if self.config.bert_model_name is None:
-        # No pretrained model, init weights
-        self.bert.init_weights()
-        self.cls.apply(self.bert._init_weights)
-      self.tie_weights()
+    def init_weights(self):
+        if self.config.random_initialize is False:
+            if self.config.bert_model_name is None:
+                # No pretrained model, init weights
+                self.bert.init_weights()
+                self.cls.apply(self.bert._init_weights)
+            self.tie_weights()
 
-  def tie_weights(self):
-    """Make sure we are sharing the input and output embeddings.
+    def tie_weights(self):
+        """Make sure we are sharing the input and output embeddings.
 
-        Export to TorchScript can't handle parameter sharing so we are cloning them
-        instead.
+        Export to TorchScript can't handle parameter sharing so we are cloning them instead.
         """
-    self._tie_or_clone_weights(self.cls.predictions.decoder,
-                               self.bert.embeddings.word_embeddings)
+        self._tie_or_clone_weights(self.cls.predictions.decoder, self.bert.embeddings.word_embeddings)
 
-  def forward(
-      self,
-      input_ids,  # tokens
-      token_type_ids=None,
-      attention_mask=None,
-      visual_feats=None,
-      visual_pos=None,
-      visual_attention_mask=None,
-      masked_lm_labels=None,
-      masked_image_labels=None,
-      obj_labels=None,
-      matched_label=None,  #
-      ans=None,  # qa answer
-      num_features=None,  # max num of objects
-      name=None,
-      output_all_attention_masks=False,
-      output_all_encoded_layers=False,
-  ):
+    def forward(
+        self,
+        input_ids,  # tokens
+        token_type_ids=None,
+        attention_mask=None,
+        visual_feats=None,
+        visual_pos=None,
+        visual_attention_mask=None,
+        masked_lm_labels=None,
+        masked_image_labels=None,
+        obj_labels=None,
+        matched_label=None,  #
+        ans=None,  # qa answer
+        num_features=None,  # max num of objects
+        name=None,
+        output_all_attention_masks=False,
+        output_all_encoded_layers=False,
+    ):
 
-    (lang_output, visn_output), pooled_output = self.bert(
-        input_ids,
-        token_type_ids,
-        attention_mask,
-        visual_feats,
-        visual_pos,
-        visual_attention_mask,
-        output_all_attention_masks,
-        output_all_encoded_layers,
-    )
+        (lang_output, visn_output), pooled_output = self.bert(
+            input_ids,
+            token_type_ids,
+            attention_mask,
+            visual_feats,
+            visual_pos,
+            visual_attention_mask,
+            output_all_attention_masks,
+            output_all_encoded_layers,
+        )
 
-    lang_prediction_scores, cross_relationship_score = self.cls(
-        lang_output, pooled_output)
+        lang_prediction_scores, cross_relationship_score = self.cls(lang_output, pooled_output)
 
-    ## KEEP TRACK OF OUTPUTS HERE
-    output = {
-        "lang_prediction_scores": lang_prediction_scores,
-        "cross_relationship_score": cross_relationship_score,
-    }
+        # KEEP TRACK OF OUTPUTS HERE
+        output = {
+            'lang_prediction_scores': lang_prediction_scores,
+            'cross_relationship_score': cross_relationship_score,
+        }
 
-    if output_all_attention_masks:
-      raise NotImplementedError
+        if output_all_attention_masks:
+            raise NotImplementedError
 
-    if self.task_qa:
-      answer_score = self.answer_head(pooled_output, name)
-    else:
-      # This answer_score would not be used anywhere,
-      # just to keep a constant return function signature.
-      answer_score = pooled_output[0][0]
-    output.update({"answer_score": answer_score})
+        if self.task_qa:
+            answer_score = self.answer_head(pooled_output, name)
+        else:
+            # This answer_score would not be used anywhere,
+            # just to keep a constant return function signature.
+            answer_score = pooled_output[0][0]
+        output.update({'answer_score': answer_score})
 
-    if self.task_obj_predict:
-      visn_prediction_scores_dict = self.obj_predict_head(visn_output)
-      output.update(
-          {"visn_prediction_scores_dict": visn_prediction_scores_dict})
+        if self.task_obj_predict:
+            visn_prediction_scores_dict = self.obj_predict_head(visn_output)
+            output.update({'visn_prediction_scores_dict': visn_prediction_scores_dict})
 
-    return output
+        return output
 
 
 '''
@@ -769,7 +732,8 @@ class BertPreTrainedModel(nn.Module):
                     . `model.chkpt` a TensorFlow checkpoint
             from_tf: should we load the weights from a locally saved TensorFlow checkpoint
             cache_dir: an optional path to a folder in which the pre-trained models will be cached.
-            state_dict: an optional state dictionnary (collections.OrderedDict object) to use instead of Google pre-trained models
+            state_dict: an optional state dictionnary (collections.OrderedDict object) to use instead
+                of Google pre-trained models
             *inputs, **kwargs: additional input for the specific Bert class
                 (ex: num_labels for BertForSequenceClassification)
         """
@@ -890,6 +854,7 @@ class BertPreTrainedModel(nn.Module):
         return model
 '''
 
+
 @ENCODER.register_module()
 class LXRTModel(BertPreTrainedModel):
     """LXRT Model."""
@@ -924,18 +889,15 @@ class LXRTModel(BertPreTrainedModel):
         # positions we want to attend and -10000.0 for masked positions.
         # Since we are adding it to the raw scores before the softmax, this is
         # effectively the same as removing these entirely.
-        extended_attention_mask = extended_attention_mask.to(
-            dtype=next(self.parameters()).dtype)  # fp16 compatibility
+        extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)  # fp16 compatibility
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
 
         # Process the visual attention mask
         if visual_attention_mask is not None:
-            extended_visual_attention_mask = visual_attention_mask.unsqueeze(
-                1).unsqueeze(2)
-            extended_visual_attention_mask = extended_visual_attention_mask.to(
-                dtype=next(self.parameters()).dtype)  # fp16 compatibility
-            extended_visual_attention_mask = (
-                1.0 - extended_visual_attention_mask) * -10000.0
+            extended_visual_attention_mask = visual_attention_mask.unsqueeze(1).unsqueeze(2)
+            extended_visual_attention_mask = extended_visual_attention_mask.to(dtype=next(
+                self.parameters()).dtype)  # fp16 compatibility
+            extended_visual_attention_mask = (1.0 - extended_visual_attention_mask) * -10000.0
         else:
             extended_visual_attention_mask = None
 
@@ -1067,10 +1029,9 @@ class LXRTPretraining(BertPreTrainedModel):
             0), answer_score.detach()
 '''
 
+
 class LXRTFeatureExtraction(BertPreTrainedModel):
-    """
-    BERT model for classification.
-    """
+    """BERT model for classification."""
 
     def __init__(self, config):
         """
@@ -1079,7 +1040,7 @@ class LXRTFeatureExtraction(BertPreTrainedModel):
             """
         super().__init__(config)
         self.bert = LXRTModel(config)
-        #self.mode = mode
+        # self.mode = mode
         self.apply(self._init_weights)
 
     def forward(self,
@@ -1104,6 +1065,7 @@ class LXRTFeatureExtraction(BertPreTrainedModel):
         '''
         return pooled_output
 
+
 class InputFeatures(object):
     """A single set of features of data."""
 
@@ -1123,9 +1085,9 @@ def convert_sents_to_features(sents, max_seq_length, tokenizer):
         # Account for [CLS] and [SEP] with "- 2"
         if len(tokens_a) > max_seq_length - 2:
             tokens_a = tokens_a[:(max_seq_length - 2)]
-        
+
         # Keep segment id which allows loading BERT-weights.
-        tokens = ["[CLS]"] + tokens_a + ["[SEP]"]
+        tokens = ['[CLS]'] + tokens_a + ['[SEP]']
         segment_ids = [0] * len(tokens)
 
         input_ids = tokenizer.convert_tokens_to_ids(tokens)
@@ -1144,10 +1106,7 @@ def convert_sents_to_features(sents, max_seq_length, tokenizer):
         assert len(input_mask) == max_seq_length
         assert len(segment_ids) == max_seq_length
 
-        features.append(
-                InputFeatures(input_ids=input_ids,
-                              input_mask=input_mask,
-                              segment_ids=segment_ids))
+        features.append(InputFeatures(input_ids=input_ids, input_mask=input_mask, segment_ids=segment_ids))
     return features
 
 
@@ -1158,11 +1117,11 @@ class LXMERTEncoder(nn.Module):
         # Build LXRT Model
         self.config = args
         self.max_seq_length = self.config['max_seq_length']
-        #set_visual_config(args)
+        # set_visual_config(args)
 
         # Using the bert tokenizer
         self.tokenizer = BertTokenizer.from_pretrained(
-            "bert-base-uncased",
+            'bert-base-uncased',
             do_lower_case=True,
         )
 
@@ -1170,8 +1129,7 @@ class LXMERTEncoder(nn.Module):
         self.model = LXRTFeatureExtraction.from_pretrained(
             self.config['bert_model_name'],
             config=BertConfig.from_dict(self.config),
-            cache_dir=ToExpanduser.modify_path(
-                os.path.join('~/.cache/torch', 'transformers'.format(-1))),
+            cache_dir=ToExpanduser.modify_path(os.path.join('~/.cache/torch', 'transformers')),
         )
         '''
         if self.config['from_scratch'] is not None:
@@ -1180,30 +1138,27 @@ class LXMERTEncoder(nn.Module):
         '''
 
     def forward(self, sents, feats, visual_attention_mask=None):
-        train_features = convert_sents_to_features(
-            sents, self.max_seq_length, self.tokenizer)
+        train_features = convert_sents_to_features(sents, self.max_seq_length, self.tokenizer)
 
         input_ids = torch.tensor([f.input_ids for f in train_features], dtype=torch.long).cuda()
         input_mask = torch.tensor([f.input_mask for f in train_features], dtype=torch.long).cuda()
         segment_ids = torch.tensor([f.segment_ids for f in train_features], dtype=torch.long).cuda()
 
-        output = self.model(input_ids, segment_ids, input_mask,
-                            visual_feats=feats,
-                            visual_attention_mask=visual_attention_mask)
+        output = self.model(
+            input_ids, segment_ids, input_mask, visual_feats=feats, visual_attention_mask=visual_attention_mask)
         return output
 
     def save(self, path):
-        torch.save(self.model.state_dict(),
-                   os.path.join("%s_LXRT.pth" % path))
+        torch.save(self.model.state_dict(), os.path.join('%s_LXRT.pth' % path))
 
     def load(self, path):
         # Load state_dict from snapshot file
-        print("Load LXMERT pre-trained model from %s" % path)
+        print('Load LXMERT pre-trained model from %s' % path)
         state_dict = torch.load(path)
         new_state_dict = {}
         for key, value in state_dict.items():
-            if key.startswith("module."):
-                new_state_dict[key[len("module."):]] = value
+            if key.startswith('module.'):
+                new_state_dict[key[len('module.'):]] = value
             else:
                 new_state_dict[key] = value
         state_dict = new_state_dict
@@ -1212,11 +1167,11 @@ class LXMERTEncoder(nn.Module):
         load_keys = set(state_dict.keys())
         model_keys = set(self.model.state_dict().keys())
         print()
-        print("Weights in loaded but not in model:")
+        print('Weights in loaded but not in model:')
         for key in sorted(load_keys.difference(model_keys)):
             print(key)
         print()
-        print("Weights in model but not in loaded:")
+        print('Weights in model but not in loaded:')
         for key in sorted(model_keys.difference(load_keys)):
             print(key)
         print()
@@ -1241,15 +1196,11 @@ class ClassificationModel(nn.Module):
 
         if self.training_head_type == 'nlvr2':
             self.logit_fc = nn.Sequential(
-                nn.Linear(hid_dim * 2, hid_dim * 2), 
-                GeLU(),
-                nn.LayerNorm(hid_dim * 2, eps=1e-12), 
+                nn.Linear(hid_dim * 2, hid_dim * 2), GeLU(), nn.LayerNorm(hid_dim * 2, eps=1e-12),
                 nn.Linear(hid_dim * 2, 2))
         else:
             self.logit_fc = nn.Sequential(
-                nn.Linear(hid_dim, hid_dim * 2), 
-                GeLU(),
-                nn.LayerNorm(hid_dim * 2, eps=1e-12),
+                nn.Linear(hid_dim, hid_dim * 2), GeLU(), nn.LayerNorm(hid_dim * 2, eps=1e-12),
                 nn.Linear(hid_dim * 2, self.num_labels))
 
         self.logit_fc.apply(self.lxrt_encoder.model._init_weights)
@@ -1278,7 +1229,7 @@ class ClassificationModel(nn.Module):
         #   sent     = [ sent0,  sent0,  sent1,  sent1,  ...]
         if self.training_head_type == 'nlvr2':
             x = x.view(-1, x.size(1) * 2)
-        
+
         logit = self.logit_fc(x)
 
         output = {}

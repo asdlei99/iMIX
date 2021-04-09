@@ -74,7 +74,7 @@ class VCRReader(IMIXDataReader):
         split = self.annotations_idx_split[item]
         item_feature = ItemFeature(annotation)
         item_feature.error = False
-        #for k, v in annotation.items():
+        # for k, v in annotation.items():
         #    item_feature[k] = v
 
         if self.mode == 'rationale':

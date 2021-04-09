@@ -23,7 +23,7 @@ class VizWizReader(IMIXDataReader):
         split = self.item_splits[item]
         item_feature = ItemFeature(annotation)
         item_feature.error = False
-        #for k, v in annotation.items():
+        # for k, v in annotation.items():
         #    item_feature[k] = v
 
         # TODO(jinliang)
@@ -33,7 +33,7 @@ class VizWizReader(IMIXDataReader):
         # print(item)
         # item_feature.ocr_tokens = annotation["ocr_tokens"]
 
-        #if split != 'test':
+        # if split != 'test':
         #    item_feature.answers = annotation.get('answers')
         #    item_feature.all_answers = annotation.get('all_answers')
 
@@ -47,7 +47,7 @@ class VizWizReader(IMIXDataReader):
                 return item_feature
             for k, v in feature_info.items():
                 item_feature[k] = item_feature.get(k, v)
-                #item_feature[k] = v if item_feature.get(
+                # item_feature[k] = v if item_feature.get(
                 #    k) is None else item_feature[k]
             return item_feature
         feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]

@@ -9,10 +9,7 @@ from imix.models.backbones.lcgn_backbone import Linear
 from imix.models.combine_layers import ReLUWithWeightNormFC
 from ..builder import HEADS
 
-from abc import abstractmethod, ABCMeta
-import math
 from torch import Tensor
-
 
 
 def gelu(x):
@@ -152,14 +149,6 @@ class LogitClassifierHead(ClassifierHead):
 @HEADS.register_module()
 class LCGNClassiferHead(ClassifierHead):
 
-    def __init__(self, OUT_QUESTION_MUL, CMD_DIM, outputDropout, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.OUT_QUESTION_MUL = OUT_QUESTION_MUL
-        self.outQuestion = Linear(CMD_DIM, CMD_DIM)
-        self.in_dim = 3 * self.in_dim if OUT_QUESTION_MUL else 2 * self.in_dim
-        self.classifier_layer = nn.Sequential(
-            nn.Dropout(1 - outputDropout), Linear(self.in_dim, CMD_DIM), nn.ELU(), nn.Dropout(1 - outputDropout),
-            Linear(CMD_DIM, self.out_dim))
     def __init__(self, OUT_QUESTION_MUL: bool, CMD_DIM: int, outputDropout: float, *args, **kwargs) -> None:
         """initialization of LCGNClassiferHead.
 
@@ -181,20 +170,20 @@ class LCGNClassiferHead(ClassifierHead):
     def forward(self, x_att: Tensor, vecQuestions: Tensor) -> Tensor:
         """forward computation of LCGNClassiferHead.
 
-    def forward(self, x_att, vecQuestions):
-        eQ = self.outQuestion(vecQuestions)
-        if self.OUT_QUESTION_MUL:
-            features = torch.cat([x_att, eQ, x_att * eQ], dim=-1)
-        else:
-            features = torch.cat([x_att, eQ], dim=-1)
-        logits = self.classifier_layer(features)
-        return logits
-        Args:
-          x_att: shape of batch_size x 512
-          vecQuestions: question feature shaped of batch_size x 512
+        def forward(self, x_att, vecQuestions):
+            eQ = self.outQuestion(vecQuestions)
+            if self.OUT_QUESTION_MUL:
+                features = torch.cat([x_att, eQ, x_att * eQ], dim=-1)
+            else:
+                features = torch.cat([x_att, eQ], dim=-1)
+            logits = self.classifier_layer(features)
+            return logits
+            Args:
+              x_att: shape of batch_size x 512
+              vecQuestions: question feature shaped of batch_size x 512
 
-        Returns:
-          Tensor: the predicted values
+            Returns:
+              Tensor: the predicted values
         """
         eQ = self.outQuestion(vecQuestions)
         if self.OUT_QUESTION_MUL:

@@ -26,16 +26,18 @@ def remove_None_value_elements(input_dict):
 class VQADATASETUNITER(Dataset):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
-    if comm.is_main_process():
-      logger = logging.getLogger(__name__)
-      logger.info('start loading vqadata')
+        if comm.is_main_process():
+            logger = logging.getLogger(__name__)
+            logger.info('start loading vqadata')
 
-    self.reader = VQAReaderUNITER(reader)
-        # self.infocpler = VQAInfoCpler(info_cpler)
-        # self._limit_sample_nums = limit_nums
-        # self.splits = reader.datasets
-        # if comm.is_main_process():
-        #   logger.info('load vqadata {} successfully'.format(reader.datasets))
+        self.reader = VQAReaderUNITER(reader)
+        '''
+        self.infocpler = VQAInfoCpler(info_cpler)
+        self._limit_sample_nums = limit_nums
+        self.splits = reader.datasets
+        if comm.is_main_process():
+          logger.info('load vqadata {} successfully'.format(reader.datasets))
+        '''
 
     def __len__(self):
         return len(self.reader.ids)

@@ -1,17 +1,15 @@
-# coding=utf-8
 # Copyleft 2019 project LXRT.
 
 import json
 import torch
-from imix.utils_imix.config import ToExpanduser
 
 
 class AnswerTable:
     ANS_CONVERT = {
-        "a man": "man",
-        "the man": "man",
-        "a woman": "woman",
-        "the woman": "woman",
+        'a man': 'man',
+        'the man': 'man',
+        'a woman': 'woman',
+        'the woman': 'woman',
         'one': '1',
         'two': '2',
         'three': '3',
@@ -30,8 +28,7 @@ class AnswerTable:
         if dsets is not None:
             dsets = set(dsets)
             # If the answer is used in the dsets
-            self.anss = [ans['ans'] for ans in self.all_ans if
-                         len(set(ans['dsets']) & dsets) > 0]
+            self.anss = [ans['ans'] for ans in self.all_ans if len(set(ans['dsets']) & dsets) > 0]
         else:
             self.anss = [ans['ans'] for ans in self.all_ans]
         self.ans_set = set(self.anss)
@@ -45,15 +42,15 @@ class AnswerTable:
 
     def convert_ans(self, ans):
         if len(ans) == 0:
-            return ""
+            return ''
         ans = ans.lower()
         if ans[-1] == '.':
             ans = ans[:-1].strip()
-        if ans.startswith("a "):
+        if ans.startswith('a '):
             ans = ans[2:].strip()
-        if ans.startswith("an "):
+        if ans.startswith('an '):
             ans = ans[3:].strip()
-        if ans.startswith("the "):
+        if ans.startswith('the '):
             ans = ans[4:].strip()
         if ans in self.ANS_CONVERT:
             ans = self.ANS_CONVERT[ans]
@@ -83,11 +80,9 @@ class AnswerTable:
 
 
 def load_lxmert_qa(path, model, label2ans):
-    """
-    Load model weights from LXMERT pre-training.
-    The answers in the fine-tuned QA task (indicated by label2ans)
-        would also be properly initialized with LXMERT pre-trained
-        QA heads.
+    """Load model weights from LXMERT pre-training. The answers in the fine-
+    tuned QA task (indicated by label2ans) would also be properly initialized
+    with LXMERT pre-trained QA heads.
 
     :param path: Path to LXMERT snapshot.
     :param model: LXRT model instance.
@@ -95,7 +90,7 @@ def load_lxmert_qa(path, model, label2ans):
         {0: 'cat', 1: 'dog', ...}
     :return:
     """
-    print("Load QA pre-trained LXMERT from %s " % path)
+    print('Load QA pre-trained LXMERT from %s ' % path)
     loaded_state_dict = torch.load(path)
     model_state_dict = model.state_dict()
     '''
@@ -104,7 +99,7 @@ def load_lxmert_qa(path, model, label2ans):
     '''
     # Handle Multi-GPU pre-training --> Single GPU fine-tuning
     for key in list(loaded_state_dict.keys()):
-        loaded_state_dict[key.replace("module.", '')] = loaded_state_dict.pop(key)
+        loaded_state_dict[key.replace('module.', '')] = loaded_state_dict.pop(key)
 
     # Isolate bert model
     bert_state_dict = {}
@@ -115,7 +110,7 @@ def load_lxmert_qa(path, model, label2ans):
     # Isolate answer head
     answer_state_dict = {}
     for key, value in loaded_state_dict.items():
-        if key.startswith("answer_head."):
+        if key.startswith('answer_head.'):
             answer_state_dict[key.replace('answer_head.', '')] = value
 
     # Do surgery on answer state dict
@@ -140,7 +135,7 @@ def load_lxmert_qa(path, model, label2ans):
             new_answer_weight[label] = 0.
             new_answer_bias[label] = 0.
             unload += 1
-    print("Loaded %d answers from LXRTQA pre-training and %d not" % (loaded, unload))
+    print('Loaded %d answers from LXRTQA pre-training and %d not' % (loaded, unload))
     print()
     answer_state_dict['logit_fc.3.weight'] = new_answer_weight
     answer_state_dict['logit_fc.3.bias'] = new_answer_bias
@@ -149,7 +144,7 @@ def load_lxmert_qa(path, model, label2ans):
     bert_model_keys = set(model.lxrt_encoder.model.state_dict().keys())
     bert_loaded_keys = set(bert_state_dict.keys())
 
-    #assert len(bert_model_keys - bert_loaded_keys) == 0
+    # assert len(bert_model_keys - bert_loaded_keys) == 0
 
     model.lxrt_encoder.model.load_state_dict(bert_state_dict, strict=False)
 
@@ -157,21 +152,18 @@ def load_lxmert_qa(path, model, label2ans):
     model_keys = set(model.state_dict().keys())
     ans_loaded_keys = set(answer_state_dict.keys())
     assert len(ans_loaded_keys - model_keys) == 0
-    
+
     # Print out the differences of pre-trained and model weights.
-    load_keys = bert_loaded_keys.union(set(answer_state_dict.keys()))  
+    load_keys = bert_loaded_keys.union(set(answer_state_dict.keys()))
     model_keys = bert_model_keys.union(set(answer_state_dict.keys()))
     print()
-    print("Weights in loaded but not in model:")
+    print('Weights in loaded but not in model:')
     for key in sorted(load_keys.difference(model_keys)):
         print(key)
     print()
-    print("Weights in model but not in loaded:")
+    print('Weights in model but not in loaded:')
     for key in sorted(model_keys.difference(load_keys)):
         print(key)
     print()
-    
+
     model.load_state_dict(answer_state_dict, strict=False)
-
-
-

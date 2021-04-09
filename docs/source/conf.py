@@ -14,7 +14,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'IMIX'
@@ -23,7 +22,6 @@ author = 'imix inspur'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -50,10 +48,9 @@ autodoc_default_flags = ['members']
 autosummary_generate = True
 
 autodoc_mock_imports = [
-    'matplotlib', 'pycocotools', 'terminaltables', 'mmdet.version',
-    'mmdet.ops.dcn', 'mmdet.ops.masked_conv', 'mmdet.ops.nms',
-    'mmdet.ops.roi_align', 'mmdet.ops.roi_pool',
-    'mmdet.ops.sigmoid_focal_loss', 'mmdet.ops.carafe', 'mmdet.ops.utils'
+    'matplotlib', 'pycocotools', 'terminaltables', 'mmdet.version', 'mmdet.ops.dcn', 'mmdet.ops.masked_conv',
+    'mmdet.ops.nms', 'mmdet.ops.roi_align', 'mmdet.ops.roi_pool', 'mmdet.ops.sigmoid_focal_loss', 'mmdet.ops.carafe',
+    'mmdet.ops.utils'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

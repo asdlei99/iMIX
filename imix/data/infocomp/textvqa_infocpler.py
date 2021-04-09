@@ -48,7 +48,7 @@ class TextVQAInfoCpler(BaseInfoCpler):
             to_extd_length = self.max_seq_length - len(input_ids)
             self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0), (input_segment, 0),
                              (input_lm_label_ids, -1))
-            #while len(input_ids) < self.max_seq_length:
+            # while len(input_ids) < self.max_seq_length:
             #    input_ids.append(int(self.pad_idx))
             #    input_mask.append(0)
             #    input_segment.append(0)
@@ -64,7 +64,7 @@ class TextVQAInfoCpler(BaseInfoCpler):
             input_mask = [1] * len(tokens)
             to_extd_length = self.max_seq_length - len(input_ids)
             self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0))
-            #while len(input_ids) < self.max_seq_length:
+            # while len(input_ids) < self.max_seq_length:
             #    input_ids.append(int(self.pad_idx))
             #    input_mask.append(0)
 
@@ -80,7 +80,8 @@ class TextVQAInfoCpler(BaseInfoCpler):
 
         # ocr features and bboxes
         features_ocr = torch.zeros(
-            (self.max_ocr_length, item_feature.features_ocr.shape[1] if item_feature.features_ocr is not None else 2048),
+            (self.max_ocr_length,
+             item_feature.features_ocr.shape[1] if item_feature.features_ocr is not None else 2048),
             dtype=torch.float)
         bbox_ocr_normalized = torch.zeros(
             (self.max_ocr_length,

@@ -50,4 +50,3 @@ model = dict(
     ))
 
 loss = dict(type='LogitBinaryCrossEntropy')
-#loss = dict(type='BCEWithLogitsLoss')

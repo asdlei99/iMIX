@@ -25,7 +25,7 @@ class VizWizInfoCpler(BaseInfoCpler):
         input_mask = [1] * len(input_ids)
         to_extd_length = self.max_seq_length - len(input_ids)
         self.info_extend(to_extd_length, (input_ids, 0), (input_mask, 0))
-        #while len(input_ids) < self.max_seq_length:
+        # while len(input_ids) < self.max_seq_length:
         #    input_ids.append(0)
         #    input_mask.append(0)
         item_feature.input_ids = torch.tensor(input_ids, dtype=torch.long)
@@ -52,7 +52,7 @@ class VizWizInfoCpler(BaseInfoCpler):
         to_extd_lenght = self.max_seq_length - len(input_ids)
         self.info_extend(to_extd_lenght, (input_ids, int(self.pad_idx)), (input_mask, 0), (input_segment, 0),
                          (input_lm_label_ids, -1))
-        #while len(input_ids) < self.max_seq_length:
+        # while len(input_ids) < self.max_seq_length:
         #    input_ids.append(int(self.pad_idx))
         #    input_mask.append(0)
         #    input_segment.append(0)

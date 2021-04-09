@@ -12,4 +12,3 @@ read "please make sure you have the directory <docs>:? [Y/n]" input
 cd docs
 sphinx-apidoc -o source ../imix/
 make html
-

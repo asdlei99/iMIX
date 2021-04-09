@@ -23,7 +23,7 @@ class VisualEntailmentInfoCpler(BaseInfoCpler):
         input_type_ids = [0] * (len(tokens1) + 2) + [1] * (len(tokens2) + 1)
         to_extd_length = self.default_max_length - len(tokens)
         self.info_extend(to_extd_length, (tokens, self.PAD_TOKEN), (input_mask, 0), (input_type_ids, 0))
-        #while len(tokens) < self.default_max_length:
+        # while len(tokens) < self.default_max_length:
         #    tokens.append(self._PAD_TOKEN)
         #    input_mask.append(0)
         #    input_type_ids.append(0)

@@ -19,7 +19,7 @@ class OCRVQAInfoCpler(BaseInfoCpler):
         input_mask = [1] * len(tokens)
         input_segment = [0] * len(tokens)
         input_lm_label_ids = [-1] * len(tokens)
-        #while len(input_ids) < self.max_seq_length:
+        # while len(input_ids) < self.max_seq_length:
         #    input_ids.append(int(self.pad_idx))
         #    input_mask.append(0)
         #    input_segment.append(0)

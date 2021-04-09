@@ -329,21 +329,19 @@ class VCRDatasetConverter(BaseDatasetConverter):
 
         return predictions, labels
 
+    def submit(self, batch_data, model_outputs, *args, **kwargs):
+        scores, labels = model_outputs['scores'].max(1)
+        q_ids = batch_data['question_id'].detach().numpy()
+        labels = labels.cpu().detach().numpy()
+        q2a = batch_data['quesid2ans']
+        predictions = list({'question_id': int(qid), 'answer': q2a[l][0]} for qid, l in zip(q_ids, labels))
+        return predictions
 
-def submit(self, batch_data, model_outputs, *args, **kwargs):
-    scores, labels = model_outputs['scores'].max(1)
-    q_ids = batch_data['question_id'].detach().numpy()
-    labels = labels.cpu().detach().numpy()
-    q2a = batch_data['quesid2ans']
-    predictions = list({'question_id': int(qid), 'answer': q2a[l][0]} for qid, l in zip(q_ids, labels))
-    return predictions
-
-
-def predict(self, batch_data, model_outputs, *args, **kwargs):
-    q_ids = batch_data['question_id'].detach().numpy()
-    scores = model_outputs['scores'].cpu().detach().numpy()
-    predictions = list({'question_id': int(qid), 'scores': s} for qid, s in zip(q_ids, scores))
-    return predictions
+    def predict(self, batch_data, model_outputs, *args, **kwargs):
+        q_ids = batch_data['question_id'].detach().numpy()
+        scores = model_outputs['scores'].cpu().detach().numpy()
+        predictions = list({'question_id': int(qid), 'scores': s} for qid, s in zip(q_ids, scores))
+        return predictions
 
     def data_pre_process(self, model_outputs, *args, **kwargs):
         # labels = self.list_to_tensor(labels)

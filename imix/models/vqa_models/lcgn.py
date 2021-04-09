@@ -1,7 +1,6 @@
-from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
+from ..builder import VQA_MODELS, build_backbone, build_encoder, build_head
 import torch.nn as nn
 import torch
-import math
 import torch.nn.functional as F
 from imix.models.backbones.lcgn_backbone import Linear, apply_mask1d
 from .base_model import BaseModel
@@ -25,7 +24,7 @@ class LCGN(BaseModel):
         self.encoder_model = build_encoder(encoder)
         self.backbone = build_backbone(backbone)
         self.single_hop = SingleHop(self.backbone.CTX_DIM, self.encoder_model.ENC_DIM)
-        self.head = build_head(head)  ###包括 classification head， generation head
+        self.head = build_head(head)  # 包括 classification head， generation head
 
     def forward_train(self, data: Dict) -> Dict:
         """the forward computation of LCGN.
@@ -39,7 +38,7 @@ class LCGN(BaseModel):
         questionIndices = data['input_ids'].cuda()
         questionLengths = data['questionLengths']
         images = torch.cat((data['feature'], data['bbox'].repeat(1, 1, 16)), dim=-1).cuda()
-        batchSize = data['image_dim'].shape[0]
+        # batchSize = data['image_dim'].shape[0]
         imagesObjectNum = data['image_dim'].cuda()
 
         questionCntxWords, vecQuestions = self.encoder_model(questionIndices, questionLengths)

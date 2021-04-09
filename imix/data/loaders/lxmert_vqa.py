@@ -1,6 +1,4 @@
 import json
-import os
-import pickle
 import torch
 from torch.utils.data import Dataset
 import sys
@@ -13,8 +11,9 @@ from ..utils.stream import ItemFeature
 import numpy as np
 
 csv.field_size_limit(sys.maxsize)
-FIELDNAMES = ["img_id", "img_h", "img_w", "objects_id", "objects_conf",
-              "attrs_id", "attrs_conf", "num_boxes", "boxes", "features"]
+FIELDNAMES = [
+    'img_id', 'img_h', 'img_w', 'objects_id', 'objects_conf', 'attrs_id', 'attrs_conf', 'num_boxes', 'boxes', 'features'
+]
 
 
 def load_obj_tsv(fname, topk=None):
@@ -28,9 +27,9 @@ def load_obj_tsv(fname, topk=None):
     """
     data = []
     start_time = time.time()
-    print("Start to load Faster-RCNN detected objects from %s" % fname)
+    print('Start to load Faster-RCNN detected objects from %s' % fname)
     with open(fname) as f:
-        reader = csv.DictReader(f, FIELDNAMES, delimiter="\t")
+        reader = csv.DictReader(f, FIELDNAMES, delimiter='\t')
         for i, item in enumerate(reader):
 
             for key in ['img_h', 'img_w', 'num_boxes']:
@@ -38,10 +37,10 @@ def load_obj_tsv(fname, topk=None):
 
             boxes = item['num_boxes']
             decode_config = [
-                ('objects_id', (boxes,), np.int64),
-                ('objects_conf', (boxes,), np.float32),
-                ('attrs_id', (boxes,), np.int64),
-                ('attrs_conf', (boxes,), np.float32),
+                ('objects_id', (boxes, ), np.int64),
+                ('objects_conf', (boxes, ), np.float32),
+                ('attrs_id', (boxes, ), np.int64),
+                ('attrs_conf', (boxes, ), np.float32),
                 ('boxes', (boxes, 4), np.float32),
                 ('features', (boxes, -1), np.float32),
             ]
@@ -54,7 +53,7 @@ def load_obj_tsv(fname, topk=None):
             if topk is not None and len(data) == topk:
                 break
     elapsed_time = time.time() - start_time
-    print("Loaded %d images in file %s in %d seconds." % (len(data), fname, elapsed_time))
+    print('Loaded %d images in file %s in %d seconds.' % (len(data), fname, elapsed_time))
     return data
 
 
@@ -72,6 +71,7 @@ class VQADataset:
             "sent": "What is this photo taken looking through?"
         }
     """
+
     def __init__(self, cfg):
         splits = cfg.datasets
         if isinstance(splits, str):
@@ -88,13 +88,10 @@ class VQADataset:
             path = cfg.annotations.get(split, None)
             if path:
                 self.data.extend(json.load(open(path)))
-        print("Load %d data from split(s) %s." % (len(self.data), self.name))
+        print('Load %d data from split(s) %s.' % (len(self.data), self.name))
 
         # Convert list to dict (for evaluation)
-        self.id2datum = {
-            datum['question_id']: datum
-            for datum in self.data
-        }
+        self.id2datum = {datum['question_id']: datum for datum in self.data}
 
         # Answers
         self.ans2label = json.load(open(cfg.answer_2_label))
@@ -119,6 +116,7 @@ FIELDNAMES would be keys in the dict returned by load_obj_tsv.
 
 @DATASETS.register_module()
 class VQATorchDataset(Dataset):
+
     def __init__(self, reader):
         super().__init__()
         self.raw_dataset = VQADataset(reader)
@@ -131,9 +129,7 @@ class VQATorchDataset(Dataset):
             # Minival is 5K images in MS COCO, which is used in evaluating VQA/LXMERT-pre-training.
             # It is saved as the top 5K features in val2014_***.tsv
             load_topk = 5000 if (split == 'minival' and topk is None) else topk
-            img_data.extend(load_obj_tsv(
-                reader.img_feature.get(split),
-                topk=load_topk))
+            img_data.extend(load_obj_tsv(reader.img_feature.get(split), topk=load_topk))
 
         # Convert img list to dict
         self.imgid2img = {}
@@ -145,7 +141,7 @@ class VQATorchDataset(Dataset):
         for datum in self.raw_dataset.data:
             if datum['img_id'] in self.imgid2img:
                 self.data.append(datum)
-        print("Use %d data in torch dataset" % (len(self.data)))
+        print('Use %d data in torch dataset' % (len(self.data)))
         print()
 
     def __len__(self):

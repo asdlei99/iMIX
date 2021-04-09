@@ -79,7 +79,7 @@ def build_vqa_models(cfg):
 
 def build_model(cfg):
     """Build models based on different input type."""
-    cfg.model['params']["device"] = cfg.model_device
+    cfg.model['params']['device'] = cfg.model_device
     model = build_vqa_models(cfg)  # TODO(jinliang)
 
     # # put model on gpus

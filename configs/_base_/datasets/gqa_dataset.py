@@ -27,17 +27,13 @@ vqa_reader_train_cfg = dict(
         valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
     ),
     mix_annotations=dict(
-        train=data_root + annotation_default_path +
-              'train_balanced_questions.npy',
+        train=data_root + annotation_default_path + 'train_balanced_questions.npy',
         val=data_root + annotation_default_path + 'val_balanced_questions.npy',
         test=data_root + annotation_default_path + 'test_balanced_questions.npy',
         minival=data_root + annotation_default_path + 'val_balanced_questions.npy',
-        train_coco10pc=data_root + annotation_default_path +
-                       'imdb_train2014_len_coco_10_pc.npy',
-        train_coco50pc=data_root + annotation_default_path +
-                       'imdb_train2014_len_coco_50_pc.npy',
-        valminusminival=data_root + annotation_default_path +
-                        'imdb_valminusminival2014.npy',
+        train_coco10pc=data_root + annotation_default_path + 'imdb_train2014_len_coco_10_pc.npy',
+        train_coco50pc=data_root + annotation_default_path + 'imdb_train2014_len_coco_50_pc.npy',
+        valminusminival=data_root + annotation_default_path + 'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets  # used datasets
 )
@@ -55,18 +51,13 @@ vqa_reader_test_cfg = dict(
         valminusminival=data_root + feature_default_path + 'trainval2014.lmdb',
     ),
     mix_annotations=dict(
-        train=data_root + annotation_default_path +
-              'train_balanced_questions.npy',
+        train=data_root + annotation_default_path + 'train_balanced_questions.npy',
         val=data_root + annotation_default_path + 'val_balanced_questions.npy',
-        test=data_root + annotation_default_path +
-             'test_balanced_questions.npy',
+        test=data_root + annotation_default_path + 'test_balanced_questions.npy',
         minival=data_root + annotation_default_path + 'val_balanced_questions.npy',
-        train_coco10pc=data_root + annotation_default_path +
-                       'imdb_train2014_len_coco_10_pc.npy',
-        train_coco50pc=data_root + annotation_default_path +
-                       'imdb_train2014_len_coco_50_pc.npy',
-        valminusminival=data_root + annotation_default_path +
-                        'imdb_valminusminival2014.npy',
+        train_coco10pc=data_root + annotation_default_path + 'imdb_train2014_len_coco_10_pc.npy',
+        train_coco50pc=data_root + annotation_default_path + 'imdb_train2014_len_coco_50_pc.npy',
+        valminusminival=data_root + annotation_default_path + 'imdb_valminusminival2014.npy',
     ),
     datasets=test_datasets  # used datasets
 )
@@ -86,7 +77,7 @@ vqa_info_cpler_cfg = dict(
         vocabulary_gqa=data_root + vocab_path + 'vocabulary_gqa.txt'),
     max_seg_lenth=128,  # 20,
     word_mask_ratio=0.0,
-    vocab_name='vocabulary_gqa',  ##bert for vocabulary_100k
+    vocab_name='vocabulary_gqa',  # #bert for vocabulary_100k
     vocab_answer_name='answers_gqa',
     glove_name='glove6b300d',
     if_bert=False,
@@ -96,10 +87,7 @@ train_data = dict(
     samples_per_gpu=127,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
-    data=dict(
-        type=dataset_type,
-        reader=vqa_reader_train_cfg,
-        info_cpler=vqa_info_cpler_cfg),
+    data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=vqa_info_cpler_cfg),
 )
 
 # , limit_nums=1280
@@ -110,14 +98,9 @@ test_data = dict(
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(
-        type=dataset_type,
-        reader=vqa_reader_test_cfg,
-        info_cpler=vqa_info_cpler_cfg),
+    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=vqa_info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
-    type='Evaluator',
-    metrics=[dict(type='VQAAccuracyMetric')],
-    dataset_converters=[dict(type='VQADatasetConverter')])
+    type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])

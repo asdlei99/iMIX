@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyleft 2019 project LXRT.
 
 import json
@@ -8,7 +7,7 @@ import torch
 from torch.utils.data import Dataset
 from .lxmert_nlvr2 import load_obj_tsv
 from ..utils.stream import ItemFeature
-from  imix.data.builder import DATASETS
+from imix.data.builder import DATASETS
 
 # Load part of the dataset for fast checking.
 # Notice that here is the number of images instead of the number of data,
@@ -29,6 +28,7 @@ class GQADataset:
         "sent": "What is on the white wall?"
     }
     """
+
     def __init__(self, cfg):
         splits = cfg.datasets
         if isinstance(splits, str):
@@ -44,13 +44,10 @@ class GQADataset:
             path = cfg.annotations.get(split, None)
             if path:
                 self.data.extend(json.load(open(path)))
-        print("Load %d data from split(s) %s." % (len(self.data), self.name))
+        print('Load %d data from split(s) %s.' % (len(self.data), self.name))
 
         # List to dict (for evaluation and others)
-        self.id2datum = {
-            datum['question_id']: datum
-            for datum in self.data
-        }
+        self.id2datum = {datum['question_id']: datum for datum in self.data}
 
         # Answers
         self.ans2label = json.load(open(cfg.answer_2_label))
@@ -68,29 +65,28 @@ class GQADataset:
 
 
 class GQABufferLoader():
+
     def __init__(self):
         self.key2data = {}
 
     def load_data(self, path, number):
-        key = "%s_%d" % (path, number)
+        key = '%s_%d' % (path, number)
         if key not in self.key2data:
-            self.key2data[key] = load_obj_tsv(
-                path,
-                topk=number
-            )
+            self.key2data[key] = load_obj_tsv(path, topk=number)
         return self.key2data[key]
 
 
 gqa_buffer_loader = GQABufferLoader()
-
 """
 Example in obj tsv:
 FIELDNAMES = ["img_id", "img_h", "img_w", "objects_id", "objects_conf",
               "attrs_id", "attrs_conf", "num_boxes", "boxes", "features"]
 """
 
+
 @DATASETS.register_module()
 class GQATorchDataset(Dataset):
+
     def __init__(self, reader):
         super().__init__()
         self.raw_dataset = GQADataset(reader)
@@ -100,7 +96,8 @@ class GQATorchDataset(Dataset):
         # Since images in train and valid both come from Visual Genome,
         # buffer the image loading to save memory.
         img_data = []
-        if 'testdev' in self.raw_dataset.splits or 'testdev_all' in self.raw_dataset.splits:  # Always loading all the data in testdev
+        # Always loading all the data in testdev
+        if 'testdev' in self.raw_dataset.splits or 'testdev_all' in self.raw_dataset.splits:
             path = reader.img_feature.get('testdev', None)
             assert path
             img_data.extend(gqa_buffer_loader.load_data(path, -1))
@@ -118,7 +115,7 @@ class GQATorchDataset(Dataset):
         for datum in self.raw_dataset.data:
             if datum['img_id'] in self.imgid2img:
                 self.data.append(datum)
-        print("Use %d data in torch dataset" % (len(self.data)))
+        print('Use %d data in torch dataset' % (len(self.data)))
         print()
 
     def __len__(self):
@@ -166,4 +163,3 @@ class GQATorchDataset(Dataset):
             pass
 
         return item
-

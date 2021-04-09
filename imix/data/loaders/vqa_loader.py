@@ -1,13 +1,7 @@
-import logging
 from ..reader.vqa_reader import VQAReader as Reader
 from ..infocomp.vqa_infocpler import VQAInfoCpler as InfoCpler
 from ..builder import DATASETS
 from .base_loader import BaseLoader
-
-
-from torch.utils.data import Dataset
-
-import imix.utils_imix.distributed_info as comm
 
 # VQA_PATH_CONFIG = yaml.load(open("datasets/dataset_vqa.yaml"))["dataset_configs"]
 
@@ -47,21 +41,25 @@ class VQADATASET(BaseLoader):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
         super().__init__(Reader, reader, InfoCpler, info_cpler, limit_nums)
-        #if comm.is_main_process():
-        #    logger = logging.getLogger(__name__)
-        #    logger.info('start loading vqadata')
+        '''
+        if comm.is_main_process():
+            logger = logging.getLogger(__name__)
+            logger.info('start loading vqadata')
 
-        #self.reader = VQAReader(reader)
-        #self.infocpler = VQAInfoCpler(info_cpler)
-        #self._limit_sample_nums = limit_nums
-        #self.splits = reader.datasets
-        #if comm.is_main_process():
-        #    logger.info('load vqadata {} successfully'.format(reader.datasets))
+        self.reader = VQAReader(reader)
+        self.infocpler = VQAInfoCpler(info_cpler)
+        self._limit_sample_nums = limit_nums
+        self.splits = reader.datasets
+        if comm.is_main_process():
+            logger.info('load vqadata {} successfully'.format(reader.datasets))
+        '''
 
-    #def __len__(self):
-    #    if self._limit_sample_nums and self._limit_sample_nums > 0:
-    #        return min(len(self.reader), self._limit_sample_nums)
-    #    return len(self.reader)
+    '''
+    def __len__(self):
+        if self._limit_sample_nums and self._limit_sample_nums > 0:
+            return min(len(self.reader), self._limit_sample_nums)
+        return len(self.reader)
+    '''
 
     def __getitem__(self, idx):
         # idx = 0

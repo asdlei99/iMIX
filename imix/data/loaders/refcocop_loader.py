@@ -2,12 +2,6 @@
 author: lxc
 created time: 2021/1/26
 """
-
-import logging
-
-from torch.utils.data import Dataset
-
-import imix.utils_imix.distributed_info as comm
 from .base_loader import BaseLoader
 from ..builder import DATASETS
 from ..infocomp import RefCOCOpInfoCpler as InfoCpler
@@ -20,10 +14,12 @@ class RefCOCOpDATASET(BaseLoader):
     def __init__(self, reader, info_cpler, limit_nums=None):
         super().__init__(Reader, reader, InfoCpler, info_cpler, limit_nums)
 
-    #def __len__(self):
-    #    if self._limit_sample_nums and self._limit_sample_nums > 0:
-    #        return min(len(self.reader), self._limit_sample_nums)
-    #    return len(self.reader)
+    '''
+    def __len__(self):
+        if self._limit_sample_nums and self._limit_sample_nums > 0:
+            return min(len(self.reader), self._limit_sample_nums)
+        return len(self.reader)
+    '''
 
     def __getitem__(self, idx):
         item_feature = self.reader[idx]

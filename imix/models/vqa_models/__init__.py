@@ -15,7 +15,8 @@ from .resc import ReSC
 from .cmrin import CMRIN
 from .uniter import UNITER
 from .visual_dialog_bert import VisDiaBERT
-from .lxmert import *
+# from .lxmert import *
+from .lxmert import LXMERT
 
 __all__ = [
     'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VilBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
