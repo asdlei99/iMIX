@@ -162,9 +162,9 @@ class Organizer:
         else:
             hook_list.append(hooks.OptimizerHook(self.cfg.optimizer_config.grad_clip))
         hook_list.append(hooks.LRSchedulerHook(self.optimizer, self.scheduler))
-        hook_list.append(
-            hooks.IterationTimerHook(
-                warmup_iter=self.cfg.lr_config.warmup_iterations if self.cfg.lr_config.use_warmup else 0))
+        warmup_iter = self.cfg.lr_config.get('warmup_iterations', 0) if self.cfg.lr_config.get('use_warmup',
+                                                                                               False) else 0
+        hook_list.append(hooks.IterationTimerHook(warmup_iter=warmup_iter))
         if hasattr(cfg, 'test') and hasattr(cfg.test, 'precise_bn'):
             if cfg.test.precise_bn and get_bn_modules(self.model):
                 hook_list.append(

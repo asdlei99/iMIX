@@ -226,7 +226,7 @@ def inference_on_dataset(cfg, model, data_loader):
     post_processor.reset()
 
     logger = logging.getLogger(__name__)
-    logger.info('Starting inference on {} images'.format(len(data_loader)))
+    logger.info('Starting inference on {} batch images'.format(len(data_loader)))
     with to_inference(model), torch.no_grad():
         for idx, batch_data in enumerate(data_loader, start=1):
             logger.info('{} running idx: {}/{}'.format(str(post_processor), idx, len(data_loader)))

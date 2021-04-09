@@ -51,12 +51,12 @@ class OptimizerHook(HookBase):
 
     def _clip_grad_norm(self) -> None:
         clip_norm_params = list(
-            filter(lambda parm: parm.requires_grad and parm.grad is not None, self.trainer.parameters()))
+            filter(lambda parm: parm.requires_grad and parm.grad is not None, self.trainer.model.parameters()))
         if len(clip_norm_params) == 0:
             return
         else:
             grad_norm = clip_grad.clip_grad_norm_(clip_norm_params, **self._grad_clip)
-            self.trainer.log_buffer.push_scalar('grad_norm', float(grad_norm))  # TODO(jinliang) -> test
+            self.trainer.log_buffer.put_scalar('grad_norm', float(grad_norm))  # TODO(jinliang) -> test
 
     def after_train_iter(self):  # TODO(jinliang):jinliang_imitate
         self.trainer.output['loss'].backward()

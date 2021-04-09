@@ -5,6 +5,8 @@ import torch.nn.functional as F
 from torch import Tensor
 from collections import Iterable
 from typing import Tuple
+from ..builder import ENCODER
+import torch.nn as nn
 
 
 @ENCODER.register_module()

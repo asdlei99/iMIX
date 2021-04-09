@@ -21,6 +21,10 @@ from .loaders.visual_dialog_dataset import VisDialDataset
 from .loaders.vqa_loader import VQADATASET
 from .loaders.vizwiz_loader import VizWizDATASET
 
+from .loaders.lxmert_vqa import VQATorchDataset
+from .loaders.lxmert_nlvr2 import NLVR2TorchDataset
+from .loaders.lxmert_gqa import GQATorchDataset
+
 __all__ = [
     'VQADATASET',
     'GQADATASET',
@@ -37,6 +41,9 @@ __all__ = [
     'HatefulMemesDATASET',
     'VisualEntailmentDATASET',
     'LXMERTPreTrainDATASET',
+    'VQATorchDataset', 
+    'NLVR2TorchDataset', 
+    'GQATorchDataset',
     'build_imix_train_loader',
     'build_imix_test_loader',
     'VisDialDataset',

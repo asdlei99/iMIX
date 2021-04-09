@@ -7,6 +7,14 @@ from typing import List
 import torch
 from .builder import LR_SCHEDULERS
 from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
+from .default_constructor import BertAdam, LXMERT_BertAdam
+import imix.utils_imix.distributed_info as comm
+import logging
+from transformers.optimization import (
+    get_cosine_schedule_with_warmup,
+    get_linear_schedule_with_warmup,
+    get_constant_schedule,
+)
 
 # NOTE: PyTorch's LR scheduler interface uses names that assume the LR changes
 # only on epoch boundaries. We typically use iteration based schedules instead.
@@ -182,3 +190,107 @@ def lr_lambda_update(i_iter, cfg):
     else:
         idx = bisect(cfg.training.lr_steps, i_iter)
         return pow(cfg.training.lr_ratio, idx)
+
+
+def warmup_cosine(x, warmup=0.002):
+    if x < warmup:
+        return x / warmup
+    return 0.5 * (1.0 + torch.cos(math.pi * x))
+
+
+def warmup_constant(x, warmup=0.002):
+    """ Linearly increases learning rate over `warmup`*`t_total` (as provided to BertAdam) training steps.
+        Learning rate is 1. afterwards. """
+    if x < warmup:
+        return x / warmup
+    return 1.0
+
+
+def warmup_linear(x, warmup=0.002):
+    """ Specifies a triangular learning rate schedule where peak is reached at `warmup`*`t_total`-th (as provided to BertAdam) training step.
+        After `t_total`-th training step, learning rate is zero. """
+    if x < warmup:
+        return x / warmup
+    return max((x - 1.) / (warmup - 1.), 0)
+
+
+SCHEDULES = {
+    'warmup_cosine': warmup_cosine,
+    'warmup_constant': warmup_constant,
+    'warmup_linear': warmup_linear,
+}
+
+
+@LR_SCHEDULERS.register_module()
+class BertWarmupLinearLR(torch.optim.lr_scheduler._LRScheduler):
+    """Implements BERT version of Warmup Linear lr algorithm
+  Params:
+      warmup: portion of t_total for the warmup, -1  means no warmup. Default: -1
+      t_total: total number of training steps for the learning
+          rate schedule, -1  means constant learning rate. Default: -1
+      schedule: schedule to use for the warmup (see above). Default: 'warmup_linear'
+  """
+
+    def __init__(
+        self,
+        optimizer: BertAdam,
+        max_iters: int,
+        warmup: float = -1,
+        warmup_method: str = 'warmup_linear',
+        last_epoch: int = -1,
+    ):
+        if warmup_method not in SCHEDULES:
+            raise ValueError("Invalid schedule parameter: {}".format(warmup_method))
+        if not 0.0 <= warmup < 1.0 and not warmup == -1:
+            raise ValueError("Invalid warmup: {} - should be in [0.0, 1.0[ or -1".format(warmup))
+
+        self.max_iters = max_iters
+        self.warmup = warmup
+        self.warmup_method = warmup_method
+        self.warned_for_t_total = False
+        super().__init__(optimizer, last_epoch)
+
+    def get_lr(self) -> List[float]:
+        if self.max_iters != -1:
+            if comm.is_main_process():
+                logger = logging.getLogger(__name__)
+
+            schedule_fct = SCHEDULES[self.warmup_method]
+            progress = self.last_epoch / self.max_iters
+            lr_cur = [base_lr * schedule_fct(progress, self.warmup) for base_lr in self.base_lrs]
+            # warning for exceeding t_total (only active with warmup_linear
+            if self.warmup_method == "warmup_linear" and progress > 1. and not self.warned_for_t_total:
+                if comm.is_main_process():
+                    logger.info(
+                        "Training beyond specified 't_total' steps with schedule '{}'. Learning rate set to {}. "
+                        "Please set 't_total' of {} correctly.".format(self.warmup_method, lr_cur,
+                                                                       self.__class__.__name__))
+                self.warned_for_t_total = True
+            # end warning
+        else:
+            lr_cur = [base_lr for base_lr in self.base_lrs]
+
+        # Different definitions of half-cosine with warmup are possible. For
+        # simplicity we multiply the standard half-cosine schedule by the warmup
+        # factor. An alternative is to start the period of the cosine at warmup_iters
+        # instead of at 0. In the case that warmup_iters << max_iters the two are
+        # very close to each other.
+        return lr_cur
+
+    def _compute_values(self) -> List[float]:
+        # The new interface
+        return self.get_lr()
+
+
+@LR_SCHEDULERS.register_module()
+class WarmupLinearScheduler(LambdaLR):
+
+    def __new__(cls, optimizer, *args, **kwargs):
+        return get_linear_schedule_with_warmup(optimizer, *args, **kwargs)
+
+
+@LR_SCHEDULERS.register_module()
+class ConstantScheduler(LambdaLR):
+
+    def __new__(cls, optimizer, *args, **kwargs):
+        return get_constant_schedule(optimizer, *args, **kwargs)

@@ -198,12 +198,27 @@ def build_data_loader_by_iter(dataset, cfg, is_training=True):
 def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     batch_size = cfg.train_data.samples_per_gpu if is_training else cfg.test_data.samples_per_gpu
     num_workers = cfg.train_data.workers_per_gpu if is_training else cfg.test_data.workers_per_gpu
+    drop_last = cfg.train_data.get('drop_last', False) if is_training else cfg.test_data.get('drop_last', False)
+    shuffle = cfg.train_data.get('shuffle', False) if is_training else cfg.test_data.get('shuffle', False)
+
     if comm.get_world_size() > 1:
         sampler = DistributedSampler(dataset, shuffle=True)
         return DataLoader(
-            dataset=dataset, pin_memory=False, num_workers=num_workers, batch_size=batch_size, sampler=sampler)
+            dataset=dataset,
+            pin_memory=False,
+            num_workers=num_workers,
+            batch_size=batch_size,
+            sampler=sampler,
+            drop_last=drop_last,
+            shuffle=shuffle)
     else:
-        return DataLoader(dataset=dataset, pin_memory=False, num_workers=num_workers, batch_size=batch_size)
+        return DataLoader(
+            dataset=dataset,
+            pin_memory=False,
+            num_workers=num_workers,
+            batch_size=batch_size,
+            drop_last=drop_last,
+            shuffle=shuffle)
 
 
 def batch_collate_fn(batch):
