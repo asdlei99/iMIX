@@ -35,28 +35,28 @@ class GQAReader(IMIXDataReader):
     def __getitem__(self, item):
         annotation = self.mix_annotations[item]
         split = self.item_splits[item]
-        itemFeature = ItemFeature()
-        itemFeature.error = False
-        for k, v in annotation.items():
-            itemFeature[k] = v
+        item_feature = ItemFeature(annotation)
+        item_feature.error = False
+        #for k, v in annotation.items():
+        #    item_feature[k] = v
 
         # TODO(jinliang)
-        # itemFeature.tokens = annotation["question_tokens"]
-        # itemFeature.answers = annotation["answers"]
-        # itemFeature.all_answers = annotation["all_answers"]
+        # item_feature.tokens = annotation["question_tokens"]
+        # item_feature.answers = annotation["answers"]
+        # item_feature.all_answers = annotation["all_answers"]
         # print(item)
-        # itemFeature.ocr_tokens = annotation["ocr_tokens"]
+        # item_feature.ocr_tokens = annotation["ocr_tokens"]
 
-        if split != 'test':
-            itemFeature.answers = annotation['answers']
-            itemFeature.all_answers = annotation['all_answers']
+        #if split is not 'test':
+        #    item_feature.answers = annotation['answers']
+        #    item_feature.all_answers = annotation['all_answers']
 
         # bert use self.tokenizer TODO zhangrunze
 
-        itemFeature.tokens = tokenize_gqa(annotation['question_str'])
-        itemFeature.tokens_len = len(itemFeature.tokens)
+        item_feature.tokens = tokenize_gqa(annotation['question_str'])
+        item_feature.tokens_len = len(item_feature.tokens)
 
-        itemFeature.img_id = annotation['image_id']
+        item_feature.img_id = annotation['image_id']
         if self.default_feature:
             feature_info = None
             for txn in self.feature_txns:
@@ -64,13 +64,14 @@ class GQAReader(IMIXDataReader):
                 if feature_info is not None:
                     break
             if feature_info is None:
-                itemFeature.error = True
-                itemFeature.feature = np.random.random((100, 2048))
-                return itemFeature
-            for k, v in feature_info.items():
-                itemFeature[k] = v
-            return itemFeature
+                item_feature.error = True
+                item_feature.feature = np.random.random((100, 2048))
+                return item_feature
+            item_feature.update(feature_info.items())
+            #for k, v in feature_info.items():
+            #    item_feature[k] = v
+            return item_feature
 
-        feature_path = self.features_pathes[split + '_' + str(itemFeature.img_id)]
-        itemFeature.feature = torch.load(feature_path)[0]
-        return itemFeature
+        feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
+        item_feature.feature = torch.load(feature_path)[0]
+        return item_feature

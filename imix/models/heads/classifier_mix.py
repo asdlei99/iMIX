@@ -14,6 +14,7 @@ import math
 from torch import Tensor
 
 
+
 def gelu(x):
     """Implementation of the gelu activation function. For information: OpenAI
     GPT's gelu is slightly different (and gives slightly different results):

@@ -20,9 +20,9 @@ from ..reader.vqa_reader import VQAReader
 #
 #     def __getitem__(self, item):
 #
-#         itemFeature = self.reader[item]
-#         itemFeature = self.infocpler.completeInfo(itemFeature)
-#         return itemFeature.feature, itemFeature.input_ids, itemFeature.answers_scores, itemFeature.input_mask
+#         item_feature = self.reader[item]
+#         item_feature = self.infocpler.completeInfo(item_feature)
+#         return item_feature.feature, item_feature.input_ids, item_feature.answers_scores, item_feature.input_mask
 
 
 @DATASETS.register_module()
@@ -46,24 +46,24 @@ class VQADATASET(Dataset):
         return len(self.reader)
 
     def __getitem__(self, idx):
-        itemFeature = self.reader[idx]
-        itemFeature = self.infocpler.completeInfo(itemFeature)
+        item_feature = self.reader[idx]
+        item_feature = self.infocpler.completeInfo(item_feature)
 
         # TODO(jinliang)
         item = {
-            'feature': itemFeature.feature,
-            'input_ids': itemFeature.input_ids,
-            'input_mask': itemFeature.input_mask,
-            'question_id': itemFeature.question_id,
-            'image_id': itemFeature.image_id
+            'feature': item_feature.feature,
+            'input_ids': item_feature.input_ids,
+            'input_mask': item_feature.input_mask,
+            'question_id': item_feature.question_id,
+            'image_id': item_feature.image_id
         }
 
-        if itemFeature.answers_scores is not None:
-            item['answers_scores'] = itemFeature.answers_scores
-        # return itemFeature.feature, itemFeature.input_ids, itemFeature.answers_scores, itemFeature.input_mask
+        if item_feature.answers_scores is not None:
+            item['answers_scores'] = item_feature.answers_scores
+        # return item_feature.feature, item_feature.input_ids, item_feature.answers_scores, item_feature.input_mask
 
         if 'test' in self._split or 'oneval' in self._split:
             item['quesid2ans'] = self.infocpler.qa_id2ans
         return item
 
-        # return itemFeature
+        # return item_feature

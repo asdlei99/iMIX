@@ -33,9 +33,9 @@ class TextVQAInfoCpler(BaseInfoCpler):
         answer_vocab_nums += self.max_length
         return answer_vocab_nums
 
-    def completeInfo(self, itemFeature: ItemFeature):
+    def completeInfo(self, item_feature: ItemFeature):
         if self.if_bert:
-            tokens = self.tokenizer.tokenize(itemFeature.question.strip())
+            tokens = self.tokenizer.tokenize(item_feature.question.strip())
 
             tokens = self.tokenizer.get_limited_tokens(tokens, self.max_seq_length - 2)
             tokens, input_lm_label_ids = self.tokenizer.random_mask_tokens(tokens, self.word_mask_ratio)
@@ -45,67 +45,72 @@ class TextVQAInfoCpler(BaseInfoCpler):
             input_mask = [1] * len(tokens)
             input_segment = [0] * len(tokens)
             input_lm_label_ids = [-1] * len(tokens)
-            while len(input_ids) < self.max_seq_length:
-                input_ids.append(int(self.pad_idx))
-                input_mask.append(0)
-                input_segment.append(0)
-                input_lm_label_ids.append(-1)
-            itemFeature.input_segment = torch.tensor(input_segment, dtype=torch.int)
-            itemFeature.input_lm_label_ids = torch.tensor(input_lm_label_ids, dtype=torch.long)
+            to_extd_length = self.max_seq_length - len(input_ids)
+            self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0), (input_segment, 0),
+                             (input_lm_label_ids, -1))
+            #while len(input_ids) < self.max_seq_length:
+            #    input_ids.append(int(self.pad_idx))
+            #    input_mask.append(0)
+            #    input_segment.append(0)
+            #    input_lm_label_ids.append(-1)
+            item_feature.input_segment = torch.tensor(input_segment, dtype=torch.int)
+            item_feature.input_lm_label_ids = torch.tensor(input_lm_label_ids, dtype=torch.long)
 
         else:
-            tokens = itemFeature.tokens
+            tokens = item_feature.tokens
             if len(tokens) > self.max_seq_length:
                 tokens = tokens[:self.max_seq_length]
             input_ids = [self.stoi[t] for t in tokens]
             input_mask = [1] * len(tokens)
-            while len(input_ids) < self.max_seq_length:
-                input_ids.append(int(self.pad_idx))
-                input_mask.append(0)
+            to_extd_length = self.max_seq_length - len(input_ids)
+            self.info_extend(to_extd_length, (input_ids, int(self.pad_idx)), (input_mask, 0))
+            #while len(input_ids) < self.max_seq_length:
+            #    input_ids.append(int(self.pad_idx))
+            #    input_mask.append(0)
 
         # ocr vectors
 
-        ocr_tokens = self.tokenizer.get_limited_tokens(itemFeature.ocr_tokens, self.max_ocr_length)
+        ocr_tokens = self.tokenizer.get_limited_tokens(item_feature.ocr_tokens, self.max_ocr_length)
         ocr_tokens = [self.word_tokenize(tmp) for tmp in ocr_tokens]
         ocr_tokens, ocr_length = self._pad_tokens(ocr_tokens)
-        itemFeature.ocr_vectors_glove = self.get_tokens_glove_vectors(ocr_tokens)
-        itemFeature.ocr_vectors_order = self.get_tokens_order_vectors(ocr_tokens)
-        itemFeature.ocr_vectors_phoc = self.get_tokens_phoc_vectors(ocr_tokens)
-        itemFeature.ocr_vectors_fasttext = self.get_tokens_fasttext_vectors(ocr_tokens)
+        item_feature.ocr_vectors_glove = self.get_tokens_glove_vectors(ocr_tokens)
+        item_feature.ocr_vectors_order = self.get_tokens_order_vectors(ocr_tokens)
+        item_feature.ocr_vectors_phoc = self.get_tokens_phoc_vectors(ocr_tokens)
+        item_feature.ocr_vectors_fasttext = self.get_tokens_fasttext_vectors(ocr_tokens)
 
         # ocr features and bboxes
         features_ocr = torch.zeros(
-            (self.max_ocr_length, itemFeature.features_ocr.shape[1] if itemFeature.features_ocr is not None else 2048),
+            (self.max_ocr_length, item_feature.features_ocr.shape[1] if item_feature.features_ocr is not None else 2048),
             dtype=torch.float)
         bbox_ocr_normalized = torch.zeros(
             (self.max_ocr_length,
-             itemFeature.ocr_normalized_boxes.shape[1] if itemFeature.ocr_normalized_boxes is not None else 4),
+             item_feature.ocr_normalized_boxes.shape[1] if item_feature.ocr_normalized_boxes is not None else 4),
             dtype=torch.float)
-        if itemFeature.features_ocr is not None:
-            limit = min(self.max_ocr_length, len(itemFeature.features_ocr))
-            features_ocr[:limit] = torch.tensor(itemFeature.features_ocr[:limit])
-            bbox_ocr_normalized[:limit] = torch.tensor(itemFeature.ocr_normalized_boxes[:limit])
-        itemFeature.features_ocr = features_ocr
-        itemFeature.ocr_normalized_boxes = bbox_ocr_normalized
+        if item_feature.features_ocr is not None:
+            limit = min(self.max_ocr_length, len(item_feature.features_ocr))
+            features_ocr[:limit] = torch.tensor(item_feature.features_ocr[:limit])
+            bbox_ocr_normalized[:limit] = torch.tensor(item_feature.ocr_normalized_boxes[:limit])
+        item_feature.features_ocr = features_ocr
+        item_feature.ocr_normalized_boxes = bbox_ocr_normalized
 
         # features and bboxes
-        img_h = itemFeature.image_height
-        img_w = itemFeature.image_width
-        itemFeature.bbox = self._get_bbox_from_normalized(itemFeature.obj_normalized_boxes, img_h, img_w)
-        itemFeature.bbox_normalized = itemFeature.obj_normalized_boxes
-        itemFeature.bbox_ocr = self._get_bbox_from_normalized(itemFeature.ocr_normalized_boxes, img_h, img_w)
-        itemFeature.bbox_ocr_normalized = itemFeature.ocr_normalized_boxes
+        img_h = item_feature.image_height
+        img_w = item_feature.image_width
+        item_feature.bbox = self._get_bbox_from_normalized(item_feature.obj_normalized_boxes, img_h, img_w)
+        item_feature.bbox_normalized = item_feature.obj_normalized_boxes
+        item_feature.bbox_ocr = self._get_bbox_from_normalized(item_feature.ocr_normalized_boxes, img_h, img_w)
+        item_feature.bbox_ocr_normalized = item_feature.ocr_normalized_boxes
 
-        itemFeature.input_ids = torch.tensor(input_ids, dtype=torch.long)
-        itemFeature.input_mask = torch.tensor(input_mask, dtype=torch.int)
+        item_feature.input_ids = torch.tensor(input_ids, dtype=torch.long)
+        item_feature.input_mask = torch.tensor(input_mask, dtype=torch.int)
 
-        itemFeature.qa_ids = [self.qa_ans2id[ans] for ans in itemFeature.answers if ans in self.qa_ans2id]
-        # itemFeature.qa_allids = [self.qa_ans2id[ans] for ans in itemFeature.all_answers if ans in self.qa_ans2id]
-        itemFeature.answers_scores = self.compute_answers_scores(itemFeature.answers)
-        answers = self.compute_special_answers(itemFeature, ocr_tokens)
+        item_feature.qa_ids = [self.qa_ans2id[ans] for ans in item_feature.answers if ans in self.qa_ans2id]
+        # item_feature.qa_allids = [self.qa_ans2id[ans] for ans in item_feature.all_answers if ans in self.qa_ans2id]
+        item_feature.answers_scores = self.compute_answers_scores(item_feature.answers)
+        answers = self.compute_special_answers(item_feature, ocr_tokens)
         for k, v in answers.items():
-            itemFeature[k] = v
-        return itemFeature
+            item_feature[k] = v
+        return item_feature
 
     def get_tokens_order_vectors(self, tokens):
         vector = torch.full((self.max_ocr_length, self.max_length), fill_value=self.PAD_INDEX, dtype=torch.float)
@@ -169,10 +174,10 @@ class TextVQAInfoCpler(BaseInfoCpler):
         token_length = torch.tensor(token_length, dtype=torch.long)
         return padded_tokens, token_length
 
-    def compute_special_answers(self, itemFeature, ocr_tokens):
-        unique_answer2score = itemFeature.answers_scores
+    def compute_special_answers(self, item_feature, ocr_tokens):
+        unique_answer2score = item_feature.answers_scores
         scores = torch.zeros(self.max_copy_steps, self.get_vocab_size(), dtype=torch.float)
-        answers = itemFeature.answers
+        answers = item_feature.answers
         ocr2inds_dict = defaultdict(list)
         for idx, token in enumerate(ocr_tokens):
             ocr2inds_dict[token].append(idx)

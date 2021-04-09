@@ -23,24 +23,26 @@ class VQAReader(IMIXDataReader):
     def __getitem__(self, item):
         annotation = self.mix_annotations[item]
         split = self.item_splits[item]
-        itemFeature = ItemFeature()
-        itemFeature.error = False
-        for k, v in annotation.items():
-            itemFeature[k] = v
+        item_feature = ItemFeature(annotation)
+        #item_feature = ItemFeature()
 
+        #for k, v in annotation.items():
+        #    item_feature[k] = v
+
+        item_feature.error = False
         # TODO(jinliang)
-        # itemFeature.tokens = annotation["question_tokens"]
-        # itemFeature.answers = annotation["answers"]
-        # itemFeature.all_answers = annotation["all_answers"]
+        # item_feature.tokens = annotation["question_tokens"]
+        # item_feature.answers = annotation["answers"]
+        # item_feature.all_answers = annotation["all_answers"]
         # print(item)
-        # itemFeature.ocr_tokens = annotation["ocr_tokens"]
+        # item_feature.ocr_tokens = annotation["ocr_tokens"]
 
-        if split != 'test':
-            itemFeature.answers = annotation['answers']
-            itemFeature.all_answers = annotation['all_answers']
+        # if split != 'test':
+        #     item_feature.answers = annotation['answers']
+        #     item_feature.all_answers = annotation['all_answers']
 
-        itemFeature.tokens = annotation['question_tokens']
-        itemFeature.img_id = annotation['image_id']
+        item_feature.tokens = annotation['question_tokens']
+        item_feature.img_id = annotation['image_id']
         if self.default_feature:
             feature_info = None
             for txn in self.feature_txns:
@@ -58,22 +60,22 @@ class VQAReader(IMIXDataReader):
 
             if self.if_global:
                 if feature_info is None or feature_global_info is None:
-                    itemFeature.error = True
-                    itemFeature.feature = np.random.random((100, 2048))
-                    itemFeature.global_feature = np.random.random((100, 2048))
-                    return itemFeature
+                    item_feature.error = True
+                    item_feature.feature = np.random.random((100, 2048))
+                    item_feature.global_feature = np.random.random((100, 2048))
+                    return item_feature
             else:
                 if feature_info is None:
-                    itemFeature.error = True
-                    itemFeature.feature = np.random.random((100, 2048))
-                    return itemFeature
+                    item_feature.error = True
+                    item_feature.feature = np.random.random((100, 2048))
+                    return item_feature
 
             for k, v in feature_info.items():
-                itemFeature[k] = v
+                item_feature[k] = v
             if self.if_global:
                 for k, v in feature_global_info.items():
-                    itemFeature[k] = v
-            return itemFeature
-        feature_path = self.features_pathes[split + '_' + str(itemFeature.img_id)]
-        itemFeature.feature = torch.load(feature_path)[0]
-        return itemFeature
+                    item_feature[k] = v
+            return item_feature
+        feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
+        item_feature.feature = torch.load(feature_path)[0]
+        return item_feature

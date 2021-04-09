@@ -23,9 +23,13 @@ class HatefulMemesInfoCpler(BaseInfoCpler):
         tokens = [self._CLS_TOKEN] + tokens + [self._SEP_TOEKN]
         input_mask = [1] * len(tokens)
         input_type_ids = [0] * self.default_max_length
-        while len(tokens) < self.default_max_length:
-            tokens.append(self._PAD_TOKEN)
-            input_mask.append(0)
+
+        #to_extd_length = self.default_max_length - len(tokens)
+        #tokens.extend([self._PAD_TOKEN] * to_extend)
+        #input_mask.extend([0] * to_extend)
+
+        to_extd_length = self.default_max_length - len(tokens)
+        self.info_extend(to_extd_length, (tokens, self.PAD_TOKEN), (input_mask, 0))
 
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
         input_mask = input_mask[:self.default_max_length]

@@ -5,6 +5,7 @@ created time: 2020/8/17
 
 import collections
 from collections import OrderedDict
+from copy import deepcopy
 
 
 class ItemFeature(OrderedDict):
@@ -42,3 +43,6 @@ class ItemFeature(OrderedDict):
 
     def fields(self):
         return list(self.keys())
+
+    def deepcopy(self):
+        return deepcopy(self)

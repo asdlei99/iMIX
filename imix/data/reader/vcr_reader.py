@@ -72,10 +72,10 @@ class VCRReader(IMIXDataReader):
 
         annotation = self.annotations[item]
         split = self.annotations_idx_split[item]
-        item_feature = ItemFeature()
+        item_feature = ItemFeature(annotation)
         item_feature.error = False
-        for k, v in annotation.items():
-            item_feature[k] = v
+        #for k, v in annotation.items():
+        #    item_feature[k] = v
 
         if self.mode == 'rationale':
             conditioned_label = item_feature['answer_label'] if split != 'test' else self.default_answer_idx

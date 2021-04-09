@@ -26,11 +26,11 @@ def remove_None_value_elements(input_dict):
 class VQADATASETUNITER(Dataset):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
-        if comm.is_main_process():
-            logger = logging.getLogger(__name__)
-            logger.info('start loading vqadata')
+    if comm.is_main_process():
+      logger = logging.getLogger(__name__)
+      logger.info('start loading vqadata')
 
-        self.reader = VQAReaderUNITER(reader)
+    self.reader = VQAReaderUNITER(reader)
         # self.infocpler = VQAInfoCpler(info_cpler)
         # self._limit_sample_nums = limit_nums
         # self.splits = reader.datasets
@@ -42,25 +42,25 @@ class VQADATASETUNITER(Dataset):
 
     def __getitem__(self, idx):
 
-        itemFeature = self.reader.__getitem__(idx)
+        item_feature = self.reader[idx]
 
         # TODO(jinliang+ce@lxc)
         item = {
-            'feature': itemFeature.features,  # feature - feature
-            'feature_global': itemFeature.global_features,  # feature - global_features
-            'cls_prob': itemFeature.cls_prob,  # 1601 cls_prob
-            'bbox': itemFeature.bbox,  # feature - bbox
-            'image_dim': itemFeature.num_boxes,  # feature - bbox_Num
-            'input_ids': itemFeature.input_ids,  # tokens - ids
-            'input_mask': itemFeature.input_mask,  # tokens - mask
-            'input_segment': itemFeature.input_segment,  # tokens - segments
-            'input_lm_label_ids': itemFeature.input_lm_label_ids,  # tokens - mlm labels
-            'question_id': itemFeature.question_id,
-            'image_id': itemFeature.image_id,
+            'feature': item_feature.features,  # feature - feature
+            'feature_global': item_feature.global_features,  # feature - global_features
+            'cls_prob': item_feature.cls_prob,  # 1601 cls_prob
+            'bbox': item_feature.bbox,  # feature - bbox
+            'image_dim': item_feature.num_boxes,  # feature - bbox_Num
+            'input_ids': item_feature.input_ids,  # tokens - ids
+            'input_mask': item_feature.input_mask,  # tokens - mask
+            'input_segment': item_feature.input_segment,  # tokens - segments
+            'input_lm_label_ids': item_feature.input_lm_label_ids,  # tokens - mlm labels
+            'question_id': item_feature.question_id,
+            'image_id': item_feature.image_id,
         }
 
-        if itemFeature.answers_scores is not None:
-            item['answers_scores'] = itemFeature.answers_scores
+        if item_feature.answers_scores is not None:
+            item['answers_scores'] = item_feature.answers_scores
 
         if 'test' in self.splits or 'oneval' in self.splits:
             item['quesid2ans'] = self.infocpler.qa_id2ans

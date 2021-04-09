@@ -206,3 +206,7 @@ class BaseInfoCpler(object):
             return out
         except Exception:
             return None
+
+    def info_extend(self, length, *to_be_extend):
+        for info, value in to_be_extend:
+            info.extend([value] * length)
