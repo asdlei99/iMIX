@@ -18,18 +18,6 @@ lr_config = dict(
     # max_iters=55472,  # ceil(totoal 443753 / batch size 32) * epoch size  datasets: train
     max_iters=79012,  # floor(totoal 632117 / batch size 32) * epoch size  datasets: train, nominival
     policy='BertWarmupLinearLR')
-'''
 
-optimizer = dict(
-    type='LXMERT_BertAdam',
-    lr=5e-5,
-    warmup=0.1,
-    t_total=55472,  # ceil(totoal 443753 / batch size 32) * epoch size
-    training_encoder_lr_multiply=1)
-optimizer_config = dict(grad_clip=dict(max_norm=5))
-
-lr_config = dict(
-    policy='ConstantScheduler')
-'''
 # by_iter = True
 total_epochs = 4

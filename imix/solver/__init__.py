@@ -12,7 +12,6 @@ from .default_constructor import (
 
 from .optimization import (
     BertAdam,
-    LXMERT_BertAdam,
     RAdam,
     PlainRAdam,
 )
@@ -34,6 +33,6 @@ __all__ = [
     'build_lr_scheduler', 'build_optimizer', 'OPTIMIZER_BUILDERS', 'OPTIMIZERS', 'build_optimizer',
     'build_optimizer_constructor', 'WarmupCosineLR', 'WarmupMultiStepLR', 'PythiaScheduler', 'MultiStepScheduler',
     'WarmupLinearScheduleNonZero', 'BertAdam', 'BertWarmupLinearLR', 'WarmupLinearScheduler', 'ConstantScheduler',
-    'LXMERT_BertAdam', 'WarmupConstantSchedule', 'WarmupCosineSchedule', 'WarmupCosineWithHardRestartsSchedule',
+    'WarmupConstantSchedule', 'WarmupCosineSchedule', 'WarmupCosineWithHardRestartsSchedule',
     'WarmupPolynomialSchedule', 'BertAdamRaw', 'RAdam', 'PlainRAdam'
 ]

@@ -1,10 +1,7 @@
 # optimizer  transform.AdamW
 optimizer = dict(
-    type='Adam',
-    lr=0.0002,
-    weight_decay=0.0001,
-    training_encoder_lr_multiply=1
-)  # mix_model_zrz_jin get_optimizer_parmeters??
+    type='Adam', lr=0.0002, weight_decay=0.0001,
+    training_encoder_lr_multiply=1)  # mix_model_zrz_jin get_optimizer_parmeters??
 optimizer_config = dict(grad_clip=None)  # ??
 # fp16 = dict(
 #     init_scale=2.**16,
@@ -22,15 +19,8 @@ optimizer_config = dict(grad_clip=None)  # ??
 #     warmup_iterations=10000,
 #     policy='MultiStepScheduler')
 lr_config = dict(
-    policy='ReduceOnPlateauSchedule',
-    use_warmup=False,
-    factor=0.5,
-    mode='max',
-    patience=1,
-    verbose=True,
-    cooldown=2
-)
+    policy='ReduceOnPlateauSchedule', use_warmup=False, factor=0.5, mode='max', patience=1, verbose=True, cooldown=2)
 # max_iter = 118000
 # max_iter = 236000
-#by_iter = True
+# by_iter = True
 total_epochs = 30
