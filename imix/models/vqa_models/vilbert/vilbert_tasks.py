@@ -11,6 +11,7 @@ import yaml
 from easydict import EasyDict as edict
 
 import torch
+import os
 
 from imix.models.builder import VQA_MODELS
 '''
@@ -52,9 +53,9 @@ class VILBERT(BaseModel):
 
         self.config = config = kwargs['params']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.root_path = '/home/zj/work/imix/imix/models/vqa_models/vilbert'
+        self.root_path = os.getcwd()
 
-        with open(self.root_path + '/vilbert_tasks.yml', 'r') as f:
+        with open(self.root_path + '/imix/models/vqa_models/vilbert/vilbert_tasks.yml', 'r') as f:
             task_cfg = edict(yaml.safe_load(f))
         self.task_cfg = task_cfg
 
@@ -84,7 +85,9 @@ class VILBERT(BaseModel):
             task_ids.append(task)
 
         bert_weight_name = json.load(
-            open(self.root_path + '/config/' + config['bert_model'] + '_weight_name.json', 'r'))
+            open(
+                self.root_path + '/imix/models/vqa_models/vilbert/config/' + config['bert_model'] + '_weight_name.json',
+                'r'))
 
         bertconfig = BertConfig.from_json_file(config['config_file'])
 

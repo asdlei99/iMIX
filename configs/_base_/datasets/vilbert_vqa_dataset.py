@@ -25,7 +25,7 @@ test_datasets = ['val']     # for TASK16
 test_datasets = ['valid']   # for TASK17
 test_datasets = ['val']     # for TASK18
 '''
-limit_nums = 32
+limit_nums = None
 
 vqa_reader_train_cfg = dict(
     tasks=task_ids,
