@@ -27,7 +27,7 @@ class LXMERT(BaseModel):
         # self.special_visual_initialize = params['special_visual_initialize']
         freeze_base = params['freeze_base']
         training_head_type = params['training_head_type']
-        self.device = torch.device(params['device'])
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         if training_head_type == 'pretraining':
             self.model = LXMERTForPretraining(params)

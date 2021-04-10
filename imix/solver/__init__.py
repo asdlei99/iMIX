@@ -10,11 +10,8 @@ from .default_constructor import (
     VilbertOptimizerConstructor,
 )
 
-from .optimization import (
-    BertAdam,
-    RAdam,
-    PlainRAdam,
-)
+from .optimization import BertAdam
+
 from .lr_scheduler import (
     WarmupCosineLR,
     WarmupMultiStepLR,
