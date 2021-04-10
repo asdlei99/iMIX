@@ -1,0 +1,3 @@
+[submodule "imix/models/vqa_models/vilbert/tools/refer"]
+	path = imix/models/vqa_models/vilbert/tools/refer
+	url = https://github.com/lichengunc/refer.git

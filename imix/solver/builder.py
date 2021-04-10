@@ -27,6 +27,21 @@ def register_torch_optimizers():
 TORCH_OPTIMIZERS = register_torch_optimizers()
 
 
+def register_torch_lr_schedulers():
+    torch_lr_scheduler = []
+    for module_name in dir(torch.optim.lr_scheduler):
+        if module_name.startswith('__'):
+            continue
+        _optim_lr = getattr(torch.optim.lr_scheduler, module_name)
+        if inspect.isclass(_optim_lr) and issubclass(_optim_lr, torch.optim.lr_scheduler._LRScheduler):
+            LR_SCHEDULERS.register_module()(_optim_lr)
+            torch_lr_scheduler.append(module_name)
+    return torch_lr_scheduler
+
+
+TORCH_OPTIM_LR_SCHEDULERS = register_torch_lr_schedulers()
+
+
 def build_optimizer_constructor(cfg):
     return build_from_cfg(cfg, OPTIMIZER_BUILDERS)
 

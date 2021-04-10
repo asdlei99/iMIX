@@ -55,7 +55,7 @@ class LXMERT(BaseModel):
             for p in self.model.bert.parameters():
                 p.requires_grad = False
 
-    def forward_train(self, data):
+    def forward_train(self, data, **kwargs):
         # ques_id = data['ques_id'].to(self.device)
         feats = data['feats'].to(self.device)
         boxes = data['boxes'].to(self.device)

@@ -282,3 +282,56 @@ class LXMERTPreTrainLossV0(BaseLoss):
 
     def __str__(self):
         return 'lxmert_pretrain_loss_v0'
+
+
+@LOSSES.register_module()
+class VILBERTMutilLoss(BaseLoss):
+
+    def __init__(self, task_cfg):
+        super().__init__(loss_name=str(self))
+        self.LossMap = {
+            'BCEWithLogitLoss': nn.BCEWithLogitsLoss(reduction='mean'),
+            'CrossEntropyLoss': nn.CrossEntropyLoss(),
+        }
+        self.task_ids = []
+        self.loss_scale = {}
+        self.task_cfg = task_cfg
+        self.task_losses = self.LoadLosses(task_cfg)
+        self.gradient_accumulation_steps = task_cfg['gradient_accumulation_steps']
+
+    def __str__(self):
+        return 'vilbert_mutil_loss'
+
+    def LoadLosses(self, task_cfg):
+        losses = {}
+        task_types = []
+
+        for i, task_id in enumerate(task_cfg['tasks'].split('-')):
+            task = 'TASK' + task_id
+            model_type = task_cfg[task]['type']
+            if model_type not in task_types:
+                task_types.append(model_type)
+            losses[task] = self.LossMap[task_cfg[task]['loss']]
+            self.loss_scale[task] = task_cfg[task]['loss_scale']
+            self.task_ids.append(task)
+
+        return losses
+
+    def forward(self, model_output):
+        for task_id in self.task_ids:
+            # only one task now
+            pred = model_output['scores']  # model_output[task_id]['scores']
+            target = model_output['target']  # model_output[task_id]['target']
+
+            # for different task, we use different output to calculate the loss.
+            loss = self.task_losses[task_id](pred, target)
+            if self.task_cfg[task_id]['type'] in ['VL-classifier', 'VL-classifier-GQA', 'V-logit', 'V-logit-mc']:
+                loss = loss.mean() * target.size(1)
+            elif self.task_cfg[task_id]['type'] in ['VL-binary-classifier', 'VL-tri-classifier']:
+                loss = loss.mean()
+
+            loss = loss * self.loss_scale[task_id]
+            if self.gradient_accumulation_steps > 1:
+                loss = loss / self.gradient_accumulation_steps
+
+        return loss

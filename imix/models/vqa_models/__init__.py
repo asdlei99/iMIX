@@ -8,17 +8,16 @@ from .cagraph import CAGRAPH
 from .visualbert import VisualBERT
 from .lcgn import LCGN
 from .visdial_principles import VISDIALPRINCIPLES
-from .vilbert import VilBERT
+from .vilbert import VILBERT
 from .ban import BAN
 from .hgl import HGL
 from .resc import ReSC
 from .cmrin import CMRIN
 from .uniter import UNITER
 from .visual_dialog_bert import VisDiaBERT
-# from .lxmert import *
 from .lxmert import LXMERT
 
 __all__ = [
-    'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VilBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
+    'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VILBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
     'CMRIN', 'UNITER', 'VisDiaBERT'
 ]

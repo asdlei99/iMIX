@@ -19,6 +19,7 @@ from imix.utils.env import seed_all_rng
 from imix.utils_imix.registry import Registry, build_from_cfg
 from .parallel.collate import collate
 from .sampler import InferenceSampler, TrainingSampler
+from torch.utils.data import RandomSampler
 
 VOCAB = Registry('vocab')
 PREPROCESSOR = Registry('preprocessor')
@@ -200,12 +201,22 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     num_workers = cfg.train_data.workers_per_gpu if is_training else cfg.test_data.workers_per_gpu
     drop_last = cfg.train_data.get('drop_last', False) if is_training else cfg.test_data.get('drop_last', False)
     shuffle = cfg.train_data.get('shuffle', False) if is_training else cfg.test_data.get('shuffle', False)
+    pin_memory = cfg.train_data.get('pin_memory', False) if is_training else cfg.test_data.get('pin_memory', False)
+    sampler_cfg = cfg.train_data.get('sampler', None) if is_training else None
+
+    if sampler_cfg == 'RandomSampler':
+        sampler = RandomSampler(dataset)
+    elif sampler_cfg == 'DistributedSampler' and comm.get_world_size() > 1:
+        sampler = DistributedSampler(dataset, shuffle=shuffle)
+    elif sampler_cfg is None:
+        sampler = None
+    else:
+        raise ValueError('Unsupported sampler method: {}'.format(sampler_cfg))
 
     if comm.get_world_size() > 1:
-        sampler = DistributedSampler(dataset, shuffle=True)
         return DataLoader(
             dataset=dataset,
-            pin_memory=False,
+            pin_memory=pin_memory,
             num_workers=num_workers,
             batch_size=batch_size,
             sampler=sampler,
@@ -214,9 +225,10 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     else:
         return DataLoader(
             dataset=dataset,
-            pin_memory=False,
+            pin_memory=pin_memory,
             num_workers=num_workers,
             batch_size=batch_size,
+            sampler=sampler,
             drop_last=drop_last,
             shuffle=shuffle)
 

@@ -3,12 +3,11 @@ from .lcgnencoder import LCGNEncoder
 from .oscar import OSCARBackbone
 from .textbert import TextBertBase
 from .uniter import UniterEncoder
-from .vilbert import ViLBERTBase, ViLBERTForClassification, ViLBERTForPretraining
 from .visdiag_lstm import VisDialANSEncoder, VisDialLSTM, VisDialPrincipleLSTM
 from .visualbert import VisualBERTBase, VisualBERTForClassification, VisualBERTForPretraining
 
 __all__ = [
     'ImageFeatureEncoder', 'TextBertBase', 'VisDialLSTM', 'VisDialANSEncoder', 'VisDialPrincipleLSTM', 'VisualBERTBase',
-    'VisualBERTForClassification', 'VisualBERTForPretraining', 'LCGNEncoder', 'ViLBERTBase', 'ViLBERTForClassification',
-    'ViLBERTForPretraining', 'DarknetEncoder', 'OSCARBackbone', 'UniterEncoder'
+    'VisualBERTForClassification', 'VisualBERTForPretraining', 'LCGNEncoder', 'DarknetEncoder', 'OSCARBackbone',
+    'UniterEncoder'
 ]

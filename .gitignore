@@ -124,3 +124,5 @@ work_dirs/
 
 #sphinx
 *.rst
+
+imix/models/vqa_models/vilbert/tools/

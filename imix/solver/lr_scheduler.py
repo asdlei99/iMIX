@@ -7,12 +7,16 @@ from typing import List
 import torch
 from .builder import LR_SCHEDULERS
 from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
-from .default_constructor import BertAdam
+from .optimization import BertAdam
 import imix.utils_imix.distributed_info as comm
 import logging
 from transformers.optimization import (
-    get_linear_schedule_with_warmup,
     get_constant_schedule,
+    get_constant_schedule_with_warmup,
+    get_linear_schedule_with_warmup,
+    get_cosine_schedule_with_warmup,
+    get_cosine_with_hard_restarts_schedule_with_warmup,
+    get_polynomial_decay_schedule_with_warmup,
 )
 
 # NOTE: PyTorch's LR scheduler interface uses names that assume the LR changes
@@ -288,14 +292,47 @@ class BertWarmupLinearLR(torch.optim.lr_scheduler._LRScheduler):
 
 
 @LR_SCHEDULERS.register_module()
-class WarmupLinearScheduler(LambdaLR):
+class ConstantSchedule(LambdaLR):
+
+    def __new__(cls, optimizer, *args, **kwargs):
+        return get_constant_schedule(optimizer, *args, **kwargs)
+
+
+@LR_SCHEDULERS.register_module()
+class WarmupConstantSchedule(LambdaLR):
+
+    def __new__(cls, optimizer, *args, **kwargs):
+        return get_constant_schedule_with_warmup(optimizer, *args, **kwargs)
+
+
+@LR_SCHEDULERS.register_module()
+class WarmupLinearSchedule(LambdaLR):
+    """Linear warmup and then linear decay. Linearly increases learning rate
+    from 0 to 1 over `warmup_steps` training steps.
+
+    Linearly decreases learning rate from 1. to 0. over remaining `t_total - warmup_steps` steps.
+    """
 
     def __new__(cls, optimizer, *args, **kwargs):
         return get_linear_schedule_with_warmup(optimizer, *args, **kwargs)
 
 
 @LR_SCHEDULERS.register_module()
-class ConstantScheduler(LambdaLR):
+class WarmupCosineSchedule(LambdaLR):
 
     def __new__(cls, optimizer, *args, **kwargs):
-        return get_constant_schedule(optimizer, *args, **kwargs)
+        return get_cosine_schedule_with_warmup(optimizer, *args, **kwargs)
+
+
+@LR_SCHEDULERS.register_module()
+class WarmupCosineWithHardRestartsSchedule(LambdaLR):
+
+    def __new__(cls, optimizer, *args, **kwargs):
+        return get_cosine_with_hard_restarts_schedule_with_warmup(optimizer, *args, **kwargs)
+
+
+@LR_SCHEDULERS.register_module()
+class WarmupPolynomialSchedule(LambdaLR):
+
+    def __new__(cls, optimizer, *args, **kwargs):
+        return get_polynomial_decay_schedule_with_warmup(optimizer, *args, **kwargs)

@@ -334,6 +334,7 @@ class CommonMetricLoggerHook(LogBufferWriter):
         for k, v in self.log_buffer.histories().items():
             if 'loss' in k:
                 loss_str = '{}: {:.3f}'.format(k, v.median(20))
+                # loss_str = '{}: {:.3f}'.format(k, v.latest())
                 losses_info.append(loss_str)
 
         return '  '.join(losses_info)
