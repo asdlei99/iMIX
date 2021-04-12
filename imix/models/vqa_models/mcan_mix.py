@@ -1,6 +1,5 @@
+from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
 import torch
-
-from ..builder import VQA_MODELS, build_backbone, build_combine_layer, build_embedding, build_encoder, build_head
 from .base_model import BaseModel
 
 
@@ -11,7 +10,17 @@ def filter_grads(parameters):
 @VQA_MODELS.register_module()
 class MCAN(BaseModel):
 
-    def __init__(self, embedding, encoder, backbone, combine_model, head):
+    def __init__(self, embedding: 'WordEmbedding and TextEmbedding', encoder: 'ImageFeatureEncoder',
+                 backbone: 'TwoBranchEmbedding', combine_model: 'BranchCombineLayer', head: 'TripleLinearHead') -> None:
+        """The initialization of MCAN model.
+
+        Args:
+            embedding: the embedding of text and word
+            encoder: the encoder of image feature
+            backbone: backbone networks to process input features
+            combine_model: combine the image and text feature
+            head: the classifier do the answering job
+        """
         super().__init__()
         self.embedding_model = build_embedding(embedding)
         self.encoder_model = build_encoder(encoder)
@@ -20,6 +29,7 @@ class MCAN(BaseModel):
         self.head = build_head(head)  # 包括 classification head， generation head
 
     def get_optimizer_parameters(self, optimizer_params_lr, training_encoder_lr_multiply):
+
         combine_layer = self.combine_model
         params = [
             {
@@ -51,19 +61,42 @@ class MCAN(BaseModel):
 
         return params
 
-    def process_text_embedding(self, text, text_mask):
+    def process_text_embedding(self, text: Tensor, text_mask: Tensor) -> Tuple[Tensor, Tensor]:
+        """conduct text embedding with mask.
+
+        Args:
+            text: text in the input data, shaped of (batch_size, 14, 300)
+            text_mask: mask used to mask the null place except for real words, shaped of (batch_size, 14)
+
+        Returns:
+            Tuple: embedding feature and text embedding vector,shaped of (batch_size, 14, 1024), (batch_size, 2, 1024)
+        """
         # Get embedding models
         text_embedding_model = self.embedding_model[-1]
         text_embedding_total, text_embedding_vec = text_embedding_model(text, text_mask)
         return text_embedding_total, text_embedding_vec
 
     def process_feature_embedding(self,
-                                  img_feat,
-                                  text_embedding_total,
-                                  text_embedding_vec,
-                                  text_mask,
+                                  img_feat: Tensor,
+                                  text_embedding_total: Tensor,
+                                  text_embedding_vec: Tensor,
+                                  text_mask: Tensor,
                                   vextra=None,
-                                  batch_size_t=None):
+                                  batch_size_t=None) -> Tuple[Tensor, Tensor]:
+        """embedding image and text to features using self-guided attention and
+        features from bottlenecks proposed in MCAN.
+
+        Args:
+            img_feat: image features
+            text_embedding_total: text embedding total feature
+            text_embedding_vec: vectors of text embedding
+            text_mask: mask used to mask the non-word places
+            vextra: Optinal (not used here)
+            batch_size_t: Optinal (not used here)
+
+        Returns:
+            Tuple: features from self-guided attention and features from bottlenecks
+        """
         image_feature_0 = img_feat
         encoded_feature = self.encoder_model(image_feature_0)
         feature_sga, feature_cbn = self.backbone(encoded_feature, text_embedding_total, text_embedding_vec, None,
@@ -71,28 +104,21 @@ class MCAN(BaseModel):
 
         return feature_sga, feature_cbn
 
-    # def forward(self, img_feat, input_ids, text_mask):
-    #     ques_feat = self.embedding_model[0](input_ids)
-    #     # text_mask = ques_feat.eq(0)
-    #     text_embedding_total, text_embedding_vec = self.process_text_embedding(
-    #         ques_feat, text_mask)
-    #
-    #     feature_sga, feature_cbn = self.process_feature_embedding(
-    #         img_feat, text_embedding_total, text_embedding_vec[:, 0],
-    #         text_mask)
-    #
-    #     joint_embedding = self.combine_model(feature_sga, feature_cbn,
-    #                                          text_embedding_vec[:, 1])
-    #
-    #     model_output = {"scores": self.head(joint_embedding)}
-    #
-    #     return model_output
-    def __joint_embedding(self, data, **kwargs):
+    def _joint_embedding(self, data: Dict, **kwargs: Dict) -> Tensor(not sure):
+        """the embedding computing of MCAN.
+
+        Args:
+            data: a dict containing input data
+            **kwargs: other parameters packed into a dict
+
+        Returns:
+            Tensor: output containing the embeddings, shaped of (batch_size, 3, 2048)
+        """
         batch_data = self.preprocess_data(data)
 
-        img_feat = batch_data['feature']
-        input_ids = batch_data['input_ids']
-        text_mask = batch_data['input_mask']
+        img_feat = batch_data['feature']  # (batch_size, 2048, 1024, 1)
+        input_ids = batch_data['input_ids']  # (batch_size, 14)
+        text_mask = batch_data['input_mask']  # (batch_size, 14)
         # targets = batch_data['answers_scores']
 
         ques_feat = self.embedding_model[0](input_ids)
@@ -105,24 +131,50 @@ class MCAN(BaseModel):
         joint_embedding = self.combine_model(feature_sga, feature_cbn, text_embedding_vec[:, 1])
         return joint_embedding
 
-    def forward_train(self, data, **kwargs):
+    def forward_train(self, data: List, **kwargs: Dict) -> Dict:
+        """the forward training computation of MCAN.
+
+        Args:
+            data: A list containing the inputs, using data.keys() to get the specific content
+            **kwargs: Other parameters that packed into a Dict
+
+        Returns:
+            Dict: the output of the ground truth answers and predicted answers, formed to a dictionary
+        """
 
         batch_data = self.preprocess_data(data)
-        joint_embedding = self.__joint_embedding(batch_data, **kwargs)
+        joint_embedding = self._joint_embedding(batch_data, **kwargs)
 
         targets = batch_data['answers_scores']
         model_output = self.head.forward_train(joint_embedding, labels=targets)
         return model_output
 
-    def forward_test(self, data, **kwargs):
+    def forward_test(self, data: List, **kwargs: Dict) -> Dict:
+        """the forward testing computation of MCAN.
+
+        Args:
+            data: A list containing the inputs, using data.keys() to get the specific content
+            **kwargs: Other parameters that packed into a Dict
+
+        Returns:
+            Dict: the output of the ground truth answers and predicted answers, formed to a dictionary
+        """
         assert not self.training
 
         batch_data = self.preprocess_data(data)
-        joint_embedding = self.__joint_embedding(batch_data, **kwargs)
+        joint_embedding = self._joint_embedding(batch_data, **kwargs)
         model_output = {'scores': self.head.forward_test(joint_embedding)}
         return model_output
 
-    def preprocess_data(self, batched_inputs):
+    def preprocess_data(self, batched_inputs: Dict) -> Dict:
+        """padding data and turn data into cuda format.
+
+        Args:
+            batched_inputs: a Dict containing input data
+
+        Returns:
+            Dict: a dict containing input data
+        """
         from imix.engine.organizer import is_by_iter
         if is_by_iter():
             batched_inputs = list2dict(batched_inputs)
@@ -154,7 +206,15 @@ class MCAN(BaseModel):
         return batched_inputs
 
 
-def list2dict(batched_inputs):  # TODO(jinliang):
+def list2dict(batched_inputs: List) -> Dict:  # TODO(jinliang):
+    """turn data from list to dict.
+
+    Args:
+        batched_inputs: input data
+
+    Returns:
+        Dict: a dict containing the input data
+    """
     batch_size = len(batched_inputs)
     img_feats = torch.zeros((batch_size, *batched_inputs[0]['feature'].shape), dtype=batched_inputs[0]['feature'].dtype)
     input_ids = torch.zeros((batch_size, *batched_inputs[0]['input_ids'].shape),
