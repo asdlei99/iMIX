@@ -68,7 +68,7 @@ class VQADATASET(BaseLoader):
 
         # TODO(jinliang+ce@lxc)
         item = {
-            'feature': item_feature.features,  # feature - feature
+            'feature': item_feature.feature,  # feature - feature
             'feature_global': item_feature.global_features,  # feature - global_features
             'cls_prob': item_feature.cls_prob,  # 1601 cls_prob
             'bbox': item_feature.bbox,  # feature - bbox
