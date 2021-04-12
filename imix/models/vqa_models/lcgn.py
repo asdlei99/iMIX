@@ -26,7 +26,7 @@ class LCGN(BaseModel):
         self.single_hop = SingleHop(self.backbone.CTX_DIM, self.encoder_model.ENC_DIM)
         self.head = build_head(head)  # 包括 classification head， generation head
 
-    def forward_train(self, data: Dict) -> Dict:
+    def forward_train(self, data: Dict, **kwargs) -> Dict:
         """the forward computation of LCGN.
 
         Args:

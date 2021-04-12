@@ -1,10 +1,10 @@
 # # 前傳沒問題
-_base_ = [
-    '../_base_/models/lxmert_config.py',
-    '../_base_/datasets/vqa_dataset.py',
-    '../_base_/schedules/schedule_vqa.py',
-    '../_base_/default_runtime.py'
-]  # yapf:disable
+# _base_ = [
+#     '../_base_/models/lxmert_config.py',
+#     '../_base_/datasets/vqa_dataset.py',
+#     '../_base_/schedules/schedule_vqa.py',
+#     '../_base_/default_runtime.py'
+# ]  # yapf:disable
 
 # _base_ = [
 #     '../_base_/models/visual_dialog_bert_config.py',
@@ -116,4 +116,11 @@ _base_ = [
 #     '../_base_/schedules/schedule_vqa.py',
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
+
+_base_ = [
+    '../_base_/models/devlbert_config.py',
+    '../_base_/datasets/devlbert_dataset.py',
+    '../_base_/schedules/schedule_vqa_devlbert.py',
+    '../_base_/default_runtime.py'
+]
 # total_epochs = 20

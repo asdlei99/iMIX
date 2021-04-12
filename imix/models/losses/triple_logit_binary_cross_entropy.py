@@ -335,3 +335,36 @@ class VILBERTMutilLoss(BaseLoss):
                 loss = loss / self.gradient_accumulation_steps
 
         return loss
+
+
+@LOSSES.register_module()
+class BCEWithLogitsLoss(BaseLoss):
+    """Returns .
+
+    Attention:
+        `Key`: logit_bce
+    """
+
+    def __init__(self, params=None):
+        super().__init__(loss_name=str(self))
+        if params is None:
+            params = {}
+        self.loss_fn = nn.BCEWithLogitsLoss(reduction='mean', **params)
+
+    def forward(self, model_output):
+        """Calculates and returns the binary cross entropy for logits.
+
+        Args:
+            sample_list (SampleList): SampleList containing `targets` attribute.
+            model_output (Dict): Model output containing `scores` attribute.
+
+        Returns:
+            torch.FloatTensor: Float value for loss.
+        """
+        # scores = model_output["scores"]
+        # targets = sample_list["targets"]
+        scores, targets = model_output['scores'], model_output['target']
+        return self.loss_fn(scores, targets)
+
+    def __str__(self):
+        return 'bce_with_logits_loss'

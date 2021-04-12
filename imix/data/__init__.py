@@ -24,6 +24,7 @@ from .loaders.vizwiz_loader import VizWizDATASET
 from .loaders.lxmert_vqa import VQATorchDataset
 from .loaders.lxmert_nlvr2 import NLVR2TorchDataset
 from .loaders.lxmert_gqa import GQATorchDataset
+from .loaders.devlbert_vqa_loader import DeVLBertVQADATASET
 
 __all__ = [
     'VQADATASET',
@@ -47,4 +48,5 @@ __all__ = [
     'build_imix_train_loader',
     'build_imix_test_loader',
     'VisDialDataset',
+    'DeVLBertVQADATASET'
 ]

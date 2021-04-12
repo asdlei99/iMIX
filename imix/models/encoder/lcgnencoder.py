@@ -4,6 +4,7 @@ from torch import Tensor
 from typing import Tuple
 from ..builder import ENCODER
 import torch.nn as nn
+import torch
 
 
 @ENCODER.register_module()
