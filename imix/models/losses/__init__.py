@@ -4,5 +4,6 @@ from .yolo_loss import YOLOLoss
 from .yolo_loss_v2 import YOLOLossV2
 
 __all__ = [
-    'TripleLogitBinaryCrossEntropy', 'YOLOLoss', 'YOLOLossV2', 'DiverseLoss', 'CrossEntropyLoss', 'OBJCrossEntropyLoss', 'BCEWithLogitsLoss'
+    'TripleLogitBinaryCrossEntropy', 'YOLOLoss', 'YOLOLossV2', 'DiverseLoss', 'CrossEntropyLoss', 'OBJCrossEntropyLoss',
+    'BCEWithLogitsLoss'
 ]
