@@ -1,6 +1,8 @@
 from ..builder import VQA_MODELS, build_backbone, build_embedding, build_encoder, build_head, build_combine_layer
 import torch
 from .base_model import BaseModel
+from torch import Tensor
+from typing import Tuple, Dict, List
 
 
 def filter_grads(parameters):
@@ -104,7 +106,7 @@ class MCAN(BaseModel):
 
         return feature_sga, feature_cbn
 
-    def _joint_embedding(self, data: Dict, **kwargs: Dict) -> Tensor(not sure):
+    def _joint_embedding(self, data: Dict, **kwargs: Dict) -> Tensor:
         """the embedding computing of MCAN.
 
         Args:
