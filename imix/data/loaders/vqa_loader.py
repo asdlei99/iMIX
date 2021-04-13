@@ -89,7 +89,7 @@ class VQADATASET(BaseLoader):
 
         if 'test' in self.splits or 'oneval' in self.splits:
             item['quesid2ans'] = self.infocpler.qa_id2ans
-
+        item = remove_None_value_elements(item)
         return item
 
         # return item_feature
