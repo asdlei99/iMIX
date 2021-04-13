@@ -43,7 +43,7 @@ class TripleLogitBinaryCrossEntropy(BaseLoss):
         #
         #     return loss * targets.size(-1)
 
-    def forward(self, predict_scores, target):
+    def forward(self, model_output):
         """Calculates and returns the binary cross entropy for logits
             Args:
                 sample_list (SampleList): SampleList containing `targets` attribute.
@@ -51,7 +51,8 @@ class TripleLogitBinaryCrossEntropy(BaseLoss):
             Returns:
                 torch.FloatTensor: Float value for loss.
             """
-        scores = predict_scores
+
+        scores, target = model_output['scores'], model_output['target']
 
         if scores.dim() == 3:
             loss = (
@@ -201,7 +202,6 @@ class M4CDecodingBCEWithMaskLoss(BaseLoss):
         return 'M4CDecodingBCEWithMask_loss'
 
     def forward(self, model_output):
-
         scores = model_output['scores']
         targets = model_output['target']
         loss_mask = model_output['train_loss_mask']

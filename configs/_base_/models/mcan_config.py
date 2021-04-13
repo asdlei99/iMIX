@@ -42,7 +42,12 @@ model = dict(
         dict(
             type='WordEmbedding',
             vocab_file='~/.cache/torch/mmf/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
-            embedding_dim=300),
+            embedding_dim=300,
+            glove_params=dict(
+                name='6B',
+                dim=300,
+                cache='/home/datasets/mix_data/mmf',
+            )),
         dict(
             type='TextEmbedding',
             emb_type='mcan',
