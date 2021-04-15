@@ -60,7 +60,7 @@ visual_dialog_info_cpler_cfg = dict(
 
 train_data = dict(
     samples_per_gpu=4,  # 16
-    workers_per_gpu=0,
+    workers_per_gpu=4,
     sampler_name='TrainingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=None))
 

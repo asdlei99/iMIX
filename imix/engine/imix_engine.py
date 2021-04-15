@@ -1,8 +1,6 @@
 import time
 
 from torch.cuda.amp.autocast_mode import autocast
-
-from imix.utils_imix.Timer import Timer
 from .base_engine import EngineBase
 from .hooks.periods import write_metrics
 from .organizer import Organizer, is_mixed_precision
@@ -40,26 +38,17 @@ class CommonEngine(EngineBase):
         self.batch_processor = batch_processor
 
         self.data_loader = data_loader
-        self.data_loader_iter = IterDataLoader(data_loader=data_loader)
+        # self.data_loader_iter = IterDataLoader(data_loader=data_loader)
         self.imixed_precision = False
 
-    def run_train_iter(self):
+    def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
 
-        # metrics_dict = {}
-        # start_time = Timer.now()
-        # batch_data = next(self.data_loader_iter)
-        # data_time = Timer.passed_seconds(start=start_time, end=Timer.now())
-        # metrics_dict['data_time'] = data_time
-        # loger = logging.getLogger(__name__)
-
-        @Timer.run_time
-        def load_data():
-            return next(self.data_loader_iter)
+        if batch_data is None:
+            batch_data = next(self._iter_data_Loader)
 
         metrics_dict = {}
-        batch_data, metrics_dict['data_time'] = load_data()
-        # loger.info('batch_data keys:{}'.format(batch_data.keys()))
+        batch_data, metrics_dict['data_time'] = batch_data, 1
 
         if self.batch_processor is not None:
             self.output = self.batch_processor(batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
@@ -133,10 +122,10 @@ class CommonEngine(EngineBase):
     def run_train_epoch(self):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
         time.sleep(2)  # prevent possible deadlockduring epoch transition
-        for i in range(0, len(self.data_loader)):
+        for i, batch_data in enumerate(self.data_loader):
             self.inner_iter = i
             self.before_train_iter()
-            self.run_train_iter()
+            self.run_train_iter(batch_data)
             self.after_train_iter()
             self.iter += 1
 

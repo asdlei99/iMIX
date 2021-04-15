@@ -137,20 +137,21 @@ class VisualizeScalar:
     def smoothing_hits(self):
         return self._smoothing_hints
 
-    def add_single(self, name, data, is_smooth_hint: bool = True, iter_idx: int = 0):
+    def add_single(self, name, data, is_smooth_hint: bool = True, idx: int = 0):
         h = self._history[name]
-        h.update(float(data), iter_idx)
+        h.update(float(data), idx)
 
         self._scalars[name] = data
         is_exist = self._smoothing_hints.get(name)
         if is_exist is not None:
-            assert ValueError('Scalar {} should be add with  a different smoothing_hits'.format(name))
+            assert (is_smooth_hint == is_exist), ValueError(
+                'Scalar {} should be add with  a different smoothing_hits'.format(name))
         else:
             self._smoothing_hints[name] = is_smooth_hint
 
     def add_some(self, *, is_smooth_hint: bool = True, iter_idx: int = 0, **kwargs):
         for k, v in kwargs.items():
-            self.add_single(k, v, is_smooth_hint=is_smooth_hint, iter_idx=iter_idx)
+            self.add_single(k, v, is_smooth_hint=is_smooth_hint, idx=iter_idx)
 
     def get_history_with_name(self, name):
         h = self._history.get(name, None)
@@ -184,8 +185,9 @@ class LogBufferStorage:
 
         self.vis_scalars = VisualizeScalar()
 
-    def put_scalar(self, name, data, smoothing_hint=True):
-        self.vis_scalars.add_single(name, data, smoothing_hint, self.train_info.iter)
+    def put_scalar(self, name, data, smoothing_hint=True, is_epoch=False):
+        idx = self.train_info.epoch if is_epoch else self.train_info.iter
+        self.vis_scalars.add_single(name, data, smoothing_hint, idx=idx)
 
     def put_scalars(self, *, smoothing_hint: bool = True, **kwargs):
         self.vis_scalars.add_some(is_smooth_hint=smoothing_hint, iter_idx=self.train_info.iter, **kwargs)

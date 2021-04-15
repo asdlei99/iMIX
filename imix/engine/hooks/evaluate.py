@@ -11,7 +11,6 @@ import torch
 from operator import itemgetter
 from shutil import copyfile
 import copy
-from .periods.log_buffer_imix import get_log_buffer
 
 
 @HOOKS.register_module()
@@ -86,16 +85,15 @@ class EvaluateHook(HookBase):
         # logger = logging.getLogger(__name__)
         results = self._do_eval()
         self._wirte_eval_result(results)
-        self._write_to_tensorboard(results)
+        self._write_to_tensorboard(results, is_epoch=True)
         # logger.info('epoch_{} evaluate accuracy :'.format(
         #     self.trainer.epoch, float(results['classification'])))
 
-    def _write_to_tensorboard(self, eval_result):
-        logger_buffer = get_log_buffer()
+    def _write_to_tensorboard(self, eval_result, is_epoch=False):
         for k, v in eval_result.items():
             if isinstance(v, torch.Tensor):
                 v = v.item()
-            logger_buffer.put_scalar(k, v)
+            self.trainer.log_buffer.put_scalar(k, v, is_epoch=is_epoch)
 
     def _wirte_eval_result(self, results):
 
@@ -122,10 +120,7 @@ class EvaluateHook(HookBase):
     def _eval_result(self, eval_result):
 
         def value(v):
-            if isinstance(v, torch.Tensor):
-                return v.item()
-            else:
-                return v
+            return v.item() if isinstance(v, torch.Tensor) else v
 
         result = {k: value(v) for k, v in eval_result.items()}
         return result

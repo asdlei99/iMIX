@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import json
-import lmdb
 from ..utils.stream import ItemFeature
 from ..utils.image_features_reader import ImageFeaturesH5Reader
 from ..utils.data_utils import encode_image_input
@@ -83,12 +82,12 @@ class BaseDatasetReader:
             self.feature_txns = []
             self.feature_global_txns = []
             self.feature_ocr_txns = []
-            for path in set(self.image_features_dir):
-                self.feature_txns.append(lmdb.open(path).begin())
-            for path in set(self.image_global_features_dir):
-                self.feature_global_txns.append(lmdb.open(path).begin())
-            for path in set(self.ocr_features_dir):
-                self.feature_ocr_txns.append(lmdb.open(path).begin())
+            # for path in set(self.image_features_dir):
+            #     self.feature_txns.append(lmdb.open(path).begin())
+            # for path in set(self.image_global_features_dir):
+            #     self.feature_global_txns.append(lmdb.open(path).begin())
+            # for path in set(self.ocr_features_dir):
+            #     self.feature_ocr_txns.append(lmdb.open(path).begin())
         else:
             self.features_pathes = {}
             for split in self.splits:

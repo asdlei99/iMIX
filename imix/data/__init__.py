@@ -27,26 +27,8 @@ from .loaders.lxmert_gqa import GQATorchDataset
 from .loaders.devlbert_vqa_loader import DeVLBertVQADATASET
 
 __all__ = [
-    'VQADATASET',
-    'GQADATASET',
-    'VizWizDATASET',
-    'ClevrDATASET',
-    'TEXTVQADATASET',
-    'STVQADATASET',
-    'OCRVQADATASET',
-    'VCRDATASET',
-    'RefCOCODATASET',
-    'RefCOCOpDATASET',
-    'RefCOCOgDATASET',
-    'RefClefDATASET',
-    'HatefulMemesDATASET',
-    'VisualEntailmentDATASET',
-    'LXMERTPreTrainDATASET',
-    'VQATorchDataset',
-    'NLVR2TorchDataset',
-    'GQATorchDataset',
-    'build_imix_train_loader',
-    'build_imix_test_loader',
-    'VisDialDataset',
-    'DeVLBertVQADATASET'
+    'VQADATASET', 'GQADATASET', 'VizWizDATASET', 'ClevrDATASET', 'TEXTVQADATASET', 'STVQADATASET', 'OCRVQADATASET',
+    'VCRDATASET', 'RefCOCODATASET', 'RefCOCOpDATASET', 'RefCOCOgDATASET', 'RefClefDATASET', 'HatefulMemesDATASET',
+    'VisualEntailmentDATASET', 'LXMERTPreTrainDATASET', 'VQATorchDataset', 'NLVR2TorchDataset', 'GQATorchDataset',
+    'build_imix_train_loader', 'build_imix_test_loader', 'VisDialDataset', 'DeVLBertVQADATASET'
 ]
