@@ -6,6 +6,10 @@ import sys
 import tempfile
 from importlib import import_module
 from typing import Dict
+import torch
+from datetime import datetime
+import numpy as np
+import random
 
 import regex
 from easydict import EasyDict
@@ -250,3 +254,11 @@ def get_imix_root():
     imix_root = os.path.abspath(os.path.join(imix_root, '..'))
 
     return imix_root
+
+
+def seed_all_rng(seed=None) -> None:
+    if seed is None:
+        seed = (os.getpid() + int(datetime.now().strftime('%S%f')) + int.from_bytes(os.urandom(2), 'big'))
+    np.random.seed(seed)
+    torch.set_rng_state(torch.manual_seed(seed).get_state())
+    random.seed(seed)

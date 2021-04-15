@@ -5,9 +5,7 @@ import sys
 
 from termcolor import colored
 
-from imix.utils.file_io import PathManager
-
-# from iopath.common.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 
 
 class _ColoredMessage(logging.Formatter):

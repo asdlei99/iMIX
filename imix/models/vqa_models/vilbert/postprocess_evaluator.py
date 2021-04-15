@@ -1,6 +1,6 @@
 from imix.evaluation.dataset_evaluator import BaseDatasetConverter
 from imix.evaluation.metric import BaseMetric
-from imix.evaluation.evaluator_mix1 import DATASET_CONVERTER, METRICS
+from imix.evaluation.evaluator_imix import DATASET_CONVERTER, METRICS
 import torch
 
 

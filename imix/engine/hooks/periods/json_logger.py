@@ -2,7 +2,7 @@
 import json
 import os
 
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 from ..builder import HOOKS
 from .log_buffer_imix import LogBufferWriter
 

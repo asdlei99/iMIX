@@ -2,7 +2,7 @@ from collections import defaultdict
 import os
 import torch
 from imix.utils_imix.config import get_imix_cache_dir, get_imix_root
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 from imix.utils_imix.distributed_info import is_main_process, synchronize
 from torchtext import vocab
 

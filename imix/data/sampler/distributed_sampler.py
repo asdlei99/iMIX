@@ -7,7 +7,7 @@ from typing import Optional
 import torch
 from torch.utils.data.sampler import Sampler
 
-from imix.utils import comm
+import imix.utils_imix.distributed_info as comm
 
 
 class TrainingSampler(Sampler):

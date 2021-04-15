@@ -3,7 +3,6 @@ from contextlib import contextmanager
 
 import torch
 
-# from imix.utils.history_buffer import HistoryBuffer
 from imix.utils_imix.config import imixEasyDict as MIXEasyDict
 from imix.utils_imix.history_buffer import HistoryBuffer
 

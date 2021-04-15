@@ -1,4 +1,3 @@
-# from imix.utils.registry import Registry, build_from_cfg
 import logging
 import random
 from functools import partial
@@ -9,13 +8,8 @@ from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data.sampler import BatchSampler
 
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-# from .sampler import DistributedGroupSampler, DistributedSampler, GroupSampler
-from imix.utils.dist_utils import get_dist_info
-# from imix.utils.comm import get_world_size
-# import imix.utils_imix.distributed_info as comm
-from imix.utils.env import seed_all_rng
+from imix.utils_imix.config import seed_all_rng
 from imix.utils_imix.registry import Registry, build_from_cfg
 from .parallel.collate import collate
 from .sampler import InferenceSampler, TrainingSampler
@@ -92,7 +86,7 @@ def build_dataloader(dataset,
         DataLoader: A PyTorch dataloader.
     """
     from .sampler.group_sampler import DistributedGroupSampler, GroupSampler
-    rank, world_size = get_dist_info()
+    rank, world_size = comm.get_local_rank(), comm.get_world_size()
     if dist:
         # DistributedGroupSampler will definitely shuffle the data to satisfy
         # that images on each GPU are in the same group

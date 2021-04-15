@@ -1,8 +1,8 @@
 dataset_type = 'HatefulMemesDATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 annotation_dir = '/home/datasets/hateful_memes/annotations/'
 image_dir = '/home/datasets/hateful_memes/img/'
-mix_dir = '/home/datasets/mix_data/mmf/data/datasets/hateful-memes/defaults/'
+mix_dir = '/home/datasets/mix_data/iMIX/data/datasets/hateful-memes/defaults/'
 
 train_datasets = ['train']
 test_datasets = ['dev']

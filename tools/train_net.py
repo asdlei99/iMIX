@@ -5,26 +5,13 @@
 #
 # sys.path.append(os.path.abspath('.'))
 
-# from imix.utils.config import Config
 from imix.engine.imix_engine import imixEngine
 from imix.engine.organizer import Organizer
-from imix.utils.imix_checkpoint import imixCheckpointer
-# from imix.utils.default_argument import default_argument_parser, default_setup
+from imix.utils_imix.imix_checkpoint import imixCheckpointer
 from imix.utils_imix.default_argument import default_argument_parser, default_setup
-# from imix.utils.launch import launch
 from imix.utils_imix.launch import launch as ddp_launch
 
 from imix.utils_imix.config import Config as imix_config
-
-# import argparse
-# import torch
-# from imix.utils.file_io import PathManager
-# from imix.utils import comm
-# from imix.utils.logger import setup_logger
-# from imix.utils.env import seed_all_rng
-# from imix.utils.collect_env import collect_env_info
-# from imix.evaluation import verify_results
-# import warnings
 
 # def merge_args_to_cfg(cfg, args):  # TODO(jinliang):jinliang_copy
 #     for k, v in vars(args).items():

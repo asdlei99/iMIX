@@ -4,12 +4,7 @@ import torch
 import json
 from torch.nn import GroupNorm, LayerNorm
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
-# from ..utils.registry import build_from_cfg, Registry
 from ..utils_imix.registry import build_from_cfg
-# from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
-from ..utils.misc import is_list_of
-# import imix.utils.comm as comm
-# import imix.utils_imix.distributed_info as comm
 
 
 @OPTIMIZER_BUILDERS.register_module()
@@ -110,7 +105,7 @@ class DefaultOptimizerConstructor:
                 raise ValueError('base_wd should not be None')
 
     def _is_in(self, param_group, param_group_list):
-        assert is_list_of(param_group_list, dict)
+        assert isinstance(param_group_list, dict)
         param = set(param_group['params'])
         param_set = set()
         for group in param_group_list:

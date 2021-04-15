@@ -4,9 +4,9 @@ import pickle
 import lmdb
 import numpy as np
 
-feats_dir = '/home/zrz/.cache/torch/mmf/data/datasets/gqa/defaults/features/new_output'
+feats_dir = '/home/zrz/.cache/torch/iMIX/data/datasets/gqa/defaults/features/new_output'
 
-env = lmdb.open('/home/zrz/.cache/torch/mmf/data/datasets/gqa/defaults/features/gqa', map_size=1099511627776)
+env = lmdb.open('/home/zrz/.cache/torch/iMIX/data/datasets/gqa/defaults/features/gqa', map_size=1099511627776)
 
 txn = env.begin(write=True)
 max_num_bbox = 0

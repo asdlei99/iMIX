@@ -62,13 +62,13 @@ class VQAReader(IMIXDataReader):
             if self.if_global:
                 if feature_info is None or feature_global_info is None:
                     item_feature.error = True
-                    item_feature.feature = np.random.random((100, 2048))
+                    item_feature.features = np.random.random((100, 2048))
                     item_feature.global_feature = np.random.random((100, 2048))
                     return item_feature
             else:
                 if feature_info is None:
                     item_feature.error = True
-                    item_feature.feature = np.random.random((100, 2048))
+                    item_feature.features = np.random.random((100, 2048))
                     return item_feature
 
             for k, v in feature_info.items():
@@ -78,5 +78,5 @@ class VQAReader(IMIXDataReader):
                     item_feature[k] = v
             return item_feature
         feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
-        item_feature.feature = torch.load(feature_path)[0]
+        item_feature.features = torch.load(feature_path)[0]
         return item_feature

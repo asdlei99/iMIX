@@ -4,11 +4,9 @@ import os
 import random
 import numpy as np
 from datetime import datetime
-from imix.utils.file_io import PathManager
-# from iopath.common.file_io import PathManager
-# from imix.utils.logger import setup_logger
+from imix.utils_imix.file_io import PathManager
+
 from imix.utils_imix.logger import setup_logger
-# from imix.utils.collect_env import collect_env_info
 from imix.utils_imix.collect_running_env import collect_env_info
 import argparse
 import json

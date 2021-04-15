@@ -4,7 +4,6 @@ import logging
 
 from imix.utils_imix.Timer import Timer
 from .base_hook import HookBase
-# from imix.utils.timer import Timer
 from .builder import HOOKS
 
 # class IterationTimeHook(HookBase):

@@ -1,3 +1,4 @@
+# TODO(jinliang)  copy
 # # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 #
 import base64
@@ -12,7 +13,7 @@ from urllib.parse import urlparse
 
 import portalocker  # type: ignore
 
-from imix.utils.download import download
+from .download import download
 
 __all__ = ['LazyPath', 'PathManager', 'get_cache_dir', 'file_lock']
 

@@ -21,7 +21,7 @@ from collections import Counter
 from itertools import chain
 
 import torch
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 
 SENTENCE_SPLIT_REGEX = re.compile(r'(\W+)')
 

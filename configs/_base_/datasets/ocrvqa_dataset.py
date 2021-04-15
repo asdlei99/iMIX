@@ -1,5 +1,5 @@
 dataset_type = 'OCRVQADATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 feature_path = 'data/datasets/ocrvqa/defaults/features/'
 ocr_feature_path = 'data/datasets/ocrvqa/defaults/ocr_features/'
 annotation_path = 'data/datasets/ocrvqa/defaults/annotations/'

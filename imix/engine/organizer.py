@@ -8,18 +8,15 @@ import torch
 from torch.nn.parallel import DistributedDataParallel
 
 import imix.engine.hooks as hooks
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
 from imix.evaluation import (DatasetEvaluator, VQAEvaluator, build_submit_file, build_test_predict_result)
 from imix.models import build_loss, build_model
 from imix.solver import build_lr_scheduler, build_optimizer
-from imix.utils.imix_checkpoint import imixCheckpointer
-from imix.utils.precise_bn import get_bn_modules
-# from imix.utils.logger import setup_logger
+from imix.utils_imix.imix_checkpoint import imixCheckpointer
 from imix.utils_imix.logger import setup_logger
 from ..data import build_imix_test_loader, build_imix_train_loader
 from ..models.losses.base_loss import Losser
-from ..evaluation.evaluator_mix1 import inference_on_dataset
+from ..evaluation import inference_on_dataset
 
 _AUTOMATIC_imixED_PRECISION = False
 _BY_ITER_TRAIN = False
@@ -57,6 +54,8 @@ class Organizer:
             setup_logger()
 
         self.cfg = cfg
+        self._model_name = self.cfg.model.type
+        self._dataset_name = self.cfg.dataset_type
 
         self.model = self.build_model(cfg)
         # self.losses_fn = self.build_loss(cfg)
@@ -165,16 +164,14 @@ class Organizer:
         warmup_iter = self.cfg.lr_config.get('warmup_iterations', 0) if self.cfg.lr_config.get('use_warmup',
                                                                                                False) else 0
         hook_list.append(hooks.IterationTimerHook(warmup_iter=warmup_iter))
-        if hasattr(cfg, 'test') and hasattr(cfg.test, 'precise_bn'):
-            if cfg.test.precise_bn and get_bn_modules(self.model):
-                hook_list.append(
-                    hooks.PreciseBNHook(cfg.test.eval_period, self.model, self.build_train_loader(cfg),
-                                        cfg.test.precise_bn.num_iter))
-
         if comm.is_main_process():
             hook_list.append(
                 hooks.CheckPointHook(
-                    self.checkpointer, iter_period=cfg.checkpoint_config.period, epoch_period=1, max_num_checkpoints=2))
+                    self.checkpointer,
+                    prefix=f'{self.model_name}_{self.dataset_name}',
+                    iter_period=cfg.checkpoint_config.period,
+                    epoch_period=1,
+                    max_num_checkpoints=2))
             # hook_list.append(
             #     hooks.CheckPointHook(self.checkpointer,
             #                          cfg.checkpoint_config.period))
@@ -362,3 +359,19 @@ class Organizer:
             self.start_iter = checkpoint.get('iteration', -1) + 1
             # The checkpoint stores the training iteration that just finished, thus we start
             # at the next iteration (or iter zero if there's no checkpoint).
+
+    @property
+    def model_name(self):
+        return self._model_name
+
+    @property
+    def dataset_name(self):
+        return self._dataset_name
+
+    @model_name.setter
+    def model_name(self, name):
+        self._model_name = name
+
+    @dataset_name.setter
+    def dataset_name(self, name):
+        self._dataset_name = name

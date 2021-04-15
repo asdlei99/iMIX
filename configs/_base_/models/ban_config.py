@@ -4,7 +4,7 @@ model = dict(
     embedding=[
         dict(
             type='WordEmbedding',
-            vocab_file='/home/zrz/.cache/torch/mmf/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
+            vocab_file='/home/zrz/.cache/torch/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
             embedding_dim=300),
         dict(
             type='BiLSTMTextEmbedding',

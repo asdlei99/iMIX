@@ -2,7 +2,7 @@
 from .base_hook import HookBase, PriorityStatus
 from .builder import HOOKS
 import imix.utils_imix.distributed_info as comm
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 import logging
 import json
 import os
@@ -93,7 +93,11 @@ class EvaluateHook(HookBase):
         for k, v in eval_result.items():
             if isinstance(v, torch.Tensor):
                 v = v.item()
-            self.trainer.log_buffer.put_scalar(k, v, is_epoch=is_epoch)
+            if isinstance(v, dict):
+                for ki, vi in v.items():
+                    self.trainer.log_buffer.put_scalar(ki, vi, is_epoch=is_epoch)
+            else:
+                self.trainer.log_buffer.put_scalar(k, v, is_epoch=is_epoch)
 
     def _wirte_eval_result(self, results):
 

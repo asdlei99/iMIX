@@ -191,7 +191,7 @@ class MCAN(BaseModel):
         if is_by_iter():
             batched_inputs = list2dict(batched_inputs)
 
-        img_feat = batched_inputs['feature']
+        img_feat = batched_inputs['features']
         input_ids = batched_inputs['input_ids']
         input_mask = batched_inputs['input_mask']
 

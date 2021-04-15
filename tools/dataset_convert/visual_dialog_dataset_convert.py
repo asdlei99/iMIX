@@ -137,7 +137,7 @@ class VisDiaDatasetConvert:
 
 
 if __name__ == '__main__':
-    data_root = '/home/datasets/mix_data/mmf/data/datasets/visdial_data/'
+    data_root = '/home/datasets/mix_data/iMIX/data/datasets/visdial_data/'
     json_path = os.path.join(data_root, 'annotations')
     save_path = os.path.join(data_root, 'annotations_npy_1')
     json_files = os.listdir(json_path)

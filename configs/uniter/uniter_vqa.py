@@ -6,7 +6,7 @@ _base_ = [
 ]  # yapf:disable
 
 dataset_type = 'VQADATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
 feature_default_path = 'data/datasets/vqa2/defaults/features/'

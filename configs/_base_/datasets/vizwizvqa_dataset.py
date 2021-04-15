@@ -1,5 +1,5 @@
 dataset_type = 'VizWizDATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 feature_default_path = 'data/datasets/vizwiz/defaults/features/'
 annotation_default_path = 'data/datasets/vizwiz/defaults/annotations/'
 vocab_path = 'data/datasets/vizwiz/defaults/extras/vocabs/'

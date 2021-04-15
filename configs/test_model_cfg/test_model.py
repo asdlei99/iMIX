@@ -6,12 +6,12 @@
 #     '../_base_/default_runtime.py'
 # ]  # yapf:disable
 
-_base_ = [
-    '../_base_/models/visual_dialog_bert_config.py',
-    '../_base_/datasets/visual_dialog_dataset.py',
-    '../_base_/schedules/schedule_visual_dialog.py',
-    '../_base_/default_runtime.py'
-]  # yapf:disable
+# _base_ = [
+#     '../_base_/models/visual_dialog_bert_config.py',
+#     '../_base_/datasets/visual_dialog_dataset.py',
+#     '../_base_/schedules/schedule_visual_dialog.py',
+#     '../_base_/default_runtime.py'
+# ]  # yapf:disable
 
 # 前傳沒問題  TODO(zhaojian)
 # _base_ = [
@@ -86,12 +86,12 @@ _base_ = [
 # ] # yapf:disable
 
 # 不通过
-# _base_ = [
-#     '../_base_/models/mcan_config.py',
-#     '../_base_/datasets/vqa_dataset_grid_data.py',
-#     '../_base_/schedules/schedule_vqa.py',
-#     '../_base_/default_runtime.py'
-# ] # yapf:disable
+_base_ = [
+    '../_base_/models/mcan_config.py',
+    '../_base_/datasets/vqa_dataset_grid_data.py',
+    '../_base_/schedules/schedule_vqa.py',
+    '../_base_/default_runtime.py'
+]  # yapf:disable
 
 # 前傳沒問題
 # _base_ = [
