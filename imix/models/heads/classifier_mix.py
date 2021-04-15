@@ -88,8 +88,7 @@ class MLPClassiferHead(ClassifierHead):
 
     def __init__(self, hidden_dim=None, num_layers=0, dropout=0.5, hidden_act='relu', batch_norm=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        from mmf.utils.modeling import ACT2FN
+        from imix.utils_imix.modeling import ACT2FN
 
         activation = ACT2FN[hidden_act]
         self.layers = nn.ModuleList()

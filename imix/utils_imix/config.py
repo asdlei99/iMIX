@@ -15,6 +15,8 @@ DELETE_KEY = '_delete_'
 RESERVED_KEYS = ['filename', 'text', 'pretty_text']
 SUPPORTED_FILE_EXT = ['.json', '.py', '.yaml', '.yml']
 
+_CACHE_DIR = osp.expanduser('~') + '/cache'
+
 
 class imixEasyDict(EasyDict):
 
@@ -231,3 +233,20 @@ class Config:
 
     def __iter__(self):
         return iter(self._cfg_eDict)
+
+
+def get_imix_cache_dir():
+    return _CACHE_DIR
+
+
+def set_imix_cache_dir(cache_dir):
+    global _CACHE_DIR
+    _CACHE_DIR = ToExpanduser.modify_path(cache_dir)
+
+
+def get_imix_root():
+    imix_root = os.path.dirname(os.path.abspath(__file__))
+    imix_root = os.path.dirname(imix_root)
+    imix_root = os.path.abspath(os.path.join(imix_root, '..'))
+
+    return imix_root

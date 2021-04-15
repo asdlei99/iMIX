@@ -144,30 +144,3 @@ def phoc(raw_word):
         on_unknown_unigram='warn')
 
     return qry_phocs
-
-
-# class PhocProcessor(VocabProcessor):
-#     """
-#     Compute PHOC features from text tokens
-#     """
-#
-#     def __init__(self, config, *args, **kwargs):
-#         from mmf.utils.phoc import build_phoc
-#
-#         self._build_phoc = build_phoc
-#         self._init_extras(config)
-#         self.config = config
-#
-#     def _map_strings_to_indices(self, tokens):
-#         length = min(len(tokens), self.max_length)
-#         tokens = tokens[:length]
-#
-#         phoc_dim = 604
-#         output = torch.full(
-#             (self.max_length, phoc_dim), fill_value=self.PAD_INDEX, dtype=torch.float
-#         )
-#
-#         for idx, token in enumerate(tokens):
-#             output[idx] = torch.from_numpy(self._build_phoc(token))
-#
-#         return output

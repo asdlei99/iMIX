@@ -57,12 +57,6 @@ class WordEmbedding(nn.Module):
         self.total_predefined = len(self.itos.keys())
 
         if vocab_file is not None:
-            #     if not os.path.isabs(vocab_file) :
-            #         mmf_root = get_mmf_root()
-            #         vocab_file = os.path.join(mmf_root, data_dir, vocab_file)
-            #     if not PathManager.exists(vocab_file):
-            #         raise RuntimeError("Vocab not found at " + vocab_file)
-
             with open(vocab_file, 'r') as f:
                 for line in f:
                     self.itos[index] = line.strip()

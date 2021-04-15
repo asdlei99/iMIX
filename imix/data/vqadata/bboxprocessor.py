@@ -40,7 +40,7 @@ class BBoxProcessor(VocabProcessor):
     """
 
     def __init__(self, max_length, *args, **kwargs):
-        from mmf.utils.dataset import build_bbox_tensors
+        from imix.utils_imix.dataset import build_bbox_tensors
 
         self.lambda_fn = build_bbox_tensors
         self.max_length = max_length
