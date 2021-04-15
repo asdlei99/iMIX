@@ -65,7 +65,7 @@ class IncompatibleKeys:
         if self.unexpected_keys:
             unexpected_keys = self.list_to_dict(self.unexpected_keys)
             msg = 'Some keys contained in the state_dict checkpoint that are not used by the model:'
-            msg += '\n'.join(' ' + k + self.list_to_str(v) for k, v in unexpected_keys)
+            msg += '\n'.join(' ' + k + self.list_to_str(v) for k, v in unexpected_keys.items())
             self.logger.warning(msg)
 
     def __remove_reused_missing_keys(self) -> List[str]:
