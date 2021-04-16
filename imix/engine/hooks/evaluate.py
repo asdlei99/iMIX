@@ -11,6 +11,7 @@ import torch
 from operator import itemgetter
 from shutil import copyfile
 import copy
+from imix.utils_imix.config import get_imix_work_dir
 
 
 @HOOKS.register_module()
@@ -35,7 +36,7 @@ class EvaluateHook(HookBase):
         self._period = eval_period
         self._func = eval_function
         self._level = PriorityStatus.LOW
-        self._file_handle = PathManager.open(eval_json_file, 'w')
+        self._file_handle = PathManager.open(os.path.join(get_imix_work_dir(), eval_json_file), 'w')
         self._all_eval_results = []
 
     def _do_eval(self):

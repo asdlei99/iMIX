@@ -20,6 +20,7 @@ RESERVED_KEYS = ['filename', 'text', 'pretty_text']
 SUPPORTED_FILE_EXT = ['.json', '.py', '.yaml', '.yml']
 
 _CACHE_DIR = osp.expanduser('~') + '/cache'
+_iMIX_WORK_DIR = './work_dir'
 
 
 class imixEasyDict(EasyDict):
@@ -254,6 +255,15 @@ def get_imix_root():
     imix_root = os.path.abspath(os.path.join(imix_root, '..'))
 
     return imix_root
+
+
+def set_imix_work_dir(work_dir):
+    global _iMIX_WORK_DIR
+    _iMIX_WORK_DIR = work_dir
+
+
+def get_imix_work_dir():
+    return _iMIX_WORK_DIR
 
 
 def seed_all_rng(seed=None) -> None:

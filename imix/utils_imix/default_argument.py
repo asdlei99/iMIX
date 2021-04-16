@@ -10,6 +10,7 @@ from imix.utils_imix.logger import setup_logger
 from imix.utils_imix.collect_running_env import collect_env_info
 import argparse
 import json
+from imix.utils_imix.config import set_imix_work_dir
 
 
 def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argument()
@@ -71,8 +72,10 @@ def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argum
 
 def default_setup(args, cfg):  # DODO(jinliang):modify
     output_dir = cfg.work_dir
+
     if output_dir and dist_info.is_main_process():
         PathManager.mkdirs(output_dir)
+        set_imix_work_dir(output_dir)
 
     rank = dist_info.get_rank()
     logger = setup_logger(output_dir, distributed_rank=rank, name='imix')

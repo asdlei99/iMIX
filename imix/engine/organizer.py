@@ -329,7 +329,7 @@ class Organizer:
         return hooks.EvaluateHook(
             eval_period=self.cfg.test_data.eval_period,
             eval_function=test_and_save_results,
-            eval_json_file=os.path.join(self.cfg.work_dir, 'eval_result.json'))
+            eval_json_file='eval_result.json')
 
     @property
     def by_epoch(self):
