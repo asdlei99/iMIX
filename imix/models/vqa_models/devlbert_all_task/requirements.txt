@@ -1,0 +1,17 @@
+# Cython
+# easydict==1.9
+json-lines==0.5.0
+jsonlines==1.2.0
+# lmdb==0.94
+# matplotlib
+# msgpack
+# msgpack-numpy
+# numpy==1.16.4
+# opencv-python==4.2.0.34
+# python-prctl
+pytorch-transformers==1.2.0
+# PyYAML==5.1.2
+# tensorboardX==1.8
+# tensorflow==2.3.1
+tensorpack==0.9.4
+# tqdm==4.31.1
