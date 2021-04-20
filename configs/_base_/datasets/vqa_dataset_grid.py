@@ -1,5 +1,5 @@
 dataset_type = 'VQADATASET'
-data_root = '~/.cache/torch/mmf/'
+data_root = '~/.cache/torch/iMIX/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
 vocab_path = 'data/datasets/vqa2/defaults/extras/vocabs/'

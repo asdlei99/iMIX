@@ -147,8 +147,13 @@ class MCAN(BaseModel):
         batch_data = self.preprocess_data(data)
         joint_embedding = self._joint_embedding(batch_data, **kwargs)
 
-        targets = batch_data['answers_scores']
-        model_output = self.head.forward_train(joint_embedding, labels=targets)
+        # targets = batch_data['answers_scores']
+        output = self.head.forward(joint_embedding)
+
+        model_output = {}
+        model_output['target'] = batch_data['answers_scores']
+        model_output['scores'] = output
+
         return model_output
 
     def forward_test(self, data: List, **kwargs: Dict) -> Dict:
@@ -165,7 +170,12 @@ class MCAN(BaseModel):
 
         batch_data = self.preprocess_data(data)
         joint_embedding = self._joint_embedding(batch_data, **kwargs)
-        model_output = {'scores': self.head.forward_test(joint_embedding)}
+        output = self.head.forward(joint_embedding)
+
+        model_output = {}
+        model_output['target'] = batch_data['answers_scores']
+        model_output['scores'] = output
+
         return model_output
 
     def preprocess_data(self, batched_inputs: Dict) -> Dict:
@@ -181,7 +191,7 @@ class MCAN(BaseModel):
         if is_by_iter():
             batched_inputs = list2dict(batched_inputs)
 
-        img_feat = batched_inputs['feature']
+        img_feat = batched_inputs['features']
         input_ids = batched_inputs['input_ids']
         input_mask = batched_inputs['input_mask']
 

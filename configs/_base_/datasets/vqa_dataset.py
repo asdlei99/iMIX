@@ -1,5 +1,5 @@
 dataset_type = 'VQADATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
 feature_default_path = 'data/datasets/vqa2/defaults/features/'
@@ -111,8 +111,8 @@ train_data = dict(
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
-    samples_per_gpu=16,
-    workers_per_gpu=1,
+    samples_per_gpu=8,
+    workers_per_gpu=2,
     sampler_name='TestingSampler',
     # metric="",
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=vqa_info_cpler_cfg),

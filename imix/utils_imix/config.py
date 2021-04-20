@@ -6,6 +6,10 @@ import sys
 import tempfile
 from importlib import import_module
 from typing import Dict
+import torch
+from datetime import datetime
+import numpy as np
+import random
 
 import regex
 from easydict import EasyDict
@@ -14,6 +18,9 @@ BASE_KEY = '_base_'
 DELETE_KEY = '_delete_'
 RESERVED_KEYS = ['filename', 'text', 'pretty_text']
 SUPPORTED_FILE_EXT = ['.json', '.py', '.yaml', '.yml']
+
+_CACHE_DIR = osp.expanduser('~') + '/cache'
+_iMIX_WORK_DIR = './work_dir'
 
 
 class imixEasyDict(EasyDict):
@@ -231,3 +238,37 @@ class Config:
 
     def __iter__(self):
         return iter(self._cfg_eDict)
+
+
+def get_imix_cache_dir():
+    return _CACHE_DIR
+
+
+def set_imix_cache_dir(cache_dir):
+    global _CACHE_DIR
+    _CACHE_DIR = ToExpanduser.modify_path(cache_dir)
+
+
+def get_imix_root():
+    imix_root = os.path.dirname(os.path.abspath(__file__))
+    imix_root = os.path.dirname(imix_root)
+    imix_root = os.path.abspath(os.path.join(imix_root, '..'))
+
+    return imix_root
+
+
+def set_imix_work_dir(work_dir):
+    global _iMIX_WORK_DIR
+    _iMIX_WORK_DIR = work_dir
+
+
+def get_imix_work_dir():
+    return _iMIX_WORK_DIR
+
+
+def seed_all_rng(seed=None) -> None:
+    if seed is None:
+        seed = (os.getpid() + int(datetime.now().strftime('%S%f')) + int.from_bytes(os.urandom(2), 'big'))
+    np.random.seed(seed)
+    torch.set_rng_state(torch.manual_seed(seed).get_state())
+    random.seed(seed)

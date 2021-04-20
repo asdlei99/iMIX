@@ -57,12 +57,6 @@ class WordEmbedding(nn.Module):
         self.total_predefined = len(self.itos.keys())
 
         if vocab_file is not None:
-            #     if not os.path.isabs(vocab_file) :
-            #         mmf_root = get_mmf_root()
-            #         vocab_file = os.path.join(mmf_root, data_dir, vocab_file)
-            #     if not PathManager.exists(vocab_file):
-            #         raise RuntimeError("Vocab not found at " + vocab_file)
-
             with open(vocab_file, 'r') as f:
                 for line in f:
                     self.itos[index] = line.strip()
@@ -76,9 +70,9 @@ class WordEmbedding(nn.Module):
         # Return unk index by default
         self.stoi = defaultdict(self.get_unk_index)
         self.stoi.update(self.word_dict)
-        params = ['6B', 300]
-        vector_cache = '/home/jinliang/.cache/torch/mmf'
-        embedding = GloVe(*params, cache=vector_cache)
+
+        glove_params = kwargs['glove_params']
+        embedding = self.init_GloVe(name=glove_params.name, dim=glove_params.dim, cache=glove_params.get('cache', None))
 
         self.vectors = torch.empty((self.get_size(), len(embedding.vectors[0])), dtype=torch.float)
 
@@ -111,3 +105,6 @@ class WordEmbedding(nn.Module):
 
     def forward(self, x):
         return self.embedding(x)
+
+    def init_GloVe(self, name, dim, cache=None):
+        return GloVe(name, dim, cache=cache)

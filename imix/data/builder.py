@@ -1,4 +1,3 @@
-# from imix.utils.registry import Registry, build_from_cfg
 import logging
 import random
 from functools import partial
@@ -7,25 +6,29 @@ import numpy as np
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-from torch.utils.data.sampler import BatchSampler
-
 # import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-# from .sampler import DistributedGroupSampler, DistributedSampler, GroupSampler
-from imix.utils.dist_utils import get_dist_info
-# from imix.utils.comm import get_world_size
-# import imix.utils_imix.distributed_info as comm
-from imix.utils.env import seed_all_rng
+from imix.utils_imix.config import seed_all_rng
 from imix.utils_imix.registry import Registry, build_from_cfg
 from .parallel.collate import collate
 from .sampler import InferenceSampler, TrainingSampler
-from torch.utils.data import RandomSampler
+from torch.utils.data import (RandomSampler, SequentialSampler, SubsetRandomSampler, WeightedRandomSampler,
+                              BatchSampler)
 
 VOCAB = Registry('vocab')
 PREPROCESSOR = Registry('preprocessor')
 DATASETS = Registry('dataset')
 
 PROCESSOR = Registry('processor')
+
+SAMPLER_MAP = {
+    'RandomSampler': RandomSampler,
+    'SequentialSampler': SequentialSampler,
+    'SubsetRandomSampler': SubsetRandomSampler,
+    'WeightedRandomSampler': WeightedRandomSampler,
+    'BatchSampler': BatchSampler,
+    'DistributedSampler': DistributedSampler,
+}
 
 
 def build(cfg, registry, default_args=None):
@@ -92,7 +95,7 @@ def build_dataloader(dataset,
         DataLoader: A PyTorch dataloader.
     """
     from .sampler.group_sampler import DistributedGroupSampler, GroupSampler
-    rank, world_size = get_dist_info()
+    rank, world_size = comm.get_local_rank(), comm.get_world_size()
     if dist:
         # DistributedGroupSampler will definitely shuffle the data to satisfy
         # that images on each GPU are in the same group
@@ -197,40 +200,28 @@ def build_data_loader_by_iter(dataset, cfg, is_training=True):
 
 
 def build_data_loader_by_epoch(dataset, cfg, is_training=True):
+    logger = logging.getLogger(__name__)
+
     batch_size = cfg.train_data.samples_per_gpu if is_training else cfg.test_data.samples_per_gpu
     num_workers = cfg.train_data.workers_per_gpu if is_training else cfg.test_data.workers_per_gpu
     drop_last = cfg.train_data.get('drop_last', False) if is_training else cfg.test_data.get('drop_last', False)
     shuffle = cfg.train_data.get('shuffle', False) if is_training else cfg.test_data.get('shuffle', False)
     pin_memory = cfg.train_data.get('pin_memory', False) if is_training else cfg.test_data.get('pin_memory', False)
-    sampler_cfg = cfg.train_data.get('sampler', None) if is_training else None
+    sampler_cfg = cfg.train_data.get('sampler', None) if is_training else cfg.test_data.get('sampler', False)
 
-    if sampler_cfg == 'RandomSampler':
-        sampler = RandomSampler(dataset)
-    elif sampler_cfg == 'DistributedSampler' and comm.get_world_size() > 1:
-        sampler = DistributedSampler(dataset, shuffle=shuffle)
-    elif sampler_cfg is None:
-        sampler = None
-    else:
-        raise ValueError('Unsupported sampler method: {}'.format(sampler_cfg))
+    sampler = SAMPLER_MAP[sampler_cfg](dataset)
 
-    if comm.get_world_size() > 1:
-        return DataLoader(
-            dataset=dataset,
-            pin_memory=pin_memory,
-            num_workers=num_workers,
-            batch_size=batch_size,
-            sampler=sampler,
-            drop_last=drop_last,
-            shuffle=shuffle)
-    else:
-        return DataLoader(
-            dataset=dataset,
-            pin_memory=pin_memory,
-            num_workers=num_workers,
-            batch_size=batch_size,
-            sampler=sampler,
-            drop_last=drop_last,
-            shuffle=shuffle)
+    if sampler_cfg == 'DistributedSampler' and comm.get_world_size() <= 1:
+        logger.info('chose the wrong DistributedSampler sampler for training')
+
+    return DataLoader(
+        dataset=dataset,
+        pin_memory=pin_memory,
+        num_workers=num_workers,
+        batch_size=batch_size,
+        sampler=sampler,
+        drop_last=drop_last,
+        shuffle=shuffle)
 
 
 def batch_collate_fn(batch):

@@ -329,6 +329,8 @@ class VILBERT(BaseModel):
         # test now does not support **kwargs
         if isinstance(self.task_ids, list):
             task_id = self.task_ids[0]
+        else:
+            task_id = self.task_ids
         torch.autograd.set_detect_anomaly(True)
         model_output = {}
 

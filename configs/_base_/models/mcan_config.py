@@ -5,7 +5,7 @@
 #         dict(
 #             type='WordEmbedding',
 #             vocab_file=
-#             '/home/jinliang/.cache/torch/mmf/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
+#             '/home/jinliang/.cache/torch/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
 #             embedding_dim=300),
 #         dict(
 #             type='TextEmbedding',
@@ -41,8 +41,13 @@ model = dict(
     embedding=[
         dict(
             type='WordEmbedding',
-            vocab_file='~/.cache/torch/mmf/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
-            embedding_dim=300),
+            vocab_file='~/.cache/torch/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
+            embedding_dim=300,
+            glove_params=dict(
+                name='6B',
+                dim=300,
+                cache='/home/datasets/mix_data/iMIX',
+            )),
         dict(
             type='TextEmbedding',
             emb_type='mcan',

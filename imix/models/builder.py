@@ -1,6 +1,5 @@
 from torch import nn
 import torch
-# from imix.utils.registry import Registry, build_from_cfg
 from imix.utils_imix.registry import Registry, build_from_cfg
 # from imix.data.parallel.distributed import MMDistributedDataParallel
 # from imix.data.parallel.data_parallel import MMDataParallel
@@ -66,7 +65,7 @@ def build_head(cfg, default_args=None):
 
 def build_loss(cfg):
     """Build loss."""
-    from imix.evaluation.evaluator_mix1 import build as list_build
+    from imix.evaluation.evaluator_imix import build as list_build
     return list_build(cfg, LOSSES)
 
     # return build(cfg, LOSSES)

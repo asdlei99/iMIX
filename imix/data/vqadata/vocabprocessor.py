@@ -3,23 +3,6 @@ import torch
 from ..builder import VOCAB
 from .baseprocessor import BaseProcessor
 
-# @PROCESSOR.register_module()
-# class SimpleSentenceProcessor(BaseProcessor):
-#     """Tokenizes a sentence and processes it.
-#
-#     Attributes:
-#         tokenizer (function): Type of tokenizer to be used.
-#
-#     """
-#
-#     def __init__(self, *args, **kwargs):
-#         from mmf.utils.text import tokenize
-#
-#         self.tokenizer = tokenize
-#
-#     def __call__(self, item, *args, **kwargs):
-#         return {"text": self.tokenizer(item["text"], *args, **kwargs)}
-
 
 @VOCAB.register_module()
 class VocabProcessor(BaseProcessor):

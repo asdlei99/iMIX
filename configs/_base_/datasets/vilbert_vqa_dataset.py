@@ -34,7 +34,7 @@ vqa_reader_train_cfg = dict(
     gradient_accumulation_steps=1,
     in_memory=False,  # whether use chunck for parallel training
     clean_datasets=True,  # whether clean train sets for multitask data
-    limit_nums=limit_nums,
+    # limit_nums=limit_nums,
     TASK1=dict(
         name='VQA',
         dataroot=data_root + 'VQA/',
@@ -206,7 +206,7 @@ vqa_reader_test_cfg = dict(
     gradient_accumulation_steps=1,
     in_memory=False,
     clean_datasets=True,
-    limit_nums=limit_nums,
+    # limit_nums=limit_nums,
     TASK1=dict(
         name='VQA',
         dataroot=data_root + 'VQA/',
@@ -373,7 +373,7 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=64,
+    samples_per_gpu=32,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(
@@ -404,7 +404,7 @@ samples_per_gpu=64,     # for TASK17
 samples_per_gpu=256,    # for TASK18
 '''
 test_data = dict(
-    samples_per_gpu=1024,
+    samples_per_gpu=32,
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),

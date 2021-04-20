@@ -4,14 +4,13 @@ import os
 import random
 import numpy as np
 from datetime import datetime
-from imix.utils.file_io import PathManager
-# from iopath.common.file_io import PathManager
-# from imix.utils.logger import setup_logger
+from imix.utils_imix.file_io import PathManager
+
 from imix.utils_imix.logger import setup_logger
-# from imix.utils.collect_env import collect_env_info
 from imix.utils_imix.collect_running_env import collect_env_info
 import argparse
 import json
+from imix.utils_imix.config import set_imix_work_dir
 
 
 def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argument()
@@ -73,8 +72,10 @@ def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argum
 
 def default_setup(args, cfg):  # DODO(jinliang):modify
     output_dir = cfg.work_dir
+
     if output_dir and dist_info.is_main_process():
         PathManager.mkdirs(output_dir)
+        set_imix_work_dir(output_dir)
 
     rank = dist_info.get_rank()
     logger = setup_logger(output_dir, distributed_rank=rank, name='imix')
@@ -108,3 +109,6 @@ def seed_all_rng(seed=None):  # TODO(jinliang): rename set_all_rng_seed
     np.random.seed(seed)
     random.seed(seed)
     torch.set_rng_state(torch.manual_seed(seed).get_state())
+    # TODO confirm if no cuda in use
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)

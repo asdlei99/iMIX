@@ -57,7 +57,7 @@ class SimpleWordProcessor(BaseProcessor):
     """
 
     def __init__(self, *args, **kwargs):
-        from mmf.utils.text import word_tokenize
+        from imix.utils_imix.text import word_tokenize
 
         self.tokenizer = word_tokenize
 
@@ -79,8 +79,6 @@ class VocabDict:
 
     def __init__(self, vocab_file, data_dir=None):
         if not os.path.isabs(vocab_file) and data_dir is not None:
-            # mmf_root = get_mmf_root()
-            # vocab_file = os.path.abspath(os.path.join(mmf_root, data_dir, vocab_file))
             vocab_file = os.path.abspath(os.path.join(data_dir, vocab_file))
 
         if not PathManager.exists(vocab_file):

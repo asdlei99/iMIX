@@ -75,8 +75,8 @@ class LoadDatasets(Dataset):
                 clean_datasets=task_cfg['clean_datasets'],
                 padding_index=0,
                 max_seq_length=task_cfg[task]['max_seq_length'],
-                max_region_num=task_cfg[task]['max_region_num'],
-                limit_nums=self._limit_sample_nums)
+                max_region_num=task_cfg[task]['max_region_num'])
+            # limit_nums=self._limit_sample_nums)
 
     def __len__(self):
         # only one task now

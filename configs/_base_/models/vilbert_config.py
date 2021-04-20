@@ -161,7 +161,7 @@ optimizer = dict(
         language_weights_file='/home/datasets/mix_data/model/vilbert/config/bert-base-uncased_weight_name.json',
         vision_scratch=False,  # whether pre-trained the image or not.
     ),
-    lr=0.00004,
+    lr=0.00002,
     correct_bias=False,
     training_encoder_lr_multiply=1)
 optimizer_config = dict(grad_clip=None)
@@ -187,8 +187,8 @@ lr=0.000002,# for TASK18
 '''
 
 lr_config = dict(
-    num_warmup_steps=58,  # warmup_proportion=0.1
-    num_training_steps=580,  # ceil(totoal 443753 / batch size 32) * epoch size
+    num_warmup_steps=750,  # warmup_proportion=0.1
+    num_training_steps=7500,  # ceil(totoal 443753 / batch size 32) * epoch size
     policy='WarmupLinearSchedule')
 '''
 # for task 1
@@ -200,6 +200,27 @@ num_training_steps=202240,
 # for task 4
 num_warmup_steps=734,
 num_training_steps=7340,
+# for task 7
+num_warmup_steps=7620,
+num_training_steps=76200,
+# for task 8
+num_warmup_steps=2196,
+num_training_steps=21960,
+# for task 9
+num_warmup_steps=752,
+num_training_steps=7520,
+# for task 10
+num_warmup_steps=750,
+num_training_steps=7500,
+# for task 11
+num_warmup_steps=512,
+num_training_steps=5120,
+# for task 13
+num_warmup_steps=4004,
+num_training_steps=40040,
+# for task 14
+num_warmup_steps=4530,
+num_training_steps=45300,
 # for task 15
 num_warmup_steps=15046,
 num_training_steps=150460,

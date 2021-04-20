@@ -2,7 +2,7 @@
 from .base_hook import HookBase, PriorityStatus
 from .builder import HOOKS
 import imix.utils_imix.distributed_info as comm
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 import logging
 import json
 import os
@@ -11,7 +11,7 @@ import torch
 from operator import itemgetter
 from shutil import copyfile
 import copy
-from .periods.log_buffer_imix import get_log_buffer
+from imix.utils_imix.config import get_imix_work_dir
 
 
 @HOOKS.register_module()
@@ -36,7 +36,7 @@ class EvaluateHook(HookBase):
         self._period = eval_period
         self._func = eval_function
         self._level = PriorityStatus.LOW
-        self._file_handle = PathManager.open(eval_json_file, 'w')
+        self._file_handle = PathManager.open(os.path.join(get_imix_work_dir(), eval_json_file), 'w')
         self._all_eval_results = []
 
     def _do_eval(self):
@@ -86,16 +86,19 @@ class EvaluateHook(HookBase):
         # logger = logging.getLogger(__name__)
         results = self._do_eval()
         self._wirte_eval_result(results)
-        self._write_to_tensorboard(results)
+        self._write_to_tensorboard(results, is_epoch=True)
         # logger.info('epoch_{} evaluate accuracy :'.format(
         #     self.trainer.epoch, float(results['classification'])))
 
-    def _write_to_tensorboard(self, eval_result):
-        logger_buffer = get_log_buffer()
+    def _write_to_tensorboard(self, eval_result, is_epoch=False):
         for k, v in eval_result.items():
             if isinstance(v, torch.Tensor):
                 v = v.item()
-            logger_buffer.put_scalar(k, v)
+            if isinstance(v, dict):
+                for ki, vi in v.items():
+                    self.trainer.log_buffer.put_scalar(ki, vi, is_epoch=is_epoch)
+            else:
+                self.trainer.log_buffer.put_scalar(k, v, is_epoch=is_epoch)
 
     def _wirte_eval_result(self, results):
 
@@ -122,10 +125,7 @@ class EvaluateHook(HookBase):
     def _eval_result(self, eval_result):
 
         def value(v):
-            if isinstance(v, torch.Tensor):
-                return v.item()
-            else:
-                return v
+            return v.item() if isinstance(v, torch.Tensor) else v
 
         result = {k: value(v) for k, v in eval_result.items()}
         return result

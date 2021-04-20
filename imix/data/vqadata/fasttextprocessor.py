@@ -7,6 +7,7 @@ import numpy as np
 from ..builder import EMBEDDING
 from .vocabprocessor import VocabProcessor
 from imix.utils.file_io import PathManager
+from imix.utils_imix.config import get_imix_cache_dir
 
 VOCAB = Registry('vocab')
 
@@ -88,8 +89,7 @@ class FastTextProcessor(VocabProcessor):
         model_file = self.model_file
         # If model_file is already an existing path don't join to cache dir
         if not PathManager.exists(model_file):
-            # model_file = os.path.join(get_mmf_cache_dir(), model_file)
-            model_file = model_file  # todo cache_dir
+            model_file = os.path.join(get_imix_cache_dir(), model_file)
 
         if not PathManager.exists(model_file):
             if _is_master:
@@ -105,11 +105,10 @@ class FastTextProcessor(VocabProcessor):
         synchronize()
 
     def _download_model(self):
-        # _is_master = is_master()
-        _is_master = False
-
-        # model_file_path = os.path.join(get_mmf_cache_dir(), 'wiki.en.bin')
-        model_file_path = 'wiki.en.bin'
+        from imix.utils_imix.distributed_info import is_main_process
+        from imix.utils_imix.config import get_imix_cache_dir
+        _is_master = is_main_process()
+        model_file_path = os.path.join(get_imix_cache_dir(), 'wiki.en.bin')
 
         if not _is_master:
             return model_file_path
@@ -119,9 +118,9 @@ class FastTextProcessor(VocabProcessor):
             return model_file_path
 
         import requests
-        from mmf.common.constants import FASTTEXT_WIKI_URL
         from tqdm import tqdm
 
+        FASTTEXT_WIKI_URL = 'https://dl.fbaipublicfiles.com/pythia/pretrained_models/fasttext/wiki.en.bin'
         PathManager.mkdirs(os.path.dirname(model_file_path))
         response = requests.get(FASTTEXT_WIKI_URL, stream=True)
 

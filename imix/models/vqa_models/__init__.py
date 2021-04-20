@@ -17,8 +17,9 @@ from .uniter import UNITER
 from .visual_dialog_bert import VisDiaBERT
 from .lxmert import LXMERT
 from .devilbert import DeVLBert
+from .oscar import OSCAR
 
 __all__ = [
     'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VILBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
-    'CMRIN', 'UNITER', 'VisDiaBERT', 'DeVLBert'
+    'CMRIN', 'UNITER', 'VisDiaBERT', 'DeVLBert', 'OSCAR'
 ]

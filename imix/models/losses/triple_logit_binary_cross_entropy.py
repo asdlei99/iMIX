@@ -4,9 +4,10 @@ import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss as TorchCrossEntropyLoss
 from torch.nn import SmoothL1Loss as TorchSmoothL1Loss
 
-from ..builder import LOSSES
+from ..builder import LOSSES, build_loss
 from .base_loss import BaseLoss
 from torch.nn.utils.rnn import pack_padded_sequence
+from typing import Dict
 
 
 @LOSSES.register_module()
@@ -43,7 +44,7 @@ class TripleLogitBinaryCrossEntropy(BaseLoss):
         #
         #     return loss * targets.size(-1)
 
-    def forward(self, predict_scores, target):
+    def forward(self, model_output):
         """Calculates and returns the binary cross entropy for logits
             Args:
                 sample_list (SampleList): SampleList containing `targets` attribute.
@@ -51,7 +52,8 @@ class TripleLogitBinaryCrossEntropy(BaseLoss):
             Returns:
                 torch.FloatTensor: Float value for loss.
             """
-        scores = predict_scores
+
+        scores, target = model_output['scores'], model_output['target']
 
         if scores.dim() == 3:
             loss = (
@@ -201,7 +203,6 @@ class M4CDecodingBCEWithMaskLoss(BaseLoss):
         return 'M4CDecodingBCEWithMask_loss'
 
     def forward(self, model_output):
-
         scores = model_output['scores']
         targets = model_output['target']
         loss_mask = model_output['train_loss_mask']
@@ -368,3 +369,166 @@ class BCEWithLogitsLoss(BaseLoss):
 
     def __str__(self):
         return 'bce_with_logits_loss'
+
+
+@LOSSES.register_module()
+class OSCARLoss(BaseLoss):
+
+    def __init__(self, cfg):
+        super().__init__(loss_name=str(self))
+        self.loss_type = cfg.loss_type
+        self.num_labels = cfg.num_labels
+        self.n_gpu = cfg.ngpu
+        self.gradient_accumulation_steps = cfg.gradient_accumulation_steps
+
+    def __str__(self):
+        return 'oscar_mutil_loss'
+
+    def instance_bce_with_logits(self, logits, labels, reduction='mean'):
+        assert logits.dim() == 2
+        loss = F.binary_cross_entropy_with_logits(logits, labels, reduction=reduction)
+        if reduction == 'mean':
+            loss *= labels.size(1)
+        return loss
+
+    def forward(self, model_output):
+        logits = model_output['scores']
+        labels = model_output['target']
+
+        if labels is not None:
+            if self.num_labels == 1:  # doing regression
+                loss_fct = MSELoss()
+                labels = labels.to(torch.float)
+                loss = loss_fct(logits.view(-1), labels.view(-1))
+            else:
+                if self.loss_type == 'kl':
+                    # KL Loss: https://github.com/uclanlp/visualbert/blob/master/pytorch_pretrained_bert/modeling.py
+                    loss_fct = nn.KLDivLoss(reduction='batchmean')
+                    log_softmax = nn.LogSoftmax(dim=-1)
+                    reshaped_logits = logits.contiguous().view(-1, 3129)
+                    reshaped_logits = log_softmax(reshaped_logits)
+                    loss = loss_fct(reshaped_logits, labels.contiguous())
+                elif self.loss_type == 'bce':  # [VQA]
+                    loss = self.instance_bce_with_logits(logits, labels)
+                else:  # cross_entropy [GQA, Retrieval, Captioning]
+                    loss_fct = nn.CrossEntropyLoss()
+                    loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+
+            if self.n_gpu > 1:
+                loss = loss.mean()  # mean() to average on multi-gpu parallel training
+
+            if self.gradient_accumulation_steps > 1:
+                loss = loss / self.gradient_accumulation_steps
+
+        return loss
+
+
+@LOSSES.register_module()
+class OSCARBertCaptioningLoss(nn.Module):
+
+    def __init__(self, cfg):
+        super().__init__()
+        self.label_smoothing = getattr(config, 'label_smoothing', 0)
+        self.drop_worst_ratio = getattr(config, 'drop_worst_ratio', 0)
+        self.drop_worst_after = getattr(config, 'drop_worst_after', 0)
+        self.log_soft = nn.LogSoftmax(dim=1)
+        self.kl = nn.KLDivLoss(reduction='none')
+        self.iter = 0
+
+    def __str__(self):
+        return 'oscar_bert_captioning_loss'
+
+    def forward(self, model_output):
+        logits = model_output['scores']
+        target = model_output['target']
+
+        self.iter += 1
+        eps = self.label_smoothing
+        n_class = logits.size(1)
+        one_hot = torch.zeros_like(logits).scatter(1, target.view(-1, 1), 1)
+        one_hot = one_hot * (1 - eps) + (1 - one_hot) * eps / (n_class - 1)
+        log_prb = self.log_soft(logits)
+        loss = self.kl(log_prb, one_hot).sum(1)
+
+        if self.drop_worst_ratio > 0 and self.iter > self.drop_worst_after:
+            loss, _ = torch.topk(loss, k=int(loss.shape[0] * (1 - self.drop_worst_ratio)), largest=False)
+
+        loss = loss.mean()
+
+        if args.gradient_accumulation_steps > 1:
+            loss = loss / args.gradient_accumulation_steps
+
+        return loss
+
+
+class VisualDialogBertLoss(BaseLoss):
+    loss_name = 'visual_dialog_bert_loss'
+
+    def __init__(self, MLM_loss: Dict, NSP_loss: Dict, MIR_loss: Dict, predict_feature: bool = False):
+        super().__init__(loss_name=str(self))
+
+        self.masked_lm_loss_coeff = MLM_loss.pop('weight_coeff')
+        self.masked_lm_loss = build_loss(cfg=MLM_loss)
+
+        self.masked_img_loss_coeff = MIR_loss.pop('weight_coeff')
+        self.masked_img_loss = build_loss(cfg=MIR_loss)
+
+        self.next_sentence_pred_loss_coeff = NSP_loss.pop('weight_coeff')
+        self.next_sentence_pred_loss = build_loss(cfg=NSP_loss)
+
+        self.predict_feature = predict_feature
+
+    def forward(self, model_output):
+        visual_predict_scores = model_output['visual_predict_scores']
+        image_target = model_output['image_target']
+        masked_img_loss = self.masked_img_loss_coeff * self.calcuate_img_loss(visual_predict_scores, image_target)
+
+        text_predict_scores = model_output['text_predict_scores']
+        masked_lm_labels = model_output['masked_lm_labels']
+        masked_lm_loss = self.masked_lm_loss_coeff * self.calcuate_text_loss(text_predict_scores, masked_lm_labels)
+
+        seq_relationship_scores = model_output['seq_relationship_scores']
+        next_sentence_label = model_output['next_sentence_label']
+        nsp_loss = self.next_sentence_pred_loss_coeff * self.calcuate_nsp_loss(seq_relationship_scores,
+                                                                               next_sentence_label)
+
+        output_loss = masked_lm_loss + masked_lm_loss + nsp_loss
+
+        return {
+            str(self): output_loss,
+            'masked_img_loss': masked_img_loss,
+            'nsp_loss': nsp_loss,
+            'masked_lm_loss': masked_lm_loss
+        }
+
+    def calcuate_img_loss(self, prediction, target):
+        # model_output['scores'], model_output['target']
+        if self.predict_feature:
+            img_loss = self.masked_img_loss(model_output={'scores': prediction, 'target': target})
+            max_v = max(torch.sum((target == 1).unsqueeze(2).expand_as(img_loss)), 1)
+        else:
+            img_loss = self.masked_img_loss(model_output={'scores': F.log_softmax(prediction, dim=2), 'target': target})
+            max_v = max(torch.sum((target == 1)), 0)
+
+        sum_v = torch.sum(img_loss * (target == 1))
+        return sum_v / max_v
+
+    def calcuate_text_loss(self, prediction, target):
+        return self.masked_lm_loss(model_output={'scores': prediction, 'target': target})
+
+    def calcuate_nsp_loss(self, prediction, target):
+        return self.next_sentence_pred_loss(model_output={'scores': prediction, 'target': target})
+
+
+@LOSSES.register_module()
+class KLDivLoss(BaseLoss):
+
+    def __init__(self, params=None):
+        super().__init__(loss_name=str(self))
+        if params is None:
+            params = {}
+        self.loss_fn = nn.KLDivLoss(**params)
+
+    def forward(self, model_output):
+        predict_scores, target = model_output['scores'], model_output['target']
+        return self.loss_fn(predict_scores, target)

@@ -1,7 +1,6 @@
 # TODO(jinliang):jinliang_copy_and_imitate
 from .base_hook import HookBase, PriorityStatus
 from .builder import HOOKS
-# from imix.utils.events import EventWriter
 from .periods import LogBufferWriter
 from .periods.tensorboard_logger import TensorboardLoggerHook
 

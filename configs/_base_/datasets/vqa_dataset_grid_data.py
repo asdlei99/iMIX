@@ -1,5 +1,5 @@
 dataset_type = 'VQADATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 feature_path = 'data/datasets/vqa2/grid_features/features/'
 annotation_path = 'data/datasets/vqa2/grid_features/annotations/'
 feature_default_path = 'data/datasets/vqa2/defaults/features/'
@@ -54,7 +54,12 @@ vqa_reader_test_cfg = dict(
 
 vqa_info_cpler_cfg = dict(
     type='VQAInfoCpler',
-    glove_weights=data_root + 'glove.6B.300d.txt.pt',
+    glove_weights=dict(
+        glove6b50d=data_root + 'glove.6B.50d.txt.pt',
+        glove6b100d=data_root + 'glove.6B.100d.txt.pt',
+        glove6b200d=data_root + 'glove.6B.200d.txt.pt',
+        glove6b300d=data_root + 'glove.6B.300d.txt.pt',
+    ),
     tokenizer='/home/datasets/VQA/bert/' + 'bert-base-uncased-vocab.txt',
     if_bert=False,
     mix_vocab=dict(
@@ -63,8 +68,8 @@ vqa_info_cpler_cfg = dict(
         vocabulary_vqa=data_root + vocab_path + 'vocabulary_vqa.txt'))
 
 train_data = dict(
-    samples_per_gpu=16,
-    workers_per_gpu=1,
+    samples_per_gpu=8,
+    workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=vqa_info_cpler_cfg, limit_nums=800))
 
@@ -74,7 +79,7 @@ test_data = dict(
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(type=dataset_type, vqa_reader=vqa_reader_test_cfg, vqa_info_cpler=vqa_info_cpler_cfg),
+    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, vqa_info_cpler=vqa_info_cpler_cfg),
     eval_period=5000)  # eval_period set to 0 to disable
 
 # evaluator_type = 'VQA'  # TODO(jinliang)

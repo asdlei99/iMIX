@@ -68,7 +68,7 @@ class VQADATASET(BaseLoader):
 
         # TODO(jinliang+ce@lxc)
         item = {
-            'feature': item_feature.feature,  # feature - feature
+            'features': item_feature.features,  # feature - feature
             'feature_global': item_feature.global_features,  # feature - global_features
             'cls_prob': item_feature.cls_prob,  # 1601 cls_prob
             'bbox': item_feature.bbox,  # feature - bbox
@@ -89,7 +89,7 @@ class VQADATASET(BaseLoader):
 
         if 'test' in self.splits or 'oneval' in self.splits:
             item['quesid2ans'] = self.infocpler.qa_id2ans
-
+        item = remove_None_value_elements(item)
         return item
 
         # return item_feature

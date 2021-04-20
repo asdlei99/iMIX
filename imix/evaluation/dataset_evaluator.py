@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 import torch
 
-from .evaluator_mix1 import DATASET_CONVERTER
+from .evaluator_imix import DATASET_CONVERTER
 
 
 class BaseDatasetConverter(metaclass=ABCMeta):

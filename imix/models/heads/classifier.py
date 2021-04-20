@@ -76,7 +76,7 @@ class MLPClassifer(nn.Module):
         **kwargs,
     ):
         super().__init__()
-        from mmf.utils.modeling import ACT2FN
+        from imix.utils_imix.modeling import ACT2FN
 
         activation = ACT2FN[hidden_act]
         self.layers = nn.ModuleList()

@@ -1,6 +1,4 @@
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
-# from imix.utils.checkpoint import PeriodicCheckpointer
 from imix.utils_imix.checkpoint import PeriodicCheckpointer
 from ..base_hook import HookBase, PriorityStatus
 from ..builder import HOOKS
@@ -10,6 +8,7 @@ from ..builder import HOOKS
 class CheckPointHook(PeriodicCheckpointer, HookBase):
 
     def __init__(self, *args, **kwargs):
+        self.prefix = kwargs.pop('prefix')
         super().__init__(*args, **kwargs)
         self._level = PriorityStatus.LOW
 
@@ -22,7 +21,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
         if not self.trainer.by_epoch:
             # self.step(self.trainer.iter) # step(old) --> record_iter_checkpoint
             iter_other_info = {'by_epoch': self.trainer.by_epoch}
-            self.record_iter_checkpoint(self.trainer.iter, **iter_other_info)
+            self.record_iter_checkpoint(self.trainer.iter, self.prefix, **iter_other_info)
 
     def after_train_epoch(self):
         # self.save(name='epoch_{}'.format(self.trainer.epoch)) # save(old) --> record_epoch_checkpoint
@@ -31,7 +30,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
             'epoch_iter': self.trainer.iter,
             'by_epoch': self.trainer.by_epoch
         }
-        self.record_epoch_checkpoint(self.trainer.epoch, **epoch_other_info)
+        self.record_epoch_checkpoint(self.trainer.epoch, self.prefix, **epoch_other_info)
 
     def _multi_gpus_sync(self):
         comm.synchronize()

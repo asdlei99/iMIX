@@ -5,7 +5,7 @@ import tempfile
 
 import torch
 
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 from .base_hook import HookBase
 from .builder import HOOKS
 

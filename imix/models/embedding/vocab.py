@@ -1,9 +1,9 @@
 from collections import defaultdict
 import os
 import torch
-from mmf.utils.configuration import get_mmf_cache_dir
-from mmf.utils.distributed import is_master, synchronize
-from mmf.utils.file_io import PathManager
+from imix.utils_imix.config import get_imix_cache_dir, get_imix_root
+from imix.utils_imix.file_io import PathManager
+from imix.utils_imix.distributed_info import is_main_process, synchronize
 from torchtext import vocab
 
 from ..builder import EMBEDDING
@@ -56,9 +56,8 @@ class BaseVocab:
 
         if vocab_file is not None:
             if not os.path.isabs(vocab_file) and data_dir is not None:
-                # mmf_root = get_mmf_root()
-                mmf_root = None  # todo zrz
-                vocab_file = os.path.join(mmf_root, data_dir, vocab_file)
+                imix_root = get_imix_root()
+                vocab_file = os.path.join(imix_root, data_dir, vocab_file)
             if not PathManager.exists(vocab_file):
                 raise RuntimeError('Vocab not found at ' + vocab_file)
 
@@ -172,26 +171,16 @@ class IntersectedVocab(BaseVocab):
         middle = embedding_name.split('.')[1]
 
         class_name = 'GloVe'
-
-        # if not hasattr(vocab, class_name):
-        #     from mmf.common.registry import registry
-        #
-        #     writer = registry.get("writer")
-        #     error = "Unknown embedding type: %s" % name, "error"
-        #     if writer is not None:
-        #         writer.write(error, "error")
-        #     raise RuntimeError(error)
-
         params = [middle]
 
         if name == 'glove':
             params.append(int(dim))
 
-        vector_cache = get_mmf_cache_dir()
+        vector_cache = get_imix_cache_dir()
 
         # First test loading the vectors in master so that everybody doesn't
         # download it in case it doesn't exist
-        if is_master():
+        if is_main_process():
             vocab.pretrained_aliases[embedding_name](cache=vector_cache)
         synchronize()
 

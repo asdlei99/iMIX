@@ -1,5 +1,5 @@
 dataset_type = 'GQADATASET'
-data_root = '~/.cache/torch/mmf/'
+data_root = '~/.cache/torch/iMIX/'
 # feature_path = "data/datasets/gqa/grid_features/features/"
 # annotation_path = "data/datasets/gqa/grid_features/annotations/"
 feature_default_path = 'data/datasets/gqa/defaults/features/'

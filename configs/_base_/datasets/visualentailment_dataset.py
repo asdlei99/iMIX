@@ -1,8 +1,8 @@
 dataset_type = 'VisualEntailmentDATASET'
-data_root = '/home/datasets/mix_data/mmf/'
-annotation_dir = '/home/datasets/mix_data/mmf/data/datasets/visual_entailment/defaults/annotations/'
+data_root = '/home/datasets/mix_data/iMIX/'
+annotation_dir = '/home/datasets/mix_data/iMIX/data/datasets/visual_entailment/defaults/annotations/'
 image_dir = ''
-mix_dir = '/home/datasets/mix_data/mmf/data/datasets/visual_entailment/defaults/'
+mix_dir = '/home/datasets/mix_data/iMIX/data/datasets/visual_entailment/defaults/'
 
 train_datasets = ['train']
 test_datasets = ['dev']

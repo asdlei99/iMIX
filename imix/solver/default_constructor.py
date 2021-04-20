@@ -4,12 +4,7 @@ import torch
 import json
 from torch.nn import GroupNorm, LayerNorm
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
-# from ..utils.registry import build_from_cfg, Registry
 from ..utils_imix.registry import build_from_cfg
-# from ..utils.parrots_wrapper import _BatchNorm, _InstanceNorm
-from ..utils.misc import is_list_of
-# import imix.utils.comm as comm
-# import imix.utils_imix.distributed_info as comm
 
 
 @OPTIMIZER_BUILDERS.register_module()
@@ -110,7 +105,7 @@ class DefaultOptimizerConstructor:
                 raise ValueError('base_wd should not be None')
 
     def _is_in(self, param_group, param_group_list):
-        assert is_list_of(param_group_list, dict)
+        assert isinstance(param_group_list, dict)
         param = set(param_group['params'])
         param_set = set()
         for group in param_group_list:
@@ -300,6 +295,39 @@ class VilbertOptimizerConstructor(DefaultOptimizerConstructor):
     def load_language_weight(file):
         with open(file) as f:
             return json.load(f)
+
+    def __call__(self, model):
+        if hasattr(model, 'module'):
+            model = model.module
+
+        optimizer_cfg = self.optimizer_cfg.copy()
+        params = []
+        self.modify_params(params, optimizer_cfg, model)
+        optimizer_cfg['params'] = params
+
+        optimizer_cfg.pop('training_encoder_lr_multiply')
+
+        return build_from_cfg(optimizer_cfg, OPTIMIZERS)
+
+
+@OPTIMIZER_BUILDERS.register_module()
+class OscarOptimizerConstructor(DefaultOptimizerConstructor):
+
+    def __init__(self, optimizer_cfg, paramwise_cfg=None):
+        self.weight_decay = paramwise_cfg.pop('weight_decay', None)
+        super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
+        self.no_decay = ['bias', 'LayerNorm.weight']
+
+    def modify_params(self, params, optimizer_cfg, model, prefix=''):
+        # Prepare optimizer (decay)
+        params += [{
+            'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in self.no_decay)],
+            'weight_decay': self.weight_decay
+        }]
+        params += [{
+            'params': [p for n, p in model.named_parameters() if any(nd in n for nd in self.no_decay)],
+            'weight_decay': 0.0
+        }]
 
     def __call__(self, model):
         if hasattr(model, 'module'):

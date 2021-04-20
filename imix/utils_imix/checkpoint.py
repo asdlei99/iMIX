@@ -10,7 +10,7 @@ import torch
 from torch.nn.modules import Module
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 
 # from iopath.common.file_io import PathManager
 
@@ -65,7 +65,7 @@ class IncompatibleKeys:
         if self.unexpected_keys:
             unexpected_keys = self.list_to_dict(self.unexpected_keys)
             msg = 'Some keys contained in the state_dict checkpoint that are not used by the model:'
-            msg += '\n'.join(' ' + k + self.list_to_str(v) for k, v in unexpected_keys)
+            msg += '\n'.join(' ' + k + self.list_to_str(v) for k, v in unexpected_keys.items())
             self.logger.warning(msg)
 
     def __remove_reused_missing_keys(self) -> List[str]:
@@ -290,31 +290,31 @@ class PeriodicCheckpointer:
         if self.max_num_checkpoints is not None:
             self.checkpointer.is_record_ck = True
 
-    def record_iter_checkpoint(self, iteration: int, **kwargs: Any) -> None:
+    def record_iter_checkpoint(self, iteration: int, prefix: str = '', **kwargs: Any) -> None:
         state_dict = dict(iteration=iteration)
         state_dict.update(kwargs)
         if (iteration + 1) % self.iter_period == 0:
-            file_name = 'iter{:07d}_model'.format(iteration)
+            file_name = '{}_iter{:07d}_model'.format(prefix, iteration)
             self.save(file_name, **state_dict)
             if self.max_num_checkpoints is not None and len(
                     self.checkpointer.checkpoint_files) > self.max_num_checkpoints:
                 self.checkpointer.remove_first_from_checkpoint()
 
         if iteration + 1 >= self.max_iter:
-            self.save('model_final', **state_dict)
+            self.save('{}_model_final'.format(prefix), **state_dict)
 
-    def record_epoch_checkpoint(self, epoch: int, **kwargs: Any) -> None:
+    def record_epoch_checkpoint(self, epoch: int, prefix: str = '', **kwargs: Any) -> None:
         state_dict = dict(epoch=epoch)
         state_dict.update(kwargs)
         if (epoch + 1) % self.epoch_period == 0:
-            file_name = 'epoch{}_model'.format(epoch)
+            file_name = '{}_epoch{}_model'.format(prefix, epoch)
             self.save(file_name, **state_dict)
             if self.max_num_checkpoints is not None and len(
                     self.checkpointer.checkpoint_files) > self.max_num_checkpoints:
                 self.checkpointer.remove_first_from_checkpoint()
 
         if epoch + 1 >= self.max_epoch:
-            self.save('model_final', **state_dict)
+            self.save('{}_model_final'.format(prefix), **state_dict)
 
     def save(self, file_name, **kwargs: Any) -> None:
         self.checkpointer.save(file_name, **kwargs)

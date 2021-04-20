@@ -4,6 +4,7 @@ import copy
 import pickle
 import lmdb  # install lmdb by "pip install lmdb"
 import base64
+import os
 
 
 class ImageFeaturesH5Reader(object):
@@ -32,25 +33,34 @@ class ImageFeaturesH5Reader(object):
         self.features_path = features_path
         self._in_memory = in_memory
 
-        # with h5py.File(self.features_h5path, "r", libver='latest', swmr=True) as features_h5:
-        # self._image_ids = list(features_h5["image_ids"])
-        # If not loaded in memory, then list of None.
+        self.env = None
+        self._image_ids = []
+        self.features = []
+        self.num_boxes = []
+        self.boxes = []
+        self.boxes_ori = []
+        self.cls_prob = []
+
+    def init_lmdb(self):
         self.env = lmdb.open(
-            self.features_path, max_readers=1, readonly=True, lock=False, readahead=False, meminit=False)
+            self.features_path,
+            subdir=os.path.isdir(self.features_path),
+            max_readers=8,
+            readonly=True,
+            lock=False,
+            readahead=False,
+            meminit=False)
 
         with self.env.begin(write=False) as txn:
             self._image_ids = pickle.loads(txn.get('keys'.encode()))
-
-        self.features = [None] * len(self._image_ids)
-        self.num_boxes = [None] * len(self._image_ids)
-        self.boxes = [None] * len(self._image_ids)
-        self.boxes_ori = [None] * len(self._image_ids)
-        self.cls_prob = [None] * len(self._image_ids)
 
     def __len__(self):
         return len(self._image_ids)
 
     def __getitem__(self, image_id):
+        if self.env is None:
+            self.init_lmdb()
+
         image_id = str(image_id).encode()
         index = self._image_ids.index(image_id)
         if self._in_memory:

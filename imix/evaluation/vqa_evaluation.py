@@ -9,8 +9,8 @@ from collections import OrderedDict
 
 import torch
 
-import imix.utils.comm as comm
-from imix.utils.file_io import PathManager
+import imix.utils_imix.distributed_info as comm
+from imix.utils_imix.file_io import PathManager
 from .evaluator import DatasetEvaluator
 
 

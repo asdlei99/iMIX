@@ -1,5 +1,5 @@
 import torch
-from .evaluator_mix1 import METRICS
+from .evaluator_imix import METRICS
 from abc import abstractmethod, ABCMeta
 
 

@@ -1,5 +1,5 @@
 dataset_type = 'TEXTVQADATASET'
-data_root = '/home/datasets/mix_data/mmf/'
+data_root = '/home/datasets/mix_data/iMIX/'
 feature_path = 'data/datasets/textvqa/defaults/features/open_images/'
 ocr_feature_path = 'data/datasets/textvqa/defaults/ocr/'
 annotation_path = 'data/datasets/textvqa/defaults/annotations/'

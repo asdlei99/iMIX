@@ -1,6 +1,6 @@
 from imix.evaluation.dataset_evaluator import BaseDatasetConverter
 from imix.evaluation.metric import BaseMetric
-from imix.evaluation.evaluator_mix1 import DATASET_CONVERTER, METRICS
+from imix.evaluation.evaluator_imix import DATASET_CONVERTER, METRICS
 import torch
 
 
@@ -44,7 +44,11 @@ class VILBERT_AccuracyMetric(BaseMetric):
         score = 0.
         datasize = 0
         for pred, bsize in zip(predictions, labels):
-            batch_score = pred['batch_score'].item()
+            if torch.is_tensor(pred['batch_score']):
+                batch_score = pred['batch_score'].item()
+            else:
+                batch_score = pred['batch_score']
+
             batch_size = bsize['batch_size']
 
             score += batch_score
