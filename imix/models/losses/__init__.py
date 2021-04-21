@@ -1,6 +1,6 @@
 from .diverse_loss import DiverseLoss
 from .triple_logit_binary_cross_entropy import CrossEntropyLoss, OBJCrossEntropyLoss, TripleLogitBinaryCrossEntropy, \
-    BCEWithLogitsLoss, VisualDialogBertLoss
+    BCEWithLogitsLoss, VisualDialogBertLoss, VisualDialogBertDenseLoss
 from .yolo_loss import YOLOLoss
 from .yolo_loss_v2 import YOLOLossV2
 
@@ -13,4 +13,5 @@ __all__ = [
     'OBJCrossEntropyLoss',
     'BCEWithLogitsLoss',
     'VisualDialogBertLoss',
+    'VisualDialogBertDenseLoss',
 ]

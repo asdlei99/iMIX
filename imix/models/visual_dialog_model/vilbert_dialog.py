@@ -1582,6 +1582,8 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
             model_output['sequence_output_t'] = sequence_output_t
             model_output['all_attention_mask'] = all_attention_mask
 
+            model_output['image_target'] = image_target
+
         return model_output
 
 

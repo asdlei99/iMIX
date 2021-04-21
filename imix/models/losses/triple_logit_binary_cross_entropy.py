@@ -433,6 +433,7 @@ class VisualDialogBertLoss(BaseLoss):
 
 @LOSSES.register_module()
 class KLDivLoss(BaseLoss):
+    loss_name = 'KLDiv_loss'
 
     def __init__(self, params=None):
         super().__init__(loss_name=str(self))
@@ -443,3 +444,77 @@ class KLDivLoss(BaseLoss):
     def forward(self, model_output):
         predict_scores, target = model_output['scores'], model_output['target']
         return self.loss_fn(predict_scores, target)
+
+
+@LOSSES.register_module()
+class VisualDialogBertDenseLoss(BaseLoss):
+    loss_name = 'visual_dialog_bert_dense_loss'
+
+    def __init__(self, NSP_loss: Dict, KLDiv_loss: Dict, MLM_loss: Dict, MIR_loss: Dict):
+        super().__init__(loss_name=str(self))
+
+        self.nsp_loss_coeff = NSP_loss.pop('weight_coeff')  # next sentence prediction loss
+        self.nsp_loss_fun = build_loss(cfg=NSP_loss)
+
+        self.kldiv_loss_coef = KLDiv_loss.pop('weight_coeff')
+        self.kldiv_loss_fun = build_loss(cfg=KLDiv_loss)
+
+        self.mlm_loss_coeff = MLM_loss.pop('weight_coeff')  # mask language modeling loss
+        self.mlm_loss_fun = build_loss(cfg=MLM_loss)
+
+        self.mir_loss_coeff = MIR_loss.pop('weight_coeff')  # masked image region loss
+        self.mir_loss_fun = build_loss(cfg=MIR_loss)
+
+        self.predict_feature = False
+
+    def forward(self, model_output):
+        nsp_scores = model_output['seq_relationship_scores']
+        nsp_scores = nsp_scores.view(-1, nsp_scores.shape[0], nsp_scores.shape[1])
+        next_sentence_label = model_output['next_sentence_label']
+        nsp_loss = self.nsp_loss_fun({
+            'scores': nsp_scores.view(-1, 2),
+            'target': next_sentence_label.view(-1)
+        }) * self.nsp_loss_coeff
+
+        nsp_scores = nsp_scores[:, :, 0]
+        gt_relevance = model_output['gt_relevance']
+        kldiv_loss = self.kldiv_loss_fun({
+            'scores': F.log_softmax(nsp_scores, dim=1),
+            'target': F.softmax(gt_relevance, dim=1)
+        }) * self.kldiv_loss_coef
+
+        # torch runtimeError
+        visual_predict_scores = model_output['visual_predict_scores']
+        image_target = model_output['image_target']
+        masked_img_loss = self.mir_loss_coeff * self.calcuate_img_loss(visual_predict_scores, image_target)
+
+        text_predict_scores = model_output['text_predict_scores']
+        masked_lm_labels = model_output['masked_lm_labels']
+        masked_lm_loss = self.mlm_loss_coeff * self.calcuate_text_loss(text_predict_scores, masked_lm_labels)
+
+        kldiv_loss += nsp_loss
+
+        loss = kldiv_loss + nsp_scores + masked_lm_loss + masked_img_loss
+
+        return {
+            str(self): loss,
+            'kldiv_loss': kldiv_loss,
+            'nsp_loss': nsp_loss,
+            'masked_img_loss': masked_img_loss,
+            'masked_lm_loss': masked_lm_loss
+        }
+
+    def calcuate_img_loss(self, prediction, target):
+        # model_output['scores'], model_output['target']
+        if self.predict_feature:
+            img_loss = self.mir_loss_fun(model_output={'scores': prediction, 'target': target})
+            max_v = max(torch.sum((target == 1).unsqueeze(2).expand_as(img_loss)), 1)
+        else:
+            img_loss = self.mir_loss_fun(model_output={'scores': F.log_softmax(prediction, dim=2), 'target': target})
+            max_v = max(torch.sum((target == 1)), 0)
+
+        sum_v = torch.sum(img_loss * (target == 1))
+        return sum_v / max_v
+
+    def calcuate_text_loss(self, prediction, target):
+        return self.mlm_loss_fun(model_output={'scores': prediction, 'target': target})
