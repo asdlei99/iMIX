@@ -46,6 +46,8 @@ model = dict(
         model='bert',
         training_head_type='nlvr2',
         bert_model_name='bert-base-uncased',
-        pretrained_path='/home/datasets/mix_data/iMIX/data/models/model_LXRT.pth'))
+        pretrained_path='/home/datasets/mix_data/iMIX/data/models/model_LXRT.pth',
+        label2ans_path=None,
+    ))
 
 loss = dict(type='CrossEntropyLoss', params=dict(ignore_index=-1))

@@ -209,7 +209,7 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     pin_memory = cfg.train_data.get('pin_memory', False) if is_training else cfg.test_data.get('pin_memory', False)
     sampler_cfg = cfg.train_data.get('sampler', None) if is_training else cfg.test_data.get('sampler', False)
 
-    sampler = SAMPLER_MAP[sampler_cfg](dataset)
+    sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
 
     ngpus = comm.get_world_size()
     batch_size *= ngpus

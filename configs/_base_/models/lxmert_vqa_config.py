@@ -4,7 +4,7 @@ model = dict(
     params=dict(
         random_initialize=False,
         num_labels=3129,
-        gqa_labels=3129,
+        gqa_labels=1534,
         num_hidden_layers=12,
         num_attention_heads=12,
         intermediate_size=3072,
@@ -46,7 +46,8 @@ model = dict(
         model='bert',
         training_head_type='vqa2',
         bert_model_name='bert-base-uncased',
-        pretrained_path='/home/datasets/mix_data/iMIX/data/models/model_LXRT.pth'  # vqa2_pretrained.pth'
+        pretrained_path='/home/datasets/mix_data/iMIX/data/models/model_LXRT.pth',  # vqa2_pretrained.pth'
+        label2ans_path='/home/datasets/mix_data/lxmert/vqa/trainval_label2ans.json',
     ))
 
 loss = dict(type='LogitBinaryCrossEntropy')

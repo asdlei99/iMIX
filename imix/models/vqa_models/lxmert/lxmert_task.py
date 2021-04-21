@@ -23,30 +23,21 @@ class LXMERT(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
 
-        params = kwargs['params']
-        # self.special_visual_initialize = params['special_visual_initialize']
-        freeze_base = params['freeze_base']
-        training_head_type = params['training_head_type']
+        args = kwargs['params']
+        # self.special_visual_initialize = args['special_visual_initialize']
+        freeze_base = args['freeze_base']
+        training_head_type = args['training_head_type']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         if training_head_type == 'pretraining':
-            self.model = LXMERTForPretraining(params)
+            self.model = LXMERTForPretraining(**args)
             self.forward_train = self.forward_train_pretrain
         else:
-            self.model = ClassificationModel(**params)
-            if training_head_type == 'vqa2':
-                label2ans_path = '/home/datasets/mix_data/lxmert/vqa/trainval_label2ans.json'
-            elif training_head_type == 'gqa':
-                label2ans_path = '/home/datasets/mix_data/lxmert/gqa/trainval_label2ans.json'
-            elif training_head_type == 'nlvr2':
-                label2ans_path = None
-            else:
-                raise KeyError('NO head type support for {}!'.format(training_head_type))
-
-            pretrained_path = params['pretrained_path']
+            self.model = ClassificationModel(**args)
+            pretrained_path = args['pretrained_path']
             if pretrained_path is not None:
                 if training_head_type in ['vqa2', 'gqa']:
-                    self.label2ans = json.load(open(label2ans_path))
+                    self.label2ans = json.load(open(args.label2ans_path))
                     load_lxmert_qa(pretrained_path, self.model, label2ans=self.label2ans)
                 elif training_head_type == 'nlvr2':
                     self.model.lxrt_encoder.load(pretrained_path)

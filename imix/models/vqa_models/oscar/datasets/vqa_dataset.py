@@ -387,8 +387,8 @@ class OSCAR_VQADataset(Dataset):
         return example
 
     def __len__(self):
-        # return len(self.examples)
-        return 64
+        return len(self.examples)
+        # return 64
 
     # tsv feature loading
     def load_img_tsv_features(self):

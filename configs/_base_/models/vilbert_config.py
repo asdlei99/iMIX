@@ -1,5 +1,25 @@
 # model settings
 tasks = '1'  # '1-2-3...' training task separate by -
+'''
+num_labels=3129,    # for TASK1
+num_labels=3129,    # for TASK2
+num_labels=,        # for TASK3
+num_labels=1,       # for TASK4
+num_labels=,        # for TASK5
+num_labels=,        # for TASK6
+num_labels=1,       # for TASK7
+num_labels=1,       # for TASK8
+num_labels=1,       # for TASK9
+num_labels=1,       # for TASK10
+num_labels=1,       # for TASK11
+num_labels=,        # for TASK12
+num_labels=3,       # for TASK13
+num_labels=3,       # for TASK14
+num_labels=1533,    # for TASK15
+num_labels=,        # for TASK16
+num_labels=1,       # for TASK17
+num_labels=,        # for TASK18
+'''
 
 model = dict(
     type='VILBERT',
