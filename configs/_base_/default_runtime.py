@@ -12,7 +12,7 @@ log_level = 'INFO'
 
 work_dir = './work_dirs'  # the dir to save logs and models
 
-load_from = '/home/datasets/mix_data/model/visdial_model_imix/vqa_weights.pth'
+# load_from = '/home/datasets/mix_data/model/visdial_model_imix/vqa_weights.pth'
 # load_from = '/home/jinliang/iMIX/imix/work_dirs/epoch18_model.pth'
 
 # resume_from = None

@@ -4,7 +4,7 @@ data_root = '/home/datasets/mix_data/oscar/datasets/nlvr2'
 train_datasets = ['train']
 test_datasets = ['val']  # 'test1'
 
-vqa_reader_train_cfg = dict(
+nlvr_reader_train_cfg = dict(
     data_dir=data_root + '/ft_corpus',
     eval_data_type='all',
     use_label_seq=False,
@@ -24,7 +24,7 @@ vqa_reader_train_cfg = dict(
     # limit_nums=limit_nums,
 )
 
-vqa_reader_test_cfg = dict(
+nlvr_reader_test_cfg = dict(
     data_dir=data_root + '/ft_corpus',
     eval_data_type='all',
     use_label_seq=False,
@@ -45,23 +45,23 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=16,  # 72
-    workers_per_gpu=1,
+    samples_per_gpu=72,  # 72
+    workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
-        reader=vqa_reader_train_cfg,
+        reader=nlvr_reader_train_cfg,
     ),
     sampler='RandomSampler',
 )
 
 test_data = dict(
-    samples_per_gpu=16,  # 64
-    workers_per_gpu=1,
+    samples_per_gpu=64,  # 64
+    workers_per_gpu=0,
     sampler_name='TestingSampler',
     data=dict(
         type=dataset_type,
-        reader=vqa_reader_test_cfg,
+        reader=nlvr_reader_test_cfg,
     ),
     sampler='SequentialSampler',
     eval_period=5000)  # eval_period set to 0 to disable

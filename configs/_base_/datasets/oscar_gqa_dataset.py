@@ -51,8 +51,8 @@ gqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=32,
-    workers_per_gpu=1,
+    samples_per_gpu=48,
+    workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
@@ -63,7 +63,7 @@ train_data = dict(
 
 test_data = dict(
     samples_per_gpu=256,
-    workers_per_gpu=1,
+    workers_per_gpu=0,
     sampler_name='TestingSampler',
     data=dict(
         type=dataset_type,

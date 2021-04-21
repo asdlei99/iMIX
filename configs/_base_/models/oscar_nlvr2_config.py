@@ -32,7 +32,6 @@ model = dict(
 loss = dict(
     type='OSCARLoss', cfg=dict(
         loss_type='xe',
-        ngpu=1,
         num_labels=2,
         gradient_accumulation_steps=1,
     ))

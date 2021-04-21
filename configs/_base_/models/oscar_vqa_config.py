@@ -32,7 +32,6 @@ model = dict(
 loss = dict(
     type='OSCARLoss', cfg=dict(
         loss_type='bce',
-        ngpu=1,
         num_labels=3129,
         gradient_accumulation_steps=1,
     ))
@@ -40,7 +39,7 @@ loss = dict(
 optimizer = dict(
     type='TansformerAdamW',
     constructor='OscarOptimizerConstructor',
-    paramwise_cfg=dict(weight_decay=0.05, ),
+    paramwise_cfg=dict(weight_decay=0.05),
     lr=5e-05,
     eps=1e-8,
     training_encoder_lr_multiply=1,

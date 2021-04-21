@@ -9,10 +9,10 @@ import base64
 import numpy as np
 import torch
 from pytorch_transformers import BertTokenizer
-
+from torch.utils.data import Dataset
 from ..utils.task_utils import (_truncate_seq_pair, output_modes, processors)
 from imix.data.builder import DATASETS
-import imix.utils_imix.distributed_info as comm
+# import imix.utils_imix.distributed_info as comm
 from .dataset_utils import target_tensor
 import sys
 
@@ -68,9 +68,9 @@ class OSCAR_VQADataset(Dataset):
     def __init__(self, reader):
         super(OSCAR_VQADataset, self).__init__()
 
-        if comm.is_main_process():
-            logger = logging.getLogger(__name__)
-            logger.info('start loading vqa data')
+        # if comm.is_main_process():
+        #     logger = logging.getLogger(__name__)
+        logger.info('start loading vqa data')
 
         self.args = args = reader
         if isinstance(args.name, list):
@@ -388,7 +388,7 @@ class OSCAR_VQADataset(Dataset):
 
     def __len__(self):
         # return len(self.examples)
-        return 512
+        return 64
 
     # tsv feature loading
     def load_img_tsv_features(self):

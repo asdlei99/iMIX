@@ -211,6 +211,9 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
 
     sampler = SAMPLER_MAP[sampler_cfg](dataset)
 
+    ngpus = comm.get_world_size()
+    batch_size *= ngpus
+
     if sampler_cfg == 'DistributedSampler' and comm.get_world_size() <= 1:
         logger.info('chose the wrong DistributedSampler sampler for training')
 

@@ -7,10 +7,10 @@ import time
 import torch
 
 from pytorch_transformers import BertTokenizer
-
+from torch.utils.data import Dataset
 from ..utils.task_utils import (_truncate_seq_pair, output_modes, processors)
 from imix.data.builder import DATASETS
-import imix.utils_imix.distributed_info as comm
+# import imix.utils_imix.distributed_info as comm
 import sys
 
 sys.path.insert(0, '.')
@@ -55,9 +55,9 @@ class OSCAR_NLVR2Dataset(Dataset):
     def __init__(self, reader):
         super(OSCAR_NLVR2Dataset, self).__init__()
 
-        if comm.is_main_process():
-            logger = logging.getLogger(__name__)
-            logger.info('start loading nlvr2 data')
+        # if comm.is_main_process():
+        #     logger = logging.getLogger(__name__)
+        logger.info('start loading nlvr2 data')
 
         self.args = args = reader
         if isinstance(args.name, list):
