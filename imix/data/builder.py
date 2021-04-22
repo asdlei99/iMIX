@@ -205,14 +205,20 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     batch_size = cfg.train_data.samples_per_gpu if is_training else cfg.test_data.samples_per_gpu
     num_workers = cfg.train_data.workers_per_gpu if is_training else cfg.test_data.workers_per_gpu
     drop_last = cfg.train_data.get('drop_last', False) if is_training else cfg.test_data.get('drop_last', False)
-    shuffle = cfg.train_data.get('shuffle', False) if is_training else cfg.test_data.get('shuffle', False)
+    shuffle = cfg.train_data.get('shuffle', True) if is_training else cfg.test_data.get('shuffle', False)
     pin_memory = cfg.train_data.get('pin_memory', False) if is_training else cfg.test_data.get('pin_memory', False)
     sampler_cfg = cfg.train_data.get('sampler', None) if is_training else cfg.test_data.get('sampler', False)
 
-    sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
+    # sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
+    # ngpus = comm.get_world_size()
+    # batch_size *= ngpus
 
-    ngpus = comm.get_world_size()
-    batch_size *= ngpus
+    world_size = comm.get_world_size()
+    if world_size > 1:
+        rank = comm.get_local_rank()
+        sampler = DistributedSampler(dataset, world_size, rank, shuffle=shuffle)
+    else:
+        sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
 
     if sampler_cfg == 'DistributedSampler' and comm.get_world_size() <= 1:
         logger.info('chose the wrong DistributedSampler sampler for training')
@@ -223,8 +229,7 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
         num_workers=num_workers,
         batch_size=batch_size,
         sampler=sampler,
-        drop_last=drop_last,
-        shuffle=shuffle)
+        drop_last=drop_last)
 
 
 def batch_collate_fn(batch):

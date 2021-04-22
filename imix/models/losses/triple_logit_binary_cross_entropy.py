@@ -461,6 +461,7 @@ class OSCARBertCaptioningLoss(nn.Module):
         return loss
 
 
+@LOSSES.register_module()
 class VisualDialogBertLoss(BaseLoss):
     loss_name = 'visual_dialog_bert_loss'
 

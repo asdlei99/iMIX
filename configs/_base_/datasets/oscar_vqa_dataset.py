@@ -53,8 +53,8 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=32,  # 32,
-    workers_per_gpu=0,
+    samples_per_gpu=8,  # 32,
+    workers_per_gpu=4,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
@@ -72,7 +72,7 @@ test_data = dict(
         reader=vqa_reader_test_cfg,
     ),
     sampler='SequentialSampler',
-    eval_period=5000)  # eval_period set to 0 to disable
+    eval_period=0)  # eval_period set to 0 to disable
 
 post_processor = dict(
     type='Evaluator',

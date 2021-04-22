@@ -56,7 +56,7 @@ visual_dialog_info_cpler_cfg = dict(
 train_data = dict(
     samples_per_gpu=1,  # 16
     workers_per_gpu=0,
-    sampler_name='TrainingSampler',
+    sampler_name='DistributedSampler',
     data=dict(type=dataset_type))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
