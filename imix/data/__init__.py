@@ -17,7 +17,7 @@ from .loaders.vcr_loader import VCRDATASET
 from .loaders.visualentailment_loader import VisualEntailmentDATASET
 
 from .loaders.lxmertpretrain_loader import LXMERTPreTrainDATASET
-from .loaders.visual_dialog_dataset import VisDialDataset
+from .loaders.visual_dialog_dataset import VisDialDataset, VisdialDatasetDense
 from .loaders.vqa_loader import VQADATASET
 from .loaders.vizwiz_loader import VizWizDATASET
 
@@ -27,8 +27,27 @@ from .loaders.lxmert_gqa import GQATorchDataset
 from .loaders.devlbert_vqa_loader import DeVLBertVQADATASET
 
 __all__ = [
-    'VQADATASET', 'GQADATASET', 'VizWizDATASET', 'ClevrDATASET', 'TEXTVQADATASET', 'STVQADATASET', 'OCRVQADATASET',
-    'VCRDATASET', 'RefCOCODATASET', 'RefCOCOpDATASET', 'RefCOCOgDATASET', 'RefClefDATASET', 'HatefulMemesDATASET',
-    'VisualEntailmentDATASET', 'LXMERTPreTrainDATASET', 'VQATorchDataset', 'NLVR2TorchDataset', 'GQATorchDataset',
-    'build_imix_train_loader', 'build_imix_test_loader', 'VisDialDataset', 'DeVLBertVQADATASET'
+    'VQADATASET',
+    'GQADATASET',
+    'VizWizDATASET',
+    'ClevrDATASET',
+    'TEXTVQADATASET',
+    'STVQADATASET',
+    'OCRVQADATASET',
+    'VCRDATASET',
+    'RefCOCODATASET',
+    'RefCOCOpDATASET',
+    'RefCOCOgDATASET',
+    'RefClefDATASET',
+    'HatefulMemesDATASET',
+    'VisualEntailmentDATASET',
+    'LXMERTPreTrainDATASET',
+    'VQATorchDataset',
+    'NLVR2TorchDataset',
+    'GQATorchDataset',
+    'build_imix_train_loader',
+    'build_imix_test_loader',
+    'VisDialDataset',
+    'DeVLBertVQADATASET',
+    'VisdialDatasetDense',
 ]

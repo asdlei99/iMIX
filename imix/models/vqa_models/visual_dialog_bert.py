@@ -41,6 +41,8 @@ class VisDiaBERT(BaseModel):
         self.sample_size = config.sample_size
         self.n_gpus = config.get('n_gpus', 1)  # TODO(jinliang): evaluation
 
+        self.is_dense = config.get('is_dense', False)
+
     def convert(self, batch, sample_size=None, evaluation=False):
 
         tokens = batch['tokens']
@@ -221,9 +223,253 @@ class VisDiaBERT(BaseModel):
             image_label=image_label,
             image_target=image_target)
 
+    def dense_process_image_data(self, data):
+        num_rounds = data['tokens'].shape[1]
+        num_samples = self.sample_size
+        orig_features = data['image_feat']
+        orig_spatials = data['image_loc']
+        orig_image_mask = data['image_mask']
+        orig_image_target = data['image_target']
+        orig_image_label = data['image_label']
+
+        features = orig_features.unsqueeze(1).unsqueeze(1).expand(orig_features.shape[0], num_rounds, num_samples,
+                                                                  orig_features.shape[1],
+                                                                  orig_features.shape[2]).contiguous()
+        spatials = orig_spatials.unsqueeze(1).unsqueeze(1).expand(orig_spatials.shape[0], num_rounds, num_samples,
+                                                                  orig_spatials.shape[1],
+                                                                  orig_spatials.shape[2]).contiguous()
+        image_label = orig_image_label.unsqueeze(1).unsqueeze(1).expand(orig_image_label.shape[0], num_rounds,
+                                                                        num_samples,
+                                                                        orig_image_label.shape[1]).contiguous()
+        image_mask = orig_image_mask.unsqueeze(1).unsqueeze(1).expand(orig_image_mask.shape[0], num_rounds, num_samples,
+                                                                      orig_image_mask.shape[1]).contiguous()
+        image_target = orig_image_target.unsqueeze(1).unsqueeze(1).expand(orig_image_target.shape[0], num_rounds,
+                                                                          num_samples, orig_image_target.shape[1],
+                                                                          orig_image_target.shape[2]).contiguous()
+
+        data['image_feat'] = features.contiguous()
+        data['image_loc'] = spatials.contiguous()
+        data['image_mask'] = image_mask.contiguous()
+        data['image_target'] = image_target.contiguous()
+        data['image_label'] = image_label.contiguous()
+        return data
+
+    def dense_convert(
+        self,
+        batch,
+        sample_size=None,
+        evaluation=False,
+        output_nsp_scores=False,
+        output_lm_scores=False,
+    ):
+
+        gt_option_ind = batch['gt_option'].item()
+        all_inds_minus_gt = torch.cat([torch.arange(gt_option_ind), torch.arange(gt_option_ind + 1, 100)], 0)
+        all_inds_minus_gt = all_inds_minus_gt[torch.randperm(99)[:self.sample_size - 1]]
+
+        gt = batch['gt_option'].view(-1)
+        other_option = all_inds_minus_gt.to(gt.device)
+        option_indices = torch.cat([gt, other_option], 0)
+
+        tokens = batch['tokens']
+        segments = batch['segments']
+        sep_indices = batch['sep_indices']
+        mask = batch['mask']
+        hist_len = batch['hist_len']
+        nsp_labels = batch['next_sentence_labels']
+
+        # select 80 options from the 100 options including the GT option
+        tokens = tokens[:, :, option_indices, :]
+        segments = segments[:, :, option_indices, :]
+        sep_indices = sep_indices[:, :, option_indices, :]
+        mask = mask[:, :, option_indices, :]
+        hist_len = hist_len[:, :, option_indices]
+        nsp_labels = nsp_labels[:, :, option_indices]
+
+        tokens = tokens.view(-1, tokens.shape[-1])
+        segments = segments.view(-1, segments.shape[-1])
+        sep_indices = sep_indices.view(-1, sep_indices.shape[-1])
+        mask = mask.view(-1, mask.shape[-1])
+        hist_len = hist_len.view(-1)
+        nsp_labels = nsp_labels.view(-1)
+
+        # image stuff
+        orig_features = batch['image_feat']
+        orig_spatials = batch['image_loc']
+        orig_image_mask = batch['image_mask']
+
+        features = orig_features.view(-1, orig_features.shape[-2], orig_features.shape[-1])
+        spatials = orig_spatials.view(-1, orig_spatials.shape[-2], orig_spatials.shape[-1])
+        image_mask = orig_image_mask.view(-1, orig_image_mask.shape[-1])
+
+        if sample_size:
+            # subsample a random set
+            sample_indices = torch.randperm(hist_len.shape[0])
+            sample_indices = sample_indices[:self.sample_size]
+        else:
+            sample_indices = torch.arange(hist_len.shape[0])
+
+        tokens = tokens[sample_indices, :]
+        segments = segments[sample_indices, :]
+        sep_indices = sep_indices[sample_indices, :]
+        mask = mask[sample_indices, :]
+        hist_len = hist_len[sample_indices]
+
+        features = features[sample_indices, :, :]
+        spatials = spatials[sample_indices, :, :]
+        image_mask = image_mask[sample_indices, :]
+
+        next_sentence_labels = None
+        image_target = None
+        image_label = None
+
+        if not evaluation:  # TODO(jinliang): -> self.training
+            next_sentence_labels = batch['next_sentence_labels']
+            next_sentence_labels = next_sentence_labels.view(-1)
+            next_sentence_labels = next_sentence_labels[sample_indices]
+            next_sentence_labels = next_sentence_labels.cuda()
+
+            orig_image_target = batch['image_target']
+            orig_image_label = batch['image_label']
+
+            image_target = orig_image_target.view(-1, orig_image_target.shape[-2], orig_image_target.shape[-1])
+            image_label = orig_image_label.view(-1, orig_image_label.shape[-1])
+
+            image_target = image_target[sample_indices, :, :]
+            image_label = image_label[sample_indices, :]
+
+            image_target = image_target.cuda()
+            image_label = image_label.cuda()
+
+        tokens = tokens.cuda()
+        segments = segments.cuda()
+        sep_indices = sep_indices.cuda()
+        mask = mask.cuda()
+        hist_len = hist_len.cuda()
+
+        features = features.cuda()
+        spatials = spatials.cuda()
+        image_mask = image_mask.cuda()
+
+        sequence_lengths = torch.gather(sep_indices, 1, hist_len.view(-1, 1)) + 1
+        sequence_lengths = sequence_lengths.squeeze(1)
+        attention_mask_lm_nsp = sequence_mask(sequence_lengths, max_len=tokens.shape[1])
+        sep_len = hist_len + 1
+
+        # masked_lm_loss = None
+        # masked_img_loss = None
+        # nsp_loss = None
+        # prediction_scores_t = None
+        # seq_relationship_score = None
+        #
+        # nsp_loss = None
+        # lm_loss = None
+        # loss = None
+        # lm_scores = None
+        # nsp_scores = None
+        # img_loss = None
+
+        # if output_nsp_scores and output_lm_scores:
+        #     lm_loss, img_loss, nsp_loss, nsp_scores, lm_scores = self.model(tokens,
+        #                                                                     features,
+        #                                                                     spatials,
+        #                                                                     sep_indices=sep_indices,
+        #                                                                     sep_len=sep_len,
+        #                                                                     token_type_ids=segments,
+        #                                                                     masked_lm_labels=mask,
+        #                                                                     attention_mask=attention_mask_lm_nsp,
+        #                                                                     next_sentence_label=next_sentence_labels,
+        #                                                                     output_nsp_scores=output_nsp_scores,
+        #                                                                     output_lm_scores=output_lm_scores,
+        #                                                                     image_attention_mask=image_mask,
+        #                                                                     image_label=image_label,
+        #                                                                     image_target=image_target)
+        # elif output_nsp_scores and not output_lm_scores:
+        #     lm_loss, img_loss, nsp_loss, nsp_scores = self.model(tokens,
+        #                                                          features,
+        #                                                          spatials,
+        #                                                          sep_indices=sep_indices,
+        #                                                          sep_len=sep_len,
+        #                                                          token_type_ids=segments,
+        #                                                          masked_lm_labels=mask,
+        #                                                          attention_mask=attention_mask_lm_nsp,
+        #                                                          next_sentence_label=next_sentence_labels,
+        #                                                          output_nsp_scores=output_nsp_scores,
+        #                                                          output_lm_scores=output_lm_scores,
+        #                                                          image_attention_mask=image_mask,
+        #                                                          image_label=image_label,
+        #                                                          image_target=image_target)
+        # elif output_lm_scores and not output_nsp_scores:
+        #     lm_loss, img_loss, nsp_loss, lm_scores = self.model(tokens,
+        #                                                         features,
+        #                                                         spatials,
+        #                                                         sep_indices=sep_indices,
+        #                                                         sep_len=sep_len,
+        #                                                         token_type_ids=segments,
+        #                                                         masked_lm_labels=mask,
+        #                                                         attention_mask=attention_mask_lm_nsp,
+        #                                                         next_sentence_label=next_sentence_labels,
+        #                                                         output_nsp_scores=output_nsp_scores,
+        #                                                         output_lm_scores=output_lm_scores,
+        #                                                         image_attention_mask=image_mask,
+        #                                                         image_label=image_label,
+        #                                                         image_target=image_target)
+        # else:
+        #     lm_loss, img_loss, nsp_loss = self.forward1(tokens, features, spatials, sep_indices=sep_indices,
+        #                                                 sep_len=sep_len,
+        #                                                 token_type_ids=segments, masked_lm_labels=mask,
+        #                                                 attention_mask=attention_mask_lm_nsp,
+        #                                                 next_sentence_label=next_sentence_labels,
+        #                                                 output_nsp_scores=output_nsp_scores,
+        #                                                 output_lm_scores=output_lm_scores,
+        #                                                 image_attention_mask=image_mask,
+        #                                                 image_label=image_label,
+        #                                                 image_target=image_target)
+        #
+        # lm_loss = lm_loss.mean()
+        # nsp_loss = nsp_loss.mean()
+        # img_loss = img_loss.mean()
+        # # loss = (params['lm_loss_coeff'] * lm_loss) + (params['nsp_loss_coeff'] * nsp_loss) + \
+        # #        (params['img_loss_coeff'] * img_loss)
+        #
+        # if output_nsp_scores and output_lm_scores:
+        #     return loss, lm_loss, nsp_loss, img_loss, nsp_scores, lm_scores
+        # elif output_nsp_scores and not output_lm_scores:
+        #     return loss, lm_loss, nsp_loss, img_loss, nsp_scores
+        # elif not output_nsp_scores and output_lm_scores:
+        #     return loss, lm_loss, nsp_loss, img_loss, lm_scores
+        # else:
+        #     return loss, lm_loss, nsp_loss, img_loss
+
+        model_output = self._forward(
+            tokens,
+            features,
+            spatials,
+            sep_indices=sep_indices,
+            sep_len=sep_len,
+            token_type_ids=segments,
+            masked_lm_labels=mask,
+            attention_mask=attention_mask_lm_nsp,
+            next_sentence_label=next_sentence_labels,
+            output_nsp_scores=output_nsp_scores,
+            output_lm_scores=output_lm_scores,
+            image_attention_mask=image_mask,
+            image_label=image_label,
+            image_target=image_target)
+
+        gt_relevance = batch['gt_relevance']
+        gt_relevance = gt_relevance[:, option_indices]
+        model_output['gt_relevance'] = gt_relevance.cuda()
+        model_output['next_sentence_label'] = nsp_labels.cuda()
+        return model_output
+
     def forward_train(self, data, **kwargs):
-        batch = self.preprocess_data(data)
-        return self.convert(batch, sample_size=self.sample_size)
+        if self.is_dense:
+            batch = self.dense_process_image_data(data)
+            return self.dense_convert(batch, sample_size=self.sample_size, evaluation=False, output_nsp_scores=True)
+        else:
+            batch = self.preprocess_data(data)
+            return self.convert(batch, sample_size=self.sample_size)
 
     def forward_test(self, data, **kwargs):
         # gt_option_inds = data['gt_option_inds']

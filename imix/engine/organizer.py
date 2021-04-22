@@ -58,7 +58,6 @@ class Organizer:
         self._dataset_name = self.cfg.dataset_type
 
         self.model = self.build_model(cfg)
-        # self.losses_fn = self.build_loss(cfg)
         self.losses_fn = Losser(cfg.loss)
 
         self.train_data_loader = self.build_train_loader(cfg)

@@ -21,7 +21,10 @@ class VisDiaBertModelConvert:
 
     @staticmethod
     def save_model(model_data, path):
-        data = {'model': model_data}
+        if 'vqa_weights' in path:
+            data = {'model': model_data}
+        else:
+            data = {'model': model_data['model_state_dict']}
         with open(path, 'wb') as fwb:
             torch.save(data, fwb)
 
