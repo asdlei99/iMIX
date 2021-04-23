@@ -27,7 +27,7 @@ class IterDataLoader:
 
 class CommonEngine(EngineBase):
 
-    def __init__(self, model, data_loader, optimizer, loss_fn, batch_processor=None):
+    def __init__(self, model, data_loader, optimizer, loss_fn, batch_processor=None, gradient_accumulation_steps=1):
         super(CommonEngine, self).__init__()
 
         model.train()
@@ -40,6 +40,7 @@ class CommonEngine(EngineBase):
         self.data_loader = data_loader
         # self.data_loader_iter = IterDataLoader(data_loader=data_loader)
         self.imixed_precision = False
+        self.gradient_accumulation_steps = gradient_accumulation_steps
 
     def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
@@ -146,6 +147,9 @@ class imixEngine(CommonEngine):
         self.max_epoch = self.organizer.max_epoch
         self.cfg = self.organizer.cfg
         self.by_epoch = self.organizer.by_epoch
+        self.is_lr_accumulation = self.organizer.is_lr_accumulation
+        self.gradient_accumulation_steps = self.organizer.gradient_accumulation_steps
+
         self.imixed_precision = self.organizer.imixed_precision if hasattr(self.organizer,
                                                                            'imixed_precision') else False
         self.work_dir = cfg.work_dir

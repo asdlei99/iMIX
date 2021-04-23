@@ -59,13 +59,24 @@ class OptimizerHook(HookBase):
             self.trainer.log_buffer.put_scalar('grad_norm', float(grad_norm))  # TODO(jinliang) -> test
 
     def after_train_iter(self):  # TODO(jinliang):jinliang_imitate
+        self.trainer.output['loss'] /= self.trainer.gradient_accumulation_steps
         self.trainer.output['loss'].backward()
         if self._grad_clip is not None:
             self._clip_grad_norm()
-        self.trainer.optimizer.step()
+
+        if (self.trainer.iter + 1) % self.trainer.gradient_accumulation_steps == 0:
+            self.trainer.optimizer.step()
 
     def before_train_iter(self):
-        self.trainer.optimizer.zero_grad()
+        if self.trainer.iter == 0:
+            is_clean = True
+        elif self.trainer.iter % self.trainer.gradient_accumulation_steps == 0:
+            is_clean = True
+        else:
+            is_clean = False
+
+        if is_clean:
+            self.trainer.optimizer.zero_grad()
 
     @property
     def level(self):
@@ -79,7 +90,6 @@ class Fp16OptimizerHook(OptimizerHook):
         super().__init__(grad_clip)
         self._grad_scaler_config = grad_scaler_config
         self._scaler = None
-        self.__level = PriorityStatus.HIGH
 
     def before_train(self):
         if self._grad_scaler_config is None:
@@ -88,10 +98,12 @@ class Fp16OptimizerHook(OptimizerHook):
             self._scaler = GradScaler(**self._grad_scaler_config)
 
     def after_train_iter(self):
-        loss = self.trainer.output['loss']
+        loss = self.trainer.output['loss'] / self.trainer.gradient_accumulation_steps
         self._scaler.scale(loss).backward()
         if self._grad_clip is not None:
             self._scaler.unscale_(self.trainer.optimizer)
             self._clip_grad_norm()
-        self._scaler.step(self.trainer.optimizer)
-        self._scaler.update()
+
+        if (self.trainer.iter + 1) % self.trainer.gradient_accumulation_steps == 0:
+            self._scaler.step(self.trainer.optimizer)
+            self._scaler.update()
