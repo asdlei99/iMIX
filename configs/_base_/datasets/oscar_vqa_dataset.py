@@ -72,7 +72,7 @@ test_data = dict(
         reader=vqa_reader_test_cfg,
     ),
     sampler='SequentialSampler',
-    eval_period=0)  # eval_period set to 0 to disable
+    eval_period=5000)  # eval_period set to 0 to disable
 
 post_processor = dict(
     type='Evaluator',

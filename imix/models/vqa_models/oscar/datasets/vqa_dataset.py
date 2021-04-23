@@ -98,8 +98,10 @@ class OSCAR_VQADataset(Dataset):
                     if args.use_vg_dev:
                         self.img_features = torch.load(os.path.join(args.data_dir, 'train+val_img_frcnn_feats.pt'))
                     else:
-                        self.img_features = torch.load(
-                            os.path.join(args.data_dir, '{}_img_frcnn_feats.pt'.format(name)))
+                        # self.img_features = torch.load(
+                        #     os.path.join(args.data_dir, '{}_img_frcnn_feats.pt'.format(name)))
+                        self.img_features_env = None
+                        self.img_features = os.path.join(args.data_dir, '{}_img_frcnn_feats.pt'.format(name))
             elif args.img_feat_format == 'tsv':
                 self.load_img_tsv_features()
         elif args.img_feature_type == 'mask_r-cnn':
@@ -130,6 +132,11 @@ class OSCAR_VQADataset(Dataset):
             pass
 
         logger.info('%s Data Examples: %d' % (name, len(self.examples)))
+
+    def init_torch_pth_file(self):
+        if self.img_features_env is None:
+            self.img_features = torch.load(self.img_features)
+            self.img_features_env = True
 
     def tensorize(self,
                   cls_token_at_end=False,
@@ -200,6 +207,9 @@ class OSCAR_VQADataset(Dataset):
             assert len(input_ids) == self.args.max_seq_length
             assert len(input_mask) == self.args.max_seq_length
             assert len(segment_ids) == self.args.max_seq_length
+
+            if self.img_features_env is None:
+                self.init_torch_pth_file()
 
             # image features
             img_feat = self.img_features[example.img_key]  # torch
@@ -305,6 +315,9 @@ class OSCAR_VQADataset(Dataset):
         assert len(input_ids) == self.args.max_seq_length
         assert len(input_mask) == self.args.max_seq_length
         assert len(segment_ids) == self.args.max_seq_length
+
+        if self.img_features_env is None:
+            self.init_torch_pth_file()
 
         # image features
         if self.args.img_feature_type.startswith('dis_code'):

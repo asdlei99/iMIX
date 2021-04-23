@@ -12,6 +12,8 @@ import argparse
 import json
 from imix.utils_imix.config import set_imix_work_dir
 
+random.seed(datetime.now())
+
 
 def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argument()
     """
@@ -61,7 +63,7 @@ def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argum
     parser.add_argument('--seed', type=int, default=None, help='random seed')
     parser.add_argument(
         '--master-port',
-        default=2**14 + hash(os.getuid() % 2**14),
+        default=2**14 + hash(random.randint(0, 2**14)),
         type=int,
         help='it is the free port of mast node(rank 0) and is used for communication in distributed training')
     parser.add_argument(
@@ -72,10 +74,9 @@ def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argum
 
 def default_setup(args, cfg):  # DODO(jinliang):modify
     output_dir = cfg.work_dir
-
+    set_imix_work_dir(output_dir)
     if output_dir and dist_info.is_main_process():
         PathManager.mkdirs(output_dir)
-        set_imix_work_dir(output_dir)
 
     rank = dist_info.get_rank()
     logger = setup_logger(output_dir, distributed_rank=rank, name='imix')

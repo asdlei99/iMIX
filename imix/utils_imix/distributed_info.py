@@ -85,6 +85,16 @@ def is_main_process() -> bool:
     return get_rank() == 0
 
 
+def master_only_run(func):
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if is_main_process():
+            return func(*args, **kwargs)
+
+    return wrapper
+
+
 def synchronize() -> None:
     """Helper function to synchronize (barrier) among all processes when using
     distributed training."""

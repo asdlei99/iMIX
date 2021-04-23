@@ -244,6 +244,7 @@ def get_imix_cache_dir():
     return _CACHE_DIR
 
 
+# @master_only_run
 def set_imix_cache_dir(cache_dir):
     global _CACHE_DIR
     _CACHE_DIR = ToExpanduser.modify_path(cache_dir)
@@ -257,9 +258,10 @@ def get_imix_root():
     return imix_root
 
 
+# @master_only_run
 def set_imix_work_dir(work_dir):
     global _iMIX_WORK_DIR
-    _iMIX_WORK_DIR = work_dir
+    _iMIX_WORK_DIR = ToExpanduser.modify_path(work_dir)
 
 
 def get_imix_work_dir():

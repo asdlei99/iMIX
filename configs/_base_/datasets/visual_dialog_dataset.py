@@ -61,7 +61,7 @@ visual_dialog_info_cpler_cfg = dict(
 train_data = dict(
     samples_per_gpu=4,  # 16
     workers_per_gpu=2,
-    data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=120))
+    data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=None))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
@@ -69,7 +69,7 @@ test_data = dict(
     workers_per_gpu=1,
     # metric="",
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=10),
-    eval_period=0)  # eval_period set to 0 to disable
+    eval_period=5000)  # eval_period set to 0 to disable
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
