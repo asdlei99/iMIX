@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from .lxmert_nlvr2 import load_obj_tsv
-from ..utils.stream import ItemFeature
+from imix.data.utils.stream import ItemFeature
 from imix.data.builder import DATASETS
 
 # Load part of the dataset for fast checking.

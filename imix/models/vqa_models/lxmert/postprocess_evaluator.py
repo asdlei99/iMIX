@@ -1,9 +1,9 @@
 from imix.evaluation.dataset_evaluator import BaseDatasetConverter
 from imix.evaluation.metric import BaseMetric
 from imix.evaluation.evaluator_imix import DATASET_CONVERTER, METRICS
-from imix.data.loaders.lxmert_vqa import VQADataset
-from imix.data.loaders.lxmert_gqa import GQADataset
-from imix.data.loaders.lxmert_nlvr2 import NLVR2Dataset
+from .datasets.lxmert_vqa import VQADataset
+from .datasets.lxmert_gqa import GQADataset
+from .datasets.lxmert_nlvr2 import NLVR2Dataset
 import torch
 
 

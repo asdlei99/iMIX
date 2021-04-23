@@ -6,7 +6,7 @@ import csv
 import base64
 import time
 from imix.data.builder import DATASETS
-from ..utils.stream import ItemFeature
+from imix.data.utils.stream import ItemFeature
 
 import numpy as np
 

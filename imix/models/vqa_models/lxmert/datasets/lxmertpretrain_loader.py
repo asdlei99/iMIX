@@ -1,7 +1,7 @@
-from ..reader.lxmertpretrain_reader import LXMERTPretrainReader as Reader
-from ..infocomp.lxmertpretrain_infocpler import LXMERTPreTrainInfoCpler as InfoCpler
-from ..builder import DATASETS
-from .base_loader import BaseLoader
+from imix.data.reader.lxmertpretrain_reader import LXMERTPretrainReader as Reader
+from imix.data.infocomp.lxmertpretrain_infocpler import LXMERTPreTrainInfoCpler as InfoCpler
+from imix.data.builder import DATASETS
+from imix.data.loaders.base_loader import BaseLoader
 
 
 @DATASETS.register_module()

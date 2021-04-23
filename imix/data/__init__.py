@@ -4,7 +4,6 @@ from .builder import build_imix_test_loader, build_imix_train_loader
 from .loaders.clevr_loader import ClevrDATASET
 from .loaders.gqa_loader import GQADATASET
 from .loaders.hatefulmemes_loader import HatefulMemesDATASET
-from .loaders.lxmertpretrain_loader import LXMERTPreTrainDATASET
 from .loaders.ocrvqa_loader import OCRVQADATASET
 from .loaders.refclef_loader import RefClefDATASET
 # from .loaders.referit_loader import ReferitDATASET
@@ -21,9 +20,6 @@ from .loaders.visual_dialog_dataset import VisDialDataset, VisdialDatasetDense
 from .loaders.vqa_loader import VQADATASET
 from .loaders.vizwiz_loader import VizWizDATASET
 
-from .loaders.lxmert_vqa import VQATorchDataset
-from .loaders.lxmert_nlvr2 import NLVR2TorchDataset
-from .loaders.lxmert_gqa import GQATorchDataset
 from .loaders.devlbert_vqa_loader import DeVLBertVQADATASET
 
 __all__ = [
