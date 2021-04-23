@@ -27,7 +27,7 @@ class IterDataLoader:
 
 class CommonEngine(EngineBase):
 
-    def __init__(self, model, data_loader, optimizer, loss_fn, batch_processor=None, gradient_accumulation_steps=1):
+    def __init__(self, model, data_loader, optimizer, loss_fn, batch_processor=None):
         super(CommonEngine, self).__init__()
 
         model.train()
@@ -40,7 +40,6 @@ class CommonEngine(EngineBase):
         self.data_loader = data_loader
         # self.data_loader_iter = IterDataLoader(data_loader=data_loader)
         self.imixed_precision = False
-        self.gradient_accumulation_steps = gradient_accumulation_steps
 
     def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
