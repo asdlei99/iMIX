@@ -54,6 +54,8 @@ class Organizer:
             setup_logger()
 
         self.cfg = cfg
+        self.gradient_accumulation_steps = self.cfg.get('gradient_accumulation_steps', 1)
+        self.is_lr_accumulation = self.cfg.get('is_lr_accumulation', True)
         self._model_name = self.cfg.model.type
         self._dataset_name = self.cfg.dataset_type
 
@@ -154,12 +156,15 @@ class Organizer:
         cfg = self.cfg
 
         hook_list = []
+
         if hasattr(self.cfg, 'fp16'):
             hook_list.append(hooks.Fp16OptimizerHook(self.cfg.optimizer_config.grad_clip, self.cfg.fp16))
             self.set_imixed_precision(True)
         else:
             hook_list.append(hooks.OptimizerHook(self.cfg.optimizer_config.grad_clip))
+
         hook_list.append(hooks.LRSchedulerHook(self.optimizer, self.scheduler))
+
         warmup_iter = self.cfg.lr_config.get('warmup_iterations', 0) if self.cfg.lr_config.get('use_warmup',
                                                                                                False) else 0
         hook_list.append(hooks.IterationTimerHook(warmup_iter=warmup_iter))

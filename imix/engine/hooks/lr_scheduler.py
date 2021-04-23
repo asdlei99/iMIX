@@ -3,7 +3,7 @@ from collections import Counter
 
 import torch
 
-from .base_hook import HookBase
+from .base_hook import HookBase, PriorityStatus
 from .builder import HOOKS
 
 # @HOOKS.register_module()
@@ -65,10 +65,20 @@ class LRSchedulerHook(HookBase):
         self._optimizer = optimizer
         self._scheduler = scheduler
         self._best_param_group_idx = self._get_best_parm_group_idx()
+        self._level = PriorityStatus.HIGH
 
     def after_train_iter(self):
-        self._record_lr_log()
-        self._scheduler.step()
+
+        if self.trainer.is_lr_accumulation and (self.trainer.iter + 1) % self.trainer.gradient_accumulation_steps == 0:
+            is_step = True
+        elif self.trainer.is_lr_accumulation is False:
+            is_step = True
+        else:
+            is_step = False
+
+        if is_step:
+            self._record_lr_log()
+            self._scheduler.step()
 
     def _get_best_parm_group_idx(self):
         longest = max(len(pg['params']) for pg in self._optimizer.param_groups)
