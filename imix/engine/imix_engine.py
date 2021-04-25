@@ -6,25 +6,6 @@ from .hooks.periods import write_metrics
 from .organizer import Organizer, is_mixed_precision
 
 
-class IterDataLoader:
-
-    def __init__(self, data_loader):
-        self.data_loader = data_loader
-        self.data_loader_iter = iter(data_loader)
-
-    def __next__(self):
-        try:
-            data = next(self.data_loader_iter)
-        except StopIteration:
-            self.data_loader_iter = iter(self.data_loader)
-            data = next(self.data_loader_iter)
-        finally:
-            return data
-
-    def __len__(self):
-        return len(self.data_loader)
-
-
 class CommonEngine(EngineBase):
 
     def __init__(self, model, data_loader, optimizer, loss_fn, batch_processor=None):
@@ -38,14 +19,10 @@ class CommonEngine(EngineBase):
         self.batch_processor = batch_processor
 
         self.data_loader = data_loader
-        # self.data_loader_iter = IterDataLoader(data_loader=data_loader)
         self.imixed_precision = False
 
     def run_train_iter(self, batch_data=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
-
-        if batch_data is None:
-            batch_data = next(self._iter_data_Loader)
 
         metrics_dict = {}
         batch_data, metrics_dict['data_time'] = batch_data, 1
@@ -58,66 +35,8 @@ class CommonEngine(EngineBase):
                     batch_data, cur_epoch=self.epoch, cur_iter=self.iter, inner_iter=self.inner_iter)
                 self.output = self.loss_fn(self.model_output)
 
-        # self.output['loss'] /= comm.get_world_size()
         metrics_dict.update(self.output)
         write_metrics(metrics_dict)
-
-        # self.optimizer.zero_grad()
-        # self.output['loss'].backward()
-        # self.optimizer.step()
-
-    # def _write_metrics(self,
-    #                    metrics_dict: dict):  # TODO(jinliang):jinliang_copy
-    #     """
-    #     Args:
-    #         metrics_dict (dict): dict of scalar metrics
-    #     """
-    #
-    #     # self.log_buffer.put_scalar('total_loss', metrics_dict['loss'])
-    #     # self.log_buffer.put_scalar('data_time', metrics_dict['data_time'])
-    #     # return
-    #
-    #     import numpy as np
-    #     device = metrics_dict['loss'].device
-    #     with torch.cuda.stream(torch.cuda.Stream() if device.type == 'cuda' else None):
-    #         metrics_dict.pop('loss')
-    #         all_metrics_dict = comm.gather(metrics_dict)
-    #
-    #     if comm.is_main_process():
-    #         data_time = np.max((m.pop('data_time') for m in all_metrics_dict))
-    #         self.log_buffer.put_scalar('data_time', data_time)
-    #         metrics_dict = {
-    #             k:np.mean([x[k] for x in all_metrics_dict]) for k in all_metrics_dict[0].keys()
-    #         }
-
-    # metrics_dict = {
-    #     k: v.detach().cpu().item()
-    #     if isinstance(v, torch.Tensor) else float(v)
-    #     for k, v in metrics_dict.items()
-    # }
-    # # gather metrics among all workers for logging
-    # # This assumes we do DDP-style training, which is currently the only
-    # # supported method in detectron2.
-    # all_metrics_dict = comm.gather(metrics_dict)
-    #
-    # if comm.is_main_process():
-    #     if 'data_time' in all_metrics_dict[0]:
-    #         # data_time among workers can have high variance. The actual latency
-    #         # caused by data_time is the maximum among workers.
-    #         data_time = np.max(
-    #             [x.pop('data_time') for x in all_metrics_dict])
-    #         self.log_buffer.put_scalar('data_time', data_time)
-    #
-    #     # average the rest metrics
-    #     metrics_dict = {
-    #         k: np.mean([x[k] for x in all_metrics_dict])
-    #         for k in all_metrics_dict[0].keys()
-    #     }
-    #     total_losses_reduced = sum(loss for loss in metrics_dict.values())
-    #
-    #     self.log_buffer.put_scalar('total_loss', total_losses_reduced)
-    #     if len(metrics_dict) > 1:
-    #         self.log_buffer.put_scalars(**metrics_dict)
 
     def run_train_epoch(self):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
