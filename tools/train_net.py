@@ -96,15 +96,6 @@ def main(args):
 if __name__ == '__main__':
     args = default_argument_parser().parse_args()
     print('Command line Args:', args)
-    # launch(
-    #     main,
-    #     args.num_gpus,
-    #     num_machines=args.num_machines,
-    #     machine_rank=args.machine_rank,
-    #     dist_url=args.dist_url,
-    #     args=(args,),
-    # )
-
     ddp_launch(
         run_fn=main,
         gpus=args.gpus,

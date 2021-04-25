@@ -5,6 +5,7 @@ from abc import abstractmethod
 
 import imix.engine.hooks as hooks
 from imix.engine.hooks.periods import LogBufferStorage
+from imix.utils_imix.Timer import batch_iter
 
 
 class EngineBase:
@@ -72,9 +73,9 @@ class EngineBase:
         with LogBufferStorage(start_iter, by_epoch=False) as self.log_buffer:
             try:
                 self.before_train()
-                for self.iter in range(self.start_iter, self.max_iter):
+                for self.iter, batch_data, data_time in batch_iter(self.data_loader):
                     self.before_train_iter()
-                    self.run_train_iter()
+                    self.run_train_iter(batch_data, data_time)
                     self.after_train_iter()
             except Exception:
                 raise

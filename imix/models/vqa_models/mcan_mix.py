@@ -228,7 +228,8 @@ def list2dict(batched_inputs: List) -> Dict:  # TODO(jinliang):
         Dict: a dict containing the input data
     """
     batch_size = len(batched_inputs)
-    img_feats = torch.zeros((batch_size, *batched_inputs[0]['feature'].shape), dtype=batched_inputs[0]['feature'].dtype)
+    img_feats = torch.zeros((batch_size, *batched_inputs[0]['features'].shape),
+                            dtype=batched_inputs[0]['features'].dtype)
     input_ids = torch.zeros((batch_size, *batched_inputs[0]['input_ids'].shape),
                             dtype=batched_inputs[0]['input_ids'].dtype)
     answers_scores = torch.zeros((batch_size, *batched_inputs[0]['answers_scores'].shape),
@@ -237,7 +238,7 @@ def list2dict(batched_inputs: List) -> Dict:  # TODO(jinliang):
                              dtype=batched_inputs[0]['input_mask'].dtype)
     question_id = torch.zeros([batch_size], dtype=torch.int32)
     for idx in range(batch_size):
-        img_feats[idx] = batched_inputs[idx]['feature']
+        img_feats[idx] = batched_inputs[idx]['features']
         input_ids[idx] = batched_inputs[idx]['input_ids']
         answers_scores[idx] = batched_inputs[idx]['answers_scores']
         input_mask[idx] = batched_inputs[idx]['input_mask']
@@ -245,7 +246,7 @@ def list2dict(batched_inputs: List) -> Dict:  # TODO(jinliang):
 
     batch_data = dict()
 
-    batch_data['feature'] = img_feats
+    batch_data['features'] = img_feats
     batch_data['input_ids'] = input_ids
     batch_data['answers_scores'] = answers_scores
     batch_data['input_mask'] = input_mask
