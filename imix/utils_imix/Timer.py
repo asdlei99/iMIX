@@ -21,3 +21,11 @@ class Timer:
             return result, passed_time
 
         return wrapper
+
+
+def batch_iter(dataloader):
+    now = Timer.now()
+    for idx, batch_data in enumerate(dataloader):
+        data_time = Timer.passed_seconds(start=now, end=Timer.now())
+        yield idx, batch_data, data_time
+        now = Timer.now()

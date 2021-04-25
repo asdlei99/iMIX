@@ -4,6 +4,7 @@ from torch.cuda.amp.autocast_mode import autocast
 from .base_engine import EngineBase
 from .hooks.periods import write_metrics
 from .organizer import Organizer, is_mixed_precision
+from imix.utils_imix.Timer import batch_iter
 
 
 class CommonEngine(EngineBase):
@@ -21,30 +22,31 @@ class CommonEngine(EngineBase):
         self.data_loader = data_loader
         self.imixed_precision = False
 
-    def run_train_iter(self, batch_data=None):
+    def run_train_iter(self, batch_data=None, data_time=None):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
-
-        metrics_dict = {}
-        batch_data, metrics_dict['data_time'] = batch_data, 1
 
         if self.batch_processor is not None:
             self.output = self.batch_processor(batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
         else:
             with autocast(enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
                 self.model_output = self.model(
-                    batch_data, cur_epoch=self.epoch, cur_iter=self.iter, inner_iter=self.inner_iter)
+                    batch_data,
+                    cur_epoch=getattr(self, 'epoch', None),
+                    cur_iter=self.iter,
+                    inner_iter=getattr(self, 'inner_iter', None))
                 self.output = self.loss_fn(self.model_output)
 
+        metrics_dict = {'data_time': data_time}
         metrics_dict.update(self.output)
         write_metrics(metrics_dict)
 
     def run_train_epoch(self):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
         time.sleep(2)  # prevent possible deadlockduring epoch transition
-        for i, batch_data in enumerate(self.data_loader):
+        for i, batch_data, data_time in batch_iter(self.data_loader):
             self.inner_iter = i
             self.before_train_iter()
-            self.run_train_iter(batch_data)
+            self.run_train_iter(batch_data, data_time)
             self.after_train_iter()
             self.iter += 1
 
