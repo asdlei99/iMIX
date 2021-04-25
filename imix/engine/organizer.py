@@ -85,6 +85,9 @@ class Organizer:
         self.start_epoch = 0
         self.start_iter = 0
         self.max_iter = cfg.total_epochs * len(self.train_data_loader) if self.by_epoch else cfg.max_iter
+        if self.is_lr_accumulation and self.gradient_accumulation_steps > 1:
+            self.max_iter /= self.gradient_accumulation_steps
+
         self.max_epoch = cfg.total_epochs if self.by_epoch else 0
 
         self.hooks = self.build_hooks()
