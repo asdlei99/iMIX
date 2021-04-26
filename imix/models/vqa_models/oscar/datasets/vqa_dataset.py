@@ -133,11 +133,6 @@ class OSCAR_VQADataset(Dataset):
 
         logger.info('%s Data Examples: %d' % (name, len(self.examples)))
 
-    def init_torch_pth_file(self):
-        if self.img_features_env is None:
-            self.img_features = torch.load(self.img_features)
-            self.img_features_env = True
-
     def tensorize(self,
                   cls_token_at_end=False,
                   pad_on_left=False,
@@ -208,8 +203,7 @@ class OSCAR_VQADataset(Dataset):
             assert len(input_mask) == self.args.max_seq_length
             assert len(segment_ids) == self.args.max_seq_length
 
-            if self.img_features_env is None:
-                self.init_torch_pth_file()
+            self.init_torch_pth_file()
 
             # image features
             img_feat = self.img_features[example.img_key]  # torch
@@ -316,8 +310,7 @@ class OSCAR_VQADataset(Dataset):
         assert len(input_mask) == self.args.max_seq_length
         assert len(segment_ids) == self.args.max_seq_length
 
-        if self.img_features_env is None:
-            self.init_torch_pth_file()
+        self.init_torch_pth_file()
 
         # image features
         if self.args.img_feature_type.startswith('dis_code'):
@@ -440,3 +433,8 @@ class OSCAR_VQADataset(Dataset):
             return feat
 
         return None
+
+    def init_torch_pth_file(self):
+        if self.img_features_env is None:
+            self.img_features = torch.load(self.img_features)
+            self.img_features_env = True

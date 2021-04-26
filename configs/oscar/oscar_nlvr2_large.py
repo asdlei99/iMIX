@@ -6,7 +6,11 @@ _base_ = [
 ]
 
 #  cover the parrmeter in above files
-model = dict(params=dict(model_name_or_path='/home/datasets/mix_data/model/oscar/large-vg-labels/ep_55_1617000', ))
+model = dict(
+    params=dict(
+        model_name_or_path='/home/datasets/mix_data/model/oscar/large-vg-labels/ep_55_1617000',
+        cls_hidden_scale=2,
+    ))
 
 lr_config = dict(
     num_warmup_steps=5000,  # warmup_proportion=0

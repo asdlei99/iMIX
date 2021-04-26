@@ -166,6 +166,8 @@ class OSCAR_GQADataset(Dataset):
             assert len(input_mask) == self.args.max_seq_length
             assert len(segment_ids) == self.args.max_seq_length
 
+            self.init_torch_pth_file()
+
             # image features
             img_feat = self.img_features[example.img_key]  # torch
             # img_feat = self.img_features.item().get(example.img_key)  # numpy
@@ -285,6 +287,8 @@ class OSCAR_GQADataset(Dataset):
         assert len(input_mask) == self.args.max_seq_length
         assert len(segment_ids) == self.args.max_seq_length
 
+        self.init_torch_pth_file()
+
         # image features
         if self.args.img_feature_type.startswith('dis_code'):
             img_feat = self.img_features[example.img_key]
@@ -369,8 +373,16 @@ class OSCAR_GQADataset(Dataset):
                 feat_file_name = 'gqa_img_frcnn_feats.pt'
         else:
             feat_file_name = 'gqa_img_frcnn_feats.pt'
-        img_features = torch.load(os.path.join(args.data_dir, feat_file_name))
+        # img_features = torch.load(os.path.join(args.data_dir, feat_file_name))
+        self.img_features_env = None
+        img_features = os.path.join(args.data_dir, feat_file_name)
+
         t_end = time.time()
         logger.info('Info: loading {0:s} features using {1:.2f} secs'.format(feat_file_name, (t_end - t_start)))
 
         return img_features
+
+    def init_torch_pth_file(self):
+        if self.img_features_env is None:
+            self.img_features = torch.load(self.img_features)
+            self.img_features_env = True
