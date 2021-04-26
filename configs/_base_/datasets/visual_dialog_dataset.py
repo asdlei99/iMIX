@@ -66,9 +66,9 @@ train_data = dict(
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=2,
-    workers_per_gpu=1,
+    workers_per_gpu=0,
     # metric="",
-    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=10),
+    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=None),
     eval_period=5000)  # eval_period set to 0 to disable
 
 # evaluator_type = 'VQA'  # TODO(jinliang)

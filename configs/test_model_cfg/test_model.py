@@ -6,6 +6,7 @@
 #     '../_base_/default_runtime.py'
 # ]  # yapf:disable
 
+# To train the base model(no finetuning on dense annotations)
 _base_ = [
     '../_base_/models/visual_dialog_bert_config.py',
     '../_base_/datasets/visual_dialog_dataset.py',
@@ -13,8 +14,17 @@ _base_ = [
     '../_base_/default_runtime.py'
 ]  # yapf:disable
 
+# To finetuning the base model with dense annotations
 # _base_ = [
 #     '../_base_/models/visual_dialog_bert_densen_anns_config.py',
+#     '../_base_/datasets/visual_dialog_dense_annotations_dataset.py',
+#     '../_base_/schedules/schedule_visual_dialog_dense.py',
+#     '../_base_/visual_dialog_bert_default_runtime.py'
+# ]  # yapf:disable
+
+# To finetuning the base model with dense annotations and the next sentence prediction(NSP) loss
+# _base_ = [
+#     '../_base_/models/visual_dialog_bert_densen_anns_config_ce+nsp.py',
 #     '../_base_/datasets/visual_dialog_dense_annotations_dataset.py',
 #     '../_base_/schedules/schedule_visual_dialog_dense.py',
 #     '../_base_/visual_dialog_bert_default_runtime.py'
@@ -27,7 +37,6 @@ _base_ = [
 #     '../_base_/schedules/schedule_vqa.py',
 #     '../_base_/default_runtime.py'
 # ] # yapf:disable
-
 
 # 前傳沒問題
 # _base_ = [
@@ -98,13 +107,6 @@ _base_ = [
 #     '../_base_/models/mcan_config.py',
 #     '../_base_/datasets/vqa_dataset_grid_data.py',
 #     '../_base_/schedules/schedule_vqa.py',
-#     '../_base_/default_runtime.py'
-# ]  # yapf:disable
-
-# _base_ = [
-#     '../_base_/models/mcan_config.py',
-#     '../_base_/datasets/vqa_dataset_grid_data.py',
-#     '../_base_/schedules/schedule_vqa_by_iter.py',
 #     '../_base_/default_runtime.py'
 # ]  # yapf:disable
 

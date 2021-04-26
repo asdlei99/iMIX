@@ -93,7 +93,7 @@ class VisDialMetric(BaseMetric):
         self.predictions = predictions
         for p in predictions:
             self._rank_list.extend(p['sparse_r'])
-            self._ndcg_numerator += sum(p['ndcg_n'])
+            self._ndcg_numerator += p['ndcg_n']
             self._ndcg_denominator += p['ndcg_d']
         self.all_metrics.update(self.sparse_retrieve())
         self.all_metrics.update(self.ndcg_retrieve())

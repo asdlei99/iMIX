@@ -171,7 +171,21 @@ class VisDialDatasetConverter(BaseDatasetConverter):
         self.gt_relevance_round_id = batch_data['round_id'].squeeze(1)
         predictions = self.data_pre_process(model_outputs, *args, **kwargs)
         labels = self.gt_option_inds
-        return [predictions], labels
+        predictions = self.dict_to_list(predictions)
+        return predictions, labels
+
+    def dict_to_list(self, dict_data):
+        list_data = []
+        keys = list(dict_data.keys())
+        length = len(dict_data[keys[0]])
+
+        for l in range(0, length):
+            d = {}
+            for k in keys:
+                d[k] = 1 if k == 'ndcg_d' else dict_data[k][l]
+            list_data.append(d)
+
+        return list_data
 
     def sparse_metrics_observe(self, predicted_scores: torch.Tensor):
         target_ranks = self.gt_option_inds
@@ -221,7 +235,7 @@ class VisDialDatasetConverter(BaseDatasetConverter):
         predicted_ranks = self.scores_to_ranks(predicted_scores)
 
         # shape: (batch_size, num_options)
-        predicted_ranks = predicted_ranks.squeeze()
+        predicted_ranks = predicted_ranks.squeeze(dim=-2)
         batch_size, num_options = predicted_ranks.size()
 
         k = torch.sum(target_relevance != 0, dim=-1)
