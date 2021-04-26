@@ -217,8 +217,6 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     if world_size > 1:
         rank = comm.get_local_rank()
         sampler = DistributedSampler(dataset, world_size, rank, shuffle=shuffle)
-        pin_memory = True
-        drop_last = True
     else:
         sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
 

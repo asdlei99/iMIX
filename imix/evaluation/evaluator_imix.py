@@ -66,8 +66,10 @@ def get_predictions_and_labels(func):
 
 
 class PostProcessor(metaclass=ABCMeta):
-    logger = logging.getLogger(__name__)
-    distributed = comm.get_world_size() > 1
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.distributed = comm.get_world_size() > 1
 
     @abstractmethod
     def reset(self):
@@ -106,6 +108,7 @@ class PostProcessor(metaclass=ABCMeta):
 class Evaluator(PostProcessor):
 
     def __init__(self, metrics, dataset_converters):
+        super().__init__()
         self._metrics: list = self.build_metrics(metrics)
         self._dataset_converters: list = self.build_dataset_converters(
             dataset_converters=dataset_converters, default_args={'post_process_type': str(self)})
@@ -163,6 +166,8 @@ class Submitter(PostProcessor):
                  output_dir: str = None,
                  file_name: str = 'submit_result.json',
                  post_process_type: Dict = None):
+        super().__init__()
+
         self._predictions: list = []
         self._file_name = file_name
         self._output_dir = os.path.abspath('./') if output_dir is None else output_dir
