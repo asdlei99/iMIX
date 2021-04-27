@@ -12,11 +12,10 @@ from easydict import EasyDict as edict
 
 import torch
 import os
-
 from imix.models.builder import VQA_MODELS
+from transformers.modeling_bert import BertConfig
 '''
 from transformers.modeling_bert import (
-    BertConfig,
     BertEmbeddings,
     BertEncoder,
     # BertLayerNorm,
@@ -53,19 +52,18 @@ class VILBERT(BaseModel):
 
         self.config = config = kwargs['params']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.root_path = os.getcwd()
+        # self.root_path = os.getcwd()
+        self.root_path = os.path.dirname(__file__)
 
-        with open(self.root_path + '/imix/models/vqa_models/vilbert/vilbert_tasks.yml', 'r') as f:
+        with open(self.root_path + '/vilbert_tasks.yml', 'r') as f:
             task_cfg = edict(yaml.safe_load(f))
         self.task_cfg = task_cfg
 
         torch.backends.cudnn.deterministic = True
 
         if config['baseline']:
-            from pytorch_transformers.modeling_bert import BertConfig
             from .basebert import BaseBertForVLTasks
         else:
-            from .vilbert import BertConfig
             from .vilbert import VILBertForVLTasks
 
         task_names = []
@@ -85,13 +83,10 @@ class VILBERT(BaseModel):
             task_ids.append(task)
 
         bert_weight_name = json.load(
-            open(
-                self.root_path + '/imix/models/vqa_models/vilbert/config/' + config['bert_model'] + '_weight_name.json',
-                'r'))
+            open(self.root_path + '/config/' + config['bert_model'] + '_weight_name.json', 'r'))
 
-        bertconfig = BertConfig.from_json_file(config['config_file'])
-
-        default_gpu = True
+        configfile = self.root_path + '/bert_base_6layer_6conect.json'
+        bertconfig = BertConfig.from_json_file(configfile)
 
         if config['visual_target'] == 0:
             bertconfig.v_target_size = 1601
@@ -141,14 +136,12 @@ class VILBERT(BaseModel):
                 config['from_pretrained'],
                 config=bertconfig,
                 num_labels=num_labels,
-                default_gpu=default_gpu,
             )
         else:
             self.model = VILBertForVLTasks.from_pretrained(
                 config['from_pretrained'],
                 config=bertconfig,
                 num_labels=num_labels,
-                default_gpu=default_gpu,
             )
 
         if config['freeze'] != -1:
@@ -165,9 +158,8 @@ class VILBERT(BaseModel):
                 if key[12:] in bert_weight_name_filtered:
                     value.requires_grad = False
 
-            if default_gpu:
-                print('filtered weight')
-                print(bert_weight_name_filtered)
+            print('filtered weight')
+            print(bert_weight_name_filtered)
 
         # warmpu_steps = config['warmup'] * num_train_optimization_steps
 

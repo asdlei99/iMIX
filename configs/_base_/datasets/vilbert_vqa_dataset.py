@@ -1,10 +1,10 @@
 dataset_type = 'LoadDatasets'
 
 data_root = '/home/datasets/mix_data/vilbert/datasets/'
-task_ids = '1',
+task_ids = '11',
 
 # test mode directly read this data set
-test_datasets = ['minval']
+test_datasets = ['val']
 '''
 test_datasets = ['minval']  # for TASK1
 test_datasets = ['val']  # for TASK2
@@ -373,7 +373,7 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=32,
+    samples_per_gpu=8,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
     data=dict(
@@ -404,7 +404,7 @@ samples_per_gpu=64,     # for TASK17
 samples_per_gpu=256,    # for TASK18
 '''
 test_data = dict(
-    samples_per_gpu=32,
+    samples_per_gpu=8,
     workers_per_gpu=1,
     sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),

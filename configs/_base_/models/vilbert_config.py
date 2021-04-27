@@ -1,5 +1,5 @@
 # model settings
-tasks = '1'  # '1-2-3...' training task separate by -
+tasks = '11'  # '1-2-3...' training task separate by -
 '''
 num_labels=3129,    # for TASK1
 num_labels=3129,    # for TASK2
@@ -24,7 +24,7 @@ num_labels=,        # for TASK18
 model = dict(
     type='VILBERT',
     params=dict(
-        num_labels=3129,
+        num_labels=1,
         # below from bert_base_6layer_6conect.json
         attention_probs_dropout_prob=0.1,
         hidden_act='gelu',
@@ -207,8 +207,8 @@ lr=0.000002,# for TASK18
 '''
 
 lr_config = dict(
-    num_warmup_steps=750,  # warmup_proportion=0.1
-    num_training_steps=7500,  # ceil(totoal 443753 / batch size 32) * epoch size
+    num_warmup_steps=512,  # warmup_proportion=0.1
+    num_training_steps=5120,  # ceil(totoal 443753 / batch size 32) * epoch size
     policy='WarmupLinearSchedule')
 '''
 # for task 1
