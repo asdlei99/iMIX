@@ -9,6 +9,20 @@ from .r2c_backbone import R2C_BACKBONE
 
 @BACKBONES.register_module()
 class HGL_BACKBONE(R2C_BACKBONE):
+    """
+        parameters:
+
+        input:
+        image_feat_variable: [batch_size, num_location, image_feat_dim]
+        or a list of [num_location, image_feat_dim]
+        when using adaptive number of objects
+        question_embedding:[batch_size, txt_embeding_dim]
+
+        output:
+        image_embedding:[batch_size, image_feat_dim]
+
+
+        """
 
     def __init__(self, graph_dim=512, **kwargs):
         self.graph_dim = graph_dim
