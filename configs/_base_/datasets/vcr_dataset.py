@@ -70,7 +70,7 @@ vcr_info_cpler_cfg = dict(
     default_max_length=20,
     max_ques_length=20,
     max_answer_length=20,
-    max_obj_length=20,
+    max_obj_length=50,
 )
 
 train_data = dict(
