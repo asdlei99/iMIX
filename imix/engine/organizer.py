@@ -105,8 +105,8 @@ class Organizer:
     def build_model(cls, cfg):
 
         model = build_model(cfg)
-        logger = logging.getLogger(__name__)
-        logger.info('build model:\n {} '.format(model))
+        # logger = logging.getLogger(__name__)
+        # logger.info('build model:\n {} '.format(model))
 
         return model
 

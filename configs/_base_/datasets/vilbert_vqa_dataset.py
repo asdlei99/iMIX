@@ -374,7 +374,7 @@ vqa_reader_test_cfg = dict(
 
 train_data = dict(
     samples_per_gpu=8,
-    workers_per_gpu=1,
+    workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
@@ -405,7 +405,7 @@ samples_per_gpu=256,    # for TASK18
 '''
 test_data = dict(
     samples_per_gpu=8,
-    workers_per_gpu=1,
+    workers_per_gpu=0,
     sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),
     pin_memory=True,

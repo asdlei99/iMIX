@@ -23,7 +23,7 @@ from transformers.modeling_bert import (
     # BertSelfOutput,
     ACT2FN,
 )
-from easydict import EasyDict as edict
+# from easydict import EasyDict as edict
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +133,6 @@ class BertBiAttention(nn.Module):
 
     def __init__(self, config):
         super(BertBiAttention, self).__init__()
-        v_config = edict(config.v_config)
         if config.bi_hidden_size % config.bi_num_attention_heads != 0:
             raise ValueError('The hidden size (%d) is not a multiple of the number of attention '
                              'heads (%d)' % (config.bi_hidden_size, config.bi_num_attention_heads))
@@ -145,20 +144,20 @@ class BertBiAttention(nn.Module):
 
         # self.scale = nn.Linear(1, self.num_attention_heads, bias=False)
         # self.scale_act_fn = ACT2FN['relu']
+        v_config = BertConfig.from_dict(config.v_config)
 
         self.query1 = nn.Linear(v_config.hidden_size, self.all_head_size)
         self.key1 = nn.Linear(v_config.hidden_size, self.all_head_size)
         self.value1 = nn.Linear(v_config.hidden_size, self.all_head_size)
         # self.logit1 = nn.Linear(config.hidden_size, self.num_attention_heads)
-
         self.dropout1 = nn.Dropout(v_config.attention_probs_dropout_prob)
 
-        self.query2 = nn.Linear(config.hidden_size, self.all_head_size)
-        self.key2 = nn.Linear(config.hidden_size, self.all_head_size)
-        self.value2 = nn.Linear(config.hidden_size, self.all_head_size)
+        t_config = BertConfig.from_dict(config.t_config)
+        self.query2 = nn.Linear(t_config.hidden_size, self.all_head_size)
+        self.key2 = nn.Linear(t_config.hidden_size, self.all_head_size)
+        self.value2 = nn.Linear(t_config.hidden_size, self.all_head_size)
         # self.logit2 = nn.Linear(config.hidden_size, self.num_attention_heads)
-
-        self.dropout2 = nn.Dropout(config.attention_probs_dropout_prob)
+        self.dropout2 = nn.Dropout(t_config.attention_probs_dropout_prob)
 
     def transpose_for_scores(self, x):
         new_x_shape = x.size()[:-1] + (
@@ -261,7 +260,7 @@ class BertBiOutput(nn.Module):
     def __init__(self, config):
         super(BertBiOutput, self).__init__()
 
-        v_config = edict(config.v_config)
+        v_config = BertConfig.from_dict(config.v_config)
 
         self.dense1 = nn.Linear(config.bi_hidden_size, v_config.hidden_size)
         self.LayerNorm1 = BertLayerNorm(v_config.hidden_size, eps=1e-12)
@@ -270,12 +269,14 @@ class BertBiOutput(nn.Module):
         self.q_dense1 = nn.Linear(config.bi_hidden_size, v_config.hidden_size)
         self.q_dropout1 = nn.Dropout(v_config.hidden_dropout_prob)
 
-        self.dense2 = nn.Linear(config.bi_hidden_size, config.hidden_size)
-        self.LayerNorm2 = BertLayerNorm(config.hidden_size, eps=1e-12)
-        self.dropout2 = nn.Dropout(config.hidden_dropout_prob)
+        t_config = BertConfig.from_dict(config.t_config)
 
-        self.q_dense2 = nn.Linear(config.bi_hidden_size, config.hidden_size)
-        self.q_dropout2 = nn.Dropout(config.hidden_dropout_prob)
+        self.dense2 = nn.Linear(config.bi_hidden_size, t_config.hidden_size)
+        self.LayerNorm2 = BertLayerNorm(t_config.hidden_size, eps=1e-12)
+        self.dropout2 = nn.Dropout(t_config.hidden_dropout_prob)
+
+        self.q_dense2 = nn.Linear(config.bi_hidden_size, t_config.hidden_size)
+        self.q_dropout2 = nn.Dropout(t_config.hidden_dropout_prob)
 
     def forward(self, hidden_states1, input_tensor1, hidden_states2, input_tensor2):
 
@@ -302,8 +303,9 @@ class BertConnectionLayer(nn.Module):
         self.v_intermediate = BertIntermediate(v_config)
         self.v_output = BertOutput(v_config)
 
-        self.t_intermediate = BertIntermediate(config)
-        self.t_output = BertOutput(config)
+        t_config = BertConfig.from_dict(config.t_config)
+        self.t_intermediate = BertIntermediate(t_config)
+        self.t_output = BertOutput(t_config)
 
     def forward(
         self,
@@ -345,20 +347,23 @@ class BertEncoder(nn.Module):
         # vision bert layer: BertImageLayer
         # Bi-Attention: Given the output of two bertlayer, perform bi-directional
         # attention and add on two layers.
-        v_config = edict(config.v_config)
+        t_config = BertConfig.from_dict(config.t_config)
+        v_config = BertConfig.from_dict(config.v_config)
 
         self.FAST_MODE = config.fast_mode
         self.with_coattention = config.with_coattention
         self.v_biattention_id = v_config.biattention_id
-        self.t_biattention_id = config.t_biattention_id
+        self.t_biattention_id = t_config.t_biattention_id
         self.in_batch_pairs = config.in_batch_pairs
         self.fixed_t_layer = config.fixed_t_layer
         self.fixed_v_layer = config.fixed_v_layer
-        layer = BertLayer(config)
-        v_layer = BertLayer(BertConfig.from_dict(config.v_config))
+
+        # layer = BertLayer(config)
+        layer = BertLayer(t_config)
+        v_layer = BertLayer(v_config)
         connect_layer = BertConnectionLayer(config)
 
-        self.layer = nn.ModuleList([copy.deepcopy(layer) for _ in range(config.num_hidden_layers)])
+        self.layer = nn.ModuleList([copy.deepcopy(layer) for _ in range(t_config.num_hidden_layers)])
         self.v_layer = nn.ModuleList([copy.deepcopy(v_layer) for _ in range(v_config.num_hidden_layers)])
         self.c_layer = nn.ModuleList([copy.deepcopy(connect_layer) for _ in range(len(v_config.biattention_id))])
 
@@ -530,7 +535,7 @@ class BertTextPooler(BertPooler):
 
     def __init__(self, config):
         super(BertTextPooler, self).__init__(config)
-        self.dense = nn.Linear(config.hidden_size, config.bi_hidden_size)
+        self.dense = nn.Linear(config.t_config['hidden_size'], config.bi_hidden_size)
         self.activation = nn.ReLU()
 
 
@@ -568,10 +573,12 @@ class BertPreTrainingHeads(nn.Module):
 
     def __init__(self, config, bert_model_embedding_weights):
         super(BertPreTrainingHeads, self).__init__()
-        self.predictions = BertLMPredictionHead(config, bert_model_embedding_weights)
+        t_config = BertConfig.from_dict(config.t_config)
+        self.predictions = BertLMPredictionHead(t_config, bert_model_embedding_weights)
         self.bi_seq_relationship = nn.Linear(config.bi_hidden_size, 2)
 
-        self.imagePredictions = BertImagePredictionHead(BertConfig.from_dict(config.v_config))
+        v_config = BertConfig.from_dict(config.v_config)
+        self.imagePredictions = BertImagePredictionHead(v_config)
         self.fusion_method = config.fusion_method
         self.dropout = nn.Dropout(0.1)
 
@@ -613,16 +620,19 @@ class BertModel(BertPreTrainedModel):
     def __init__(self, config):
         super(BertModel, self).__init__(config)
 
-        # initilize word embedding
-        if config.model == 'bert':
-            self.embeddings = BertEmbeddings(config)
-        elif config.model == 'roberta':
-            self.embeddings = RobertaEmbeddings(config)
-
         self.task_specific_tokens = config.task_specific_tokens
 
+        # initilize word embedding
+        t_config = BertConfig.from_dict(config.t_config)
+        v_config = BertConfig.from_dict(config.v_config)
+
+        if config.model == 'bert':
+            self.embeddings = BertEmbeddings(t_config)
+        elif config.model == 'roberta':
+            self.embeddings = RobertaEmbeddings(t_config)
+
         # initlize the vision embedding
-        self.v_embeddings = BertImageEmbeddings(config)
+        self.v_embeddings = BertImageEmbeddings(v_config)
 
         self.encoder = BertEncoder(config)
         self.t_pooler = BertTextPooler(config)
@@ -730,10 +740,9 @@ class BertImageEmbeddings(nn.Module):
     def __init__(self, config):
         super(BertImageEmbeddings, self).__init__()
 
-        v_config = edict(config.v_config)
-        self.image_embeddings = nn.Linear(v_config.feature_size, v_config.hidden_size)
-        self.image_location_embeddings = nn.Linear(5, v_config.hidden_size)
-        self.LayerNorm = BertLayerNorm(v_config.hidden_size, eps=1e-12)
+        self.image_embeddings = nn.Linear(config.feature_size, config.hidden_size)
+        self.image_location_embeddings = nn.Linear(5, config.hidden_size)
+        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids, input_loc):
@@ -920,7 +929,7 @@ class VILBertForVLTasks(BertPreTrainedModel):
         self.vil_logit = nn.Linear(config.bi_hidden_size, 1)
         self.vil_tri_prediction = nn.Linear(config.bi_hidden_size, 3)  # for Visual Entailiment tasks
         self.vision_logit = nn.Linear(config.v_config['hidden_size'], 1)
-        self.linguisic_logit = nn.Linear(config.hidden_size, 1)
+        self.linguisic_logit = nn.Linear(config.t_config['hidden_size'], 1)
         self.fusion_method = config.fusion_method
         # self.apply(self.init_weights)
         self.init_weights()

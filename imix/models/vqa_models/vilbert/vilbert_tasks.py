@@ -85,8 +85,7 @@ class VILBERT(BaseModel):
         bert_weight_name = json.load(
             open(self.root_path + '/config/' + config['bert_model'] + '_weight_name.json', 'r'))
 
-        configfile = self.root_path + '/bert_base_6layer_6conect.json'
-        bertconfig = BertConfig.from_json_file(configfile)
+        bertconfig = BertConfig.from_dict(config)
 
         if config['visual_target'] == 0:
             bertconfig.v_target_size = 1601
@@ -94,9 +93,6 @@ class VILBERT(BaseModel):
         else:
             bertconfig.v_target_size = 2048
             bertconfig.visual_target = config['visual_target']
-
-        if config['task_specific_tokens']:
-            bertconfig.task_specific_tokens = True
 
         # task_ave_iter = {}
         self.task_stop_controller = {}
