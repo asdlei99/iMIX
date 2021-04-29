@@ -99,6 +99,7 @@ def default_setup(args, cfg):  # DODO(jinliang):modify
         seed = cfg.seed + rank
     seed_all_rng(seed)
 
+    # torch.backends.cudnn.deterministic  = True
     torch.backends.cudnn.benchmark = False
 
 
@@ -110,6 +111,5 @@ def seed_all_rng(seed=None):  # TODO(jinliang): rename set_all_rng_seed
     np.random.seed(seed)
     random.seed(seed)
     torch.set_rng_state(torch.manual_seed(seed).get_state())
-    # TODO confirm if no cuda in use
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)

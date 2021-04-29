@@ -297,23 +297,24 @@ class VILBERTMutilLoss(BaseLoss):
         self.task_ids = []
         self.loss_scale = {}
         self.task_cfg = task_cfg
-        self.task_losses = self.LoadLosses(task_cfg)
-        self.gradient_accumulation_steps = task_cfg['gradient_accumulation_steps']
+        self.task_losses = self.LoadLosses()
+        self.gradient_accumulation_steps = task_cfg.gradient_accumulation_steps
 
     def __str__(self):
         return 'vilbert_mutil_loss'
 
-    def LoadLosses(self, task_cfg):
+    def LoadLosses(self):
         losses = {}
         task_types = []
 
-        for i, task_id in enumerate(task_cfg['tasks'].split('-')):
+        for i, task_id in enumerate(self.task_cfg['tasks'].split('-')):
             task = 'TASK' + task_id
-            model_type = task_cfg[task]['type']
+            cfg = self.task_cfg.TASKS[task]
+            model_type = cfg.type
             if model_type not in task_types:
                 task_types.append(model_type)
-            losses[task] = self.LossMap[task_cfg[task]['loss']]
-            self.loss_scale[task] = task_cfg[task]['loss_scale']
+            losses[task] = self.LossMap[cfg.loss]
+            self.loss_scale[task] = cfg.loss_scale
             self.task_ids.append(task)
 
         return losses
@@ -326,9 +327,10 @@ class VILBERTMutilLoss(BaseLoss):
 
             # for different task, we use different output to calculate the loss.
             loss = self.task_losses[task_id](pred, target)
-            if self.task_cfg[task_id]['type'] in ['VL-classifier', 'VL-classifier-GQA', 'V-logit', 'V-logit-mc']:
+            task_type = self.task_cfg.TASKS[task_id]['type']
+            if task_type in ['VL-classifier', 'VL-classifier-GQA', 'V-logit', 'V-logit-mc']:
                 loss = loss.mean() * target.size(1)
-            elif self.task_cfg[task_id]['type'] in ['VL-binary-classifier', 'VL-tri-classifier']:
+            elif task_type in ['VL-binary-classifier', 'VL-tri-classifier']:
                 loss = loss.mean()
 
             loss = loss * self.loss_scale[task_id]

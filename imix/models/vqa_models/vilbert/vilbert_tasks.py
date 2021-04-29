@@ -6,42 +6,13 @@
 from .utils import MultiTaskStopOnPlateau
 import json
 from io import open
-
-import yaml
 from easydict import EasyDict as edict
-
 import torch
 import os
 from imix.models.builder import VQA_MODELS
 from transformers.modeling_bert import BertConfig
-'''
-from transformers.modeling_bert import (
-    BertEmbeddings,
-    BertEncoder,
-    # BertLayerNorm,
-    BertPreTrainedModel,
-)
-'''
 from ..base_model import BaseModel
 from .task_utils import compute_score_with_logits
-# from models.encoder import
-'''
-from transformers.optimization import (
-    AdamW,
-    WarmupConstantSchedule,
-    WarmupLinearSchedule,
-)
-
-from vilbert.optimization import RAdam
-'''
-'''
-from torch.optim.lr_scheduler import (
-    LambdaLR,
-    ReduceLROnPlateau,
-    CosineAnnealingLR,
-    CosineAnnealingWarmRestarts,
-)
-'''
 
 
 @VQA_MODELS.register_module()
@@ -52,57 +23,34 @@ class VILBERT(BaseModel):
 
         self.config = config = kwargs['params']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # self.root_path = os.getcwd()
         self.root_path = os.path.dirname(__file__)
 
-        with open(self.root_path + '/vilbert_tasks.yml', 'r') as f:
-            task_cfg = edict(yaml.safe_load(f))
-        self.task_cfg = task_cfg
-
-        torch.backends.cudnn.deterministic = True
-
-        if config['baseline']:
+        if config.baseline:
             from .basebert import BaseBertForVLTasks
         else:
             from .vilbert import VILBertForVLTasks
 
-        task_names = []
-        task_lr = []
-        for i, task_id in enumerate(config['tasks'].split('-')):
-            task = 'TASK' + task_id
-            name = task_cfg[task]['name']
-            task_names.append(name)
-            task_lr.append(task_cfg[task]['lr'])
-
-        base_lr = min(task_lr)
-        loss_scale = {}
+        # task_lr = []
         task_ids = []
-        for i, task_id in enumerate(config['tasks'].split('-')):
+        for i, task_id in enumerate(config.tasks.split('-')):
             task = 'TASK' + task_id
-            loss_scale[task] = task_lr[i] / base_lr
+            cfg = config.TASKS[task]
+            name = cfg.name
             task_ids.append(task)
+            # task_lr.append(cfg.lr)
 
-        bert_weight_name = json.load(
-            open(self.root_path + '/config/' + config['bert_model'] + '_weight_name.json', 'r'))
-
-        bertconfig = BertConfig.from_dict(config)
-
-        if config['visual_target'] == 0:
-            bertconfig.v_target_size = 1601
-            bertconfig.visual_target = config['visual_target']
-        else:
-            bertconfig.v_target_size = 2048
-            bertconfig.visual_target = config['visual_target']
+        # base_lr = min(task_lr)
+        # loss_scale = {}
+        # for i, task_id in enumerate(config.tasks.split('-')):
+        #     task = 'TASK' + task_id
+        # loss_scale[task] = task_lr[i] / base_lr
 
         # task_ave_iter = {}
         self.task_stop_controller = {}
-        # for task_id, num_iter in task_ids:  # task_num_iters.items():
         for task_id in task_ids:
-            '''
-            task_ave_iter[task_id] = int(task_cfg[task]['num_epoch'] * num_iter *
-                                        config['train_iter_multiplier'] /
-                                        task_cfg[task]['num_epoch'])  # config['total_epochs'])
-            '''
+            # task_ave_iter[task_id] = int(config.TASKS[task]['num_epoch'] * num_iter *
+            #                             config.train_iter_multiplier /
+            #                             config.TASKS[task]['num_epoch'])  # config.total_epochs)
             self.task_stop_controller[task_id] = MultiTaskStopOnPlateau(
                 mode='max',
                 patience=1,
@@ -110,44 +58,47 @@ class VILBERT(BaseModel):
                 cooldown=1,
                 threshold=0.001,
             )
-        '''
-        task_ave_iter_list = sorted(task_ave_iter.values())
-        median_num_iter = task_ave_iter_list[-1]
-        num_train_optimization_steps = (
-            median_num_iter * \
-                config['total_epochs'] // config['gradient_accumulation_steps']
-        )
-        '''
-        num_labels = config['num_labels']
-        # num_labels = max(
-        #    [dataset.num_labels for dataset in task_datasets_train.values()])
+        # task_ave_iter_list = sorted(task_ave_iter.values())
+        # median_num_iter = task_ave_iter_list[-1]
+        # num_train_optimization_steps = (
+        #     median_num_iter * \
+        #         config.total_epochs // config.gradient_accumulation_steps
+        # )
+        num_labels = max([config.TASKS[k]['num_labels'] for k in task_ids])
 
-        if config['dynamic_attention']:
-            bertconfig.dynamic_attention = True
-        if 'roberta' in config['bert_model']:
+        bertconfig = BertConfig.from_dict(config)
+
+        if bertconfig.visual_target == 0:
+            bertconfig.v_config.target_size = 1601
+        else:
+            bertconfig.v_config.target_size = 2048
+
+        if 'roberta' in config.bert_model:
             bertconfig.model = 'roberta'
 
-        if config['baseline']:
+        if config.baseline:
             self.model = BaseBertForVLTasks.from_pretrained(
-                config['from_pretrained'],
+                config.from_pretrained,
                 config=bertconfig,
                 num_labels=num_labels,
             )
         else:
             self.model = VILBertForVLTasks.from_pretrained(
-                config['from_pretrained'],
+                config.from_pretrained,
                 config=bertconfig,
                 num_labels=num_labels,
             )
 
-        if config['freeze'] != -1:
+        if config.freeze != -1:
+            bert_weight_name = json.load(
+                open(self.root_path + '/config/' + config.bert_model + '_weight_name.json', 'r'))
             bert_weight_name_filtered = []
             for name in bert_weight_name:
                 if 'embeddings' in name:
                     bert_weight_name_filtered.append(name)
                 elif 'encoder' in name:
                     layer_num = name.split('.')[2]
-                    if int(layer_num) <= config['freeze']:
+                    if int(layer_num) <= config.freeze:
                         bert_weight_name_filtered.append(name)
 
             for key, value in dict(self.model.named_parameters()).items():
@@ -157,38 +108,8 @@ class VILBERT(BaseModel):
             print('filtered weight')
             print(bert_weight_name_filtered)
 
-        # warmpu_steps = config['warmup'] * num_train_optimization_steps
-
         self.lr_reduce_list = [5, 7]
         self.global_step = 0
-        # start_epoch = 0
-        '''
-        if config['resume_file'] != "" and os.path.exists(config['resume_file']):
-            checkpoint = torch.load(config['resume_file'], map_location="cpu")
-            new_dict = {}
-            for attr in checkpoint["model_state_dict"]:
-                if attr.startswith("module."):
-                    new_dict[attr.replace("module.", "", 1)] = checkpoint[
-                        "model_state_dict"
-                    ][attr]
-                else:
-                    new_dict[attr] = checkpoint["model_state_dict"][attr]
-            model.load_state_dict(new_dict)
-            warmup_scheduler.load_state_dict(checkpoint["warmup_scheduler_state_dict"])
-            # lr_scheduler.load_state_dict(checkpoint['lr_scheduler_state_dict'])
-            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-            global_step = checkpoint["global_step"]
-            start_epoch = int(checkpoint["epoch_id"]) + 1
-            self.task_stop_controller = checkpoint["task_stop_controller"]
-            tbLogger = checkpoint["tb_logger"]
-            del checkpoint
-        '''
-        '''
-        for state in optimizer.state.values():
-            for k, v in state.items():
-                if torch.is_tensor(v):
-                    state[k] = v.cuda()
-        '''
         self.task_iter_train = {name: None for name in task_ids}
         self.task_count = {name: 0 for name in task_ids}
         self.task_ids = task_ids
@@ -196,37 +117,56 @@ class VILBERT(BaseModel):
     def run_one_time(self, task_id, data):
         params = self.get_image_and_text_features(task_id, data)
 
-        (vil_prediction, vil_prediction_gqa, vil_logit, vil_binary_prediction, vil_tri_prediction, vision_prediction,
-         vision_logit, linguisic_prediction, linguisic_logit,
-         _) = self.model(params['question'], params['features'], params['spatials'], params['segment_ids'],
-                         params['input_mask'], params['image_mask'], params['co_attention_mask'], params['task_tokens'])
+        (
+            vil_prediction,
+            vil_prediction_gqa,
+            vil_logit,
+            vil_binary_prediction,
+            vil_tri_prediction,
+            vision_prediction,
+            vision_logit,
+            linguisic_prediction,
+            linguisic_logit,
+            _,
+        ) = self.model(
+            params.question,
+            params.features,
+            params.spatials,
+            params.segment_ids,
+            params.input_mask,
+            params.image_mask,
+            params.co_attention_mask,
+            params.task_tokens,
+        )
 
-        target = params['target']
-        batch_size = params['batch_size']
-        multiple_choice_ids = params['multiple_choice_ids']
-        num_options = params['num_options']
+        target = params.target
+        batch_size = params.batch_size
+        multiple_choice_ids = params.multiple_choice_ids
+        num_options = params.num_options
 
-        if self.task_cfg[task_id]['type'] == 'VL-classifier':
+        cfg_type = self.config.TASKS[task_id]['type']
+
+        if cfg_type == 'VL-classifier':
             batch_score = compute_score_with_logits(vil_prediction, target).sum()
             pred = vil_prediction
 
-        elif self.task_cfg[task_id]['type'] == 'VL-classifier-GQA':
+        elif cfg_type == 'VL-classifier-GQA':
             batch_score = compute_score_with_logits(vil_prediction_gqa, target).sum()
             pred = vil_prediction_gqa
 
-        elif self.task_cfg[task_id]['type'] == 'VL-logit':
+        elif cfg_type == 'VL-logit':
             vil_logit = vil_logit.view(batch_size, num_options)
             _, preds = torch.max(vil_logit, 1)
             batch_score = float((preds == target).sum())
             pred = vil_logit
 
-        elif self.task_cfg[task_id]['type'] == 'V-logit':
+        elif cfg_type == 'V-logit':
             _, select_idx = torch.max(vision_logit, dim=1)
             select_target = target.squeeze(2).gather(1, select_idx.view(-1, 1))
             batch_score = float(torch.sum(select_target > 0.5))
             pred = vision_logit
 
-        elif self.task_cfg[task_id]['type'] == 'V-logit-mc':
+        elif cfg_type == 'V-logit-mc':
             vision_logit = vision_logit[:, 101:]
             vision_logit = vision_logit.squeeze(2).gather(1, multiple_choice_ids)
             vision_logit = vision_logit.unsqueeze(2)
@@ -235,22 +175,20 @@ class VILBERT(BaseModel):
             batch_score = float((preds == target).sum())
             pred = vision_logit
 
-        elif self.task_cfg[task_id]['type'] == 'VL-binary-classifier':
+        elif cfg_type == 'VL-binary-classifier':
             batch_score = compute_score_with_logits(vil_binary_prediction, target).sum()
             pred = vil_binary_prediction
 
-        elif self.task_cfg[task_id]['type'] == 'VL-tri-classifier':
+        elif cfg_type == 'VL-tri-classifier':
             batch_score = compute_score_with_logits(vil_tri_prediction, target).sum()
             pred = vil_tri_prediction
 
-        output_dict = {
+        return edict({
             'scores': pred,
             'target': target,
             'batch_score': batch_score,
             'batch_size': batch_size,
-        }
-
-        return output_dict
+        })
 
     def forward_train(self, data, **kwargs):
         iterId = kwargs['cur_iter']
@@ -262,49 +200,45 @@ class VILBERT(BaseModel):
         model_output = {}
         for task_id in self.task_ids:
             is_forward = False
-            if (not self.task_stop_controller[task_id].in_stop) or (iterId % self.config['train_iter_gap'] == 0):
+            if (not self.task_stop_controller[task_id].in_stop) or (iterId % self.config.train_iter_gap == 0):
                 is_forward = True
 
             if is_forward:
                 output_dict = self.run_one_time(task_id, data)
-                output_dict['batch_score'] /= output_dict['batch_size']
+                output_dict.batch_score /= output_dict.batch_size
 
                 model_output[task_id] = {
-                    'scores': output_dict['scores'],
-                    'target': output_dict['target'],
-                    'batch_score': output_dict['batch_score'],
+                    'scores': output_dict.scores,
+                    'target': output_dict.target,
+                    'batch_score': output_dict.batch_score,
                 }
 
-                if (step + 1) % self.config['gradient_accumulation_steps'] == 0:
-                    """if config['fp16']:
+                if (step + 1) % self.config.gradient_accumulation_steps == 0:
+                    # if config.fp16:
+                    # lr_this_step = config[learning_rate] * warmup_linear(
+                    #     global_step / num_train_optimization_steps,
+                    #     config[warmup_proportio]n,
+                    # )
+                    # for param_group in optimizer.param_groups:
+                    #     param_group["lr"] = lr_this_step
+                    # if first_task and (
+                    #     global_step < warmpu_steps
+                    #     or config.lr_scheduler == "warmup_linear"
+                    # ):
+                    #     warmup_scheduler.step()
 
-                    lr_this_step = config[learning_rate] * warmup_linear(
-                        global_step / num_train_optimization_steps,
-                        config[warmup_proportio]n,
-                    )
-                    for param_group in optimizer.param_groups:
-                        param_group["lr"] = lr_this_step
-                    """
-                    '''
-                    if first_task and (
-                        global_step < warmpu_steps
-                        or config['lr_scheduler'] == "warmup_linear"
-                    ):
-                        warmup_scheduler.step()
-                    '''
                     if first_task:
                         self.global_step += 1
                         first_task = False
 
-        # if "cosine" in config['lr_scheduler'] and global_step > warmpu_steps:
+        # if "cosine" in config.lr_scheduler and global_step > warmpu_steps:
         #    lr_scheduler.step()
-        '''
-        if config['lr_scheduler'] == "automatic":
-            lr_scheduler.step(sum(val_scores.values()))
-            logger.info("best average score is %3f" % lr_scheduler.best)
-        elif config['lr_scheduler'] == "mannul":
-            lr_scheduler.step()
-        '''
+        # if config.lr_scheduler == "automatic":
+        #     lr_scheduler.step(sum(val_scores.values()))
+        #     logger.info("best average score is %3f" % lr_scheduler.best)
+        # elif config.lr_scheduler == "mannul":
+        #     lr_scheduler.step()
+
         if epochId in self.lr_reduce_list:
             for task_id in self.task_ids:
                 # reset the task_stop_controller once the lr drop
@@ -319,37 +253,26 @@ class VILBERT(BaseModel):
             task_id = self.task_ids[0]
         else:
             task_id = self.task_ids
-        torch.autograd.set_detect_anomaly(True)
+        # torch.autograd.set_detect_anomaly(True)
         model_output = {}
 
         output_dict = self.run_one_time(task_id, data)
 
         model_output[task_id] = {
-            'batch_score': output_dict['batch_score'],
-            'batch_size': output_dict['batch_size'],
+            'batch_score': output_dict.batch_score,
+            'batch_size': output_dict.batch_size,
         }
-        # print('batch_score', output_dict['batch_score'])
-        '''
-        # update the multi-task scheduler.
-        self.task_stop_controller[task_id].step(
-            tbLogger.getValScore(task_id))
-        score = tbLogger.showLossVal(task_id, task_stop_controller)
-        '''
+
+        # # update the multi-task scheduler.
+        # self.task_stop_controller[task_id].step(
+        #     tbLogger.getValScore(task_id))
+        # score = tbLogger.showLossVal(task_id, task_stop_controller)
 
         # now only one task
         return model_output[task_id]
 
     def get_image_and_text_features(self, task_id, data):
-        device = self.device
-        '''
-        if self.task_count[task_id] % len(task_dataloader_train[task_id]) == 0:
-        self.task_iter_train[task_id] = iter(task_dataloader_train[task_id])
-
-        self.task_count[task_id] += 1
-        # get the batch
-        batch = self.task_iter_train[task_id].next()
-        '''
-        batch = tuple(t.cuda(device=device, non_blocking=True) for t in data)
+        batch = tuple(t.cuda(device=self.device, non_blocking=True) for t in data)
 
         if task_id == 'TASK4' or task_id == 'TASK17':
             (features, spatials, image_mask, question, target, input_mask, segment_ids, multiple_choice_ids,
@@ -362,7 +285,9 @@ class VILBERT(BaseModel):
 
         num_options = None
         batch_size = features.size(0)
-        if self.task_cfg[task_id]['process'] in ['dialog']:
+        cfg_process = self.config.TASKS[task_id]['process']
+
+        if cfg_process in ['dialog']:
             max_num_bbox = features.size(1)
             nround = question.size(1)
             num_options = question.size(2)
@@ -394,7 +319,7 @@ class VILBERT(BaseModel):
             co_attention_mask = co_attention_mask.view(-1, co_attention_mask.size(2), co_attention_mask.size(3))
             batch_size = rbatch_size
 
-        elif self.task_cfg[task_id]['process'] in ['expand']:
+        elif cfg_process in ['expand']:
             max_num_bbox = features.size(1)
             num_options = question.size(1)
             features = (
@@ -411,7 +336,7 @@ class VILBERT(BaseModel):
             segment_ids = segment_ids.view(-1, segment_ids.size(2))
             co_attention_mask = co_attention_mask.view(-1, co_attention_mask.size(2), co_attention_mask.size(3))
 
-        elif self.task_cfg[task_id]['process'] in ['retrieval']:
+        elif cfg_process in ['retrieval']:
             max_num_bbox = features.size(1)
             num_options = question.size(1)
             features = features.view(-1, features.size(2), features.size(3))
@@ -422,7 +347,7 @@ class VILBERT(BaseModel):
             segment_ids = segment_ids.view(-1, segment_ids.size(2))
             co_attention_mask = co_attention_mask.view(-1, co_attention_mask.size(2), co_attention_mask.size(3))
 
-        elif self.task_cfg[task_id]['process'] in ['nlvr']:
+        elif cfg_process in ['nlvr']:
             batch_size = features.size(0)
             max_num_bbox = features.size(1)
             num_options = question.size(1)
@@ -443,7 +368,7 @@ class VILBERT(BaseModel):
 
         task_tokens = question.new().resize_(question.size(0), 1).fill_(int(task_id[4:]))
 
-        return {
+        return edict({
             'question': question,
             'features': features,
             'spatials': spatials,
@@ -456,4 +381,4 @@ class VILBERT(BaseModel):
             'batch_size': batch_size,
             'multiple_choice_ids': multiple_choice_ids if task_id == 'TASK4' or task_id == 'TASK17' else None,
             'num_options': num_options,
-        }
+        })

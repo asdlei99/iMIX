@@ -9,21 +9,20 @@ from torch.nn import CrossEntropyLoss
 import torch.nn.functional as F
 from transformers.modeling_bert import (
     BertConfig,
-    # BertEmbeddings,
-    # BertEncoder,
     BertPreTrainedModel,
     BertPredictionHeadTransform,
-    # BertLMPredictionHead,
     BertPooler,
     BertLayer,
+    BertIntermediate,
     BertOutput,
+    # BertLMPredictionHead,
+    # BertEmbeddings,
+    # BertEncoder,
     # BertAttention,
     # BertSelfAttention,
-    BertIntermediate,
     # BertSelfOutput,
     ACT2FN,
 )
-# from easydict import EasyDict as edict
 
 logger = logging.getLogger(__name__)
 

@@ -160,8 +160,14 @@ class Config:
 
             base_dict = dict()
             for dl in dict_list:
-                if len(base_dict.keys() & dl.keys()) > 0:
-                    raise KeyError('base_dict and  dl have  some key')
+                common_keys = base_dict.keys() & dl.keys()
+                if len(common_keys) > 0:
+                    common_base = [base_dict[k] for k in common_keys]
+                    common_dl = [dl[k] for k in common_keys]
+                    if common_base != common_dl:
+                        raise KeyError('base_dict and dl have the same key, but different values!')
+                    for k in common_keys:
+                        dl.pop(k)
                 base_dict.update(dl)
 
             base_dict = Config._merge_x_2_y(cfg_dict, base_dict)
