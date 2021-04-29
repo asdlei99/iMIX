@@ -35,7 +35,7 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=8,  # TASKS['TASK'+task_ids]['batch_size'],
+    samples_per_gpu=TASKS['TASK' + task_ids]['batch_size'],
     workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(
@@ -47,7 +47,7 @@ train_data = dict(
 )
 
 test_data = dict(
-    samples_per_gpu=8,  # TASKS['TASK'+task_ids]['eval_batch_size'],
+    samples_per_gpu=TASKS['TASK' + task_ids]['eval_batch_size'],
     workers_per_gpu=0,
     sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),
