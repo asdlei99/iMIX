@@ -278,5 +278,5 @@ class ReferExpressionDataset(Dataset):
         )
 
     def __len__(self):
-        # return len(self.entries)
-        return 64
+        return len(self.entries)
+        # return 64

@@ -339,7 +339,7 @@ class OSCAR_NLVR2Dataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def _load_img_features(slf, args):
+    def _load_img_features(self, args):
         t_start = time.time()
         if args.img_feature_type == 'faster_r-cnn':
             if args.img_feature_dim == 2048:  # object features

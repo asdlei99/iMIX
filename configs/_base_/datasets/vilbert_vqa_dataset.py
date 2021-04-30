@@ -6,7 +6,7 @@ from configs._base_.datasets.vilbert_task_config import (
 dataset_type = 'LoadDatasets'
 
 # test mode directly read this data set
-test_datasets = [TASKS['TASK' + task_ids]['val_split']]  # ['val']
+test_datasets = [TASKS['TASK' + task_ids]['val_split']]
 
 limit_nums = None
 
@@ -35,7 +35,7 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=TASKS['TASK' + task_ids]['batch_size'],
+    samples_per_gpu=TASKS['TASK' + task_ids]['per_gpu_train_batch_size'],
     workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(
@@ -47,7 +47,7 @@ train_data = dict(
 )
 
 test_data = dict(
-    samples_per_gpu=TASKS['TASK' + task_ids]['eval_batch_size'],
+    samples_per_gpu=TASKS['TASK' + task_ids]['per_gpu_eval_batch_size'],
     workers_per_gpu=0,
     sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),

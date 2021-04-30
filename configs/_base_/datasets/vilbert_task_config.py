@@ -1,6 +1,6 @@
 data_root = '/home/datasets/mix_data/vilbert/datasets/'
 
-task_ids = '11'  # '1-2-3...' training task separate by -
+task_ids = '4'  # '1-2-3...' training task separate by -
 
 TASKS = dict(
     TASK1=dict(
@@ -20,8 +20,8 @@ TASKS = dict(
         val_split='minval',
         num_labels=3129,
         lr=0.00004,
-        batch_size=128,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=128,
+        per_gpu_eval_batch_size=1024,
         num_warmup_steps=8472,  # warmup_proportion=0.1
         num_training_steps=84720,  # ceil(totoal 443753 / batch size 32/ GPUS ) * epoch size
     ),
@@ -42,8 +42,8 @@ TASKS = dict(
         val_split='val',
         num_labels=3129,
         lr=0.00004,
-        batch_size=128,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=128,
+        per_gpu_eval_batch_size=1024,
         num_warmup_steps=20224,
         num_training_steps=202240,
     ),
@@ -64,8 +64,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,  # TODO need verified
         lr=0.00004,
-        batch_size=64,
-        eval_batch_size=64,
+        per_gpu_train_batch_size=64,
+        per_gpu_eval_batch_size=64,
     ),
     TASK4=dict(
         name='Visual7w',
@@ -84,8 +84,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        batch_size=256,
-        eval_batch_size=256,
+        per_gpu_train_batch_size=64,  # 256
+        per_gpu_eval_batch_size=64,  # 256
         num_warmup_steps=734,
         num_training_steps=7340,
     ),
@@ -106,8 +106,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,  # TODO need verified
         lr=0.00002,
-        batch_size=64,
-        eval_batch_size=64,
+        per_gpu_train_batch_size=64,
+        per_gpu_eval_batch_size=64,
     ),
     TASK6=dict(
         name='VCR_QA-R',
@@ -126,8 +126,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,  # TODO need verified
         lr=0.00002,
-        batch_size=64,
-        eval_batch_size=64,
+        per_gpu_train_batch_size=64,
+        per_gpu_eval_batch_size=64,
     ),
     TASK7=dict(
         name='RetrievalCOCO',
@@ -146,8 +146,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        batch_size=128,
-        eval_batch_size=128,
+        per_gpu_train_batch_size=32,  # 128,
+        per_gpu_eval_batch_size=32,  # 128,
         num_warmup_steps=7620,
         num_training_steps=76200,
     ),
@@ -168,8 +168,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        batch_size=128,
-        eval_batch_size=128,
+        per_gpu_train_batch_size=32,  # 128,
+        per_gpu_eval_batch_size=32,  # 128,
         num_warmup_steps=2196,
         num_training_steps=21960,
     ),
@@ -190,8 +190,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        batch_size=256,
-        eval_batch_size=256,
+        per_gpu_train_batch_size=256,
+        per_gpu_eval_batch_size=256,
         num_warmup_steps=752,
         num_training_steps=7520,
     ),
@@ -212,8 +212,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        batch_size=256,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=256,
+        per_gpu_eval_batch_size=1024,
         num_warmup_steps=750,
         num_training_steps=7500,
     ),
@@ -234,8 +234,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        batch_size=256,
-        eval_batch_size=256,
+        per_gpu_train_batch_size=256,
+        per_gpu_eval_batch_size=256,
         num_warmup_steps=512,
         num_training_steps=5120,
     ),
@@ -256,8 +256,8 @@ TASKS = dict(
         val_split='dev',
         num_labels=1,  # TODO need verified
         lr=0.00002,
-        batch_size=64,
-        eval_batch_size=512,
+        per_gpu_train_batch_size=64,
+        per_gpu_eval_batch_size=512,
     ),
     TASK13=dict(
         name='VisualEntailment',
@@ -276,8 +276,8 @@ TASKS = dict(
         val_split='dev',
         num_labels=3,
         lr=0.00002,
-        batch_size=256,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=64,  # 256,
+        per_gpu_eval_batch_size=256,  # 1024,
         num_warmup_steps=4004,
         num_training_steps=40040,
     ),
@@ -298,8 +298,8 @@ TASKS = dict(
         val_split='valid',
         num_labels=3,
         lr=0.00004,
-        batch_size=256,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=64,  # 256,
+        per_gpu_eval_batch_size=256,  # 1024,
         num_warmup_steps=4530,
         num_training_steps=45300,
     ),
@@ -320,8 +320,8 @@ TASKS = dict(
         val_split='minval',
         num_labels=1533,
         lr=0.00004,
-        batch_size=128,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=128,
+        per_gpu_eval_batch_size=1024,
         num_warmup_steps=15046,
         num_training_steps=150460,
     ),
@@ -342,8 +342,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,  # TODO need verified
         lr=0.00004,
-        batch_size=256,
-        eval_batch_size=1024,
+        per_gpu_train_batch_size=256,
+        per_gpu_eval_batch_size=1024,
     ),
     TASK17=dict(
         name='GuessWhatPointing',
@@ -362,8 +362,8 @@ TASKS = dict(
         val_split='valid',
         num_labels=1,
         lr=0.00002,
-        batch_size=64,
-        eval_batch_size=64,
+        per_gpu_train_batch_size=16,  # 64,
+        per_gpu_eval_batch_size=16,  # 64,
         num_warmup_steps=3138,
         num_training_steps=31380,
     ),
@@ -384,7 +384,7 @@ TASKS = dict(
         val_split='val',
         num_labels=1,  # TODO need verified
         lr=0.000002,
-        batch_size=256,
-        eval_batch_size=256,
+        per_gpu_train_batch_size=256,
+        per_gpu_eval_batch_size=256,
     ),
 )

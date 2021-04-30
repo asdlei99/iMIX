@@ -171,8 +171,8 @@ class VILBERT(BaseModel):
             vision_logit = vision_logit.squeeze(2).gather(1, multiple_choice_ids)
             vision_logit = vision_logit.unsqueeze(2)
             _, preds = torch.max(vision_logit, dim=1)
-            _, target = torch.max(target, dim=1)
-            batch_score = float((preds == target).sum())
+            _, target_tmp = torch.max(target, dim=1)
+            batch_score = float((preds == target_tmp).sum())
             pred = vision_logit
 
         elif cfg_type == 'VL-binary-classifier':
@@ -195,7 +195,7 @@ class VILBERT(BaseModel):
         epochId = kwargs['cur_epoch']
         step = kwargs['inner_iter']
 
-        torch.autograd.set_detect_anomaly(True)
+        # torch.autograd.set_detect_anomaly(True)
         first_task = True
         model_output = {}
         for task_id in self.task_ids:
