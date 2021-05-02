@@ -70,7 +70,7 @@ def build_phoc(words,
             char_occ = occupancy(index, n)
             if char not in char_indices:
                 if on_unknown_unigram == 'warn':
-                    logger.warning('The unigram \'%s\' is unknown, skipping this character', char)
+                    # logger.warning('The unigram \'%s\' is unknown, skipping this character', char)
                     continue
                 else:
                     print('The unigram \'%s\' is unknown' % char)

@@ -46,7 +46,7 @@ vqa_reader_train_cfg = dict(
         valminusminival=data_root + annotation_default_path + 'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets,  # used datasets
-    if_global=False)
+    is_global=False)
 
 vqa_reader_test_cfg = dict(
     type='VQAReader',
@@ -79,7 +79,7 @@ vqa_reader_test_cfg = dict(
         valminusminival=data_root + annotation_default_path + 'imdb_valminusminival2014.npy',
     ),
     datasets=test_datasets,  # used datasets
-    if_global=False)
+    is_global=False)
 
 vqa_info_cpler_cfg = dict(
     type='VQAInfoCpler',

@@ -1,4 +1,5 @@
 # model settings
+weight_root = '/home/datasets/mix_data/iMIX/data/models/detectron.vmb_weights/'
 model = dict(
     type='M4C',
     hidden_dim=768,
@@ -11,15 +12,15 @@ model = dict(
             type='ImageFeatureEncoder',
             encoder_type='finetune_faster_rcnn_fpn_fc7',
             in_dim=2048,
-            weights_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_w.pkl',
-            bias_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_b.pkl',
+            weights_file=weight_root + 'fc7_w.pkl',
+            bias_file=weight_root + 'fc7_b.pkl',
         ),
         dict(
             type='ImageFeatureEncoder',
             encoder_type='finetune_faster_rcnn_fpn_fc7',
             in_dim=2048,
-            weights_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_w.pkl',
-            bias_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_b.pkl',
+            weights_file=weight_root + 'fc7_w.pkl',
+            bias_file=weight_root + 'fc7_b.pkl',
         ),
     ],
     backbone=dict(type='MMT', hidden_size=768, num_hidden_layers=4),

@@ -19,7 +19,7 @@ vqa_reader_train_cfg = dict(
     ),  # TODO(jinliang) mix_annotations  -> annotations
     image_feature_max_regions=37,
     datasets=train_datasets,  # used datasets
-    if_global=False,
+    is_global=False,
 )
 
 vqa_reader_test_cfg = dict(
@@ -35,7 +35,7 @@ vqa_reader_test_cfg = dict(
         'visdial_1.0_val_dense_annotations_processed.json'),  # TODO(jinliang) mix_annotations  -> annotations
     image_feature_max_regions=37,
     datasets=test_datasets,  # used datasets
-    if_global=False,
+    is_global=False,
     has_bert=False,  # if_bert
 )
 

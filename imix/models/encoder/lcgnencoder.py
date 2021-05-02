@@ -122,6 +122,7 @@ class BiLSTM(nn.Module):
         _, desorted_indices = torch.sort(indices, descending=False)
 
         # pack questions for LSTM forwarding
+        sorted_lengths = sorted_lengths.to(device='cpu', dtype=torch.int64)
         packed_questions = nn.utils.rnn.pack_padded_sequence(sorted_questions, sorted_lengths, batch_first=True)
         packed_output, (sorted_h_n, _) = self.bilstm(packed_questions)
         sorted_output, _ = nn.utils.rnn.pad_packed_sequence(

@@ -95,7 +95,7 @@ class VisualBERT(BaseModel):
             'position_embeddings_visual',
             'visual_embeddings_type',
         ]
-        to_be_flattened_dim = ['image_text_alignment', 'feature']
+        to_be_flattened_dim = ['image_text_alignment', 'features']
 
         # We want to convert everything into: batch x sequence_length x (dim).
         flattened = self.flatten(sample_list, to_be_flattened, to_be_flattened_dim)
@@ -141,7 +141,7 @@ class VisualBERT(BaseModel):
     # return sample_list
 
     def add_custom_params(self, data):
-        visual_embeddings = data['feature']
+        visual_embeddings = data['features']
         image_dim = data['image_dim']
         # image_feat_variable = batch x ( num_choice x ) image_feature_length x dim
         # Prepare Mask
@@ -150,6 +150,7 @@ class VisualBERT(BaseModel):
             if len(image_dim.size()) < len(image_mask.size()):
                 image_dim = image_dim.unsqueeze(-1)
             assert len(image_dim.size()) == len(image_mask.size())
+            image_mask = image_mask.to(device=image_dim.device)
             image_mask = image_mask < image_dim
             data['image_mask'] = image_mask.long()
         else:
@@ -167,7 +168,7 @@ class VisualBERT(BaseModel):
                                                                'model.cls').replace('bert.classifier',
                                                                                     'model.classifier'))
 
-    def forward_train(self, data):
+    def forward_train(self, data, *args, **kwargs):
         # data = self.update_sample_list_based_on_head(data)
         data = self.add_custom_params(data)
         data = self.flatten_for_bert(data)
@@ -177,7 +178,7 @@ class VisualBERT(BaseModel):
             data['input_mask'].cuda(),
             data['attention_mask'].cuda(),
             data['input_segment'].cuda(),
-            data['feature'].cuda(),
+            data['features'].cuda(),
             None,  # data['position_embeddings_visual'],
             data['visual_embeddings_type'].cuda(),
             None,  # data['image_text_alignment'],

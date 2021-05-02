@@ -15,7 +15,7 @@ class HGL(R2C):
         super(HGL, self).__init__(input_dropout, pretrained, average_pool, semantic, final_dim, backbone, head)
         self.detector = SimpleDetector(pretrained=True, average_pool=True, semantic=semantic, final_dim=final_dim)
 
-    def forward_train(self, data):
+    def forward_train(self, data, *args, **kwargs):
         # images = data['images']
         # boxes = data['boxes']
         # box_mask = data['box_mask']
@@ -59,7 +59,7 @@ class HGL(R2C):
 
         return model_output
 
-    def forward_test(self, data):
+    def forward_test(self, data, *args, **kwargs):
         model_output = self.forward_train(data)
         return model_output
 

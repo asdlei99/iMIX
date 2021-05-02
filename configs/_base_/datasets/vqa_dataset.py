@@ -17,7 +17,6 @@ test_datasets = ['minival']
 
 vqa_reader_train_cfg = dict(
     type='VQAReader',
-    card='default',
     mix_features=dict(
         train=data_root + feature_default_path + 'trainval2014.lmdb',
         val=data_root + feature_default_path + 'trainval2014.lmdb',
@@ -46,12 +45,10 @@ vqa_reader_train_cfg = dict(
         valminusminival=data_root + annotation_default_path + 'imdb_valminusminival2014.npy',
     ),
     datasets=train_datasets,  # used datasets
-    if_global=False,
 )
 
 vqa_reader_test_cfg = dict(
     type='VQAReader',
-    card='default',
     mix_features=dict(
         train=data_root + feature_default_path + 'trainval2014.lmdb',
         val=data_root + feature_default_path + 'trainval2014.lmdb',
@@ -79,8 +76,7 @@ vqa_reader_test_cfg = dict(
         train_coco50pc=data_root + annotation_default_path + 'imdb_train2014_len_coco_50_pc.npy',
         valminusminival=data_root + annotation_default_path + 'imdb_valminusminival2014.npy',
     ),
-    datasets=test_datasets,  # used datasets
-    if_global=False)
+    datasets=test_datasets)
 
 vqa_info_cpler_cfg = dict(
     type='VQAInfoCpler',
