@@ -7,12 +7,12 @@
 # ]  # yapf:disable
 
 # To train the base model(no finetuning on dense annotations)
-_base_ = [
-    '../_base_/models/visual_dialog_bert_config.py',
-    '../_base_/datasets/visual_dialog_dataset.py',
-    '../_base_/schedules/schedule_visual_dialog.py',
-    '../_base_/default_runtime.py'
-]  # yapf:disable
+# _base_ = [
+#     '../_base_/models/visual_dialog_bert_config.py',
+#     '../_base_/datasets/visual_dialog_dataset.py',
+#     '../_base_/schedules/schedule_visual_dialog.py',
+#     '../_base_/default_runtime.py'
+# ]  # yapf:disable
 
 # To finetuning the base model with dense annotations
 # _base_ = [
@@ -63,12 +63,12 @@ _base_ = [
 # ] # yapf:disable
 
 # 前傳沒問題
-# _base_ = [
-#     '../_base_/models/r2c_config.py',
-#     '../_base_/datasets/vcr_dataset.py',
-#     '../_base_/schedules/schedule_vqa.py',
-#     '../_base_/default_runtime.py'
-# ]  # yapf:disable
+_base_ = [
+    '../_base_/models/r2c_config.py',
+    '../_base_/datasets/vcr_dataset.py',
+    '../_base_/schedules/schedule_vqa.py',
+    '../_base_/default_runtime.py'
+]  # yapf:disable
 
 # 前傳沒問題  chao
 # _base_ = [

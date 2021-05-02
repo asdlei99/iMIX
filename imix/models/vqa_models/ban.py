@@ -14,8 +14,8 @@ class BAN(BaseModel):
         # self.combine_model = build_combine_layer(combine_model)
         self.head = build_head(head)  # 包括 classification head， generation head
 
-    def forward_train(self, data):
-        v = data['feature'].cuda()
+    def forward_train(self, data, *args, **kwargs):
+        v = data['features'].cuda()
         q = self.embeddimg_model[0](data['input_ids'].cuda())
         q_emb = self.embeddimg_model[1].forward_all(q)
         q_emb = self.backbone(v, q_emb)
@@ -27,6 +27,6 @@ class BAN(BaseModel):
         model_output = {'scores': predict_scores, 'target': targets}
         return model_output
 
-    def forward_test(self, data):
+    def forward_test(self, data, *args, **kwargs):
         model_output = self.forward_train(data)
         return model_output

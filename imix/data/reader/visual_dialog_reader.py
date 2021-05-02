@@ -2,9 +2,10 @@ import numpy as np
 import os
 import json
 from ..utils.stream import ItemFeature
-from ..utils.image_features_reader import ImageFeaturesH5Reader
+# from imix.data.reader.feature_reader.image_features_reader import ImageFeaturesH5Reader
 from ..utils.data_utils import encode_image_input
 from typing import Dict
+from .base_reader import IMIXDataReader
 
 
 def load_annotation_file(path):
@@ -33,7 +34,7 @@ class BaseDatasetReader:
         self.annotations = []
         self.item_splits = []
 
-        self.if_global = cfg.if_global if self.has_global else False
+        self.is_global = cfg.is_global if self.has_global else False
         self.load_data_from_cfg(cfg)
 
     def init_default_params(self, cfg):
@@ -97,34 +98,71 @@ class BaseDatasetReader:
                     self.features_pathes[split + '_' + name.split('.pth')[0]] = os.path.join(img_feature_dir, name)
 
 
-class VisDiaReader(BaseDatasetReader):
+# class VisDiaReader(BaseDatasetReader):
+#
+#     def __init__(self, cfg):
+#         super().__init__(cfg)
+#         self.image_features_reader = ImageFeaturesH5Reader(
+#             self.image_features_dir[0])  # TODO(jinliang)  temporary treatement
+#
+#     def __len__(self):
+#         return len(self.annotations)
+#
+#     def __getitem__(self, idx):
+#         annoation = self.annotations[idx]
+#         # split = self.item_splits[idx]
+#         item_feature = ItemFeature(init_dict=annoation)
+#         item_feature.error = False
+#         item_feature.update(self.get_image_feature_info(annoation['image_id']))
+#
+#         return item_feature
+#
+#     def get_image_feature_info(self, idx):
+#         features, num_boxes, boxes, _, image_target = self.image_features_reader[idx]
+#         features, spatials, image_mask, image_target, image_label = encode_image_input(
+#             features, num_boxes, boxes, image_target, max_regions=self.image_feature_max_regions)
+#         image_feature_info = {}
+#         image_feature_info['image_feat'] = features
+#         image_feature_info['image_loc'] = spatials
+#         image_feature_info['image_mask'] = image_mask
+#         image_feature_info['image_target'] = image_target
+#         image_feature_info['image_label'] = image_label
+
+# return image_feature_info
+
+
+class VisDiaReader(IMIXDataReader):
 
     def __init__(self, cfg):
         super().__init__(cfg)
-        self.image_features_reader = ImageFeaturesH5Reader(
-            self.image_features_dir[0])  # TODO(jinliang)  temporary treatement
+        self.image_feature_max_regions = cfg.get('image_feature_max_regions', 37)
 
     def __len__(self):
-        return len(self.annotations)
+        return len(self.mix_annotations)
 
     def __getitem__(self, idx):
-        annoation = self.annotations[idx]
-        # split = self.item_splits[idx]
+        annoation = self.mix_annotations[idx]
+        img_feature = self.get_img_feat(idx)
+
         item_feature = ItemFeature(init_dict=annoation)
         item_feature.error = False
-        item_feature.update(self.get_image_feature_info(annoation['image_id']))
+        item_feature.update(img_feature)
 
         return item_feature
 
-    def get_image_feature_info(self, idx):
-        features, num_boxes, boxes, _, image_target = self.image_features_reader[idx]
+    def get_img_feat(self, idx):
+        features, num_boxes, boxes, _, image_target = self.feature_obj[idx]
         features, spatials, image_mask, image_target, image_label = encode_image_input(
-            features, num_boxes, boxes, image_target, max_regions=self.image_feature_max_regions)
-        image_feature_info = {}
-        image_feature_info['image_feat'] = features
-        image_feature_info['image_loc'] = spatials
-        image_feature_info['image_mask'] = image_mask
-        image_feature_info['image_target'] = image_target
-        image_feature_info['image_label'] = image_label
-
-        return image_feature_info
+            features=features,
+            num_boxes=num_boxes,
+            boxes=boxes,
+            image_target=image_target,
+            max_regions=self.image_feature_max_regions)
+        img_feat = {
+            'image_feat': features,
+            'image_loc': spatials,
+            'image_mask': image_mask,
+            'image_target': image_target,
+            'image_label': image_label
+        }
+        return img_feat

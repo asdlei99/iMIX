@@ -5,9 +5,11 @@ import pickle
 import lmdb  # install lmdb by "pip install lmdb"
 import base64
 import os
+from .feature_reader import FeatureReaders
 
 
-class ImageFeaturesH5Reader(object):
+@FeatureReaders.register_module()
+class ImageFeaturesH5Reader:
     """A reader for H5 files containing pre-extracted image features. A typical
     H5 file is expected to have a column named "image_id", and another column
     named "features".
@@ -33,7 +35,7 @@ class ImageFeaturesH5Reader(object):
         self.features_path = features_path
         self._in_memory = in_memory
 
-        self.env = None
+        self.env_db = None
         self._image_ids = []
         self.features = []
         self.num_boxes = []
@@ -42,7 +44,7 @@ class ImageFeaturesH5Reader(object):
         self.cls_prob = []
 
     def init_lmdb(self):
-        self.env = lmdb.open(
+        self.env_db = lmdb.open(
             self.features_path,
             subdir=os.path.isdir(self.features_path),
             max_readers=8,
@@ -51,14 +53,14 @@ class ImageFeaturesH5Reader(object):
             readahead=False,
             meminit=False)
 
-        with self.env.begin(write=False) as txn:
+        with self.env_db.begin(write=False) as txn:
             self._image_ids = pickle.loads(txn.get('keys'.encode()))
 
     def __len__(self):
         return len(self._image_ids)
 
-    def __getitem__(self, image_id):
-        if self.env is None:
+    def __getitem__(self, image_id):  # by image id
+        if self.env_db is None:
             self.init_lmdb()
 
         image_id = str(image_id).encode()
@@ -73,7 +75,7 @@ class ImageFeaturesH5Reader(object):
                 image_location_ori = self.boxes_ori[index]
                 cls_prob = self.cls_prob[index]
             else:
-                with self.env.begin(write=False) as txn:
+                with self.env_db.begin(write=False) as txn:
                     item = pickle.loads(txn.get(image_id))
                     image_id = item['image_id']
                     image_h = int(item['image_h'])
@@ -122,7 +124,7 @@ class ImageFeaturesH5Reader(object):
                     self.num_boxes[index] = num_boxes
         else:
             # Read chunk from file everytime if not loaded in memory.
-            with self.env.begin(write=False) as txn:
+            with self.env_db.begin(write=False) as txn:
                 item = pickle.loads(txn.get(image_id))
                 image_id = item['image_id']
                 image_h = int(item['image_h'])
@@ -163,3 +165,7 @@ class ImageFeaturesH5Reader(object):
 
     def keys(self) -> List[int]:
         return self._image_ids
+
+    def read(self, img_annotation):
+        img_id = img_annotation['image_id']
+        return self[img_id]

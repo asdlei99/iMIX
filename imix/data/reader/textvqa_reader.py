@@ -5,55 +5,82 @@ created time: 2020/8/19
 
 from ..utils.stream import ItemFeature
 from .base_reader import IMIXDataReader
+from imix.utils_imix.common_function import update_d1_with_d2
 
 
 class TextVQAReader(IMIXDataReader):
 
     def __init__(self, cfg):
         super().__init__(cfg)
-        assert self.default_feature, ('Not support non-default features now.')
+        # assert self.default_feature, ('Not support non-default features now.')
 
     def __len__(self):
         return len(self.mix_annotations)
 
-    def __getitem__(self, item):
-        annotation = self.mix_annotations[item]
-        # split = self.item_splits[item]
+    def __getitem__(self, idx):
+        annotation = self.mix_annotations[idx]
+        feature = self.feature_obj[idx]
+        global_feature, ocr_feature = {}, {}
+
         item_feature = ItemFeature(annotation)
         item_feature.error = False
-        '''
-        for k, v in annotation.items():
-            item_feature[k] = v
-
-        if split != 'test':
-            item_feature.answers = annotation['answers']
-        '''
         item_feature.tokens = annotation['question_tokens']
         item_feature.img_id = annotation['image_id']
 
-        feature_info = self.get_featureinfo_from_txns(self.feature_txns,
-                                                      annotation['set_name'] + '/' + annotation['image_name'])
-        for k, v in feature_info.items():
-            item_feature[k] = item_feature.get(k, v)
-            # item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
+        update_d1_with_d2(d1=item_feature, d2=feature)
 
-        feature_global_info = self.get_featureinfo_from_txns(self.feature_global_txns,
-                                                             annotation['set_name'] + '/' + annotation['image_name'])
-        feature_global_info['features_global'] = feature_global_info.pop('features')
+        if self.global_feature_obj:
+            global_feature = self.global_feature_obj[idx]
+            global_feature.update({'features_global': global_feature.pop('features')})
+            update_d1_with_d2(d1=item_feature, d2=global_feature)
 
-        for k, v in feature_global_info.items():
-            item_feature[k] = item_feature.get(k, v)
-            # item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
+        if self.ocr_feature_obj:
+            ocr_feature = self.ocr_feature_obj[idx]
+            ocr_feature.update({'features_ocr': ocr_feature.pop('features')})
+            update_d1_with_d2(d1=item_feature, d2=ocr_feature)
 
-        feature_ocr_info = self.get_featureinfo_from_txns(self.feature_ocr_txns,
-                                                          annotation['set_name'] + '/' + annotation['image_name'])
-        feature_ocr_info['features_ocr'] = feature_ocr_info.pop('features')
-        for k, v in feature_ocr_info.items():
-            item_feature[k] = item_feature.get(k, v)
-            # item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
-        item_feature.error = None in [feature_info, feature_global_info, feature_ocr_info]
+        item_feature.error = None in [feature, global_feature, ocr_feature]
 
         return item_feature
+
+    # def __getitem__(self, item):
+    #     annotation = self.mix_annotations[item]
+    #     # split = self.item_splits[item]
+    #     item_feature = ItemFeature(annotation)
+    #     item_feature.error = False
+    #     '''
+    #     for k, v in annotation.items():
+    #         item_feature[k] = v
+    #
+    #     if split != 'test':
+    #         item_feature.answers = annotation['answers']
+    #     '''
+    #     item_feature.tokens = annotation['question_tokens']
+    #     item_feature.img_id = annotation['image_id']
+    #
+    #     feature_info = self.get_featureinfo_from_txns(self.feature_txns,
+    #                                                   annotation['set_name'] + '/' + annotation['image_name'])
+    #     for k, v in feature_info.items():
+    #         item_feature[k] = item_feature.get(k, v)
+    #         # item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
+    #
+    #     feature_global_info = self.get_featureinfo_from_txns(self.feature_global_txns,
+    #                                                          annotation['set_name'] + '/' + annotation['image_name'])
+    #     feature_global_info['features_global'] = feature_global_info.pop('features')
+    #
+    #     for k, v in feature_global_info.items():
+    #         item_feature[k] = item_feature.get(k, v)
+    #         # item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
+    #
+    #     feature_ocr_info = self.get_featureinfo_from_txns(self.feature_ocr_txns,
+    #                                                       annotation['set_name'] + '/' + annotation['image_name'])
+    #     feature_ocr_info['features_ocr'] = feature_ocr_info.pop('features')
+    #     for k, v in feature_ocr_info.items():
+    #         item_feature[k] = item_feature.get(k, v)
+    #         # item_feature[k] = v if item_feature.get(k) is None else item_feature[k]
+    #     item_feature.error = None in [feature_info, feature_global_info, feature_ocr_info]
+    #
+    #     return item_feature
 
 
 #

@@ -19,7 +19,6 @@ class PYTHIA(BaseModel):
         # self.init_weights()
 
     def process_text_embedding(self, text):
-
         # Get embedding models
         text_embedding_model = self.embedding_model[-1]
         embedding = text_embedding_model(text)
@@ -28,13 +27,12 @@ class PYTHIA(BaseModel):
         return text_embeddding_total
 
     def process_feature_embedding(self, data, text_embedding_total, extra=None, batch_size_t=None):
-
-        bs, num_feats, feats_dim = data['feature'].size()
+        bs, num_feats, feats_dim = data['features'].size()
         feature_embeddings = []
         feature_attentions = []
         features = []
         feature_global = data['feature_global'].reshape(bs, -1, feats_dim)[:, :num_feats, :]
-        features.append(data['feature'].cuda())
+        features.append(data['features'].cuda())
         features.append(feature_global.cuda())
         bs_num_feats = num_feats * torch.ones(bs)
 
@@ -60,7 +58,6 @@ class PYTHIA(BaseModel):
         return feature_embedding_total, feature_attentions
 
     def process_context_feature_embedding(self, data, text_embedding_total, order_vectors=None, batch_size_t=None):
-
         feature_embeddings = []
         feature_attentions = []
         features = []
@@ -84,7 +81,7 @@ class PYTHIA(BaseModel):
         feature_embedding_total = torch.cat(feature_embeddings, dim=1)
         return feature_embedding_total, feature_attentions
 
-    def forward_train(self, data):
+    def forward_train(self, data, *args, **kwargs):
         text = self.embedding_model[0](data['input_ids'].cuda())
         text_embedding_total = self.process_text_embedding(text)
 
@@ -99,6 +96,6 @@ class PYTHIA(BaseModel):
 
         return model_output
 
-    def forward_test(self, data):
+    def forward_test(self, data, *args, **kwargs):
         model_output = self.forward_train(data)
         return model_output

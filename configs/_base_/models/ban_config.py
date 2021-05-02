@@ -4,8 +4,13 @@ model = dict(
     embedding=[
         dict(
             type='WordEmbedding',
-            vocab_file='/home/zrz/.cache/torch/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
-            embedding_dim=300),
+            vocab_file='/home/datasets/mix_data/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
+            embedding_dim=300,
+            glove_params=dict(
+                name='6B',
+                dim=300,
+                cache='/home/datasets/mix_data/iMIX',
+            )),
         dict(
             type='BiLSTMTextEmbedding',
             hidden_dim=1280,
