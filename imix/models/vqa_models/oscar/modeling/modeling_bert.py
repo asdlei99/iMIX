@@ -7,15 +7,29 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss
-from pytorch_transformers.modeling_bert import (BertEmbeddings, BertSelfAttention, BertAttention, BertEncoder,
-                                                BertLayer, BertSelfOutput, BertIntermediate, BertOutput, BertPooler,
-                                                BertLayerNorm, BertPreTrainedModel, BertOnlyMLMHead,
-                                                BertLMPredictionHead, BertConfig, BERT_PRETRAINED_MODEL_ARCHIVE_MAP,
-                                                load_tf_weights_in_bert)
+from transformers.modeling_bert import (
+    BertEmbeddings,
+    BertSelfAttention,
+    BertAttention,
+    BertEncoder,
+    BertLayer,
+    BertSelfOutput,
+    BertIntermediate,
+    BertOutput,
+    BertPooler,
+    BertPreTrainedModel,
+    BertOnlyMLMHead,
+    BertLMPredictionHead,
+    BertConfig,
+    load_tf_weights_in_bert,
+)
+
 from .modeling_utils import CaptionPreTrainedModel, ImgPreTrainedModel
 from ..utils.cbs import ConstrainedBeamSearch, select_best_beam_with_constraints
 
 logger = logging.getLogger(__name__)
+
+BertLayerNorm = nn.LayerNorm
 
 
 class CaptionBertSelfAttention(BertSelfAttention):
@@ -25,7 +39,14 @@ class CaptionBertSelfAttention(BertSelfAttention):
     def __init__(self, config):
         super(CaptionBertSelfAttention, self).__init__(config)
 
-    def forward(self, hidden_states, attention_mask, head_mask=None, history_state=None):
+    def forward(
+        self,
+        hidden_states,
+        attention_mask,
+        head_mask=None,
+        history_state=None,
+        output_attentions=None,
+    ):
         if history_state is not None:
             x_states = torch.cat([history_state, hidden_states], dim=1)
             mixed_query_layer = self.query(hidden_states)
@@ -63,7 +84,7 @@ class CaptionBertSelfAttention(BertSelfAttention):
         new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size, )
         context_layer = context_layer.view(*new_context_layer_shape)
 
-        outputs = (context_layer, attention_probs) if self.output_attentions else (context_layer, )
+        outputs = (context_layer, attention_probs) if output_attentions else (context_layer, )
         return outputs
 
 
@@ -87,32 +108,38 @@ class CaptionBertEncoder(BertEncoder):
 
     def __init__(self, config):
         super(CaptionBertEncoder, self).__init__(config)
-        self.output_attentions = config.output_attentions
-        self.output_hidden_states = config.output_hidden_states
         self.layer = nn.ModuleList([CaptionBertLayer(config) for _ in range(config.num_hidden_layers)])
 
-    def forward(self, hidden_states, attention_mask, head_mask=None, encoder_history_states=None):
+    def forward(
+        self,
+        hidden_states,
+        attention_mask,
+        head_mask=None,
+        encoder_history_states=None,
+        output_attentions=None,
+        output_hidden_states=None,
+    ):
         all_hidden_states = ()
         all_attentions = ()
         for i, layer_module in enumerate(self.layer):
-            if self.output_hidden_states:
+            if output_hidden_states:
                 all_hidden_states = all_hidden_states + (hidden_states, )
 
             history_state = None if encoder_history_states is None else encoder_history_states[i]
             layer_outputs = layer_module(hidden_states, attention_mask, head_mask[i], history_state)
             hidden_states = layer_outputs[0]
 
-            if self.output_attentions:
+            if output_attentions:
                 all_attentions = all_attentions + (layer_outputs[1], )
 
         # Add last layer
-        if self.output_hidden_states:
+        if output_hidden_states:
             all_hidden_states = all_hidden_states + (hidden_states, )
 
         outputs = (hidden_states, )
-        if self.output_hidden_states:
+        if output_hidden_states:
             outputs = outputs + (all_hidden_states, )
-        if self.output_attentions:
+        if output_attentions:
             outputs = outputs + (all_attentions, )
         return outputs  # outputs, (hidden states), (attentions)
 
@@ -1043,7 +1070,6 @@ class BertImgForPreTraining(ImgPreTrainedModel):
 
     """
     config_class = BertConfig
-    pretrained_model_archive_map = BERT_PRETRAINED_MODEL_ARCHIVE_MAP
     load_tf_weights = load_tf_weights_in_bert
     base_model_prefix = 'bert'
 

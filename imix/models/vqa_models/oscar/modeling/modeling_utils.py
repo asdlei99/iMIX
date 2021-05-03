@@ -7,12 +7,18 @@ import logging
 import torch
 import torch.nn.functional as F
 
-from pytorch_transformers.modeling_bert import (BertConfig, load_tf_weights_in_bert, BERT_PRETRAINED_MODEL_ARCHIVE_MAP,
-                                                BertPreTrainedModel)
-from pytorch_transformers.modeling_utils import (PreTrainedModel, WEIGHTS_NAME, TF_WEIGHTS_NAME)
-from pytorch_transformers.file_utils import cached_path
+from transformers.modeling_bert import (
+    BertConfig,
+    load_tf_weights_in_bert,
+    BertPreTrainedModel,
+)
+
+from transformers.modeling_utils import (PreTrainedModel, WEIGHTS_NAME, TF_WEIGHTS_NAME)
+from transformers.file_utils import cached_path
 
 logger = logging.getLogger()
+
+BERT_PRETRAINED_MODEL_ARCHIVE_MAP = None
 
 
 class CaptionPreTrainedModel(BertPreTrainedModel):
@@ -807,7 +813,6 @@ class ImgPreTrainedModel(PreTrainedModel):
 
         if state_dict is None and not from_tf:
             state_dict = torch.load(resolved_archive_file, map_location='cpu')
-
         if from_tf:
             # Directly load from a TensorFlow checkpoint
             return cls.load_tf_weights(model, config, resolved_archive_file[:-6])  # Remove the '.index'

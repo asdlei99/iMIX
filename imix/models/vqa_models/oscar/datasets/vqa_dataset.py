@@ -8,7 +8,7 @@ import base64
 
 import numpy as np
 import torch
-from pytorch_transformers import BertTokenizer
+from transformers import BertTokenizer
 from torch.utils.data import Dataset
 from ..utils.task_utils import (_truncate_seq_pair, output_modes, processors)
 from imix.data.builder import DATASETS
