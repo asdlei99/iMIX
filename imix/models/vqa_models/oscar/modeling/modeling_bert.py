@@ -24,7 +24,7 @@ from transformers.modeling_bert import (
     load_tf_weights_in_bert,
 )
 
-from .modeling_utils import CaptionPreTrainedModel, ImgPreTrainedModel
+from .modeling_utils import CaptionPreTrainedModel
 from ..utils.cbs import ConstrainedBeamSearch, select_best_beam_with_constraints
 
 logger = logging.getLogger(__name__)
@@ -1023,7 +1023,7 @@ class BertPreTrainingHeads(nn.Module):
         return prediction_scores, seq_relationship_score
 
 
-class BertImgForPreTraining(ImgPreTrainedModel):
+class BertImgForPreTraining(BertPreTrainedModel):
     r"""
         **masked_lm_labels**: (`optional`) ``torch.LongTensor`` of shape ``(batch_size, sequence_length)``:
             Labels for computing the masked language modeling loss.
@@ -1084,18 +1084,6 @@ class BertImgForPreTraining(ImgPreTrainedModel):
         # self.apply(self.init_weights)
         self.init_weights()
         self.tie_weights()
-
-    def init_weights(self, module):
-        """Initialize the weights."""
-        if isinstance(module, (nn.Linear, nn.Embedding)):
-            # Slightly different from the TF version which uses truncated_normal for initialization
-            # cf https://github.com/pytorch/pytorch/pull/5617
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-        elif isinstance(module, BertLayerNorm):
-            module.bias.data.zero_()
-            module.weight.data.fill_(1.0)
-        if isinstance(module, nn.Linear) and module.bias is not None:
-            module.bias.data.zero_()
 
     def tie_weights(self):
         """Make sure we are sharing the input and output embeddings.
