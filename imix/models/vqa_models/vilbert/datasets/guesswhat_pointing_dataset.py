@@ -276,5 +276,4 @@ class GuessWhatPointingDataset(Dataset):
         )
 
     def __len__(self):
-        return 200
-        # return len(self.entries)
+        return len(self.entries)
