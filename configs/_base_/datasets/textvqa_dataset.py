@@ -44,7 +44,7 @@ textvqa_reader_train_cfg = dict(
         test_ml=data_root + annotation_path + 'imdb_test_ocr_ml.npy',
     ),
     datasets=train_datasets,
-    if_global=True)
+    is_global=True)
 
 textvqa_reader_test_cfg = dict(
     type='TEXTVQAREADER',
@@ -82,7 +82,7 @@ textvqa_reader_test_cfg = dict(
         test_ml=data_root + annotation_path + 'imdb_test_ocr_ml.npy',
     ),
     datasets=train_datasets,
-    if_global=True)
+    is_global=True)
 
 textvqa_info_cpler_cfg = dict(
     type='TEXTVQAInfoCpler',
@@ -121,7 +121,7 @@ train_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
     sampler_name='TrainingSampler',
-    data=dict(type=dataset_type, reader=textvqa_reader_train_cfg, info_cpler=textvqa_info_cpler_cfg, limit_nums=800))
+    data=dict(type=dataset_type, reader=textvqa_reader_train_cfg, info_cpler=textvqa_info_cpler_cfg, limit_nums=None))
 
 test_data = dict(
     samples_per_gpu=16,

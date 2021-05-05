@@ -257,10 +257,14 @@ class VisualBERTForClassification(nn.Module):
                 output_hidden_states=self.config['output_hidden_states'],
             )
         else:
+            from imix.utils_imix.config import ToExpanduser
+            cache_dir = os.path.join('~/.cache/torch', 'transformers')
+            cache_dir = ToExpanduser.modify_path(cache_dir)
+
             self.bert = VisualBERTBase.from_pretrained(
                 self.config['bert_model_name'],
                 config=self.bert_config,
-                cache_dir=os.path.join('/home/zrz/.cache/torch', 'transformers'),
+                cache_dir=cache_dir,
                 visual_embedding_dim=self.config['visual_embedding_dim'],
                 embedding_strategy=self.config['embedding_strategy'],
                 bypass_transformer=self.config['bypass_transformer'],

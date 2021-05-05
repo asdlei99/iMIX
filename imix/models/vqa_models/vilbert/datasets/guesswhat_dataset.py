@@ -94,7 +94,11 @@ class GuessWhatDataset(Dataset):
         self._image_features_reader = image_features_reader
         self._tokenizer = tokenizer
         self._padding_index = padding_index
-        cache_path = os.path.join(dataroot, 'cache', task + '_' + split + '_' + str(max_seq_length) + '.pkl')
+        # cache_path = os.path.join(dataroot, 'cache', task + '_' + split + '_' + str(max_seq_length) + '.pkl')
+
+        # jinliang: GuessWhat_xxx_25.pkl -> GuessWhat_xxx_25_tolist.pkl
+        cache_path = os.path.join(dataroot, 'cache',
+                                  task + '_' + split + '_' + str(max_seq_length) + '_tolist' + '.pkl')
         if not os.path.exists(cache_path):
             self.entries = _load_dataset(dataroot, split)
             self.tokenize(max_seq_length)
@@ -184,9 +188,18 @@ class GuessWhatDataset(Dataset):
         image_mask = torch.tensor(image_mask).long()
         spatials = torch.tensor(mix_boxes_pad).float()
 
+        device = spatials.device
+
+        def list2tensor(data):
+            return torch.tensor(data, device=device)
+
         question = entry['q_token']
         input_mask = entry['q_input_mask']
         segment_ids = entry['q_segment_ids']
+
+        question = list2tensor(question)
+        input_mask = list2tensor(input_mask)
+        segment_ids = list2tensor(segment_ids)
 
         co_attention_mask = torch.zeros((self._max_region_num, self._max_seq_length))
         target = torch.zeros(self.num_labels)
@@ -195,6 +208,10 @@ class GuessWhatDataset(Dataset):
             answer = entry['answer']
             labels = answer['labels']
             scores = answer['scores']
+
+            labels = list2tensor(labels)
+            scores = list2tensor(scores)
+
             if labels is not None:
                 target.scatter_(0, labels, scores)
 

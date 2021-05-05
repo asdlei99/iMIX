@@ -81,7 +81,7 @@ class VQADATASET(BaseLoader):
             'image_id': item_feature.image_id,
         }
 
-        if not self.reader.if_global:
+        if not self.reader.is_global:
             item.pop('feature_global')
         if item_feature.answers_scores is not None:
             item['answers_scores'] = item_feature.answers_scores

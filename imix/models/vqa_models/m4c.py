@@ -164,7 +164,7 @@ class M4C(BaseModel):
         scores = torch.cat([fixed_scores, dynamic_ocr_scores], dim=-1)
         fwd_results['scores'] = scores
 
-    def forward_train(self, data):
+    def forward_train(self, data, *args, **kwargs):
         fwd_results = {}
         self._forward_txt_encoding(data, fwd_results)
         self._forward_obj_encoding(data, fwd_results)
@@ -192,7 +192,7 @@ class M4C(BaseModel):
 
         return model_outputs
 
-    def forward_test(self, data):
+    def forward_test(self, data, *args, **kwargs):
         model_output = self.forward_train(data)
         return model_output
 

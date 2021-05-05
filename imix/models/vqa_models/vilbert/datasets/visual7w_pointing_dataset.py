@@ -50,19 +50,19 @@ def assert_eq(real, expected):
 class Visual7wPointingDataset(Dataset):
 
     def __init__(
-        self,
-        task: str,
-        dataroot: str,
-        annotations_jsonpath: str,
-        split: str,
-        image_features_reader: ImageFeaturesH5Reader,
-        gt_image_features_reader: ImageFeaturesH5Reader,
-        tokenizer: BertTokenizer,
-        bert_model,
-        clean_datasets,
-        padding_index: int = 0,
-        max_seq_length: int = 20,
-        max_region_num: int = 60,
+            self,
+            task: str,
+            dataroot: str,
+            annotations_jsonpath: str,
+            split: str,
+            image_features_reader: ImageFeaturesH5Reader,
+            gt_image_features_reader: ImageFeaturesH5Reader,
+            tokenizer: BertTokenizer,
+            bert_model,
+            clean_datasets,
+            padding_index: int = 0,
+            max_seq_length: int = 20,
+            max_region_num: int = 60,
     ):
         self.split = split
         self.num_labels = 1
@@ -76,7 +76,7 @@ class Visual7wPointingDataset(Dataset):
         self.entries = self._load_annotations(clean_datasets)
 
         self.max_region_num = max_region_num
-        clean_train = '_cleaned' if clean_datasets else ''
+        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
 
         if 'roberta' in bert_model:
             cache_path = os.path.join(
@@ -156,6 +156,7 @@ class Visual7wPointingDataset(Dataset):
         This will add caption_tokens in each entry of the dataset.
         -1 represents nil, and should be treated as padding_idx in embedding.
         """
+
         for entry in self.entries:
 
             # sentence_tokens = self._tokenizer.tokenize(entry["caption"])
@@ -250,6 +251,11 @@ class Visual7wPointingDataset(Dataset):
         caption = entry['token']
         input_mask = entry['input_mask']
         segment_ids = entry['segment_ids']
+
+        device = co_attention_mask.device
+        caption = torch.tensor(caption, device=device)
+        input_mask = torch.tensor(input_mask, device=device)
+        segment_ids = torch.tensor(segment_ids, device=device)
 
         return (
             features,

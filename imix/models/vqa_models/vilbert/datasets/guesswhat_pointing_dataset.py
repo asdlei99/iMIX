@@ -77,7 +77,7 @@ class GuessWhatPointingDataset(Dataset):
 
         self.max_region_num = max_region_num
 
-        clean_train = '_cleaned' if clean_datasets else ''
+        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
 
         if 'roberta' in bert_model:
             cache_path = os.path.join(
@@ -252,6 +252,15 @@ class GuessWhatPointingDataset(Dataset):
         caption = entry['token']
         input_mask = entry['input_mask']
         segment_ids = entry['segment_ids']
+
+        device = spatials.device
+
+        def list2tensor(data):
+            return torch.tensor(data, device=device)
+
+        caption = list2tensor(caption)
+        input_mask = list2tensor(input_mask)
+        segment_ids = list2tensor(segment_ids)
 
         return (
             features,

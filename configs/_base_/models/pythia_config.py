@@ -1,11 +1,17 @@
 # model settings
+root = '/home/datasets/mix_data/'
 model = dict(
     type='PYTHIA',
     embedding=[
         dict(
             type='WordEmbedding',
-            vocab_file='/home/zrz/.cache/torch/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
-            embedding_dim=300),
+            vocab_file=root + 'iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
+            embedding_dim=300,
+            glove_params=dict(
+                name='6B',
+                dim=300,
+                cache='/home/datasets/mix_data/iMIX',
+            )),
         dict(
             type='TextEmbedding',
             emb_type='attention',
@@ -23,8 +29,8 @@ model = dict(
             type='ImageFeatureEncoder',
             encoder_type='finetune_faster_rcnn_fpn_fc7',
             in_dim=2048,
-            weights_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_w.pkl',
-            bias_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_b.pkl',
+            weights_file=root + 'iMIX/data/models/detectron.vmb_weights/fc7_w.pkl',
+            bias_file=root + 'iMIX/data/models/detectron.vmb_weights/fc7_b.pkl',
         ),
         dict(type='ImageFeatureEncoder', encoder_type='default'),
     ],

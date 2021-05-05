@@ -78,7 +78,7 @@ class R2C(BaseModel):
 
         return self.encoder_model(span_rep, span_mask), retrieved_feats
 
-    def forward_train(self, data):
+    def forward_train(self, data, *args, **kwargs):
         images = data['image'].cuda()
         max_num = torch.max(data['max_num']).cuda()
         max_bbox_num = torch.max(data['bbox_num']).cuda()
@@ -116,7 +116,7 @@ class R2C(BaseModel):
         # }
         return model_output
 
-    def forward_test(self, data):
+    def forward_test(self, data, *args, **kwargs):
         model_output = self.forward_train(data)
         return model_output
 
