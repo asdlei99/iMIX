@@ -22,7 +22,6 @@ def assert_eq(real, expected):
 
 
 def _load_annotations(split, annotations_jsonpath, task, dataroot, clean_datasets):
-
     with jsonlines.open(annotations_jsonpath) as reader:
 
         # Build an index which maps image id with a list of caption annotations.
@@ -84,7 +83,7 @@ class RetreivalDataset(Dataset):
         self._max_region_num = max_region_num
         self._max_seq_length = max_seq_length
 
-        clean_train = '_cleaned' if clean_datasets else ''
+        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
 
         if self._split == 'train':
             image_info = cPickle.load(open(os.path.join(dataroot, 'hard_negative' + clean_train + '.pkl'), 'rb'))
@@ -176,6 +175,16 @@ class RetreivalDataset(Dataset):
         caption1 = entry['token']
         input_mask1 = entry['input_mask']
         segment_ids1 = entry['segment_ids']
+
+        device = features1.device
+
+        def list2tensor(data):
+            return torch.tensor(data, device=device)
+
+        caption1 = list2tensor(caption1)
+        input_mask1 = list2tensor(input_mask1)
+        segment_ids1 = list2tensor(segment_ids1)
+
         # negative samples.
         # 1: correct one, 2: random caption wrong, 3: random image wrong. 4: hard image wrong.
 
@@ -193,6 +202,10 @@ class RetreivalDataset(Dataset):
         caption2 = entry2['token']
         input_mask2 = entry2['input_mask']
         segment_ids2 = entry2['segment_ids']
+
+        caption2 = list2tensor(caption2)
+        input_mask2 = list2tensor(input_mask2)
+        segment_ids2 = list2tensor(segment_ids2)
 
         # random image wrong
         while True:
@@ -243,6 +256,10 @@ class RetreivalDataset(Dataset):
         input_mask4 = entry4['input_mask']
         segment_ids4 = entry4['segment_ids']
 
+        caption4 = list2tensor(caption4)
+        input_mask4 = list2tensor(input_mask4)
+        segment_ids4 = list2tensor(segment_ids4)
+
         features = torch.stack([features1, features2, features3, features4], dim=0)
         spatials = torch.stack([spatials1, spatials2, spatials3, spatials4], dim=0)
         image_mask = torch.stack([image_mask1, image_mask2, image_mask3, image_mask4], dim=0)
@@ -269,7 +286,6 @@ class RetreivalDataset(Dataset):
 
 
 def _load_annotationsVal(annotations_jsonpath, task):
-
     with jsonlines.open(annotations_jsonpath) as reader:
 
         # Build an index which maps image id with a list of caption annotations.

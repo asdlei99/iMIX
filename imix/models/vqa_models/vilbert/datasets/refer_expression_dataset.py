@@ -90,7 +90,7 @@ class ReferExpressionDataset(Dataset):
 
         self.max_region_num = max_region_num
 
-        clean_train = '_cleaned' if clean_datasets else ''
+        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
 
         if 'roberta' in bert_model:
             cache_path = os.path.join(
@@ -264,6 +264,11 @@ class ReferExpressionDataset(Dataset):
         caption = entry['token']
         input_mask = entry['input_mask']
         segment_ids = entry['segment_ids']
+
+        device = co_attention_mask.device
+        caption = torch.tensor(caption, device=device)
+        input_mask = torch.tensor(input_mask, device=device)
+        segment_ids = torch.tensor(segment_ids, device=device)
 
         return (
             features,

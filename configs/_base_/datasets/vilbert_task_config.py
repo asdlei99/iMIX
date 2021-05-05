@@ -1,6 +1,6 @@
 data_root = '/home/datasets/mix_data/vilbert/datasets/'
 
-task_ids = '4'  # '1-2-3...' training task separate by -
+task_ids = '17'  # '1-2-3...' training task separate by -
 
 TASKS = dict(
     TASK1=dict(
@@ -146,8 +146,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=32,  # 128,
-        per_gpu_eval_batch_size=32,  # 128,
+        per_gpu_train_batch_size=8,  # 128,  32
+        per_gpu_eval_batch_size=8,  # 128, 32
         num_warmup_steps=7620,
         num_training_steps=76200,
     ),
@@ -168,8 +168,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=32,  # 128,
-        per_gpu_eval_batch_size=32,  # 128,
+        per_gpu_train_batch_size=8,  # 128, 32
+        per_gpu_eval_batch_size=8,  # 128, 32
         num_warmup_steps=2196,
         num_training_steps=21960,
     ),
@@ -234,8 +234,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=256,
-        per_gpu_eval_batch_size=256,
+        per_gpu_train_batch_size=256,  # 256
+        per_gpu_eval_batch_size=256,  # 256
         num_warmup_steps=512,
         num_training_steps=5120,
     ),
@@ -276,8 +276,8 @@ TASKS = dict(
         val_split='dev',
         num_labels=3,
         lr=0.00002,
-        per_gpu_train_batch_size=64,  # 256,
-        per_gpu_eval_batch_size=256,  # 1024,
+        per_gpu_train_batch_size=8,  # 256,64
+        per_gpu_eval_batch_size=256,  # 1024
         num_warmup_steps=4004,
         num_training_steps=40040,
     ),
@@ -298,7 +298,7 @@ TASKS = dict(
         val_split='valid',
         num_labels=3,
         lr=0.00004,
-        per_gpu_train_batch_size=64,  # 256,
+        per_gpu_train_batch_size=8,  # 256,64
         per_gpu_eval_batch_size=256,  # 1024,
         num_warmup_steps=4530,
         num_training_steps=45300,
@@ -362,7 +362,7 @@ TASKS = dict(
         val_split='valid',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=16,  # 64,
+        per_gpu_train_batch_size=8,  # 64,16
         per_gpu_eval_batch_size=16,  # 64,
         num_warmup_steps=3138,
         num_training_steps=31380,
