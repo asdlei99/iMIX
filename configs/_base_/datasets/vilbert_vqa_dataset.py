@@ -48,7 +48,7 @@ train_data = dict(
 
 test_data = dict(
     samples_per_gpu=TASKS['TASK' + task_ids]['per_gpu_eval_batch_size'],
-    workers_per_gpu=0,
+    workers_per_gpu=4,
     sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),
     pin_memory=True,
