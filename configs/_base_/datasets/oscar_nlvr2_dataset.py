@@ -11,6 +11,7 @@ nlvr_reader_train_cfg = dict(
     data_label_type='all',
     img_feature_type='faster_r-cnn',
     img_feature_dim=2054,
+    img_feature_is_folder=True,  # jinliang add
     task_name='nlvr',
     max_seq_length=55,
     output_mode='classification',
@@ -31,6 +32,7 @@ nlvr_reader_test_cfg = dict(
     data_label_type='all',
     img_feature_type='faster_r-cnn',
     img_feature_dim=2054,
+    img_feature_is_folder=True,  # jinliang add
     task_name='nlvr',
     max_seq_length=55,
     output_mode='classification',
@@ -45,7 +47,7 @@ nlvr_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=72,  # 72
+    samples_per_gpu=8,  # 72
     workers_per_gpu=4,
     sampler_name='TrainingSampler',
     data=dict(
@@ -56,7 +58,7 @@ train_data = dict(
 )
 
 test_data = dict(
-    samples_per_gpu=64,  # 64
+    samples_per_gpu=8,  # 64
     workers_per_gpu=4,
     sampler_name='TestingSampler',
     data=dict(

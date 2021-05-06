@@ -287,7 +287,7 @@ class OSCAR_GQADataset(Dataset):
         assert len(input_mask) == self.args.max_seq_length
         assert len(segment_ids) == self.args.max_seq_length
 
-        self.init_torch_pth_file()
+        # self.init_torch_pth_file()
 
         # image features
         if self.args.img_feature_type.startswith('dis_code'):
@@ -301,7 +301,9 @@ class OSCAR_GQADataset(Dataset):
             else:
                 input_mask = input_mask + [1 if mask_padding_with_zero else 0] * img_feat.shape[0]
         else:
-            img_feat = self.img_features[example.img_key]  # [:, 0:self.args.img_feature_dim]  # torch
+            # img_feat = self.img_features[example.img_key]  # [:, 0:self.args.img_feature_dim]  # torch
+            img_feat_path = self.img_features[example.img_key]  # jinliang modify
+            img_feat = torch.load(img_feat_path)
 
             if img_feat.shape[0] > self.args.max_img_seq_length:
                 img_feat = img_feat[0:self.args.max_img_seq_length, ]
@@ -364,7 +366,25 @@ class OSCAR_GQADataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def _load_img_features(self, args):
+    # def _load_img_features(self, args):
+    #     t_start = time.time()
+    #     if args.img_feature_type == 'faster_r-cnn':
+    #         if args.img_feature_dim == 2048:  # object features
+    #             feat_file_name = 'gqa_img_frcnn_feats_obj.pt'
+    #         else:  # object + spatial features
+    #             feat_file_name = 'gqa_img_frcnn_feats.pt'
+    #     else:
+    #         feat_file_name = 'gqa_img_frcnn_feats.pt'
+    #     # img_features = torch.load(os.path.join(args.data_dir, feat_file_name))
+    #     self.img_features_env = None
+    #     img_features = os.path.join(args.data_dir, feat_file_name)
+    #
+    #     t_end = time.time()
+    #     logger.info('Info: loading {0:s} features using {1:.2f} secs'.format(feat_file_name, (t_end - t_start)))
+    #
+    #     return img_features
+
+    def _load_img_features(self, args):  # jinliang modify
         t_start = time.time()
         if args.img_feature_type == 'faster_r-cnn':
             if args.img_feature_dim == 2048:  # object features
@@ -374,15 +394,26 @@ class OSCAR_GQADataset(Dataset):
         else:
             feat_file_name = 'gqa_img_frcnn_feats.pt'
         # img_features = torch.load(os.path.join(args.data_dir, feat_file_name))
-        self.img_features_env = None
-        img_features = os.path.join(args.data_dir, feat_file_name)
+
+        img_features = {}
+        if args.img_feature_is_folder:
+            feat_file_name = feat_file_name.split('.')[0]
+            img_features_path = os.path.join(args.data_dir, feat_file_name)
+            from pathlib import Path
+            feat_files = Path(img_features_path).glob('*.pt')
+            for file in feat_files:
+                file_name = str(file.name).split('.')[0]
+                img_features[file_name] = str(file)
+        else:
+            self.img_features_env = None
+            img_features = os.path.join(args.data_dir, feat_file_name)
 
         t_end = time.time()
         logger.info('Info: loading {0:s} features using {1:.2f} secs'.format(feat_file_name, (t_end - t_start)))
 
         return img_features
 
-    def init_torch_pth_file(self):
-        if self.img_features_env is None:
-            self.img_features = torch.load(self.img_features)
-            self.img_features_env = True
+    # def init_torch_pth_file(self):
+    #     if self.img_features_env is None:
+    #         self.img_features = torch.load(self.img_features)
+    #         self.img_features_env = True
