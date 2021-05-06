@@ -69,7 +69,7 @@ class OSCAR_NLVR2Dataset(Dataset):
         assert name in ['train', 'val', 'test1', 'val+test1']
 
         self.tokenizer = BertTokenizer.from_pretrained(
-            arg.stokenizer_name if args.tokenizer_name else args.model_name_or_path, do_lower_case=args.do_lower_case)
+            args.stokenizer_name if args.tokenizer_name else args.model_name_or_path, do_lower_case=args.do_lower_case)
 
         self.img_features = self._load_img_features(args)
         self.output_mode = output_modes[args.task_name]
@@ -270,7 +270,9 @@ class OSCAR_NLVR2Dataset(Dataset):
 
             # img
             img_key = example.img_key[choice_key]
-            img_feat = self.img_features[img_key]
+            # img_feat = self.img_features[img_key]  #jinliang
+            img_feat_path = self.img_features[img_key]
+            img_feat = torch.load(img_feat_path)
 
             if img_feat.shape[0] > self.args.max_img_seq_length:
                 img_feat = img_feat[0:self.args.max_img_seq_length, ]
@@ -349,8 +351,20 @@ class OSCAR_NLVR2Dataset(Dataset):
         else:
             feat_file_name = 'nlvr2_img_frcnn_feats.pt'
         # img_features = torch.load(os.path.join(args.data_dir, feat_file_name))
-        self.img_features_env = None
-        img_features = os.path.join(args.data_dir, feat_file_name)
+
+        img_features = {}
+        if args.img_feature_is_folder:
+            feat_file_name = feat_file_name.split('.')[0]
+            img_features_path = os.path.join(args.data_dir, feat_file_name)
+            from pathlib import Path
+            feat_files = Path(img_features_path).glob('*.pt')
+            for file in feat_files:
+                file_name = str(file.name).split('.')[0]
+                img_features[file_name] = str(file)
+            self.img_features_env = True
+        else:
+            self.img_features_env = None
+            img_features = os.path.join(args.data_dir, feat_file_name)
 
         t_end = time.time()
         logger.info('Info: loading {0:s} features using {1:.2f} secs'.format(feat_file_name, (t_end - t_start)))

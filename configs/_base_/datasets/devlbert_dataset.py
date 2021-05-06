@@ -4,23 +4,24 @@ test_datasets = ['minval']
 
 vqa_reader_train_cfg = dict(
     type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
+    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
 
 vqa_reader_train_gt_cfg = dict(
     type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
+    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
 
 vqa_reader_test_cfg = dict(
     type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/coco/coco_test_resnet101_faster_rcnn_genome.lmdb')
-
+    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
+# '/home/datasets/mix_data/DeVLBert/vqa/coco/coco_test_resnet101_faster_rcnn_genome
+# .lmdb'
 vqa_reader_test_gt_cfg = dict(
     type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/coco/coco_test_resnet101_faster_rcnn_genome.lmdb')
+    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
 
 train_data = dict(
-    samples_per_gpu=32,  # 16
-    workers_per_gpu=1,
+    samples_per_gpu=3,  # 16
+    workers_per_gpu=0,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
@@ -37,8 +38,8 @@ train_data = dict(
 
 # just the same as train
 test_data = dict(
-    samples_per_gpu=128,  # 16
-    workers_per_gpu=1,
+    samples_per_gpu=2,  # 16
+    workers_per_gpu=0,
     sampler_name='TestingSampler',
     data=dict(
         type=dataset_type,
