@@ -82,7 +82,7 @@ class OSCAR_VQADataset(Dataset):
         assert name in ['train', 'val', 'test-dev2015', 'test2015', 'train+val']
 
         self.tokenizer = BertTokenizer.from_pretrained(
-            arg.stokenizer_name if args.tokenizer_name else args.model_name_or_path, do_lower_case=args.do_lower_case)
+            args.stokenizer_name if args.tokenizer_name else args.model_name_or_path, do_lower_case=args.do_lower_case)
 
         # load image features
         t_start = time.time()
@@ -111,6 +111,21 @@ class OSCAR_VQADataset(Dataset):
                                                         '{}.pt'.format(name)))['feats_{}'.format(args.code_level)]
         else:
             self.img_features = torch.load(os.path.join(args.data_dir, '{}_img_feats.pt'.format(name)))
+
+        if args.img_feature_is_folder:  # jinliang add
+            from pathlib import Path
+            img_feat_path = self.img_features
+            self.img_features = {}
+
+            feat_file_name = img_feat_path.split('.')[0]
+            img_features_path = os.path.join(args.data_dir, feat_file_name)
+
+            feat_files = Path(img_features_path).glob('*.pt')
+            for file in feat_files:
+                file_name = str(file.name).split('.')[0]
+                idx = int(file_name)
+                self.img_features[idx] = str(file)
+
         t_end = time.time()
         logger.info('Info: loading {0} features using {1:.2f} secs'.format(name, (t_end - t_start)))
 
@@ -203,11 +218,16 @@ class OSCAR_VQADataset(Dataset):
             assert len(input_mask) == self.args.max_seq_length
             assert len(segment_ids) == self.args.max_seq_length
 
-            self.init_torch_pth_file()
+            # jinliang
+            # self.init_torch_pth_file()
+            #
+            # # image features
+            # img_feat = self.img_features[example.img_key]  # torch
+            # # img_feat = self.img_features.item().get(example.img_key)  # numpy
 
-            # image features
-            img_feat = self.img_features[example.img_key]  # torch
-            # img_feat = self.img_features.item().get(example.img_key)  # numpy
+            img_feat_path = self.img_features[example.img_key]
+            img_feat = torch.load(img_feat_path)
+
             if img_feat.shape[0] > self.args.max_img_seq_length:
                 img_feat = img_feat[0:self.args.max_img_seq_length, ]
                 if self.args.max_img_seq_length > 0:
@@ -310,7 +330,7 @@ class OSCAR_VQADataset(Dataset):
         assert len(input_mask) == self.args.max_seq_length
         assert len(segment_ids) == self.args.max_seq_length
 
-        self.init_torch_pth_file()
+        # self.init_torch_pth_file()
 
         # image features
         if self.args.img_feature_type.startswith('dis_code'):
@@ -325,7 +345,11 @@ class OSCAR_VQADataset(Dataset):
                 input_mask = input_mask + [1 if mask_padding_with_zero else 0] * img_feat.shape[0]
         else:
             if self.args.img_feat_format == 'pt':
-                img_feat = self.img_features[example.img_key]  # [:, 0:self.args.img_feature_dim]  # torch
+                # img_feat = self.img_features[example.img_key]  # [:, 0:self.args.img_feature_dim]  # torch
+
+                # jinliang add
+                img_feat_path = self.img_features[example.img_key]
+                img_feat = torch.load(img_feat_path)
             elif self.args.img_feat_format == 'tsv':
                 img_features = self.get_img_feature(str(example.img_key))
                 img_feat = torch.from_numpy(img_features)

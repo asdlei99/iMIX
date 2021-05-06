@@ -178,7 +178,7 @@ class Organizer:
                     prefix=f'{self.model_name}_{self.dataset_name}',
                     iter_period=cfg.checkpoint_config.period,
                     epoch_period=1,
-                    max_num_checkpoints=2))
+                    max_num_checkpoints=None))
             # hook_list.append(
             #     hooks.CheckPointHook(self.checkpointer,
             #                          cfg.checkpoint_config.period))
