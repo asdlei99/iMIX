@@ -290,9 +290,10 @@ class PeriodicCheckpointer:
         if self.max_num_checkpoints is not None:
             self.checkpointer.is_record_ck = True
 
-    def record_iter_checkpoint(self, iteration: int, prefix: str = '', **kwargs: Any) -> None:
+    def record_iter_checkpoint(self, iteration: int, prefix: str = '', **kwargs: Any) -> str:
         state_dict = dict(iteration=iteration)
         state_dict.update(kwargs)
+        file_name = None
         if (iteration + 1) % self.iter_period == 0:
             file_name = '{}_iter{:07d}_model'.format(prefix, iteration)
             self.save(file_name, **state_dict)
@@ -303,9 +304,12 @@ class PeriodicCheckpointer:
         if iteration + 1 >= self.max_iter:
             self.save('{}_model_final'.format(prefix), **state_dict)
 
-    def record_epoch_checkpoint(self, epoch: int, prefix: str = '', **kwargs: Any) -> None:
+        return file_name + '.pth'
+
+    def record_epoch_checkpoint(self, epoch: int, prefix: str = '', **kwargs: Any) -> str:
         state_dict = dict(epoch=epoch)
         state_dict.update(kwargs)
+        file_name = None
         if (epoch + 1) % self.epoch_period == 0:
             file_name = '{}_epoch{}_model'.format(prefix, epoch)
             self.save(file_name, **state_dict)
@@ -315,6 +319,8 @@ class PeriodicCheckpointer:
 
         if epoch + 1 >= self.max_epoch:
             self.save('{}_model_final'.format(prefix), **state_dict)
+
+        return file_name + '.pth'
 
     def save(self, file_name, **kwargs: Any) -> None:
         self.checkpointer.save(file_name, **kwargs)

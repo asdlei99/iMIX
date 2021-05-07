@@ -11,6 +11,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
         self.prefix = kwargs.pop('prefix')
         super().__init__(*args, **kwargs)
         self._level = PriorityStatus.LOW
+        self.curr_checkpoint_name = None
 
     def before_train(self):
         self.max_iter = self.trainer.max_iter
@@ -21,7 +22,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
         if not self.trainer.by_epoch:
             # self.step(self.trainer.iter) # step(old) --> record_iter_checkpoint
             iter_other_info = {'by_epoch': self.trainer.by_epoch}
-            self.record_iter_checkpoint(self.trainer.iter, self.prefix, **iter_other_info)
+            self.curr_checkpoint_name = self.record_iter_checkpoint(self.trainer.iter, self.prefix, **iter_other_info)
 
     def after_train_epoch(self):
         # self.save(name='epoch_{}'.format(self.trainer.epoch)) # save(old) --> record_epoch_checkpoint
@@ -30,7 +31,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
             'epoch_iter': self.trainer.iter,
             'by_epoch': self.trainer.by_epoch
         }
-        self.record_epoch_checkpoint(self.trainer.epoch, self.prefix, **epoch_other_info)
+        self.curr_checkpoint_name = self.record_epoch_checkpoint(self.trainer.epoch, self.prefix, **epoch_other_info)
 
     def _multi_gpus_sync(self):
         comm.synchronize()

@@ -2,6 +2,7 @@ import functools
 import logging
 import os.path as osp
 import sys
+import atexit
 
 from termcolor import colored
 
@@ -66,4 +67,6 @@ def _file_logger(output: str, rank: int, formatter: logging.Formatter) -> loggin
 # with the same file name can safely write to the same file.
 @functools.lru_cache(maxsize=None)
 def _cached_log_stream(filename):
-    return PathManager.open(filename, 'a')
+    file_obj = PathManager.open(filename, 'w')
+    atexit.register(file_obj.close)
+    return file_obj

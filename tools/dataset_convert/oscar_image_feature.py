@@ -65,7 +65,8 @@ def gqa():
 def vqa():
     data_root = '/home/datasets/mix_data/oscar/datasets/vqa/2k'
     # img_feat_name = 'train_img_frcnn_feats.pt'
-    img_feat_name = 'train+val_img_frcnn_feats.pt'
+    # img_feat_name = 'train+val_img_frcnn_feats.pt'
+    img_feat_name = 'val_img_frcnn_feats.pt'
     save_dir = img_feat_name.split('.')[0]
 
     feat_path = os.path.join(data_root, img_feat_name)
@@ -92,5 +93,5 @@ def nlvr2():
 
 
 if __name__ == '__main__':
-    # vqa()
-    nlvr2()
+    vqa()
+    # nlvr2()

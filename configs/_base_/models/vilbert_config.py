@@ -99,7 +99,7 @@ lr_config = dict(
     policy='WarmupLinearSchedule')
 
 # by_iter = True
-total_epochs = 20
+total_epochs = 5
 '''
 fp16 = dict(
     init_scale=2.**16,

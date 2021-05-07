@@ -362,8 +362,8 @@ TASKS = dict(
         val_split='valid',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=16,  # 64,
-        per_gpu_eval_batch_size=16,  # 64,
+        per_gpu_train_batch_size=16,  # 64,  16
+        per_gpu_eval_batch_size=16,  # 64, 16
         num_warmup_steps=3138,
         num_training_steps=31380,
     ),

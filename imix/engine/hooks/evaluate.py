@@ -12,6 +12,8 @@ from operator import itemgetter
 from shutil import copyfile
 import copy
 from imix.utils_imix.config import get_imix_work_dir
+from .periods.checkpoint import CheckPointHook
+from imix.utils_imix.distributed_info import master_only_run
 
 
 @HOOKS.register_module()
@@ -41,26 +43,6 @@ class EvaluateHook(HookBase):
 
     def _do_eval(self):
         results = self._func()
-        # if results:
-        #     assert isinstance(
-        #         results, dict
-        #     ), 'Eval function must return a dict. Got {} instead.'.format(
-        #         results)
-        #
-        #     # flattened_results = flatten_results_dict(results)
-        #     flattened_results = 111  #TODO(jinliang)
-        #     for k, v in flattened_results.items():
-        #         try:
-        #             v = float(v)
-        #         except Exception:
-        #             raise ValueError(
-        #                 '[EvalHook] eval_function should return a nested dict of float. '
-        #                 "Got '{}: {}' instead.".format(k, v))
-        #     self.trainer.log_buffer.put_scalars(
-        #         **flattened_results, smoothing_hint=False)
-
-        # Evaluation may take different time among workers.
-        # A barrier make them start the next iteration together.
         comm.synchronize()
         return results
 
@@ -83,13 +65,11 @@ class EvaluateHook(HookBase):
         del self._func
 
     def after_train_epoch(self):
-        # logger = logging.getLogger(__name__)
         results = self._do_eval()
         self._wirte_eval_result(results)
         self._write_to_tensorboard(results, is_epoch=True)
-        # logger.info('epoch_{} evaluate accuracy :'.format(
-        #     self.trainer.epoch, float(results['classification'])))
 
+    @master_only_run
     def _write_to_tensorboard(self, eval_result, is_epoch=False):
         for k, v in eval_result.items():
             if isinstance(v, torch.Tensor):
@@ -100,10 +80,19 @@ class EvaluateHook(HookBase):
             else:
                 self.trainer.log_buffer.put_scalar(k, v, is_epoch=is_epoch)
 
+    @master_only_run
     def _wirte_eval_result(self, results):
 
         data = self._train_info()
         data.update(self._eval_result(results))
+
+        for hk in self.trainer._hooks:
+            if isinstance(hk, CheckPointHook):
+                ck_name = hk.curr_checkpoint_name
+                if ck_name:
+                    data.update({'model_name': ck_name})
+                break
+
         self._all_eval_results.append(data)
 
         self._file_handle.write(json.dumps(data, sort_keys=False) + '\n')
@@ -129,11 +118,6 @@ class EvaluateHook(HookBase):
 
         result = {k: value(v) for k, v in eval_result.items()}
         return result
-        # for k, v in eval_result.items():
-        #     if isinstance(v, torch.Tensor):
-        #         result[k] = v.item()
-        #     else:
-        #         result[k] = v
 
     @property
     def level(self):
@@ -145,6 +129,9 @@ class EvaluateHook(HookBase):
             keys = list(self._all_eval_results[0].keys())
             keys.remove('max_iter')
             keys.remove('iter')
+            if 'model_name' in keys:
+                keys.remove('model_name')
+
             if self.trainer.by_epoch:
                 keys.remove('epoch')
                 keys.remove('max_epoch')
@@ -156,6 +143,8 @@ class EvaluateHook(HookBase):
         key_sort = get_sored_key()
         results = sorted(self._all_eval_results, key=itemgetter(*key_sort), reverse=True)
         best_result = copy.deepcopy(results[0])
+
+        best_model_name = best_result.pop('model_name')
 
         # best info log ouput
         if self.trainer.by_epoch:
@@ -171,6 +160,4 @@ class EvaluateHook(HookBase):
         logger.info('In {}th epoch/iter,got the highest score{}'.format(best_info, best_result))
 
         # copy ck file
-        best_ck_file_name = 'epoch{}_model.pth'.format(
-            best_info) if self.trainer.by_epoch else 'iter{:07d}_model.pth'.format(best_info)
-        copyfile(src=absolute_path(best_ck_file_name), dst=absolute_path('best_result.pth'))
+        copyfile(src=absolute_path(best_model_name), dst=absolute_path('best_result.pth'))

@@ -341,9 +341,9 @@ class CommonMetricLoggerHook(LogBufferWriter):
 
     def __epoch_metric(self):
         epoch = self.log_buffer.epoch
-        epoch_inner_iter = self.log_buffer.epoch_inner_iter + 1
         iteration = self.log_buffer.iter + 1
         single_epoch_iters = self.log_buffer.single_epoch_iters
+        epoch_inner_iter = self.log_buffer.iter % single_epoch_iters + 1
         epoch_log_info_0 = 'epoch:{epoch} \t {inner_iter}/{single_epoch_iters} \t ' \
                            'current_iter:{iter} \t ' \
                            'max_iter:{max_iter} \t ' \
