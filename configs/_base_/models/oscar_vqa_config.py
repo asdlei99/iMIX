@@ -53,4 +53,4 @@ lr_config = dict(
 )
 
 # by_iter = True
-total_epochs = 5
+total_epochs = 25
