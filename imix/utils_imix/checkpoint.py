@@ -211,9 +211,6 @@ class Checkpointer:
 
         return checkpoint
 
-    def resume_checkpoint(self, file_path: str):
-        return self.load_checkpoint(file_path)
-
     @staticmethod
     def _load_file_from_path(file_path, map_location='cpu'):
         return torch.load(file_path, map_location=map_location)
@@ -258,7 +255,7 @@ class Checkpointer:
                 state_dict[_key] = state_dict.pop(key)
 
     def resume_or_load(self, path, resume=True):  # tmp function
-        return self.resume_checkpoint(path)
+        return self.load_checkpoint(path=path, specify_load_keys=None if resume else [])
 
 
 class PeriodicCheckpointer:

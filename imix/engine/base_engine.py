@@ -87,11 +87,9 @@ class EngineBase:
     def train_by_epoch(self, start_epoch: int, max_epoch: int) -> None:
         self.start_epoch = start_epoch
         self.max_epoch = max_epoch
-        self.start_iter = start_epoch * len(self.data_loader)
         self.iter = self.start_iter
-        self.max_iter = max_epoch * len(self.data_loader)
 
-        with LogBufferStorage(self.iter, len(self.data_loader)) as self.log_buffer:
+        with LogBufferStorage(self.start_iter, len(self.data_loader), self.start_epoch) as self.log_buffer:
             try:
                 self.before_train()
                 for self.epoch in range(self.start_epoch, self.max_epoch):

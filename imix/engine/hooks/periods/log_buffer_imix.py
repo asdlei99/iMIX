@@ -176,8 +176,9 @@ def get_log_buffer():
 
 class LogBufferStorage:
 
-    def __init__(self, start_iter=0, sigle_epoch_iters=0, by_epoch=True):
-        self.train_info = TrainInfo(iter=start_iter, single_epoch_iters=sigle_epoch_iters, is_by_epoch=by_epoch)
+    def __init__(self, start_iter=0, sigle_epoch_iters=0, start_epoch=0, by_epoch=True):
+        self.train_info = TrainInfo(
+            iter=start_iter, epoch=start_epoch, single_epoch_iters=sigle_epoch_iters, is_by_epoch=by_epoch)
         self.vis_data = VisualizeImage()
         self.histograms = Histogram()
         self.current_prefix = ''

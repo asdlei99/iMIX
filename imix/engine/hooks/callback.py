@@ -14,6 +14,7 @@ class CallBackHook(HookBase):
                  after_train_iter=None,
                  before_train_epoch=None,
                  after_train_epoch=None):
+        super().__init__()
         self._before_train_iter = before_train_iter
         self._before_train = before_train
         self._after_train_iter = after_train_iter

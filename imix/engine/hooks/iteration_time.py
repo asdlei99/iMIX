@@ -144,6 +144,7 @@ class IterationTimerHook(HookBase):
             warmup_iter (int): the number of iterations at the beginning to exclude
                 from timing.
         """
+        super().__init__()
         self._warmup_iter = warmup_iter
         self._iter_start_time = None
         self._epoch_start_time = None

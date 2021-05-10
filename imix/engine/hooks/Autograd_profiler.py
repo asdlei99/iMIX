@@ -44,6 +44,7 @@ class AutogradProfilerHook(HookBase):
             output_dir (str): the output directory to dump tracing files.
             use_cuda (bool): same as in `torch.autograd.profiler.profile`.
         """
+        super().__init__()
         self._enable_predicate = enable_predicate
         self._use_cuda = use_cuda
         self._output_dir = output_dir

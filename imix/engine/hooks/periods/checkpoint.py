@@ -35,7 +35,3 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
 
     def _multi_gpus_sync(self):
         comm.synchronize()
-
-    @property
-    def level(self):
-        return self._level

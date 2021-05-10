@@ -35,6 +35,7 @@ class EvaluateHook(HookBase):
             If you would like only certain workers to perform evaluation,
             give other workers a no-op function (`eval_function=lambda: None`).
         """
+        super().__init__()
         self._period = eval_period
         self._func = eval_function
         self._level = PriorityStatus.LOW
@@ -118,10 +119,6 @@ class EvaluateHook(HookBase):
 
         result = {k: value(v) for k, v in eval_result.items()}
         return result
-
-    @property
-    def level(self):
-        return self._level
 
     def _best_eval_result(self):
 

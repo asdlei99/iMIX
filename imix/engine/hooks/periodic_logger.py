@@ -13,6 +13,7 @@ class PeriodicLogger(HookBase):
     """
 
     def __init__(self, loggers, log_config_period):
+        super().__init__()
         for logger in loggers:
             assert isinstance(logger, LogBufferWriter), logger
         self._loggers = loggers
@@ -48,7 +49,3 @@ class PeriodicLogger(HookBase):
         # if self.trainer.epoch == self.trainer.max_epoch - 1:
         #     for logger in self._loggers:
         #         logger.write()
-
-    @property
-    def level(self):
-        return self._level

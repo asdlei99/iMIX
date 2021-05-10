@@ -91,12 +91,14 @@ class Organizer:
         self.max_epoch = cfg.total_epochs if self.by_epoch else 0
 
         self.hooks = self.build_hooks()
+        if cfg.get('custom_hooks', None):
+            self.add_custom_hooks(custom_hooks_cfg=cfg.custom_hooks)
 
         self.set_by_iter()
 
         if cfg.get('load_from', None) is not None:
             self.resume_or_load(cfg.load_from, resume=False)
-        elif cfg.get('resume_from ', None) is not None:
+        elif cfg.get('resume_from', None) is not None:
             self.resume_or_load(cfg.resume_from, resume=True)
 
         logger.info('Created Organizer')
@@ -350,22 +352,37 @@ class Organizer:
         global _BY_ITER_TRAIN
         _BY_ITER_TRAIN = False if self._by_epoch else True
 
-    def resume_or_load(self, path, resume=True):
-        """If `resume==True`, and last checkpoint exists, resume from it, load
-        all checkpointables (eg. optimizer and scheduler) and update iteration
+    def resume_or_load(self, path: str, resume: bool) -> None:
+        """If resume is True, and path checkpoint exists, resume from it(eg. optimizer and scheduler)
+        and update start_iter or start_epoch (if by_epoch = True)
         counter.
 
-        Otherwise, load the model specified by the config (skip all checkpointables) and start from
+        Otherwise, load the model specified by the config( skip optimizer and scheduler) and start from
         the first iteration.
 
         Args:
             resume (bool): whether to do resume or not
         """
-        checkpoint = self.checkpointer.resume_or_load(path, resume=resume)  # TODO(jinliang)
-        if resume and self.checkpointer.has_checkpoint():
-            self.start_iter = checkpoint.get('iteration', -1) + 1
-            # The checkpoint stores the training iteration that just finished, thus we start
-            # at the next iteration (or iter zero if there's no checkpoint).
+        logger = logging.getLogger(__name__)
+        if not os.path.isfile(path):
+            logger.warning(f'{path} checkpoint does not exists')
+            return
+
+        logger.info(f'loading : {path}')
+        checkpoint = self.checkpointer.resume_or_load(path, resume=resume)
+
+        if resume:
+            by_epoch = checkpoint.get('by_epoch', False)
+            if by_epoch:
+                self.start_iter = checkpoint.get('epoch_iter', 0)
+                self.start_epoch = checkpoint.get('epoch', -1) + 1
+                logger.info(f'current epoch: {self.start_epoch}')
+            else:
+                self.start_iter = checkpoint.get('iteration', 0)
+
+            logger.info(f'current iteration :{self.start_iter}')
+
+        logger.info('checkpoint loaded')
 
     @property
     def model_name(self):
@@ -382,3 +399,25 @@ class Organizer:
     @dataset_name.setter
     def dataset_name(self, name):
         self._dataset_name = name
+
+    def add_custom_hooks(self, custom_hooks_cfg):
+        assert isinstance(custom_hooks_cfg, list), f'custom_hook expect list type,but got {type(custom_hooks_cfg)} '
+        from imix.engine.hooks import build_hook, PriorityStatus
+
+        def get_insert_idx(hook):
+            for idx, hk in enumerate(self.hooks[::-1]):
+                if hk.level.value <= hook.level.value:
+                    return -idx
+
+        for hk_cfg in custom_hooks_cfg:
+            assert isinstance(hk_cfg, dict), f' hook expect dict type,but got{type(hk_cfg)}'
+            level = hk_cfg.pop('level', PriorityStatus.NORMAL)
+            hook = build_hook(hk_cfg)
+            hook.level = level
+            idx = get_insert_idx(hook)
+            self.hooks.insert(idx, hook)
+
+        # print all hook
+        logger = logging.getLogger(__name__)
+        for hk in self.hooks:
+            logger.info(f'hook name:{type(hk)}  ->   level name and value:{hk.level.name, hk.level.value}')

@@ -62,6 +62,7 @@ class LRSchedulerHook(HookBase):
             optimizer (torch.optim.Optimizer):
             scheduler (torch.optim._LRScheduler)
         """
+        super().__init__()
         self._optimizer = optimizer
         self._scheduler = scheduler
         self._best_param_group_idx = self._get_best_parm_group_idx()

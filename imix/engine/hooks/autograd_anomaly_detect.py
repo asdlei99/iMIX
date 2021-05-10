@@ -13,6 +13,7 @@ class AutogradAnomalyDetectHook(HookBase):
     """
 
     def __init__(self, mode: bool = False):
+        super().__init__()
         self._mode = mode
 
     def before_train(self):

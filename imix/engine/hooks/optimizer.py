@@ -46,6 +46,7 @@ from .builder import HOOKS
 class OptimizerHook(HookBase):
 
     def __init__(self, grad_clip=None):
+        super().__init__()
         self._grad_clip = grad_clip
         self._level = PriorityStatus.HIGH
 
@@ -77,10 +78,6 @@ class OptimizerHook(HookBase):
 
         if is_clean:
             self.trainer.optimizer.zero_grad()
-
-    @property
-    def level(self):
-        return self._level
 
 
 @HOOKS.register_module()

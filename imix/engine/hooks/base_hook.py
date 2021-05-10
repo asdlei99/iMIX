@@ -1,4 +1,5 @@
 import enum
+from typing import Union
 
 
 @enum.unique
@@ -28,6 +29,9 @@ class HookBase:
         1. 在hook方法中，用户可以通过self.trainer获取更多的信息
     """
 
+    def __init__(self):
+        self._level = PriorityStatus.NORMAL
+
     def before_train(self):
         pass
 
@@ -54,4 +58,21 @@ class HookBase:
 
     @property
     def level(self):
-        return self._level if hasattr(self, '_level') else PriorityStatus.NORMAL
+        return self._level
+
+    @level.setter
+    def level(self, level: Union[PriorityStatus, str, int]):
+        assert isinstance(level, (PriorityStatus, str, int))
+
+        if isinstance(level, PriorityStatus):
+            self._level = level
+        else:
+            level_name = list(PriorityStatus.__members__.keys())
+            level_value = list(lv.value for lv in PriorityStatus.__members__.values())
+            if level in level_name or level in level_value:
+                self._level = PriorityStatus[level.upper()] if isinstance(level_name, str) else PriorityStatus(level)
+            else:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f'because level{level} is not a PriorityStatus type,it will be set as default type')
+                self._level = PriorityStatus.NORMAL
