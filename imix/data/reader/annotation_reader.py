@@ -1,11 +1,17 @@
 from torch.utils.data import Dataset
 import numpy as np
+import json
+import _pickle as cPickle
+import logging
 
 
 class AnnotationBaseData(Dataset):
+    support_file_format = ['json', 'npy', 'pkl']
 
     def __init__(self, splits, annotation_cfg, *args, **kwargs):
         super().__init__()
+
+        self.logger = logging.getLogger(__name__)
 
         self.splits = splits
         self.annotation_cfg = annotation_cfg
@@ -20,19 +26,22 @@ class AnnotationBaseData(Dataset):
             file = self.annotation_cfg[data]
             file_format = file.split('.')[-1]
 
-            assert file_format in ['json', 'npy']
+            assert file_format in self.support_file_format, f'unknown file format :{file_format}'
 
-            if file_format == 'npy':
-                a = self._load_by_npy(path=file)
-            elif file_format == 'json':
-                a = self._load_by_json(path=file)
-
-            self.annotations.extend(a)
-            self.item_splits.extend([data] * len(a))
+            try:
+                load_fun = getattr(self, '_load_by_' + file_format)
+                annotation = load_fun(path=file)
+            except KeyError:
+                self.logger.info(f'The expected type are {self.support_file_format},but got type is {file_format}')
+                raise KeyError
+            else:
+                self.annotations.extend(annotation)
+                self.item_splits.extend([data] * len(annotation))
 
     @staticmethod
     def _load_by_json(path):
-        return path
+        with open(path, 'r') as f:
+            return json.load(f)
 
     @staticmethod
     def _load_by_npy(path):
@@ -41,6 +50,11 @@ class AnnotationBaseData(Dataset):
             return data[1:]
         else:
             return data
+
+    @staticmethod
+    def _load_by_pkl(path):
+        with open(path, 'rb') as f:
+            return cPickle.load(f)
 
     def __len__(self):
         return len(self.annotations)
@@ -54,11 +68,3 @@ def build_annotations(splits, annotation_cfg):
     annotation_bd = AnnotationBaseData(splits=splits, annotation_cfg=annotation_cfg)
     item_splits = annotation_bd.item_splits
     return annotation_bd, item_splits
-
-    # self.mix_annotations = []
-    # self.item_splits = []
-    #
-    # for dataset in self.splits:
-    #     an = np.load(self.cfg.mix_annotations[dataset], allow_pickle=True)[1:]
-    #     self.mix_annotations.extend(an)
-    #     self.item_splits.extend([dataset] * len(an))
