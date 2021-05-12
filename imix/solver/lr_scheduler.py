@@ -18,7 +18,6 @@ from transformers.optimization import (
     get_cosine_with_hard_restarts_schedule_with_warmup,
     get_polynomial_decay_schedule_with_warmup,
 )
-
 # NOTE: PyTorch's LR scheduler interface uses names that assume the LR changes
 # only on epoch boundaries. We typically use iteration based schedules instead.
 # As a result, "epoch" (e.g., as in self.last_epoch) should be understood to mean

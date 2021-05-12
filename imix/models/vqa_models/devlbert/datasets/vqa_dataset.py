@@ -1,16 +1,12 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 import os
+import json
 import _pickle as cPickle
 import logging
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from pytorch_pretrained_bert.tokenization import BertTokenizer
 
 from ._image_features_reader import ImageFeaturesH5Reader
 
@@ -22,53 +18,82 @@ def assert_eq(real, expected):
     assert real == expected, '%s (true) vs %s (expected)' % (real, expected)
 
 
-def _create_entry(item):
+def _create_entry(question, answer):
+    answer.pop('image_id')
+    answer.pop('question_id')
     entry = {
-        'question_id': item['question_id'],
-        'image_id': item['image_id'],
-        'question': item['question'],
-        'answer': item,
+        'question_id': question['question_id'],
+        'image_id': question['image_id'],
+        'question': question['question'],
+        'answer': answer,
     }
     return entry
 
 
-def _load_dataset(dataroot, name, clean_datasets):
+def _load_dataset(dataroot, name, limit_nums=None):
     """Load entries.
 
     dataroot: root path of dataset
-    name: 'train', 'val'
+    name: 'train', 'val', 'trainval', 'minsval'
     """
-    if name == 'train':
-        items_path = os.path.join(dataroot, 'cache', 'trainval_target.pkl')
-        items = cPickle.load(open(items_path, 'rb'))
-        items = sorted(items, key=lambda x: x['question_id'])
-        items = items[:-5000]
-    elif name == 'val':
-        items_path = os.path.join(dataroot, 'cache', 'trainval_target.pkl')
-        items = cPickle.load(open(items_path, 'rb'))
-        items = sorted(items, key=lambda x: x['question_id'])
-        items = items[-5000:]
+    if name == 'train' or name == 'val':
+        question_path = os.path.join(dataroot, 'v2_OpenEnded_mscoco_%s2014_questions.json' % name)
+        questions = sorted(json.load(open(question_path))['questions'], key=lambda x: x['question_id'])
+        answer_path = os.path.join(dataroot, 'cache', '%s_target.pkl' % name)
+        answers = cPickle.load(open(answer_path, 'rb'))
+        answers = sorted(answers, key=lambda x: x['question_id'])
+
+    elif name == 'trainval':
+        question_path_train = os.path.join(dataroot, 'v2_OpenEnded_mscoco_%s2014_questions.json' % 'train')
+        questions_train = sorted(json.load(open(question_path_train))['questions'], key=lambda x: x['question_id'])
+        answer_path_train = os.path.join(dataroot, 'cache', '%s_target.pkl' % 'train')
+        answers_train = cPickle.load(open(answer_path_train, 'rb'))
+        answers_train = sorted(answers_train, key=lambda x: x['question_id'])
+
+        question_path_val = os.path.join(dataroot, 'v2_OpenEnded_mscoco_%s2014_questions.json' % 'val')
+        questions_val = sorted(json.load(open(question_path_val))['questions'], key=lambda x: x['question_id'])
+        answer_path_val = os.path.join(dataroot, 'cache', '%s_target.pkl' % 'val')
+        answers_val = cPickle.load(open(answer_path_val, 'rb'))
+        answers_val = sorted(answers_val, key=lambda x: x['question_id'])
+        questions = questions_train + questions_val[:-3000]
+        answers = answers_train + answers_val[:-3000]
+
+    elif name == 'minval':
+        question_path_val = os.path.join(dataroot, 'v2_OpenEnded_mscoco_%s2014_questions.json' % 'val')
+        questions_val = sorted(json.load(open(question_path_val))['questions'], key=lambda x: x['question_id'])
+        answer_path_val = os.path.join(dataroot, 'cache', '%s_target.pkl' % 'val')
+        answers_val = cPickle.load(open(answer_path_val, 'rb'))
+        answers_val = sorted(answers_val, key=lambda x: x['question_id'])
+        questions = questions_val[-3000:]
+        answers = answers_val[-3000:]
+
+    elif name == 'test':
+        question_path_test = os.path.join(dataroot, 'v2_OpenEnded_mscoco_%s2015_questions.json' % 'test')
+        questions_test = sorted(json.load(open(question_path_test))['questions'], key=lambda x: x['question_id'])
+        questions = questions_test
     else:
         assert False, 'data split is not recognized.'
 
+    if limit_nums and limit_nums > 0:
+        questions = questions[:limit_nums]
+        answers = answers[:limit_nums]
+        print('load limit number data of ', limit_nums)
+
     if 'test' in name:
         entries = []
-        for item in items:
-            entries.append(item)
+        for question in questions:
+            entries.append(question)
     else:
+        assert_eq(len(questions), len(answers))
         entries = []
-        remove_ids = []
-        if clean_datasets:
-            remove_ids = np.load(os.path.join(dataroot, 'cache', 'genome_test_ids.npy'))
-            remove_ids = [int(x) for x in remove_ids]
-        for item in items:
-            if int(item['image_id']) in remove_ids:
-                continue
-            entries.append(_create_entry(item))
+        for question, answer in zip(questions, answers):
+            assert_eq(question['question_id'], answer['question_id'])
+            assert_eq(question['image_id'], answer['image_id'])
+            entries.append(_create_entry(question, answer))
     return entries
 
 
-class GenomeQAClassificationDataset(Dataset):
+class VQAClassificationDataset(Dataset):
 
     def __init__(
         self,
@@ -79,11 +104,10 @@ class GenomeQAClassificationDataset(Dataset):
         image_features_reader: ImageFeaturesH5Reader,
         gt_image_features_reader: ImageFeaturesH5Reader,
         tokenizer: BertTokenizer,
-        bert_model,
-        clean_datasets,
         padding_index: int = 0,
         max_seq_length: int = 16,
         max_region_num: int = 37,
+        limit_nums=None,
     ):
         super().__init__()
         self.split = split
@@ -98,29 +122,22 @@ class GenomeQAClassificationDataset(Dataset):
         self._tokenizer = tokenizer
         self._padding_index = padding_index
 
-        clean_train = '_cleaned' if clean_datasets else ''
+        if not os.path.exists(os.path.join(dataroot, 'cache')):
+            os.makedirs(os.path.join(dataroot, 'cache'))
 
-        if 'roberta' in bert_model:
-            cache_path = os.path.join(
-                dataroot,
-                'cache',
-                task + '_' + split + '_' + 'roberta' + '_' + str(max_seq_length) + clean_train + '.pkl',
-            )
-        else:
-            cache_path = os.path.join(
-                dataroot,
-                'cache',
-                task + '_' + split + '_' + str(max_seq_length) + clean_train + '.pkl',
-            )
-
+        cache_path = os.path.join(dataroot, 'cache', task + '_' + split + '_' + str(max_seq_length) + '.pkl')
         if not os.path.exists(cache_path):
-            self.entries = _load_dataset(dataroot, split, clean_datasets)
+            # if True:
+            self.entries = _load_dataset(dataroot, split, limit_nums)
             self.tokenize(max_seq_length)
             self.tensorize()
             cPickle.dump(self.entries, open(cache_path, 'wb'))
         else:
             logger.info('Loading from %s' % cache_path)
             self.entries = cPickle.load(open(cache_path, 'rb'))
+        # print(len(self.entries), "!!!!!!!!!!!!!!!!!!!!!!") # test 447793 val 214354 minval3000
+        # _image_entries = [temp["image_id"] for temp in self.entries]
+        # np.save("./vqa/image_entries(lis3000)vilbert", _image_entries)
 
     def tokenize(self, max_length=16):
         """Tokenizes the questions.
@@ -128,32 +145,30 @@ class GenomeQAClassificationDataset(Dataset):
         This will add q_token in each entry of the dataset.
         -1 represent nil, and should be treated as padding_index in embedding
         """
+        # res = []
         for entry in self.entries:
-            # tokens = self._tokenizer.tokenize(entry["question"])
-            # tokens = ["[CLS]"] + tokens + ["[SEP]"]
+            tokens = self._tokenizer.tokenize(entry['question'])
+            tokens = ['[CLS]'] + tokens + ['[SEP]']
+            # s = tokens[:max_length]
+            tokens = [self._tokenizer.vocab.get(w, self._tokenizer.vocab['[UNK]']) for w in tokens]
 
-            # tokens = [
-            #     self._tokenizer.vocab.get(w, self._tokenizer.vocab["[UNK]"])
-            #     for w in tokens
-            # ]
-            tokens = self._tokenizer.encode(entry['question'])
-            tokens = tokens[:max_length - 2]
-            tokens = self._tokenizer.add_special_tokens_single_sentence(tokens)
-
+            tokens = tokens[:max_length]
             segment_ids = [0] * len(tokens)
             input_mask = [1] * len(tokens)
 
             if len(tokens) < max_length:
+                # s += [""] * (max_length - len(tokens))
                 # Note here we pad in front of the sentence
                 padding = [self._padding_index] * (max_length - len(tokens))
                 tokens = tokens + padding
                 input_mask += padding
                 segment_ids += padding
-
+            # res.append(s)
             assert_eq(len(tokens), max_length)
             entry['q_token'] = tokens
             entry['q_input_mask'] = input_mask
             entry['q_segment_ids'] = segment_ids
+        # np.save("./vqa/txt(arrofstring3000,16)vilbert", res)
 
     def tensorize(self):
 
@@ -194,6 +209,12 @@ class GenomeQAClassificationDataset(Dataset):
         while len(image_mask) < self._max_region_num:
             image_mask.append(0)
 
+        # shuffle the image location here.
+        # img_idx = list(np.random.permutation(num_boxes-1)[:mix_num_boxes]+1)
+        # img_idx.append(0)
+        # mix_boxes_pad[:mix_num_boxes] = boxes[img_idx]
+        # mix_features_pad[:mix_num_boxes] = features[img_idx]
+
         mix_boxes_pad[:mix_num_boxes] = boxes[:mix_num_boxes]
         mix_features_pad[:mix_num_boxes] = features[:mix_num_boxes]
 
@@ -215,17 +236,7 @@ class GenomeQAClassificationDataset(Dataset):
             if labels is not None:
                 target.scatter_(0, labels, scores)
 
-        return (
-            features,
-            spatials,
-            image_mask,
-            question,
-            target,
-            input_mask,
-            segment_ids,
-            co_attention_mask,
-            question_id,
-        )
+        return features, spatials, image_mask, question, target, input_mask, segment_ids, co_attention_mask, question_id
 
     def __len__(self):
         return len(self.entries)

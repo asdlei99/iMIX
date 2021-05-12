@@ -341,3 +341,32 @@ class OscarOptimizerConstructor(DefaultOptimizerConstructor):
         optimizer_cfg.pop('training_encoder_lr_multiply')
 
         return build_from_cfg(optimizer_cfg, OPTIMIZERS)
+
+
+@OPTIMIZER_BUILDERS.register_module()
+class DevlbertOptimizerConstructor(VilbertOptimizerConstructor):
+
+    def __init__(self, optimizer_cfg, paramwise_cfg=None):
+        super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
+
+    def modify_params(self, params, optimizer_cfg, model, prefix=''):
+        langauge_weights = self.load_language_weight(file=self.language_weights_file)
+
+        for key, value in dict(model.named_parameters()).items():
+            if value.requires_grad:
+                if 'vil_prediction' in key:
+                    lr = 1e-4
+                else:
+                    if self.vision_scratch:
+                        if key[12:] in langauge_weights:
+                            lr = optimizer_cfg['lr']
+                        else:
+                            lr = 1e-4
+                    else:
+                        lr = optimizer_cfg['lr']
+                if any(nd in key for nd in self.no_decay):
+                    params += [{'params': [value], 'lr': lr, 'weight_decay': 0.01}]
+                if not any(nd in key for nd in self.no_decay):
+                    params += [{'params': [value], 'lr': lr, 'weight_decay': 0.0}]
+
+        print(len(list(model.named_parameters())), len(params))

@@ -1,61 +1,60 @@
-dataset_type = 'DeVLBertVQADATASET'
+from configs._base_.datasets.devlbert_task_config import (
+    task_ids,
+    TASKS,
+)
 
-test_datasets = ['minval']
+dataset_type = 'DevlbertLoadDatasets'
+
+# test mode directly read this data set
+test_datasets = [TASKS['TASK' + task_ids]['val_split']]
+
+limit_nums = 512
 
 vqa_reader_train_cfg = dict(
-    type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
-
-vqa_reader_train_gt_cfg = dict(
-    type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
+    tasks=task_ids,
+    bert_model='bert-base-uncased',
+    do_lower_case=True,
+    gradient_accumulation_steps=1,
+    in_memory=False,  # whether use chunck for parallel training
+    clean_datasets=True,  # whether clean train sets for multitask data
+    is_train=True,
+    limit_nums=limit_nums,
+    TASKS=TASKS,
+)
 
 vqa_reader_test_cfg = dict(
-    type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
-# '/home/datasets/mix_data/DeVLBert/vqa/coco/coco_test_resnet101_faster_rcnn_genome
-# .lmdb'
-vqa_reader_test_gt_cfg = dict(
-    type='ImageFeaturesH5Reader',
-    features_path='/home/datasets/mix_data/DeVLBert/vqa/coco/coco_trainval_resnet101_faster_rcnn_genome.lmdb')
+    tasks=task_ids,
+    bert_model='bert-base-uncased',
+    do_lower_case=True,
+    gradient_accumulation_steps=1,
+    in_memory=False,
+    clean_datasets=True,
+    is_train=False,
+    limit_nums=limit_nums,
+    TASKS=TASKS,
+)
 
 train_data = dict(
-    samples_per_gpu=3,  # 16
-    workers_per_gpu=0,
+    samples_per_gpu=TASKS['TASK' + task_ids]['per_gpu_train_batch_size'],
+    workers_per_gpu=4,
     sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
-        task='VQA',
-        dataroot='/home/datasets/mix_data/vilbert/datasets/VQA',
-        annotations_jsonpath='',
-        split='trainval',
-        image_features_reader=vqa_reader_train_cfg,
-        gt_image_features_reader=vqa_reader_train_gt_cfg,
-        tokenizer='/home/datasets/VQA/bert/bert-base-uncased',
-        padding_index=0,
-        max_seq_length=16,
-        max_region_num=100))
+        reader=vqa_reader_train_cfg,
+    ),
+    pin_memory=True,
+    # sampler='RandomSampler',
+)
 
-# just the same as train
 test_data = dict(
-    samples_per_gpu=2,  # 16
-    workers_per_gpu=0,
+    samples_per_gpu=TASKS['TASK' + task_ids]['per_gpu_eval_batch_size'],
+    workers_per_gpu=4,
     sampler_name='TestingSampler',
-    data=dict(
-        type=dataset_type,
-        task='VQA',
-        dataroot='/home/datasets/mix_data/vilbert/datasets/VQA',
-        annotations_jsonpath='',
-        split='minval',
-        image_features_reader=vqa_reader_test_cfg,
-        gt_image_features_reader=vqa_reader_test_gt_cfg,
-        tokenizer='/home/datasets/VQA/bert/bert-base-uncased',
-        padding_index=0,
-        max_seq_length=16,
-        max_region_num=100),
-    eval_period=5000,
-    datasets=test_datasets)
+    data=dict(type=dataset_type, reader=vqa_reader_test_cfg),
+    pin_memory=True,
+    eval_period=5000)  # eval_period set to 0 to disable
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
-    type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])
+    type='Evaluator',
+    metrics=[dict(type='DEVLBERT_AccuracyMetric')],
+    dataset_converters=[dict(type='DEVLBERT_DatasetConverter')])

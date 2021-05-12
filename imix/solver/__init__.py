@@ -9,6 +9,7 @@ from .default_constructor import (
     DefaultOptimizerConstructor,
     VilbertOptimizerConstructor,
     OscarOptimizerConstructor,
+    DevlbertOptimizerConstructor,
 )
 
 from .optimization import BertAdam

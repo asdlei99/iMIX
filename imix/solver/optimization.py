@@ -4,6 +4,7 @@ from torch.optim.optimizer import required
 from typing import Tuple
 from torch.optim import Optimizer
 import math
+from torch.nn.utils import clip_grad_norm_
 '''
 below optimizer for lxmert
 '''
@@ -73,10 +74,9 @@ class BertAdam(Optimizer):
                 next_m, next_v = state['next_m'], state['next_v']
                 beta1, beta2 = group['b1'], group['b2']
 
-                # LXRT: grad is clipped outside.
                 # Add grad clipping
-                # if group['max_grad_norm'] > 0:
-                #     clip_grad_norm_(p, group['max_grad_norm'])
+                if group['max_grad_norm'] > 0:
+                    clip_grad_norm_(p, group['max_grad_norm'])
 
                 # Decay the first and second moment running average coefficient
                 # In-place operations to update the averages at the same time

@@ -16,10 +16,10 @@ from .cmrin import CMRIN
 from .uniter import UNITER
 from .visual_dialog_bert import VisDiaBERT
 from .lxmert import LXMERT
-from .devilbert import DeVLBert
+from .devlbert import DEVLBERT
 from .oscar import OSCAR
 
 __all__ = [
     'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VILBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
-    'CMRIN', 'UNITER', 'VisDiaBERT', 'DeVLBert', 'OSCAR'
+    'CMRIN', 'UNITER', 'VisDiaBERT', 'DEVLBERT', 'OSCAR'
 ]

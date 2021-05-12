@@ -6,6 +6,7 @@ optimizer = dict(
     weight_decay=0.01,
     eps=1e-6,
     betas=[0.9, 0.999],
+    max_grad_norm=-1,
     training_encoder_lr_multiply=1,
 )
 optimizer_config = dict(grad_clip=dict(max_norm=5))

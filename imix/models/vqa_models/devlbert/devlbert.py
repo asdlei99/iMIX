@@ -32,6 +32,7 @@ import torch.nn.functional as F
 from torch.nn.utils.weight_norm import weight_norm
 
 from .utils import cached_path
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -1094,10 +1095,10 @@ class BertPreTrainingHeads(nn.Module):
             causal_prediction_t2v_loss = self.criterion_t(
                 causal_prediction_t2v.view(-1, 30522), causal_label_t.view(-1))
 
-            return (prediction_scores_t, prediction_scores_v, seq_relationship_score, scausal_prediction_v_loss,
+            return (prediction_scores_t, prediction_scores_v, seq_relationship_score, causal_prediction_v_loss,
                     causal_prediction_t_loss, causal_prediction_v2t_loss, causal_prediction_t2v_loss)
         else:
-            return prediction_scores_t, prediction_scores_v, seq_relationship_score
+            return (prediction_scores_t, prediction_scores_v, seq_relationship_score)
 
 
 class BertImagePredictionHead(nn.Module):
@@ -1150,6 +1151,7 @@ class BertPreTrainedModel(nn.Module):
                         config,
                         default_gpu=True,
                         state_dict=None,
+                        cache_dir=None,
                         from_tf=False,
                         *inputs,
                         **kwargs):
@@ -1175,19 +1177,15 @@ class BertPreTrainedModel(nn.Module):
                     . `model.chkpt` a TensorFlow checkpoint
             from_tf: should we load the weights from a locally saved TensorFlow checkpoint
             cache_dir: an optional path to a folder in which the pre-trained models will be cached.
-            state_dict: an optional state dictionnary (collections.OrderedDict object) to use instead of
-                        Google pre-trained models
+            state_dict: an optional state dictionnary (collections.OrderedDict object)
+                to use instead of Google pre-trained models
             *inputs, **kwargs: additional input for the specific Bert class
                 (ex: num_labels for BertForSequenceClassification)
         """
-
-        path, _ = os.path.split(pretrained_model_name_or_path)
-        cache_dir = kwargs.pop('cache_dir', path)
-
         # CONFIG_NAME = 'bert_config.json'
         WEIGHTS_NAME = 'pytorch_model.bin'
         TF_WEIGHTS_NAME = 'model.ckpt'
-        PRETRAINED_MODEL_ARCHIVE_MAP[pretrained_model_name_or_path] = pretrained_model_name_or_path
+
         if pretrained_model_name_or_path in PRETRAINED_MODEL_ARCHIVE_MAP:
             archive_file = PRETRAINED_MODEL_ARCHIVE_MAP[pretrained_model_name_or_path]
         else:
@@ -1319,13 +1317,12 @@ class BertModel(BertPreTrainedModel):
             selected in [0, 1]. It's a mask to be used if the input sequence length is smaller than the max
             input sequence length in the current batch. It's the mask that we typically use for attention when
             a batch has varying length sentences.
-        `output_all_encoded_layers`: boolean which controls the content of the `encoded_layers` output as
-            described below. Default: `True`.
+        `output_all_encoded_layers`: boolean which controls the content of the `encoded_layers`
+            output as described below. Default: `True`.
 
     Outputs: Tuple of (encoded_layers, pooled_output)
         `encoded_layers`: controled by `output_all_encoded_layers` argument:
-            - `output_all_encoded_layers=True`: outputs a list of the full sequences of encoded-hidden-states
-                at the end
+            - `output_all_encoded_layers=True`: outputs a list of the full sequences of encoded-hidden-states at the end
                 of each attention block (i.e. 12 full sequences for BERT-base, 24 for BERT-large), each
                 encoded-hidden-state is a torch.FloatTensor of size [batch_size, sequence_length, hidden_size],
             - `output_all_encoded_layers=False`: outputs only the full sequence of hidden-states corresponding
@@ -1673,7 +1670,7 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
             return (masked_lm_loss, masked_img_loss, next_sentence_loss, causal_prediction_v_loss,
                     causal_prediction_t_loss, causal_prediction_v2t_loss, causal_prediction_t2v_loss)
         else:
-            return prediction_scores_t, prediction_scores_v, seq_relationship_score, all_attention_mask
+            return (prediction_scores_t, prediction_scores_v, seq_relationship_score, all_attention_mask)
 
 
 class DeVLBertForVLTasks(BertPreTrainedModel):

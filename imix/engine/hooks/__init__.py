@@ -11,10 +11,32 @@ from .periods import (CheckPointHook, CommonMetricLoggerHook, JSONLoggerHook, Lo
                       TensorboardLoggerHook, get_log_buffer)
 from .builder import build_hook
 from .text_logger_hook import TextLoggerHook  # custom hook test
+from .ema import (
+    EMAIterHook,
+    # EMAEpochHook,
+)
 
 __all__ = [
-    'HookBase', 'AutogradProfilerHook', 'CallBackHook', 'EvaluateHook', 'IterationTimerHook', 'LRSchedulerHook',
-    'MomentumSchedulerHook', 'OptimizerHook', 'PeriodicLogger', 'CheckPointHook', 'CommonMetricLoggerHook',
-    'JSONLoggerHook', 'TensorboardLoggerHook', 'LogBufferWriter', 'LogBufferStorage', 'get_log_buffer',
-    'Fp16OptimizerHook', 'build_hook', 'PriorityStatus', 'TextLoggerHook'
+    'HookBase',
+    'AutogradProfilerHook',
+    'CallBackHook',
+    'EvaluateHook',
+    'IterationTimerHook',
+    'LRSchedulerHook',
+    'MomentumSchedulerHook',
+    'OptimizerHook',
+    'PeriodicLogger',
+    'CheckPointHook',
+    'CommonMetricLoggerHook',
+    'JSONLoggerHook',
+    'TensorboardLoggerHook',
+    'LogBufferWriter',
+    'LogBufferStorage',
+    'get_log_buffer',
+    'Fp16OptimizerHook',
+    'build_hook',
+    'PriorityStatus',
+    'TextLoggerHook',
+    'EMAIterHook',
+    # 'EMAEpochHook',
 ]
