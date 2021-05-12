@@ -11,6 +11,7 @@ from imix.utils_imix.collect_running_env import collect_env_info
 import argparse
 import json
 from imix.utils_imix.config import set_imix_work_dir
+import pprint
 
 random.seed(datetime.now())
 
@@ -85,7 +86,8 @@ def default_setup(args, cfg):  # DODO(jinliang):modify
     if hasattr(args, 'config_file') and args.config_file != '':
         logger.info('{} file content:\n{}'.format(args.config_file, PathManager.open(args.config_file, 'r').read()))
 
-    logger.info('full config file content: \n{}'.format(cfg))
+    logger.info('full config file content: ')
+    pprint.pprint({k: v for k, v in cfg.items()})
 
     if dist_info.is_main_process() and output_dir:
         cfg_path = os.path.join(output_dir, 'config.json')
