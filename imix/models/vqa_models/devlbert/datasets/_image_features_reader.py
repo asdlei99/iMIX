@@ -4,6 +4,7 @@ import copy
 import pickle
 import lmdb  # install lmdb by "pip install lmdb"
 import base64
+import os
 
 
 class ImageFeaturesH5Reader(object):
@@ -37,21 +38,44 @@ class ImageFeaturesH5Reader(object):
         # with h5py.File(self.features_h5path, "r", libver='latest', swmr=True) as features_h5:
         # self._image_ids = list(features_h5["image_ids"])
         # If not loaded in memory, then list of None.
-        self.env = lmdb.open(
-            self.features_path, max_readers=1, readonly=True, lock=False, readahead=False, meminit=False)
+        # self.env = lmdb.open(self.features_path, max_readers=1, readonly=True,
+        #                     lock=False, readahead=False, meminit=False)
 
-        with self.env.begin(write=False) as txn:
+        self.env_db = None
+        self._image_ids = []
+        self.features = []
+        self.num_boxes = []
+        self.boxes = []
+        self.boxes_ori = []
+
+        # with self.env.begin(write=False) as txn:
+        #     self._image_ids = pickle.loads(txn.get('keys'.encode()))
+        #
+        # self.features = [None] * len(self._image_ids)
+        # self.num_boxes = [None] * len(self._image_ids)
+        # self.boxes = [None] * len(self._image_ids)
+        # self.boxes_ori = [None] * len(self._image_ids)
+
+    def init_lmdb(self):
+        self.env_db = lmdb.open(
+            self.features_path,
+            subdir=os.path.isdir(self.features_path),
+            max_readers=8,
+            readonly=True,
+            lock=False,
+            readahead=False,
+            meminit=False)
+
+        with self.env_db.begin(write=False) as txn:
             self._image_ids = pickle.loads(txn.get('keys'.encode()))
-
-        self.features = [None] * len(self._image_ids)
-        self.num_boxes = [None] * len(self._image_ids)
-        self.boxes = [None] * len(self._image_ids)
-        self.boxes_ori = [None] * len(self._image_ids)
 
     def __len__(self):
         return len(self._image_ids)
 
     def __getitem__(self, image_id):
+        if self.env_db is None:
+            self.init_lmdb()
+
         image_id = str(image_id).encode()
         index = self._image_ids.index(image_id)
         if self._in_memory:
@@ -63,7 +87,7 @@ class ImageFeaturesH5Reader(object):
                 image_location = self.boxes[index]
                 image_location_ori = self.boxes_ori[index]
             else:
-                with self.env.begin(write=False) as txn:
+                with self.env_db.begin(write=False) as txn:
                     item = pickle.loads(txn.get(image_id))
                     image_id = item['image_id']
                     image_h = int(item['image_h'])
@@ -104,7 +128,7 @@ class ImageFeaturesH5Reader(object):
                     self.num_boxes[index] = num_boxes
         else:
             # Read chunk from file everytime if not loaded in memory.
-            with self.env.begin(write=False) as txn:
+            with self.env_db.begin(write=False) as txn:
                 item = pickle.loads(txn.get(image_id))
                 image_id = item['image_id']
                 image_h = int(item['image_h'])

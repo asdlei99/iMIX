@@ -21,11 +21,11 @@ TASKS = dict(
         val_split='minval',
         num_labels=3129,
         lr=0.00004,
-        per_gpu_train_batch_size=32,  # 256,
-        per_gpu_eval_batch_size=128,  # 1024,
-        iters_in_epoch=16,  # 2560,
-        num_warmup_steps=32,  # 5120,  # warmup_proportion=0.1
-        num_training_steps=320,  # 51200,  # ceil(totoal 443753 / batch size 32/ GPUS ) * epoch size
+        per_gpu_train_batch_size=64,  # 32,  # 256,
+        per_gpu_eval_batch_size=256,  # 128,  # 1024,
+        iters_in_epoch=2560,  # 16,  # 2560,
+        num_warmup_steps=5120,  # 32,  # 5120,  # warmup_proportion=0.1
+        num_training_steps=51200,  # 320,  # 51200,  # ceil(totoal 443753 / batch size 32/ GPUS ) * epoch size
         num_epoch=20,
     ),
     TASK2=dict(

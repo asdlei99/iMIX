@@ -125,7 +125,7 @@ class VQAClassificationDataset(Dataset):
         if not os.path.exists(os.path.join(dataroot, 'cache')):
             os.makedirs(os.path.join(dataroot, 'cache'))
 
-        cache_path = os.path.join(dataroot, 'cache', task + '_' + split + '_' + str(max_seq_length) + '.pkl')
+        cache_path = os.path.join(dataroot, 'cache', task + '_' + split + '_' + str(max_seq_length) + '_tolist.pkl')
         if not os.path.exists(cache_path):
             # if True:
             self.entries = _load_dataset(dataroot, split, limit_nums)
@@ -222,9 +222,18 @@ class VQAClassificationDataset(Dataset):
         image_mask = torch.tensor(image_mask).long()
         spatials = torch.tensor(mix_boxes_pad).float()
 
+        device = features.device
+
+        def list2tensor(data):
+            return torch.tensor(data, device=device)
+
         question = entry['q_token']
         input_mask = entry['q_input_mask']
         segment_ids = entry['q_segment_ids']
+
+        question = list2tensor(question)
+        input_mask = list2tensor(input_mask)
+        segment_ids = list2tensor(segment_ids)
 
         co_attention_mask = torch.zeros((self._max_region_num, self._max_seq_length))
         target = torch.zeros(self.num_labels)
@@ -233,7 +242,11 @@ class VQAClassificationDataset(Dataset):
             answer = entry['answer']
             labels = answer['labels']
             scores = answer['scores']
+
             if labels is not None:
+                labels = list2tensor(labels)
+                scores = list2tensor(scores)
+
                 target.scatter_(0, labels, scores)
 
         return features, spatials, image_mask, question, target, input_mask, segment_ids, co_attention_mask, question_id

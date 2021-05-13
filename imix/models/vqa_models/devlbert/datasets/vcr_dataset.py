@@ -148,7 +148,8 @@ class VCRDataset(Dataset):
         # cache_path = "data/VCR/cache/" + split + '_' + task + "_" + str(max_seq_length) \
         #  + "_" + str(max_region_num) + "_vcr.pkl"
         cache_path = os.path.join(
-            dataroot, 'cache', split + '_' + task + '_' + str(max_seq_length) + '_' + str(max_region_num) + '_vcr.pkl')
+            dataroot, 'cache',
+            split + '_' + task + '_' + str(max_seq_length) + '_' + str(max_region_num) + '_vcr_tolist.pkl')
 
         if not os.path.exists(cache_path):
             self.tokenize()
@@ -342,6 +343,15 @@ class VCRDataset(Dataset):
         input_mask = entry['input_mask']
         segment_ids = entry['segment_ids']
         target = int(entry['target'])
+
+        device = features.device
+
+        def list2tensor(data):
+            return torch.tensor(data, device=device)
+
+        input_ids = list2tensor(input_ids)
+        input_mask = list2tensor(input_mask)
+        segment_ids = list2tensor(segment_ids)
 
         if self._split == 'test':
             # anno_id = entry["anno_id"]

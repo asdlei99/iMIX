@@ -79,8 +79,9 @@ class ReferExpressionDataset(Dataset):
         if not os.path.exists(os.path.join(dataroot, 'cache')):
             os.makedirs(os.path.join(dataroot, 'cache'))
 
-        cache_path = os.path.join(dataroot, 'cache',
-                                  task + '_' + split + '_' + str(max_seq_length) + '_' + str(max_region_num) + '.pkl')
+        cache_path = os.path.join(
+            dataroot, 'cache',
+            task + '_' + split + '_' + str(max_seq_length) + '_' + str(max_region_num) + '_tolist.pkl')
         if not os.path.exists(cache_path):
             self.tokenize()
             self.tensorize()
@@ -215,6 +216,15 @@ class ReferExpressionDataset(Dataset):
         caption = entry['token']
         input_mask = entry['input_mask']
         segment_ids = entry['segment_ids']
+
+        device = co_attention_mask.device
+
+        def list2tensor(data):
+            return torch.tensor(data, device=device)
+
+        caption = list2tensor(caption)
+        input_mask = list2tensor(input_mask)
+        segment_ids = list2tensor(segment_ids)
 
         return features, spatials, image_mask, caption, target, input_mask, segment_ids, co_attention_mask, image_id
 
