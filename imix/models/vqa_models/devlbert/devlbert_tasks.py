@@ -13,6 +13,10 @@ from imix.models.builder import VQA_MODELS
 # from transformers.modeling_bert import BertConfig
 from ..base_model import BaseModel
 from .task_utils import compute_score_with_logits
+import imix.utils_imix.distributed_info as comm
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @VQA_MODELS.register_module()
@@ -51,10 +55,13 @@ class DEVLBERT(BaseModel):
         num_labels = max([config.TASKS[k]['num_labels'] for k in task_ids])
 
         self.task_start_iter = {}
-        for task_id in task_ids:
-            self.task_start_iter[task_id] = train_steps - (
-                config.TASKS[task_id]['num_epoch'] * config.TASKS[task_id]['iters_in_epoch'] //
-                config.gradient_accumulation_steps)
+        if len(task_ids) == 1:
+            self.task_start_iter[task_ids[0]] = 0
+        else:
+            for task_id in task_ids:
+                self.task_start_iter[task_id] = train_steps - (
+                    config.TASKS[task_id]['num_epoch'] * config.TASKS[task_id]['iters_in_epoch'] //
+                    config.gradient_accumulation_steps)
 
         # task_ave_iter_list = sorted(task_ave_iter.values())
         # median_num_iter = task_ave_iter_list[-1]
@@ -94,14 +101,63 @@ class DEVLBERT(BaseModel):
                 if key[12:] in bert_weight_name_filtered:
                     value.requires_grad = False
 
-            print('filtered weight')
-            print(bert_weight_name_filtered)
+            logger.info('filtered weight')
+            logger.info(bert_weight_name_filtered)
 
         self.lr_reduce_list = [5, 7]
         self.global_step = 0
         self.task_iter_train = {name: None for name in task_ids}
         self.task_count = {name: 0 for name in task_ids}
         self.task_ids = task_ids
+
+        self.is_ema_state = False
+        self.bkp_state_dict = None
+        self.use_ema = config.TASKS[task_ids[0]]['use_ema']
+        self.ema_decay_ratio = config.TASKS[task_ids[0]]['ema_decay_ratio']
+        self.ema_state_dict = {}
+
+    def init_ema(self):
+        if self.use_ema:
+            for param_name, param_tensor in self.model.state_dict().items():
+                # we currently store the ema params on GPU
+                self.ema_state_dict[param_name] = param_tensor.clone().detach()
+        logger.info('init ema state')
+
+    def update_ema(self):
+        if self.use_ema:
+            self.model.zero_grad()
+            for param_name, param_tensor in self.model.state_dict().items():
+                assert param_name in self.ema_state_dict
+                self.ema_state_dict[param_name] -= (1.0 - self.ema_decay_ratio) * (
+                    self.ema_state_dict[param_name] - param_tensor)
+            # print('after_train_iter use_ema')
+
+    def load_ema_state_dict(self):
+        if self.use_ema and self.is_ema_state is False:
+            self.bkp_state_dict = {
+                param_name: param_tensor.cpu().detach()
+                for param_name, param_tensor in self.model.state_dict().items()
+            }
+            # load averaged params
+            self.model.load_state_dict(self.ema_state_dict)
+            self.is_ema_state = True
+
+            logger.info('load ema state dict!')
+
+    def save_checkpoint_ema(self, savePath, epochId):
+        # If EMA is used, save averaged model
+        if self.use_ema and comm.is_main_process():
+            output_ema_state_dict = {}
+            for param_name in self.model.state_dict():
+                assert param_name in self.ema_state_dict
+                if hasattr(self.model, 'module'):
+                    output_ema_state_dict[param_name[7:]] = self.ema_state_dict[param_name]  # skip prefix "module."
+                else:
+                    output_ema_state_dict[param_name] = self.ema_state_dict[param_name]
+            output_ema_model_file = os.path.join(savePath, 'pytorch_model_' + str(epochId) + '_ema.bin')
+            torch.save(output_ema_state_dict, output_ema_model_file)
+
+            logger.info('Saving ema checkpoint to {}'.format(output_ema_model_file))
 
     def run_one_time(self, task_id, data):
         params = self.get_image_and_text_features(task_id, data)
@@ -126,7 +182,6 @@ class DEVLBERT(BaseModel):
 
         target = params.target
         batch_size = params.batch_size
-        # multiple_choice_ids = params.multiple_choice_ids
         num_options = params.num_options
 
         cfg_type = self.config.TASKS[task_id]['type']
@@ -157,16 +212,11 @@ class DEVLBERT(BaseModel):
     def forward_train(self, data, **kwargs):
         iterId = kwargs['cur_iter']
         # epochId = kwargs['cur_epoch']
-        step = kwargs['inner_iter']
+        # step = kwargs['inner_iter']
 
-        # torch.autograd.set_detect_anomaly(True)
-        first_task = True
         model_output = {}
         for task_id in self.task_ids:
             if iterId >= self.task_start_iter[task_id]:
-                #     is_forward = True
-
-                # if is_forward:
                 output_dict = self.run_one_time(task_id, data)
                 output_dict.batch_score /= output_dict.batch_size
 
@@ -176,42 +226,18 @@ class DEVLBERT(BaseModel):
                     'batch_score': output_dict.batch_score,
                 }
 
-                if (step + 1) % self.config.gradient_accumulation_steps == 0:
-                    # if config.fp16:
-                    # lr_this_step = config[learning_rate] * warmup_linear(
-                    #     global_step / num_train_optimization_steps,
-                    #     config[warmup_proportio]n,
-                    # )
-                    # for param_group in optimizer.param_groups:
-                    #     param_group["lr"] = lr_this_step
-                    # if first_task and (
-                    #     global_step < warmpu_steps
-                    #     or config.lr_scheduler == "warmup_linear"
-                    # ):
-                    #     warmup_scheduler.step()
-
-                    if first_task:
-                        self.global_step += 1
-                        first_task = False
-
-        # if "cosine" in config.lr_scheduler and global_step > warmpu_steps:
-        #    lr_scheduler.step()
-        # if config.lr_scheduler == "automatic":
-        #     lr_scheduler.step(sum(val_scores.values()))
-        #     logger.info("best average score is %3f" % lr_scheduler.best)
-        # elif config.lr_scheduler == "mannul":
-        #     lr_scheduler.step()
-
         # now only one task
         return model_output[task_id]
 
     def forward_test(self, data, **kwargs):
         # test now does not support **kwargs
+        self.load_ema_state_dict()
+
         if isinstance(self.task_ids, list):
             task_id = self.task_ids[0]
         else:
             task_id = self.task_ids
-        # torch.autograd.set_detect_anomaly(True)
+
         model_output = {}
 
         output_dict = self.run_one_time(task_id, data)
@@ -220,11 +246,6 @@ class DEVLBERT(BaseModel):
             'batch_score': output_dict.batch_score,
             'batch_size': output_dict.batch_size,
         }
-
-        # # update the multi-task scheduler.
-        # self.task_stop_controller[task_id].step(
-        #     tbLogger.getValScore(task_id))
-        # score = tbLogger.showLossVal(task_id, task_stop_controller)
 
         # now only one task
         return model_output[task_id]

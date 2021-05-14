@@ -27,6 +27,8 @@ TASKS = dict(
         num_warmup_steps=5120,  # 32,  # 5120,  # warmup_proportion=0.1
         num_training_steps=51200,  # 320,  # 51200,  # ceil(totoal 443753 / batch size 32/ GPUS ) * epoch size
         num_epoch=20,
+        use_ema=True,
+        ema_decay_ratio=0.9999,
     ),
     TASK2=dict(
         name='VCR_Q-A',
@@ -52,6 +54,8 @@ TASKS = dict(
         num_warmup_steps=13308,  # 26616,  # 13308,
         num_training_steps=266160,  # 26616,  # 133080,
         num_epoch=20,
+        use_ema=True,
+        ema_decay_ratio=0.9998,
     ),
     TASK3=dict(
         name='VCR_QA-R',
@@ -77,6 +81,8 @@ TASKS = dict(
         num_warmup_steps=13308,
         num_training_steps=266160,
         num_epoch=20,
+        use_ema=True,
+        ema_decay_ratio=0.9998,
     ),
     TASK4=dict(
         name='RetrievalFlickr30k',
@@ -101,7 +107,9 @@ TASKS = dict(
         iters_in_epoch=470,  # todo
         num_warmup_steps=2196,
         num_training_steps=21960,
-        num_epoch=20,
+        num_epoch=30,
+        use_ema=True,
+        ema_decay_ratio=0.9999,
     ),
     TASK5=dict(
         name='refcoco+',
@@ -121,11 +129,13 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00004,
-        per_gpu_train_batch_size=32,  # 256,
-        per_gpu_eval_batch_size=128,  # 1024,
+        per_gpu_train_batch_size=64,  # 256,
+        per_gpu_eval_batch_size=256,  # 1024,
         iters_in_epoch=470,
         num_warmup_steps=1410,
         num_training_steps=14100,
         num_epoch=30,
+        use_ema=True,
+        ema_decay_ratio=0.9998,
     ),
 )
