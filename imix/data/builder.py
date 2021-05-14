@@ -6,9 +6,9 @@ import numpy as np
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-# import imix.utils.comm as comm
 import imix.utils_imix.distributed_info as comm
 from imix.utils_imix.config import seed_all_rng
+from .sampler import TokenBucketSampler
 from imix.utils_imix.registry import Registry, build_from_cfg
 from .parallel.collate import collate
 from .sampler import InferenceSampler, TrainingSampler
@@ -208,6 +208,9 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     shuffle = cfg.train_data.get('shuffle', True) if is_training else cfg.test_data.get('shuffle', False)
     pin_memory = cfg.train_data.get('pin_memory', False) if is_training else cfg.test_data.get('pin_memory', False)
     sampler_cfg = cfg.train_data.get('sampler', None) if is_training else cfg.test_data.get('sampler', False)
+    collate_fn = dataset.collate_fn if hasattr(dataset, 'collate_fn') else None
+    batch_sampler_cfg = cfg.train_data.get('batch_sampler', None) if is_training \
+        else cfg.test_data.get('batch_sampler', None)
 
     # sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
     # ngpus = comm.get_world_size()
@@ -223,6 +226,22 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
     if sampler_cfg == 'DistributedSampler' and comm.get_world_size() <= 1:
         logger.info('chose the wrong DistributedSampler sampler for training')
 
+    if batch_sampler_cfg == 'TokenBucketSampler':
+        batch_sampler = TokenBucketSampler(
+            dataset.dataset.lens, bucket_size=8192, batch_size=batch_size, droplast=is_training)
+        batch_size = None
+        drop_last = None
+        shuffle = None
+    else:
+        batch_sampler = None
+
+    if batch_sampler is not None:
+        return DataLoader(
+            dataset=dataset,
+            pin_memory=pin_memory,
+            num_workers=num_workers,
+            batch_sampler=batch_sampler,
+            collate_fn=collate_fn)
     return DataLoader(
         dataset=dataset,
         pin_memory=pin_memory,

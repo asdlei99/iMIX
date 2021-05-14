@@ -20,7 +20,10 @@ from .loaders.vqa_loader import VQADATASET
 from .loaders.vizwiz_loader import VizWizDATASET
 
 from .loaders.devlbert_vqa_loader import DeVLBertVQADATASET
-
+from .loaders.uniter.nlvr2 import NLVR2Dataset
+from .loaders.uniter.vcr import VcrDataset
+from .loaders.uniter.vqa import VqaDataset
+from .loaders.uniter.ve import VeDataset
 __all__ = [
     'VQADATASET',
     'GQADATASET',
@@ -41,4 +44,8 @@ __all__ = [
     'VisDialDataset',
     'DeVLBertVQADATASET',
     'VisdialDatasetDense',
+    'VcrDataset', 
+    'VqaDataset', 
+    'VeDataset',
+    'NLVR2Dataset'
 ]

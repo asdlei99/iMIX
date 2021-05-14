@@ -1,31 +1,24 @@
-"""
-author: lxc
-created time: 2020/8/18
-"""
+"""Copyright (c) Microsoft Corporation. Licensed under the MIT license.
 
-import json
-import os
+Dataset interfaces
+"""
+from collections import defaultdict
+from contextlib import contextmanager
 import io
-import lmdb
-import msgpack
-import msgpack_numpy
+import json
+from os.path import exists
+
 import numpy as np
 import torch
-from lz4.frame import compress, decompress
+from torch.utils.data import Dataset, ConcatDataset
+# import horovod.torch as hvd
 from tqdm import tqdm
-from collections import defaultdict
-from .base_reader import BaseDataReader
+import lmdb
+from lz4.frame import compress, decompress
 
+import msgpack
+import msgpack_numpy
 msgpack_numpy.patch()
-
-# def _check_distributed():
-#   try:
-#     dist = hvd.size() != hvd.local_size()
-#   except ValueError:
-#     # not using horovod
-#     dist = False
-#   return dist
-#
 
 
 def _fp16_to_fp32(feat_dict):
@@ -39,13 +32,13 @@ def compute_num_bb(confs, conf_th, min_bb, max_bb):
     return num_bb
 
 
-def _get_vqa_target(example, num_answers):
-    target = torch.zeros(num_answers)
-    labels = example['target']['labels']
-    scores = example['target']['scores']
-    if labels and scores:
-        target.scatter_(0, torch.tensor(labels), torch.tensor(scores))
-    return target
+def _check_distributed():
+    # try:
+    #     dist = hvd.size() != hvd.local_size()
+    # except ValueError:
+    #     # not using horovod
+    #     dist = False
+    return False
 
 
 class DetectFeatLmdb(object):
@@ -58,7 +51,7 @@ class DetectFeatLmdb(object):
         else:
             db_name = f'feat_th{conf_th}_max{max_bb}_min{min_bb}'
             nbb = f'nbb_th{conf_th}_max{max_bb}_min{min_bb}.json'
-            if not os.path.exists(f'{img_dir}/{nbb}'):
+            if not exists(f'{img_dir}/{nbb}'):
                 # nbb is not pre-computed
                 self.name2nbb = None
             else:
@@ -73,12 +66,7 @@ class DetectFeatLmdb(object):
             else:
                 db_name = 'all'
         # only read ahead on single node training
-        self.env = lmdb.open(
-            f'{img_dir}/{db_name}',
-            readonly=True,
-            create=False,
-            # readahead=not _check_distributed())
-            readahead=True)
+        self.env = lmdb.open(f'{img_dir}/{db_name}', readonly=True, create=False, readahead=not _check_distributed())
         self.txn = self.env.begin(buffers=True)
         if self.name2nbb is None:
             self.name2nbb = self._compute_nbb()
@@ -130,18 +118,22 @@ class DetectFeatLmdb(object):
         return img_feat, img_bb
 
 
+@contextmanager
+def open_lmdb(db_dir, readonly=False):
+    db = TxtLmdb(db_dir, readonly)
+    try:
+        yield db
+    finally:
+        del db
+
+
 class TxtLmdb(object):
 
     def __init__(self, db_dir, readonly=True):
         self.readonly = readonly
         if readonly:
             # training
-            self.env = lmdb.open(
-                db_dir,
-                readonly=True,
-                create=False,
-                # readahead=not _check_distributed())
-                readahead=True)
+            self.env = lmdb.open(db_dir, readonly=True, create=False, readahead=not _check_distributed())
             self.txn = self.env.begin(buffers=True)
             self.write_cnt = None
         else:
@@ -210,54 +202,35 @@ class TxtTokLmdb(object):
         return img2txts
 
 
-class VQAReaderUNITER(BaseDataReader):
+def get_ids_and_lens(db):
+    assert isinstance(db, TxtTokLmdb)
+    lens = []
+    ids = []
+    for id_ in list(db.id2len.keys())[0::1]:
+        lens.append(db.id2len[id_])
+        ids.append(id_)
+    return lens, ids
 
-    def __init__(self, cfg):
-        super().__init__(cfg)
-        self.conf_th = cfg.get('conf_th', 0.2)
-        self.max_bb = cfg.get('max_bb', 100)
-        self.min_bb = cfg.get('min_bb', 10)
-        self.num_bb = cfg.get('num_bb', 36)
-        self.compress = cfg.get('compress', False)
-        self.max_txt_len = cfg.get('max_txt_len', 60)
-        path = cfg.mix_features.train
-        txt_path = cfg.mix_annotations.train
-        self.img_db = DetectFeatLmdb(path, self.conf_th, self.max_bb, self.min_bb, self.num_bb, self.compress)
-        self.txt_db = TxtTokLmdb(txt_path, self.max_txt_len)
-        txt_lens, self.ids = self.get_ids_and_lens(self.txt_db)
 
-        txt2img = self.txt_db.txt2img
+class DetectFeatTxtTokDataset(Dataset):
+
+    def __init__(self, txt_db, img_db):
+        assert isinstance(txt_db, TxtTokLmdb)
+        assert isinstance(img_db, DetectFeatLmdb)
+        self.txt_db = txt_db
+        self.img_db = img_db
+        txt_lens, self.ids = get_ids_and_lens(txt_db)
+
+        txt2img = txt_db.txt2img
         self.lens = [tl + self.img_db.name2nbb[txt2img[id_]] for tl, id_ in zip(txt_lens, self.ids)]
 
     def __len__(self):
         return len(self.ids)
 
-    def get_ids_and_lens(self, db):
-        assert isinstance(db, TxtTokLmdb)
-        lens = []
-        ids = []
-        # for id_ in list(db.id2len.keys())[hvd.rank()::hvd.size()]:
-        for id_ in list(db.id2len.keys()):
-            lens.append(db.id2len[id_])
-            ids.append(id_)
-        return lens, ids
-
-    def __getitem__(self, item):
-
-        id_ = self.ids[item]
+    def __getitem__(self, i):
+        id_ = self.ids[i]
         example = self.txt_db[id_]
-        img_feat, img_pos_feat, num_bb = self._get_img_feat(example['img_fname'])
-
-        # text input
-        input_ids = example['input_ids']
-        input_ids = self.txt_db.combine_inputs(input_ids)
-
-        target = _get_vqa_target(example, self.num_answers)
-
-        attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
-        # item_feature = ItemFeature()
-
-        return input_ids, img_feat, img_pos_feat, attn_masks, target
+        return example
 
     def _get_img_feat(self, fname):
         img_feat, bb = self.img_db[fname]
@@ -265,52 +238,66 @@ class VQAReaderUNITER(BaseDataReader):
         num_bb = img_feat.size(0)
         return img_feat, img_bb, num_bb
 
-    # annotation = self.mix_annotations[item]
-    # split = self.item_splits[item]
-    # item_feature = ItemFeature()
-    # item_feature.error = False
-    # for k, v in annotation.items():
-    #   item_feature[k] = v
-    #
-    # # TODO(jinliang)
-    # # item_feature.tokens = annotation["question_tokens"]
-    # # item_feature.answers = annotation["answers"]
-    # # item_feature.all_answers = annotation["all_answers"]
-    # # print(item)
-    # # item_feature.ocr_tokens = annotation["ocr_tokens"]
-    #
-    # if split is not 'test':
-    #   item_feature.answers = annotation['answers']
-    #   item_feature.all_answers = annotation['all_answers']
-    #
-    #
-    # item_feature.tokens = annotation['question_tokens']
-    # item_feature.img_id = annotation['image_id']
-    # if self.default_feature:
-    #   feature_info = None
-    #   for txn in self.feature_txns:
-    #     feature_info = pickle.loads(txn.get(annotation['image_name'].encode()))
-    #     if feature_info is not None:
-    #       break
-    #   feature_global_info = None
-    #   for txn in self.feature_global_txns:
-    #     feature_global_info = pickle.loads(txn.get(annotation['image_name'].encode()))
-    #     if feature_global_info is None:
-    #       break
-    #     else:
-    #       feature_global_info['global_feature_path'] = feature_global_info.pop('feature_path')
-    #       feature_global_info['global_features'] = feature_global_info.pop('features')
-    #   if feature_info is None or feature_global_info is None:
-    #     item_feature.error = True
-    #     item_feature.feature = np.random.random((100, 2048))
-    #     item_feature.global_feature = np.random.random((100, 2048))
-    #     return item_feature
-    #
-    #   for k, v in feature_info.items():
-    #     item_feature[k] = v
-    #   for k, v in feature_global_info.items():
-    #     item_feature[k] = v
-    #   return item_feature
-    # feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
-    # item_feature.feature = torch.load(feature_path)[0]
-    # return item_feature
+
+def pad_tensors(tensors, lens=None, pad=0):
+    """B x [T, ...]"""
+    if lens is None:
+        lens = [t.size(0) for t in tensors]
+    max_len = max(lens)
+    bs = len(tensors)
+    hid = tensors[0].size(-1)
+    dtype = tensors[0].dtype
+    output = torch.zeros(bs, max_len, hid, dtype=dtype)
+    if pad:
+        output.data.fill_(pad)
+    for i, (t, l) in enumerate(zip(tensors, lens)):
+        output.data[i, :l, ...] = t.data
+    return output
+
+
+def get_gather_index(txt_lens, num_bbs, batch_size, max_len, out_size):
+    assert len(txt_lens) == len(num_bbs) == batch_size
+    gather_index = torch.arange(
+        0,
+        out_size,
+        dtype=torch.long,
+    ).unsqueeze(0).repeat(batch_size, 1)
+
+    for i, (tl, nbb) in enumerate(zip(txt_lens, num_bbs)):
+        gather_index.data[i, tl:tl + nbb] = torch.arange(max_len, max_len + nbb, dtype=torch.long).data
+    return gather_index
+
+
+class ConcatDatasetWithLens(ConcatDataset):
+    """A thin wrapper on pytorch concat dataset for lens batching."""
+
+    def __init__(self, datasets):
+        super().__init__(datasets)
+        self.lens = [l for dset in datasets for l in dset.lens]
+
+    def __getattr__(self, name):
+        return self._run_method_on_all_dsets(name)
+
+    def _run_method_on_all_dsets(self, name):
+
+        def run_all(*args, **kwargs):
+            return [dset.__getattribute__(name)(*args, **kwargs) for dset in self.datasets]
+
+        return run_all
+
+
+class ImageLmdbGroup(object):
+
+    def __init__(self, conf_th, max_bb, min_bb, num_bb, compress):
+        self.path2imgdb = {}
+        self.conf_th = conf_th
+        self.max_bb = max_bb
+        self.min_bb = min_bb
+        self.num_bb = num_bb
+        self.compress = compress
+
+    def __getitem__(self, path):
+        img_db = self.path2imgdb.get(path, None)
+        if img_db is None:
+            img_db = DetectFeatLmdb(path, self.conf_th, self.max_bb, self.min_bb, self.num_bb, self.compress)
+        return img_db

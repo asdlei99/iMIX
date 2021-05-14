@@ -11,7 +11,7 @@ from .default_constructor import (
     OscarOptimizerConstructor,
 )
 
-from .optimization import BertAdam
+from .optimization import BertAdam, UniterAdamW
 
 from .lr_scheduler import (
     WarmupCosineLR,
@@ -26,11 +26,10 @@ from .lr_scheduler import (
     WarmupCosineWithHardRestartsSchedule,
     WarmupPolynomialSchedule,
 )
-
 __all__ = [
     'build_lr_scheduler', 'build_optimizer', 'OPTIMIZER_BUILDERS', 'OPTIMIZERS', 'build_optimizer',
     'build_optimizer_constructor', 'WarmupCosineLR', 'WarmupMultiStepLR', 'PythiaScheduler', 'MultiStepScheduler',
     'WarmupLinearScheduleNonZero', 'BertAdam', 'BertWarmupLinearLR', 'WarmupLinearScheduler', 'ConstantScheduler',
     'WarmupConstantSchedule', 'WarmupCosineSchedule', 'WarmupCosineWithHardRestartsSchedule',
-    'WarmupPolynomialSchedule', 'BertAdamRaw', 'RAdam', 'PlainRAdam'
+    'WarmupPolynomialSchedule', 'BertAdamRaw', 'RAdam', 'PlainRAdam', 'UniterAdamW'
 ]

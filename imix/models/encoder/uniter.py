@@ -15,6 +15,7 @@ class UniterEncoder(nn.Module):
         layer = BertLayer(config)
         self.layer = nn.ModuleList([copy.deepcopy(layer) for _ in range(config.num_hidden_layers)])
         self.pooler = BertPooler(config)
+        self.config = config
 
     def forward(self, input_, attention_mask, output_all_encoded_layers=True):
         all_encoder_layers = []

@@ -1,6 +1,6 @@
-# model settings
+# model settings for VE
 model = dict(
-    type='UNITER',
+    type='UNITERVE',
     embeddings=[
         dict(
             type='UniterTextEmbeddings',
@@ -11,7 +11,8 @@ model = dict(
             hidden_dropout_prob=0.1),
         dict(type='UniterImageEmbeddings', img_dim=2048, hidden_size=768, hidden_dropout_prob=0.1)
     ],
-    encoder=dict(type='UniterEncoder', config_file='configs/_base_/models/uniter-base.json'),
-    head=dict(type='UNITERHead', in_dim=768, out_dim=3129),
-    pretrained_path='/home/datasets/UNITER/uniter-base.pt')
+    encoder=dict(type='UniterEncoder', config_file='configs/_base_/models/uniter/uniter-base.json'),
+    head=dict(type='UNITERVQAHead', in_dim=768, out_dim=3),
+    pretrained_path='/home/datasets/UNITER/uniter-base.pt',
+    dropout=0.1)
 loss = dict(type='LogitBinaryCrossEntropy')
