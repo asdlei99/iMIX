@@ -69,14 +69,14 @@ vqa_info_cpler_cfg = dict(
 
 train_data = dict(
     samples_per_gpu=8,
-    workers_per_gpu=0,
+    workers_per_gpu=4,
     sampler_name='TrainingSampler',
     data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=vqa_info_cpler_cfg))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) mix-evaluation
 test_data = dict(
     samples_per_gpu=16,
-    workers_per_gpu=1,
+    workers_per_gpu=4,
     sampler_name='TestingSampler',
     # metric="",
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg, vqa_info_cpler=vqa_info_cpler_cfg),

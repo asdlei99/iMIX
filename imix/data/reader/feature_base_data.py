@@ -1,9 +1,10 @@
 from typing import List, Dict
 from .annotation_reader import AnnotationBaseData
 from torch.utils.data import Dataset
-
+from pathlib import Path
+from collections import Counter
 from imix.utils_imix.config import imixEasyDict
-from .feature_reader import build_feature_reader, LMDBFeatureReader
+from .feature_reader import build_feature_reader, LMDBFeatureReader, PthFeatureReader
 
 
 class FeatureBaseData(Dataset):
@@ -31,20 +32,39 @@ class FeatureBaseData(Dataset):
             self.feature_reader_objs.append(feat_reader_obj)
 
     def _auto_match_feat_reader(self, feat_path: str):
-        feature_format = feat_path.split('.')[-1]
+        feature_format = self.get_file_format_in_folder(folder=feat_path)
         assert feature_format in self.feature_support_type
 
         max_features = self.cfg.get('max_features', None)
         if feature_format == 'lmdb':
             obj = LMDBFeatureReader(dataset_type=self.dataset_type, feat_path=feat_path, max_features=max_features)
         elif feature_format in ['pth', 'pt']:
-            pass
+            obj = PthFeatureReader(dataset_type=self.dataset_type, feat_path=feat_path, max_features=max_features)
         elif feature_format == 'pkl':
             pass
         elif feature_format == 'csv':
             pass
 
         return obj
+
+    @staticmethod
+    def get_file_format_in_folder(folder: str) -> str:
+        feature_format = folder.split('.')[-1]
+        if feature_format != folder:
+            return feature_format  # such as trainval2014.lmdb
+        else:
+            assert Path(folder).is_dir()
+            feat_files = Path(folder).glob(pattern='*')
+            limits = 500
+            file_formats = Counter()
+            for idx, file in enumerate(feat_files):
+                if limits < idx:
+                    break
+                suffix = str(file.name).split('.')[-1]
+                file_formats[suffix] += 1
+
+            most_file_format = file_formats.most_common(1)
+            return most_file_format[0][0]
 
     def __len__(self):
         return len(self.annotation_obj)

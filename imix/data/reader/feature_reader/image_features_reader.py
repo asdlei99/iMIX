@@ -5,10 +5,10 @@ import pickle
 import lmdb  # install lmdb by "pip install lmdb"
 import base64
 import os
-from .feature_reader import FeatureReaders
+from .feature_reader import FEATURE_READERS
 
 
-@FeatureReaders.register_module()
+@FEATURE_READERS.register_module()
 class ImageFeaturesH5Reader:
     """A reader for H5 files containing pre-extracted image features. A typical
     H5 file is expected to have a column named "image_id", and another column

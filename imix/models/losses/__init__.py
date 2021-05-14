@@ -13,6 +13,7 @@ from .triple_logit_binary_cross_entropy import (
 )
 from .yolo_loss import YOLOLoss
 from .yolo_loss_v2 import YOLOLossV2
+from .uniter_loss import UNITERCrossEntropyLoss
 
 __all__ = [
     'TripleLogitBinaryCrossEntropy',
@@ -28,4 +29,5 @@ __all__ = [
     'OSCARBertCaptioningLoss',
     'VisualDialogBertLoss',
     'VisualDialogBertDenseLoss',
+    'UNITERCrossEntropyLoss'
 ]

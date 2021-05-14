@@ -13,7 +13,7 @@ from .ban import BAN
 from .hgl import HGL
 from .resc import ReSC
 from .cmrin import CMRIN
-from .uniter import UNITER
+from imix.models.vqa_models.uniter.unitervqa import UNITERVQA
 from .visual_dialog_bert import VisDiaBERT
 from .lxmert import LXMERT
 from .devlbert import DEVLBERT
@@ -21,5 +21,5 @@ from .oscar import OSCAR
 
 __all__ = [
     'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VILBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
-    'CMRIN', 'UNITER', 'VisDiaBERT', 'DEVLBERT', 'OSCAR'
+    'CMRIN', 'UNITERVQA', 'VisDiaBERT', 'DEVLBERT', 'OSCAR'
 ]
