@@ -415,7 +415,10 @@ class Organizer:
             hook = build_hook(hk_cfg)
             hook.level = level
             idx = get_insert_idx(hook)
-            self.hooks.insert(idx, hook)
+            if idx < 0:
+                self.hooks.insert(idx, hook)
+            else:  # == 0, the last one
+                self.hooks.append(hook)
 
         # print all hook
         logger = logging.getLogger(__name__)

@@ -33,7 +33,9 @@ class EMAEpochHook(HookBase):
 
     def after_train_epoch(self):
         if hasattr(self.trainer.model, 'module'):
+            self.trainer.model.module.load_bkp_state_dict()
             self.trainer.model.module.save_checkpoint_ema(self.savePath, self.epochId)
         else:
+            self.trainer.model.load_bkp_state_dict()
             self.trainer.model.save_checkpoint_ema(self.savePath, self.epochId)
         self.epochId += 1

@@ -5,11 +5,16 @@ import os
 import random
 
 import numpy as np
-import tensorpack.dataflow as td
-
 import torch
 import torch.distributed as dist
 import sys
+# prevent printing 'Failed to import tensorflow'
+from imix.utils_imix import disable_ouput
+import tensorpack.dataflow as td
+from imix.utils_imix import enable_ouput
+
+disable_ouput
+enable_ouput
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',

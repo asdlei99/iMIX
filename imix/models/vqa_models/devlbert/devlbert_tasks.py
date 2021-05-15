@@ -144,6 +144,14 @@ class DEVLBERT(BaseModel):
 
             logger.info('load ema state dict!')
 
+    def load_bkp_state_dict(self):
+        if self.use_ema:
+            self.model.load_state_dict(self.bkp_state_dict)
+            if self.is_ema_state:
+                self.is_ema_state = False
+
+            logger.info('load bkp state dict!')
+
     def save_checkpoint_ema(self, savePath, epochId):
         # If EMA is used, save averaged model
         if self.use_ema and comm.is_main_process():
