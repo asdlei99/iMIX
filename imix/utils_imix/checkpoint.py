@@ -263,7 +263,7 @@ class PeriodicCheckpointer:
     def __init__(self,
                  checkpointer: Checkpointer,
                  *,
-                 iter_period: int = 500,
+                 iter_period: int = None,
                  epoch_period: int = 1,
                  max_iter: Optional[int] = None,
                  max_epoch: Optional[int] = None,
@@ -304,11 +304,15 @@ class PeriodicCheckpointer:
         return file_name + '.pth'
 
     def record_epoch_checkpoint(self, epoch: int, prefix: str = '', **kwargs: Any) -> str:
+        is_epoch = kwargs.pop('is_epoch')
         state_dict = dict(epoch=epoch)
         state_dict.update(kwargs)
         file_name = None
         if (epoch + 1) % self.epoch_period == 0:
-            file_name = '{}_epoch{}_model'.format(prefix, epoch)
+            if is_epoch:
+                file_name = '{}_epoch{}({}iters)_model'.format(prefix, epoch, kwargs.get('epoch_iter'))
+            else:
+                file_name = '{}_epoch{}_iter{}_model'.format(prefix, epoch, kwargs.get('epoch_iter') + 1)
             self.save(file_name, **state_dict)
             if self.max_num_checkpoints is not None and len(
                     self.checkpointer.checkpoint_files) > self.max_num_checkpoints:

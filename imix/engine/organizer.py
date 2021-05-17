@@ -173,25 +173,28 @@ class Organizer:
         warmup_iter = self.cfg.lr_config.get('warmup_iterations', 0) if self.cfg.lr_config.get('use_warmup',
                                                                                                False) else 0
         hook_list.append(hooks.IterationTimerHook(warmup_iter=warmup_iter))
-        if comm.is_main_process():
-            hook_list.append(
-                hooks.CheckPointHook(
-                    self.checkpointer,
-                    prefix=f'{self.model_name}_{self.dataset_name}',
-                    iter_period=cfg.checkpoint_config.period,
-                    epoch_period=1,
-                    max_num_checkpoints=None))
-            # hook_list.append(
-            #     hooks.CheckPointHook(self.checkpointer,
-            #                          cfg.checkpoint_config.period))
-
-        if hasattr(cfg, 'test_data') and cfg.test_data.eval_period != 0:
-            hook_list.append(self.add_evaluate_hook())
 
         if comm.is_main_process():
+            # add periodcLogger
             hook_list.append(hooks.PeriodicLogger(self.build_writers(), cfg.log_config.period))
 
+            # add checkpointHook
+            kwargs = {'prefix': f'{self.model_name}_{self.dataset_name}'}
+            if hasattr(self.cfg, 'checkpoint_config'):
+                kwargs.update(self.cfg.checkpoint_config)
+            hook_list.append(hooks.CheckPointHook(self.checkpointer, **kwargs))
+
+        if hasattr(cfg, 'test_data') and getattr(cfg.test_data, 'is_run_eval', True):
+            hook_list.append(self.add_evaluate_hook())
+
         hook_list.sort(key=lambda obj: obj.level.value)
+
+        # print all hook
+        logger = logging.getLogger(__name__)
+        logger.info('print all hook:')
+        for hk in hook_list:
+            logger.info(f'hook name:{type(hk)}  ->   level name and value:{hk.level.name, hk.level.value}')
+
         return hook_list
 
     def build_writers(self):  # TODO(jinliang) Modify based on cfg file
@@ -335,10 +338,29 @@ class Organizer:
             self._last_eval_results = self.test(self.cfg, self.model)
             return self._last_eval_results
 
-        return hooks.EvaluateHook(
-            eval_period=self.cfg.test_data.eval_period,
-            eval_function=test_and_save_results,
-            eval_json_file='eval_result.json')
+        def evaluate_hook_param():
+            kwargs = {'eval_function': test_and_save_results, 'eval_json_file': 'eval_result.json'}
+            if hasattr(self.cfg, 'eval_iter_period') and hasattr(self.cfg, 'checkpoint_config') and hasattr(
+                    self.cfg.checkpoint_config, 'iter_period'):
+                iter_period = self.cfg.checkpoint_config.iter_period
+                eval_iter_period = self.cfg.eval_iter_period
+                if iter_period % eval_iter_period == 0:
+                    kwargs.update({'eval_iter_period': eval_iter_period})
+                else:
+                    logger = logging.getLogger(__name__)
+                    msg = 'eval_iter_period:{} is not equal to iter_period {} in checkpoint_config,'.format(
+                        eval_iter_period, iter_period)
+                    msg += 'it will be assign the value iter_period to eval_iter_period'
+                    logger.warning(msg=msg)
+                    self.cfg.eval_iter_period = iter_period
+                    kwargs.update({'eval_iter_period': iter_period})
+
+            if hasattr(self.cfg.test_data, 'is_run_eval'):
+                kwargs.update({'is_run_eval': self.cfg.test_data.is_run_eval})
+
+            return kwargs
+
+        return hooks.EvaluateHook(**evaluate_hook_param())
 
     @property
     def by_epoch(self):

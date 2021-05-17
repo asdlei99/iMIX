@@ -1,5 +1,5 @@
 # TODO(jinliang):jinliang_copy_and_imitate
-from .base_hook import HookBase, PriorityStatus
+from .base_hook import HookBase
 from .builder import HOOKS
 from .periods import LogBufferWriter
 from .periods.tensorboard_logger import TensorboardLoggerHook
@@ -18,7 +18,7 @@ class PeriodicLogger(HookBase):
             assert isinstance(logger, LogBufferWriter), logger
         self._loggers = loggers
         self._period_iter = log_config_period
-        self._level = PriorityStatus.LOWER
+        # self._level = PriorityStatus.LOW
 
     def before_train(self):  # TODO(jinliang) delete?
         # TODO(jinliang) 通过self.trainer.cfg(EngineBase)获取iter间隔次数和epoch间隔次数
