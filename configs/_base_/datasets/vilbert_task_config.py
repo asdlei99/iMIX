@@ -234,8 +234,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=64,  # 256
-        per_gpu_eval_batch_size=64,  # 256
+        per_gpu_train_batch_size=256,
+        per_gpu_eval_batch_size=256,
         num_warmup_steps=512,
         num_training_steps=5120,
     ),
