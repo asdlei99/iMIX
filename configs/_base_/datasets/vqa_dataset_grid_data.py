@@ -79,8 +79,7 @@ test_data = dict(
     workers_per_gpu=4,
     sampler_name='TestingSampler',
     # metric="",
-    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, vqa_info_cpler=vqa_info_cpler_cfg),
-    eval_period=0)  # eval_period set to 0 to disable
+    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=vqa_info_cpler_cfg))
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(

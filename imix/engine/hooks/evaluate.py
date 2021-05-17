@@ -1,5 +1,5 @@
 # TODO(jinliang):jinliang_imitate
-from .base_hook import HookBase, PriorityStatus
+from .base_hook import HookBase
 from .builder import HOOKS
 import imix.utils_imix.distributed_info as comm
 from imix.utils_imix.file_io import PathManager
@@ -23,7 +23,7 @@ class EvaluateHook(HookBase):
     It is executed every ``eval_period`` iterations and after the last iteration.
     """
 
-    def __init__(self, eval_period, eval_function, eval_json_file='eval_result.json'):
+    def __init__(self, eval_function, eval_iter_period=None, is_run_eval=True, eval_json_file='eval_result.json'):
         """
         Args:
             eval_period (int): the period to run `eval_function`.
@@ -36,9 +36,10 @@ class EvaluateHook(HookBase):
             give other workers a no-op function (`eval_function=lambda: None`).
         """
         super().__init__()
-        self._period = eval_period
+        self.is_run_eval = is_run_eval  # Dose it need to be evaluated when training ,if True, it will be evaluated
+        # self._level = PriorityStatus.LOW
+        self._eval_iter_period = eval_iter_period
         self._func = eval_function
-        self._level = PriorityStatus.LOW
         self._file_handle = PathManager.open(os.path.join(get_imix_work_dir(), eval_json_file), 'w')
         self._all_eval_results = []
 
@@ -48,13 +49,26 @@ class EvaluateHook(HookBase):
         return results
 
     def after_train_iter(self):
-        if self.trainer.by_epoch is False:
+        if not self.is_run_eval:
+            return
+
+        def is_run():
+            if self._eval_iter_period is None:
+                return False
+
             next_iter = self.trainer.iter + 1
             is_final = next_iter == self.trainer.max_iter
-            if is_final or (self._period > 0 and next_iter % self._period == 0):
-                results = self._do_eval()
-                self._wirte_eval_result(results)
-                self._write_to_tensorboard(results)
+
+            is_run_flag = (self._eval_iter_period > 0 and next_iter % self._eval_iter_period == 0)
+            if self.trainer.by_epoch:
+                is_run_flag &= (next_iter % len(self.trainer.data_loader) != 0)
+            else:
+                is_run_flag |= is_final
+
+            return is_run_flag
+
+        if is_run():
+            self._run_eval(is_epoch=True if self.trainer.by_epoch else False)
 
     def after_train(self):
         # func is likely a closure that holds reference to the trainer
@@ -66,9 +80,15 @@ class EvaluateHook(HookBase):
         del self._func
 
     def after_train_epoch(self):
+        if not self.is_run_eval:
+            return
+
+        self._run_eval(is_epoch=True)
+
+    def _run_eval(self, is_epoch=False):
         results = self._do_eval()
-        self._wirte_eval_result(results)
-        self._write_to_tensorboard(results, is_epoch=True)
+        self._write_eval_result(results)
+        self._write_to_tensorboard(results, is_epoch=is_epoch)
 
     @master_only_run
     def _write_to_tensorboard(self, eval_result, is_epoch=False):
@@ -82,7 +102,7 @@ class EvaluateHook(HookBase):
                 self.trainer.log_buffer.put_scalar(k, v, is_epoch=is_epoch)
 
     @master_only_run
-    def _wirte_eval_result(self, results):
+    def _write_eval_result(self, results):
 
         data = self._train_info()
         data.update(self._eval_result(results))
@@ -112,7 +132,8 @@ class EvaluateHook(HookBase):
 
         return train_info
 
-    def _eval_result(self, eval_result):
+    @staticmethod
+    def _eval_result(eval_result):
 
         def value(v):
             return v.item() if isinstance(v, torch.Tensor) else v
@@ -145,16 +166,23 @@ class EvaluateHook(HookBase):
 
         # best info log ouput
         if self.trainer.by_epoch:
-            best_result.pop('iter')
-            best_result.pop('max_iter')
-            best_result.pop('max_epoch')
-            best_epoch = best_result.pop('epoch')
+            ind1, ind2 = best_model_name.find('epoch'), best_model_name.find('_model.pth')
+            if ind1 != -1 and ind2 != -1 and ind1 < ind2:
+                best_info = best_model_name[ind1:ind2]
+            else:
+                best_iter = best_result.pop('iter')
+                best_result.pop('max_iter')
+                best_result.pop('max_epoch')
+                best_epoch = best_result.pop('epoch')
+                best_info = 'epoch{}th_iter{}'.format(best_epoch, best_iter)
+
         else:
             best_result.pop('max_iter')
             best_iter = best_result.pop('iter')
-        best_info = best_epoch if self.trainer.by_epoch else best_iter
+            best_info = 'iter{}th'.format(best_iter)
+
         logger = logging.getLogger(__name__)
-        logger.info('In {}th epoch/iter,got the highest score{}'.format(best_info, best_result))
+        logger.info('In {},got the highest score{}'.format(best_info, best_result))
 
         # copy ck file
         copyfile(src=absolute_path(best_model_name), dst=absolute_path('best_result.pth'))

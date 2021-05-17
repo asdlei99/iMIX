@@ -1,6 +1,6 @@
 data_root = '/home/datasets/mix_data/vilbert/datasets/'
 
-task_ids = '17'  # '1-2-3...' training task separate by -
+task_ids = '1'  # '1-2-3...' training task separate by -
 
 TASKS = dict(
     TASK1=dict(
@@ -20,8 +20,8 @@ TASKS = dict(
         val_split='minval',
         num_labels=3129,
         lr=0.00004,
-        per_gpu_train_batch_size=128,
-        per_gpu_eval_batch_size=1024,
+        per_gpu_train_batch_size=128,  # 128
+        per_gpu_eval_batch_size=1024,  # 1024
         num_warmup_steps=8472,  # warmup_proportion=0.1
         num_training_steps=84720,  # ceil(totoal 443753 / batch size 32/ GPUS ) * epoch size
     ),
@@ -234,8 +234,8 @@ TASKS = dict(
         val_split='val',
         num_labels=1,
         lr=0.00002,
-        per_gpu_train_batch_size=256,  # 256
-        per_gpu_eval_batch_size=256,  # 256
+        per_gpu_train_batch_size=64,  # 256
+        per_gpu_eval_batch_size=64,  # 256
         num_warmup_steps=512,
         num_training_steps=5120,
     ),
