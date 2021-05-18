@@ -60,29 +60,32 @@ def worker_init_fn(worker_id, num_workers, rank, seed):
 def build_data_loader_by_epoch(dataset, cfg, is_training=True):
 
     def get_cfg_param(data_cfg):
-        batch_size = getattr(data_cfg, 'samples_per_gpu')
-        num_workers = getattr(data_cfg, 'workers_per_gpu')
-        drop_last = getattr(data_cfg, 'drop_last', False)
-        pin_memory = getattr(data_cfg, 'pin_memory', False)
-        sampler_cfg = getattr(data_cfg, 'sampler', None)
-        batch_sampler_cfg = getattr(data_cfg, 'batch_sampler', None)
-        shuffle = getattr(data_cfg, 'shuffle', True if is_training else False)
-        return batch_size, num_workers, drop_last, pin_memory, sampler_cfg, batch_sampler_cfg, shuffle
+        params = imixEasyDict()
 
-    batch_size, num_workers, drop_last, pin_memory, sampler_cfg, batch_sampler_cfg, shuffle = get_cfg_param(
-        cfg.train_data if is_training else cfg.test_data)
+        params.batch_size = getattr(data_cfg, 'samples_per_gpu')
+        params.num_workers = getattr(data_cfg, 'workers_per_gpu')
+        params.drop_last = getattr(data_cfg, 'drop_last', False)
+        params.pin_memory = getattr(data_cfg, 'pin_memory', False)
+        params.sampler_cfg = getattr(data_cfg, 'sampler', None)
+        params.batch_sampler_cfg = getattr(data_cfg, 'batch_sampler', None)
+        params.shuffle = getattr(data_cfg, 'shuffle', True if is_training else False)
 
-    dataloader_param = {'dataset': dataset, 'pin_memory': pin_memory, 'num_workers': num_workers}
+        return params
+
+    params = get_cfg_param(cfg.train_data if is_training else cfg.test_data)
+
+    dataloader_param = {'dataset': dataset, 'pin_memory': params.pin_memory, 'num_workers': params.num_workers}
+    sampler_cfg, batch_sampler_cfg = params.sampler_cfg, params.batch_sampler_cfg
     if sampler_cfg:
         sampler_cfg = imixEasyDict({'type': sampler_cfg}) if isinstance(sampler_cfg, str) else sampler_cfg
         sampler = build_sampler(sampler_cfg, default_args={'dataset': dataset})
-        dataloader_param.update({'batch_size': batch_size, 'sampler': sampler, 'drop_last': drop_last})
+        dataloader_param.update({'batch_size': params.batch_size, 'sampler': sampler, 'drop_last': params.drop_last})
     elif batch_sampler_cfg:
         batch_sampler = build_batch_sampler(batch_sampler_cfg, default_args={'dataset': dataset})
         collate_fn = getattr(dataset, 'collate_fn', None)
         dataloader_param.update({'batch_sampler': batch_sampler, 'collate_fn': collate_fn})
     else:
-        dataloader_param.update({'batch_size': batch_size, 'drop_last': drop_last})
+        dataloader_param.update({'batch_size': params.batch_size, 'drop_last': params.drop_last})
 
     return DataLoader(**dataloader_param)
 

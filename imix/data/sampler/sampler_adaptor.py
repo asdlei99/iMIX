@@ -4,6 +4,8 @@ import re
 
 
 class SamplerAdaptor:
+    """modify the parameters of the sampler and the batch_sampler to adapt to
+    different sampling methods."""
 
     @classmethod
     def adaptor(cls, cfg: imixEasyDict, default_args: Optional[Dict] = None):
