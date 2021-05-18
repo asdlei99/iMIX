@@ -25,27 +25,8 @@ from .loaders.uniter.vcr import VcrDataset
 from .loaders.uniter.vqa import VqaDataset
 from .loaders.uniter.ve import VeDataset
 __all__ = [
-    'VQADATASET',
-    'GQADATASET',
-    'VizWizDATASET',
-    'ClevrDATASET',
-    'TEXTVQADATASET',
-    'STVQADATASET',
-    'OCRVQADATASET',
-    'VCRDATASET',
-    'RefCOCODATASET',
-    'RefCOCOpDATASET',
-    'RefCOCOgDATASET',
-    'RefClefDATASET',
-    'HatefulMemesDATASET',
-    'VisualEntailmentDATASET',
-    'build_imix_train_loader',
-    'build_imix_test_loader',
-    'VisDialDataset',
-    'DeVLBertVQADATASET',
-    'VisdialDatasetDense',
-    'VcrDataset', 
-    'VqaDataset', 
-    'VeDataset',
-    'NLVR2Dataset'
+    'VQADATASET', 'GQADATASET', 'VizWizDATASET', 'ClevrDATASET', 'TEXTVQADATASET', 'STVQADATASET', 'OCRVQADATASET',
+    'VCRDATASET', 'RefCOCODATASET', 'RefCOCOpDATASET', 'RefCOCOgDATASET', 'RefClefDATASET', 'HatefulMemesDATASET',
+    'VisualEntailmentDATASET', 'build_imix_train_loader', 'build_imix_test_loader', 'VisDialDataset',
+    'DeVLBertVQADATASET', 'VisdialDatasetDense', 'VcrDataset', 'VqaDataset', 'VeDataset', 'NLVR2Dataset'
 ]

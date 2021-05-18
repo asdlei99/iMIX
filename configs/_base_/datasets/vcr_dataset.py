@@ -76,17 +76,16 @@ vcr_info_cpler_cfg = dict(
 train_data = dict(
     samples_per_gpu=4,  # 16
     workers_per_gpu=1,
-    sampler_name='TrainingSampler',
     data=dict(type=dataset_type, reader=vcr_reader_train_cfg, info_cpler=vcr_info_cpler_cfg, limit_nums=800))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
-    sampler_name='TestingSampler',
+
     # metric="",
     data=dict(type=dataset_type, reader=vcr_reader_test_cfg, info_cpler=vcr_info_cpler_cfg),
-    eval_period=5000)  # eval_period set to 0 to disable
+)
 
 # evaluator_type = 'VCR'  # TODO(jinliang)
 post_processor = dict(

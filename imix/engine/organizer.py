@@ -188,13 +188,6 @@ class Organizer:
             hook_list.append(self.add_evaluate_hook())
 
         hook_list.sort(key=lambda obj: obj.level.value)
-
-        # print all hook
-        logger = logging.getLogger(__name__)
-        logger.info('print all hook:')
-        for hk in hook_list:
-            logger.info(f'hook name:{type(hk)}  ->   level name and value:{hk.level.name, hk.level.value}')
-
         return hook_list
 
     def build_writers(self):  # TODO(jinliang) Modify based on cfg file

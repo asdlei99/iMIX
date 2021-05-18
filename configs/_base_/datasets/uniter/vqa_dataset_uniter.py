@@ -58,7 +58,7 @@ test_data = dict(
     pin_mem=True,
     # metric="",
     data=dict(type=dataset_type, datacfg=vqa_cfg, train_or_val=False),
-    eval_period=5000)  # eval_period set to 0 to disable
+)
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(

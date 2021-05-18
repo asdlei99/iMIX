@@ -16,18 +16,7 @@ from .yolo_loss_v2 import YOLOLossV2
 from .uniter_loss import UNITERCrossEntropyLoss
 
 __all__ = [
-    'TripleLogitBinaryCrossEntropy',
-    'YOLOLoss',
-    'YOLOLossV2',
-    'DiverseLoss',
-    'CrossEntropyLoss',
-    'OBJCrossEntropyLoss',
-    'BCEWithLogitsLoss',
-    'LXMERTPreTrainLossV0',
-    'VILBERTMutilLoss',
-    'OSCARLoss',
-    'OSCARBertCaptioningLoss',
-    'VisualDialogBertLoss',
-    'VisualDialogBertDenseLoss',
-    'UNITERCrossEntropyLoss'
+    'TripleLogitBinaryCrossEntropy', 'YOLOLoss', 'YOLOLossV2', 'DiverseLoss', 'CrossEntropyLoss', 'OBJCrossEntropyLoss',
+    'BCEWithLogitsLoss', 'LXMERTPreTrainLossV0', 'VILBERTMutilLoss', 'OSCARLoss', 'OSCARBertCaptioningLoss',
+    'VisualDialogBertLoss', 'VisualDialogBertDenseLoss', 'UNITERCrossEntropyLoss'
 ]

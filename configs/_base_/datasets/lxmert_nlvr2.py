@@ -34,7 +34,6 @@ nlvr_reader_test_cfg = dict(
 train_data = dict(
     samples_per_gpu=32,  # 16
     workers_per_gpu=1,
-    sampler_name='TrainingSampler',
     data=dict(
         type=dataset_type,
         reader=nlvr_reader_train_cfg,
@@ -47,11 +46,10 @@ train_data = dict(
 test_data = dict(
     samples_per_gpu=512,
     workers_per_gpu=1,
-    sampler_name='TestingSampler',
     data=dict(type=dataset_type, reader=nlvr_reader_test_cfg),
     drop_last=False,
     shuffle=False,
-    eval_period=5000)  # eval_period set to 0 to disable
+)
 
 post_processor = dict(
     type='Evaluator',

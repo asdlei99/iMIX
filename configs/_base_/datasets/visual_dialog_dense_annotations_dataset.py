@@ -63,10 +63,9 @@ train_data = dict(
 test_data = dict(
     samples_per_gpu=2,
     workers_per_gpu=1,
-    sampler_name='TestingSampler',
+
     # metric="",
-    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=10),
-    eval_period=0)  # eval_period set to 0 to disable
+    data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=10))
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(

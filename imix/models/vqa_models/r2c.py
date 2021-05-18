@@ -26,7 +26,6 @@ class R2C(BaseModel):
     def __init__(self, input_dropout, pretrained, average_pool, semantic, final_dim, backbone, head):
         super().__init__()
 
-
         self.detector = SimpleDetector(
             pretrained=pretrained, average_pool=average_pool, semantic=semantic, final_dim=final_dim)
         self.rnn_input_dropout = TimeDistributed(InputVariationalDropout(input_dropout)) if input_dropout > 0 else None

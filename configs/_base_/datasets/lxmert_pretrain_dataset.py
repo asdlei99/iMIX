@@ -64,17 +64,16 @@ info_cpler_cfg = dict(
 train_data = dict(
     samples_per_gpu=4,  # 16
     workers_per_gpu=1,
-    sampler_name='TrainingSampler',
     data=dict(type=dataset_type, reader=reader_train_cfg, info_cpler=info_cpler_cfg, limit_nums=400))
 
 # evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
-    sampler_name='TestingSampler',
+
     # metric="",
     data=dict(type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
-    eval_period=5000)  # eval_period set to 0 to disable
+)
 
 # evaluator_type = "LXMERTPreTrain"  # TODO(jinliang)
 post_processor = dict(

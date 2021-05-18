@@ -51,7 +51,7 @@ test_data = dict(
     workers_per_gpu=0,
     batch_sampler='TokenBucketSampler',
     data=dict(type=dataset_type, datacfg=ve_cfg, train_or_val=False),
-    eval_period=5000)  # eval_period set to 0 to disable
+)
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(

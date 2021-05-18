@@ -52,8 +52,7 @@ test_data = dict(
     batch_sampler='TokenBucketSampler',
     pin_mem=True,
     # metric="",
-    data=dict(type=dataset_type, datacfg=nlvr_cfg, train_or_val=False),
-    eval_period=500)  # eval_period set to 0 to disable
+    data=dict(type=dataset_type, datacfg=nlvr_cfg, train_or_val=False))
 
 # evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(

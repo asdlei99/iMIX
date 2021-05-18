@@ -1,34 +1,17 @@
-import logging
 import random
-from functools import partial
-
 import numpy as np
 from torch import nn
 from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
-import imix.utils_imix.distributed_info as comm
-from imix.utils_imix.config import seed_all_rng
-from .sampler import TokenBucketSampler
+from imix.utils_imix.config import seed_all_rng, imixEasyDict
 from imix.utils_imix.registry import Registry, build_from_cfg
-from .parallel.collate import collate
-from .sampler import InferenceSampler, TrainingSampler
-from torch.utils.data import (RandomSampler, SequentialSampler, SubsetRandomSampler, WeightedRandomSampler,
-                              BatchSampler)
+from .sampler import build_sampler, build_batch_sampler
+from typing import Optional
 
 VOCAB = Registry('vocab')
 PREPROCESSOR = Registry('preprocessor')
 DATASETS = Registry('dataset')
 
 PROCESSOR = Registry('processor')
-
-SAMPLER_MAP = {
-    'RandomSampler': RandomSampler,
-    'SequentialSampler': SequentialSampler,
-    'SubsetRandomSampler': SubsetRandomSampler,
-    'WeightedRandomSampler': WeightedRandomSampler,
-    'BatchSampler': BatchSampler,
-    'DistributedSampler': DistributedSampler,
-}
 
 
 def build(cfg, registry, default_args=None):
@@ -66,66 +49,6 @@ def build_dataset(dataset_cfg, default_args=None):
     return dataset
 
 
-def build_dataloader(dataset,
-                     samples_per_gpu,
-                     workers_per_gpu,
-                     num_gpus=1,
-                     dist=True,
-                     shuffle=False,
-                     seed=None,
-                     **kwargs):
-    """Build PyTorch DataLoader.
-
-    In distributed training, each GPU/process has a dataloader.
-    In non-distributed training, there is only one dataloader for all GPUs.
-
-    Args:
-        dataset (Dataset): A PyTorch dataset.
-        samples_per_gpu (int): Number of training samples on each GPU, i.e.,
-            batch size of each GPU.
-        workers_per_gpu (int): How many subprocesses to use for data loading
-            for each GPU.
-        num_gpus (int): Number of GPUs. Only used in non-distributed training.
-        dist (bool): Distributed training/test or not. Default: True.
-        shuffle (bool): Whether to shuffle the data at every epoch.
-            Default: True.
-        kwargs: any keyword argument to be used to initialize DataLoader
-
-    Returns:
-        DataLoader: A PyTorch dataloader.
-    """
-    from .sampler.group_sampler import DistributedGroupSampler, GroupSampler
-    rank, world_size = comm.get_local_rank(), comm.get_world_size()
-    if dist:
-        # DistributedGroupSampler will definitely shuffle the data to satisfy
-        # that images on each GPU are in the same group
-        if shuffle:
-            sampler = DistributedGroupSampler(dataset, samples_per_gpu, world_size, rank)
-        else:
-            sampler = DistributedSampler(dataset, world_size, rank, shuffle=False)
-        batch_size = samples_per_gpu
-        num_workers = workers_per_gpu
-    else:
-        sampler = GroupSampler(
-            dataset, samples_per_gpu) if shuffle else None  # TODO(jinliang) mmdet:flag according to image aspect ratio
-        batch_size = num_gpus * samples_per_gpu
-        num_workers = num_gpus * workers_per_gpu
-
-    init_fn = partial(worker_init_fn, num_workers=num_workers, rank=rank, seed=seed) if seed is not None else None
-
-    data_loader = DataLoader(
-        dataset,
-        batch_size=batch_size,
-        sampler=sampler,
-        num_workers=num_workers,
-        collate_fn=partial(collate, samples_per_gpu=samples_per_gpu),
-        pin_memory=False,
-        worker_init_fn=init_fn,
-        **kwargs)
-
-    return data_loader
-
-
 def worker_init_fn(worker_id, num_workers, rank, seed):
     # The seed of each worker equals to
     # num_worker * rank + worker_id + user_seed
@@ -134,121 +57,34 @@ def worker_init_fn(worker_id, num_workers, rank, seed):
     random.seed(worker_seed)
 
 
-# def build_mix_train_loader(cfg):
-#     """
-#     A data loader is created  by the following steps:
-#     1. Use the dataset names in config to create dataset
-#     2. Build PyTorch DataLoader
-#     """
-#
-#     dataset = build_dataset(cfg.train_data.data)
-#     data_loader = build_dataloader(
-#         dataset,
-#         cfg.train_data.samples_per_gpu,
-#         cfg.train_data.workers_per_gpu,
-#         cfg.num_gpus,
-#         # dist=cfg.distributed,
-#         seed=cfg.SEED)
-#     return data_loader
-
-
-def build_data_loader_by_iter(dataset, cfg, is_training=True):
-    logger = logging.getLogger(__name__)
-    if is_training:
-        sampler_name = cfg.train_data.sampler_name
-        logger.info('using training sampler {}'.format(sampler_name))
-    else:
-        sampler_name = cfg.test_data.sampler_name
-        logging.info('using testing sampler {}'.format(sampler_name))
-
-    if sampler_name == 'TrainingSampler':
-        sampler = TrainingSampler(len(dataset))
-    elif sampler_name == 'TestingSampler':
-        sampler = InferenceSampler(len(dataset))
-    else:
-        raise ValueError('Unimplemented  sampling method: {}'.format(sampler_name))
-
-    # batch_collate_fn = lambda batch: batch
-    # worker_init_reset_seed = lambda worker_id: seed_all_rng(np.random.randint(2 ** 31) + worker_id)
-
-    if is_training:
-        # world_size = get_world_size()
-        # total_batch_size = world_size * cfg.train_data.samples_per_gpu  # multimachine ? *
-        # assert (
-        #         total_batch_size > 0 and total_batch_size % world_size == 0
-        # ), "Total batch size ({}) must be divisible by the number of gpus ({}).".format(
-        #     total_batch_size, world_size
-        # )
-        # batch_size = total_batch_size // world_size
-
-        batch_size = cfg.train_data.samples_per_gpu
-        num_workers = cfg.train_data.workers_per_gpu
-        batch_sampler = BatchSampler(sampler, batch_size, drop_last=True)
-        data_loader = DataLoader(
-            dataset,
-            num_workers=num_workers,
-            batch_sampler=batch_sampler,
-            collate_fn=batch_collate_fn,
-            worker_init_fn=worker_init_reset_seed)
-    else:
-        num_workers = cfg.test_data.workers_per_gpu
-        batch_sampler = BatchSampler(sampler, cfg.test_data.samples_per_gpu, drop_last=False)
-        data_loader = DataLoader(
-            dataset, num_workers=num_workers, batch_sampler=batch_sampler, collate_fn=batch_collate_fn)
-
-    return data_loader
-
-
 def build_data_loader_by_epoch(dataset, cfg, is_training=True):
-    logger = logging.getLogger(__name__)
 
-    batch_size = cfg.train_data.samples_per_gpu if is_training else cfg.test_data.samples_per_gpu
-    num_workers = cfg.train_data.workers_per_gpu if is_training else cfg.test_data.workers_per_gpu
-    drop_last = cfg.train_data.get('drop_last', False) if is_training else cfg.test_data.get('drop_last', False)
-    shuffle = cfg.train_data.get('shuffle', True) if is_training else cfg.test_data.get('shuffle', False)
-    pin_memory = cfg.train_data.get('pin_memory', False) if is_training else cfg.test_data.get('pin_memory', False)
-    sampler_cfg = cfg.train_data.get('sampler', None) if is_training else cfg.test_data.get('sampler', False)
-    collate_fn = dataset.collate_fn if hasattr(dataset, 'collate_fn') else None
-    batch_sampler_cfg = cfg.train_data.get('batch_sampler', None) if is_training \
-        else cfg.test_data.get('batch_sampler', None)
+    def get_cfg_param(data_cfg):
+        batch_size = getattr(data_cfg, 'samples_per_gpu')
+        num_workers = getattr(data_cfg, 'workers_per_gpu')
+        drop_last = getattr(data_cfg, 'drop_last', False)
+        pin_memory = getattr(data_cfg, 'pin_memory', False)
+        sampler_cfg = getattr(data_cfg, 'sampler', None)
+        batch_sampler_cfg = getattr(data_cfg, 'batch_sampler', None)
+        shuffle = getattr(data_cfg, 'shuffle', True if is_training else False)
+        return batch_size, num_workers, drop_last, pin_memory, sampler_cfg, batch_sampler_cfg, shuffle
 
-    # sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
-    # ngpus = comm.get_world_size()
-    # batch_size *= ngpus
+    batch_size, num_workers, drop_last, pin_memory, sampler_cfg, batch_sampler_cfg, shuffle = get_cfg_param(
+        cfg.train_data if is_training else cfg.test_data)
 
-    world_size = comm.get_world_size()
-    if world_size > 1:
-        rank = comm.get_local_rank()
-        sampler = DistributedSampler(dataset, world_size, rank, shuffle=shuffle)
+    dataloader_param = {'dataset': dataset, 'pin_memory': pin_memory, 'num_workers': num_workers}
+    if sampler_cfg:
+        sampler_cfg = imixEasyDict({'type': sampler_cfg}) if isinstance(sampler_cfg, str) else sampler_cfg
+        sampler = build_sampler(sampler_cfg, default_args={'dataset': dataset})
+        dataloader_param.update({'batch_size': batch_size, 'sampler': sampler, 'drop_last': drop_last})
+    elif batch_sampler_cfg:
+        batch_sampler = build_batch_sampler(batch_sampler_cfg, default_args={'dataset': dataset})
+        collate_fn = getattr(dataset, 'collate_fn', None)
+        dataloader_param.update({'batch_sampler': batch_sampler, 'collate_fn': collate_fn})
     else:
-        sampler = SAMPLER_MAP[sampler_cfg](dataset) if sampler_cfg else None
+        dataloader_param.update({'batch_size': batch_size, 'drop_last': drop_last})
 
-    if sampler_cfg == 'DistributedSampler' and comm.get_world_size() <= 1:
-        logger.info('chose the wrong DistributedSampler sampler for training')
-
-    if batch_sampler_cfg == 'TokenBucketSampler':
-        batch_sampler = TokenBucketSampler(
-            dataset.dataset.lens, bucket_size=8192, batch_size=batch_size, droplast=is_training)
-        batch_size = None
-        drop_last = None
-        shuffle = None
-    else:
-        batch_sampler = None
-
-    if batch_sampler is not None:
-        return DataLoader(
-            dataset=dataset,
-            pin_memory=pin_memory,
-            num_workers=num_workers,
-            batch_sampler=batch_sampler,
-            collate_fn=collate_fn)
-    return DataLoader(
-        dataset=dataset,
-        pin_memory=pin_memory,
-        num_workers=num_workers,
-        batch_size=batch_size,
-        sampler=sampler,
-        drop_last=drop_last)
+    return DataLoader(**dataloader_param)
 
 
 def batch_collate_fn(batch):
@@ -267,24 +103,9 @@ def build_imix_train_loader(cfg):
     """
 
     dataset = build_dataset(cfg.train_data.data)
-    if hasattr(cfg, 'by_iter'):
-        return build_data_loader_by_iter(dataset, cfg, is_training=True)
-    else:
-        return build_data_loader_by_epoch(dataset, cfg, is_training=True)
+    return build_data_loader_by_epoch(dataset, cfg, is_training=True)
 
 
-# def build_mix_test_loader(cfg, dataset_name):  # TODO(jinliang)
-#     dataset = build_dataset(cfg.test_data.data)
-#     data_loader = build_dataloader(dataset, cfg.test_data.samples_per_gpu,
-#                                    cfg.test_data.workers_per_gpu,
-#                                    cfg.num_gpus)
-#     # dist=cfg.distributed)data
-#     return data_loader
-
-
-def build_imix_test_loader(cfg, dataset_name):  # TODO(jinliang)
+def build_imix_test_loader(cfg, dataset_name: Optional[str] = ''):  # TODO(jinliang)
     dataset = build_dataset(cfg.test_data.data)
-    if hasattr(cfg, 'by_iter'):
-        return build_data_loader_by_iter(dataset, cfg, is_training=False)
-    else:
-        return build_data_loader_by_epoch(dataset, cfg, is_training=False)
+    return build_data_loader_by_epoch(dataset, cfg, is_training=False)

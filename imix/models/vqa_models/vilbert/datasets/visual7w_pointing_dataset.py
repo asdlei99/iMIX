@@ -50,19 +50,19 @@ def assert_eq(real, expected):
 class Visual7wPointingDataset(Dataset):
 
     def __init__(
-            self,
-            task: str,
-            dataroot: str,
-            annotations_jsonpath: str,
-            split: str,
-            image_features_reader: ImageFeaturesH5Reader,
-            gt_image_features_reader: ImageFeaturesH5Reader,
-            tokenizer: BertTokenizer,
-            bert_model,
-            clean_datasets,
-            padding_index: int = 0,
-            max_seq_length: int = 20,
-            max_region_num: int = 60,
+        self,
+        task: str,
+        dataroot: str,
+        annotations_jsonpath: str,
+        split: str,
+        image_features_reader: ImageFeaturesH5Reader,
+        gt_image_features_reader: ImageFeaturesH5Reader,
+        tokenizer: BertTokenizer,
+        bert_model,
+        clean_datasets,
+        padding_index: int = 0,
+        max_seq_length: int = 20,
+        max_region_num: int = 60,
     ):
         self.split = split
         self.num_labels = 1
