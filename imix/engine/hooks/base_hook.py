@@ -50,12 +50,6 @@ class HookBase:
     def after_train_epoch(self):
         pass
 
-    def before_forward(self):
-        pass
-
-    def after_forward(self):
-        pass
-
     @property
     def level(self):
         return self._level

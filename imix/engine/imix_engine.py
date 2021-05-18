@@ -4,6 +4,7 @@ from torch.cuda.amp.autocast_mode import autocast
 from .base_engine import EngineBase
 from .hooks.periods import write_metrics
 from .organizer import Organizer, is_mixed_precision
+from imix.engine.hooks.periods import LogBufferStorage
 from imix.utils_imix.Timer import batch_iter
 
 
@@ -26,7 +27,7 @@ class CommonEngine(EngineBase):
         assert self.model.training, '[CommonEngine] model was changed to eval model!'
 
         if self.batch_processor is not None:
-            self.output = self.batch_processor(batch_data)  # TODO(jinliang) 暂时这么处理，缺少相关参数
+            self.output = self.batch_processor(batch_data)
         else:
             with autocast(enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
                 self.model_output = self.model(
@@ -49,6 +50,44 @@ class CommonEngine(EngineBase):
             self.run_train_iter(batch_data, data_time)
             self.after_train_iter()
             self.iter += 1
+
+    def train_by_iter(self, start_iter: int, max_iter: int) -> None:
+        self.start_iter = start_iter
+        self.iter = start_iter
+        self.max_iter = max_iter
+
+        with LogBufferStorage(start_iter, by_epoch=False) as self.log_buffer:
+            try:
+                self.before_train()
+                for self.iter, batch_data, data_time in batch_iter(self.data_loader):
+                    self.before_train_iter()
+                    self.run_train_iter(batch_data, data_time)
+                    self.after_train_iter()
+            except Exception:
+                self.logger.exception('exception during training ')
+                raise
+            finally:
+                time.sleep(1)  # wait for some hooks like logger to finish
+                self.after_train()
+
+    def train_by_epoch(self, start_epoch: int, max_epoch: int) -> None:
+        self.start_epoch = start_epoch
+        self.max_epoch = max_epoch
+        self.iter = self.start_iter
+
+        with LogBufferStorage(self.start_iter, len(self.data_loader), self.start_epoch) as self.log_buffer:
+            try:
+                self.before_train()
+                for self.epoch in range(self.start_epoch, self.max_epoch):
+                    self.before_train_epoch()
+                    self.run_train_epoch()
+                    self.after_train_epoch()
+            except Exception:
+                self.logger.exception('exception during training')
+                raise
+            finally:
+                time.sleep(1)  # wait for some hooks like logger to finish
+                self.after_train()
 
 
 class imixEngine(CommonEngine):

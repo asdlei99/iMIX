@@ -1,23 +1,22 @@
 # TODO(jinliang):jinliang_copy_and_imitate
-import time
+
 import weakref
-from abc import abstractmethod
-
-import imix.engine.hooks as hooks
-from imix.engine.hooks.periods import LogBufferStorage
-from imix.utils_imix.Timer import batch_iter
+from abc import ABCMeta, abstractmethod
+from imix.engine.hooks import HookBase
+import logging
 
 
-class EngineBase:
-    """Base class for imix engine."""
+class EngineBase(metaclass=ABCMeta):
+    """Base class for iMIX engine."""
 
     def __init__(self):
-        self._hooks = []
+        self._hooks: list[HookBase] = []
+        self.logger = logging.getLogger(__name__)
 
     def register_hooks(self, engine_hooks):
         for hk in engine_hooks:
             if hk is not None:
-                assert isinstance(hk, hooks.HookBase), 'the current hook object must be a HookBase subclass!'
+                assert isinstance(hk, HookBase), 'the current hook object must be a HookBase subclass!'
                 hk.trainer = weakref.proxy(self)
                 self._hooks.append(hk)
 
@@ -49,14 +48,6 @@ class EngineBase:
             hk.after_train_epoch()
         self.log_buffer.epoch_step()
 
-    def before_forward(self):
-        for hk in self._hooks:
-            hk.before_forward()
-
-    def after_forward(self):
-        for hk in self._hooks:
-            hk.after_forward()
-
     @abstractmethod
     def run_train_epoch(self):
         pass
@@ -64,40 +55,3 @@ class EngineBase:
     @abstractmethod
     def run_train_iter(self):
         pass
-
-    def train_by_iter(self, start_iter: int, max_iter: int) -> None:
-        self.start_iter = start_iter
-        self.iter = start_iter
-        self.max_iter = max_iter
-
-        with LogBufferStorage(start_iter, by_epoch=False) as self.log_buffer:
-            try:
-                self.before_train()
-                for self.iter, batch_data, data_time in batch_iter(self.data_loader):
-                    self.before_train_iter()
-                    self.run_train_iter(batch_data, data_time)
-                    self.after_train_iter()
-            except Exception:
-                raise
-                # logger.error(e)
-            finally:
-                time.sleep(1)  # wait for some hooks like logger to finish
-                self.after_train()
-
-    def train_by_epoch(self, start_epoch: int, max_epoch: int) -> None:
-        self.start_epoch = start_epoch
-        self.max_epoch = max_epoch
-        self.iter = self.start_iter
-
-        with LogBufferStorage(self.start_iter, len(self.data_loader), self.start_epoch) as self.log_buffer:
-            try:
-                self.before_train()
-                for self.epoch in range(self.start_epoch, self.max_epoch):
-                    self.before_train_epoch()
-                    self.run_train_epoch()
-                    self.after_train_epoch()
-            except Exception:
-                raise
-            finally:
-                time.sleep(1)  # wait for some hooks like logger to finish
-                self.after_train()
