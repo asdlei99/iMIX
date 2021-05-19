@@ -276,7 +276,7 @@ class CommonMetricLoggerHook(LogBufferWriter):
 
     def __get_lr(self):
         try:
-            lr = '{:.6f}'.format(self.log_buffer.history('lr').latest())
+            lr = '{:.6e}'.format(self.log_buffer.history('lr').latest())
         except KeyError:
             lr = 'N/A'
         finally:

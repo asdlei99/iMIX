@@ -1,6 +1,6 @@
 data_root = '/home/datasets/mix_data/DeVLBert/'
 
-task_ids = '3'  # '1-2-3...' training task separate by -
+task_ids = '1'  # '1-2-3...' training task separate by -
 
 TASKS = dict(
     TASK1=dict(

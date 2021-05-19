@@ -3,14 +3,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# from .utils import MultiTaskStopOnPlateau
 import json
 from io import open
 from easydict import EasyDict as edict
 import torch
 import os
 from imix.models.builder import VQA_MODELS
-# from transformers.modeling_bert import BertConfig
+from transformers.modeling_bert import BertConfig
 from ..base_model import BaseModel
 from .task_utils import compute_score_with_logits
 import imix.utils_imix.distributed_info as comm
@@ -32,7 +31,7 @@ class DEVLBERT(BaseModel):
         if config.baseline:
             from .basebert import BaseBertForVLTasks
         else:
-            from .devlbert import BertConfig
+            # from .devlbert import BertConfig
             from .devlbert import DeVLBertForVLTasks
 
         # task_lr = []

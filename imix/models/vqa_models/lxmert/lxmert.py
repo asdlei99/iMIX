@@ -1,6 +1,5 @@
 import torch.nn as nn
 import torch
-from imix.models.builder import ENCODER
 import os
 from imix.utils_imix.config import ToExpanduser
 from transformers import BertTokenizer
@@ -279,7 +278,6 @@ class BertPreTrainingHeads(nn.Module):
         return prediction_scores, seq_relationship_score
 
 
-@ENCODER.register_module()
 class LXMERTForPretraining(nn.Module):
 
     def __init__(self, config):
@@ -388,7 +386,6 @@ class LXMERTForPretraining(nn.Module):
         return output
 
 
-@ENCODER.register_module()
 class LXRTModel(BertPreTrainedModel):
     """LXRT Model."""
 
@@ -713,7 +710,6 @@ class LXMERTEncoder(nn.Module):
         self.model.load_state_dict(state_dict, strict=False)
 
 
-@ENCODER.register_module()
 class ClassificationModel(nn.Module):
 
     def __init__(self, **kwargs):

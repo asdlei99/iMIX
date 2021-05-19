@@ -105,8 +105,8 @@ class VILBERT(BaseModel):
                 if key[12:] in bert_weight_name_filtered:
                     value.requires_grad = False
 
-            print('filtered weight')
-            print(bert_weight_name_filtered)
+            logger.info('filtered weight')
+            logger.info(bert_weight_name_filtered)
 
         self.lr_reduce_list = [5, 7]
         self.global_step = 0

@@ -1,5 +1,5 @@
-eval_iter_period = 5000
-checkpoint_config = dict(iter_period=eval_iter_period)
+# eval_iter_period = 4000
+# checkpoint_config = dict(iter_period=eval_iter_period)
 log_config = dict(period=5)  # PeriodicLogger parameter
 # yapf:enable
 dist_params = dict(backend='nccl')

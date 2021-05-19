@@ -38,7 +38,7 @@ model = dict(
             num_hidden_layers=12,
             type_vocab_size=2,
             vocab_size=30522,
-            t_biattention_id=[6, 7, 8, 9, 10, 11],
+            biattention_id=[6, 7, 8, 9, 10, 11],
             layer_norm_eps=1e-12,
             task_specific_tokens=True,
         ),
@@ -69,7 +69,6 @@ model = dict(
         vision_scratch=False,  # whether pre-trained the image or not.
         baseline=False,  # whether use single stream baseline
         fp16=False,  # Whether to use 16-bit float precision instead of 32-bit
-        # warmup=,
         TASKS=TASKS,
         training_head_type='vqa2',
     ))

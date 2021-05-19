@@ -1,4 +1,3 @@
-from imix.models.builder import ENCODER
 import copy
 import logging
 import math
@@ -265,8 +264,8 @@ class BertBiOutput(nn.Module):
         self.LayerNorm1 = BertLayerNorm(v_config.hidden_size, eps=1e-12)
         self.dropout1 = nn.Dropout(v_config.hidden_dropout_prob)
 
-        self.q_dense1 = nn.Linear(config.bi_hidden_size, v_config.hidden_size)
-        self.q_dropout1 = nn.Dropout(v_config.hidden_dropout_prob)
+        # self.q_dense1 = nn.Linear(config.bi_hidden_size, v_config.hidden_size)
+        # self.q_dropout1 = nn.Dropout(v_config.hidden_dropout_prob)
 
         t_config = BertConfig.from_dict(config.t_config)
 
@@ -274,8 +273,8 @@ class BertBiOutput(nn.Module):
         self.LayerNorm2 = BertLayerNorm(t_config.hidden_size, eps=1e-12)
         self.dropout2 = nn.Dropout(t_config.hidden_dropout_prob)
 
-        self.q_dense2 = nn.Linear(config.bi_hidden_size, t_config.hidden_size)
-        self.q_dropout2 = nn.Dropout(t_config.hidden_dropout_prob)
+        # self.q_dense2 = nn.Linear(config.bi_hidden_size, t_config.hidden_size)
+        # self.q_dropout2 = nn.Dropout(t_config.hidden_dropout_prob)
 
     def forward(self, hidden_states1, input_tensor1, hidden_states2, input_tensor2):
 
@@ -352,7 +351,7 @@ class BertEncoder(nn.Module):
         self.FAST_MODE = config.fast_mode
         self.with_coattention = config.with_coattention
         self.v_biattention_id = v_config.biattention_id
-        self.t_biattention_id = t_config.t_biattention_id
+        self.t_biattention_id = t_config.biattention_id
         self.in_batch_pairs = config.in_batch_pairs
         self.fixed_t_layer = config.fixed_t_layer
         self.fixed_v_layer = config.fixed_v_layer
@@ -419,8 +418,6 @@ class BertEncoder(nn.Module):
                     outputs = self.v_layer[idx](
                         image_embedding,
                         image_attention_mask,
-                        # txt_embedding,
-                        # txt_attention_mask2,
                     )
                     image_embedding, image_attention_probs = outputs[0], outputs[1:]
 
@@ -433,8 +430,6 @@ class BertEncoder(nn.Module):
                 outputs = self.v_layer[idx](
                     image_embedding,
                     image_attention_mask,
-                    # txt_embedding,
-                    # txt_attention_mask2,
                 )
                 image_embedding, image_attention_probs = outputs[0], outputs[1:]
 
@@ -443,26 +438,24 @@ class BertEncoder(nn.Module):
 
             if count == 0 and self.in_batch_pairs:
                 # new batch size is the batch_size ^2
-                image_embedding = (
-                    image_embedding.unsqueeze(0).expand(batch_size, batch_size, num_regions,
-                                                        v_hidden_size).contiguous().view(
-                                                            batch_size * batch_size, num_regions, v_hidden_size))
-                image_attention_mask = (
-                    image_attention_mask.unsqueeze(0).expand(batch_size, batch_size, 1, 1,
-                                                             num_regions).contiguous().view(
-                                                                 batch_size * batch_size, 1, 1, num_regions))
+                image_embedding = image_embedding.unsqueeze(0).expand(batch_size, batch_size, num_regions,
+                                                                      v_hidden_size).contiguous().view(
+                                                                          batch_size * batch_size, num_regions,
+                                                                          v_hidden_size)
+                image_attention_mask = image_attention_mask.unsqueeze(0).expand(batch_size, batch_size, 1, 1,
+                                                                                num_regions).contiguous().view(
+                                                                                    batch_size * batch_size, 1, 1,
+                                                                                    num_regions)
 
-                txt_embedding = (
-                    txt_embedding.unsqueeze(1).expand(batch_size, batch_size, num_words,
-                                                      t_hidden_size).contiguous().view(
-                                                          batch_size * batch_size, num_words, t_hidden_size))
-                txt_attention_mask = (
-                    txt_attention_mask.unsqueeze(1).expand(batch_size, batch_size, 1, 1, num_words).contiguous().view(
-                        batch_size * batch_size, 1, 1, num_words))
-                co_attention_mask = (
-                    co_attention_mask.unsqueeze(1).expand(batch_size, batch_size, 1, num_regions,
-                                                          num_words).contiguous().view(
-                                                              batch_size * batch_size, 1, num_regions, num_words))
+                txt_embedding = txt_embedding.unsqueeze(1).expand(batch_size, batch_size, num_words,
+                                                                  t_hidden_size).contiguous().view(
+                                                                      batch_size * batch_size, num_words, t_hidden_size)
+                txt_attention_mask = txt_attention_mask.unsqueeze(1).expand(
+                    batch_size, batch_size, 1, 1, num_words).contiguous().view(batch_size * batch_size, 1, 1, num_words)
+                co_attention_mask = co_attention_mask.unsqueeze(1).expand(batch_size, batch_size, 1, num_regions,
+                                                                          num_words).contiguous().view(
+                                                                              batch_size * batch_size, 1, num_regions,
+                                                                              num_words)
 
             if count == 0 and self.FAST_MODE:
                 txt_embedding = txt_embedding.expand(
@@ -503,8 +496,6 @@ class BertEncoder(nn.Module):
             outputs = self.v_layer[idx](
                 image_embedding,
                 image_attention_mask,
-                # txt_embedding,
-                # txt_attention_mask2,
             )
             image_embedding, image_attention_probs = outputs[0], outputs[1:]
 
@@ -581,7 +572,13 @@ class BertPreTrainingHeads(nn.Module):
         self.fusion_method = config.fusion_method
         self.dropout = nn.Dropout(0.1)
 
-    def forward(self, sequence_output_t, sequence_output_v, pooled_output_t, pooled_output_v):
+    def forward(
+        self,
+        sequence_output_t,
+        sequence_output_v,
+        pooled_output_t,
+        pooled_output_v,
+    ):
 
         if self.fusion_method == 'sum':
             pooled_output = self.dropout(pooled_output_t + pooled_output_v)
@@ -613,7 +610,6 @@ class BertImagePredictionHead(nn.Module):
         return hidden_states
 
 
-@ENCODER.register_module()
 class BertModel(BertPreTrainedModel):
 
     def __init__(self, config):
@@ -621,10 +617,10 @@ class BertModel(BertPreTrainedModel):
 
         self.task_specific_tokens = config.task_specific_tokens
 
-        # initilize word embedding
         t_config = BertConfig.from_dict(config.t_config)
         v_config = BertConfig.from_dict(config.v_config)
 
+        # initilize word embedding
         if config.model == 'bert':
             self.embeddings = BertEmbeddings(t_config)
         elif config.model == 'roberta':
@@ -637,7 +633,6 @@ class BertModel(BertPreTrainedModel):
         self.t_pooler = BertTextPooler(config)
         self.v_pooler = BertImagePooler(config)
 
-        # self.apply(self.init_weights)
         self.init_weights()
 
     def forward(
@@ -752,13 +747,11 @@ class BertImageEmbeddings(nn.Module):
         # TODO: we want to make the padding_idx == 0, however, with custom initilization, it seems it will have a bias.
         # Let's do masking for now
         embeddings = self.LayerNorm(img_embeddings + loc_embeddings)
-        # embeddings = self.LayerNorm(img_embeddings+loc_embeddings)
         embeddings = self.dropout(embeddings)
 
         return embeddings
 
 
-@ENCODER.register_module()
 class BertForMultiModalPreTraining(BertPreTrainedModel):
     """BERT model with multi modal pre-training heads."""
 
@@ -768,7 +761,6 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.cls = BertPreTrainingHeads(config, self.bert.embeddings.word_embeddings.weight)
 
-        # self.apply(self.init_weights)
         self.init_weights()
         self.visual_target = config.visual_target
         self.num_negative = config.num_negative
@@ -818,11 +810,14 @@ class BertForMultiModalPreTraining(BertPreTrainedModel):
             output_all_attention_masks=output_all_attention_masks,
         )
 
-        prediction_scores_t, prediction_scores_v, seq_relationship_score = self.cls(sequence_output_t,
-                                                                                    sequence_output_v, pooled_output_t,
-                                                                                    pooled_output_v)
+        prediction_scores_t, prediction_scores_v, seq_relationship_score = self.cls(
+            sequence_output_t,
+            sequence_output_v,
+            pooled_output_t,
+            pooled_output_v,
+        )
 
-        if (masked_lm_labels is not None and next_sentence_label is not None and image_target is not None):
+        if masked_lm_labels is not None and next_sentence_label is not None and image_target is not None:
             prediction_scores_v = prediction_scores_v[:, 1:]
             if self.visual_target == 1:
                 img_loss = self.vis_criterion(prediction_scores_v, image_target)
@@ -912,7 +907,6 @@ class SimpleClassifier(nn.Module):
         return self.logit_fc(hidden_states)
 
 
-@ENCODER.register_module()
 class VILBertForVLTasks(BertPreTrainedModel):
 
     def __init__(self, config, num_labels, dropout_prob=0.1, default_gpu=True):
@@ -930,7 +924,6 @@ class VILBertForVLTasks(BertPreTrainedModel):
         self.vision_logit = nn.Linear(config.v_config['hidden_size'], 1)
         self.linguisic_logit = nn.Linear(config.t_config['hidden_size'], 1)
         self.fusion_method = config.fusion_method
-        # self.apply(self.init_weights)
         self.init_weights()
 
         self.tie_weights()
