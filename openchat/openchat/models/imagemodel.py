@@ -1,29 +1,31 @@
 import torch
 from openchat.models.base_model import BaseModel
 import openchat.config as cfg
-from  openchat.utils.prepare_image import detect_objects_on_single_image
+from openchat.utils.prepare_image import detect_objects_on_single_image
 from openchat.utils.transforms import build_transforms
-import os
 import cv2
 
-import os, sys
+import sys
 sys.path.insert(0, '/home/zyj/new_19/imix')
 sys.path.insert(0, '/home/zyj/scene_graph_benchmark-main')
+
+
 class LxmertBot(BaseModel):
+
     def __init__(self, env, device, max_context_length):
-        super().__init__("imagemodel", env)
+        super().__init__('imagemodel', env)
         # self.model = MobileNetV2(num_classes=5)
         self.devices = device.lower()
         self.max_context_length = max_context_length
         # self.tokenizer = .from_pretrained()
-        self.eos = "</s><s>"
+        self.eos = '</s><s>'
         self.lxmert_model = torch.load(cfg.lxmert_weight_path)
         self.transforms = build_transforms()
         self.detect_model = torch.load(cfg.detect_weight_path)
         # self.model.to(device)
 
     @torch.no_grad()
-    def predict(self, image_id: str,  text: str) -> str:
+    def predict(self, image_id: str, text: str) -> str:
         torch.cuda.empty_cache()
         input_ids_list: list = []
         num_of_stacked_tokens: int = 0
@@ -48,9 +50,6 @@ class LxmertBot(BaseModel):
             else:
                 break
 
-        input_ids_list = list(reversed(input_ids_list))
-        new_input = text + self.eos
-
         img_path = cfg.image_path + image_id
         img = cv2.imread(img_path)
         dets = detect_objects_on_single_image(self.detect_model, self.transforms, img)
@@ -63,11 +62,7 @@ class LxmertBot(BaseModel):
         boxes = data['boxes'].to('cuda')
         sent = [text]
 
-        output_dict = self.lxmert_model(
-            feats,
-            boxes,
-            sent
-        )
+        output_dict = self.lxmert_model(feats, boxes, sent)
 
         max_score = output_dict['scores'].argmax(dim=-1)
 

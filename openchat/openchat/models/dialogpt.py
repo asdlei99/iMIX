@@ -1,15 +1,16 @@
 import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 from openchat.models.base_model import BaseModel
-import base64
+
 
 class DialoGPT(BaseModel):
 
     def __init__(self, size, env, device, max_context_length):
-        """
-        DialoGPT was proposed in DialoGPT: Large-Scale Generative Pre-training for Conversational Response Generation
-        by Yizhe Zhang, Siqi Sun, Michel Galley, Yen-Chun Chen, Chris Brockett, Xiang Gao, Jianfeng Gao,
-        Jingjing Liu, Bill Dolan. It’s a GPT2 Model trained on 147M conversation-like exchanges extracted from Reddit.
+        """DialoGPT was proposed in DialoGPT: Large-Scale Generative Pre-
+        training for Conversational Response Generation by Yizhe Zhang, Siqi
+        Sun, Michel Galley, Yen-Chun Chen, Chris Brockett, Xiang Gao, Jianfeng
+        Gao, Jingjing Liu, Bill Dolan. It’s a GPT2 Model trained on 147M
+        conversation-like exchanges extracted from Reddit.
 
         Args:
             size (str): model size
@@ -22,12 +23,12 @@ class DialoGPT(BaseModel):
         assert size in ['small', 'medium', 'large'], \
             "model size must be one of ['small', 'medium', 'large']"
 
-        super().__init__(f"microsoft/DialoGPT-{size}", env)
+        super().__init__(f'microsoft/DialoGPT-{size}', env)
         self.device = device.lower()
         self.model = GPT2LMHeadModel.from_pretrained(self.name).to(device)
         self.tokenizer = GPT2Tokenizer.from_pretrained(self.name)
         self.max_context_length = max_context_length
-        self.eos = "<|endoftext|>"
+        self.eos = '<|endoftext|>'
 
     @torch.no_grad()
     def predict(
@@ -38,8 +39,7 @@ class DialoGPT(BaseModel):
         top_k: int = 1,
         top_p: float = None,
     ) -> str:
-        """
-        dialogue with Dialo GPT
+        """dialogue with Dialo GPT.
 
         Args:
             user_id (str): user id
@@ -50,7 +50,6 @@ class DialoGPT(BaseModel):
 
         Returns:
             (str): model's next utterance
-
         """
 
         torch.cuda.empty_cache()

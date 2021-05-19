@@ -1,13 +1,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-# Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license. 
+# Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license.
 import random
 
-import torch
 import torchvision
 from torchvision.transforms import functional as F
 
 
 class Compose(object):
+
     def __init__(self, transforms):
         self.transforms = transforms
 
@@ -17,18 +17,19 @@ class Compose(object):
         return image, target
 
     def __repr__(self):
-        format_string = self.__class__.__name__ + "("
+        format_string = self.__class__.__name__ + '('
         for t in self.transforms:
-            format_string += "\n"
-            format_string += "    {0}".format(t)
-        format_string += "\n)"
+            format_string += '\n'
+            format_string += '    {0}'.format(t)
+        format_string += '\n)'
         return format_string
 
 
 class Resize(object):
+
     def __init__(self, min_size, max_size):
         if not isinstance(min_size, (list, tuple)):
-            min_size = (min_size,)
+            min_size = (min_size, )
         self.min_size = min_size
         self.max_size = max_size
 
@@ -65,6 +66,7 @@ class Resize(object):
 
 
 class RandomHorizontalFlip(object):
+
     def __init__(self, prob=0.5):
         self.prob = prob
 
@@ -74,7 +76,9 @@ class RandomHorizontalFlip(object):
             target = target.transpose(0)
         return image, target
 
+
 class RandomVerticalFlip(object):
+
     def __init__(self, prob=0.5):
         self.prob = prob
 
@@ -84,18 +88,22 @@ class RandomVerticalFlip(object):
             target = target.transpose(1)
         return image, target
 
+
 class ColorJitter(object):
-    def __init__(self,
-                 brightness=None,
-                 contrast=None,
-                 saturation=None,
-                 hue=None,
-                 ):
+
+    def __init__(
+        self,
+        brightness=None,
+        contrast=None,
+        saturation=None,
+        hue=None,
+    ):
         self.color_jitter = torchvision.transforms.ColorJitter(
             brightness=brightness,
             contrast=contrast,
             saturation=saturation,
-            hue=hue,)
+            hue=hue,
+        )
 
     def __call__(self, image, target):
         image = self.color_jitter(image)
@@ -103,11 +111,13 @@ class ColorJitter(object):
 
 
 class ToTensor(object):
+
     def __call__(self, image, target):
         return F.to_tensor(image), target
 
 
 class Normalize(object):
+
     def __init__(self, mean, std, to_bgr255=True):
         self.mean = mean
         self.std = std

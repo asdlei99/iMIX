@@ -4,27 +4,33 @@ from flask_cors import CORS
 
 from openchat.envs import BaseEnv
 from openchat.models import BaseModel
-import glob
-import os
 from werkzeug.utils import secure_filename
-
 
 IMAGE_PATH = '/home/zyj/openchat_v2/openchat/demo/static/image'
 questions = []
 
+
 class WebDemoEnv(BaseEnv):
+    """Base envrionment for web.
+
+    The function :func:`inference_on_dataset` runs the model over
+    all samples in the dataset, and have a DatasetEvaluator to process the inputs/outputs.
+
+    This class will accumulate information of the inputs/outputs (by :meth:`process`),
+    and produce evaluation results in the end (by :meth:`evaluate`).
+    """
 
     def __init__(self):
         super().__init__()
         self.app = Flask(__name__)
-        CORS(self.app) #解决跨域问题
+        CORS(self.app)
 
     def run(self, model: BaseModel):
 
-        @self.app.route("/", methods=["GET","POST"])
+        @self.app.route('/', methods=['GET', 'POST'])
         def index():
 
-            return render_template("index.html", title=model.name)
+            return render_template('index.html', title=model.name)
 
         @self.app.route('/image', methods=['POST'])
         def save_image():
@@ -41,7 +47,7 @@ class WebDemoEnv(BaseEnv):
                 # Format of self.keywords dictionary
                 # self.keywords['/exit'] = (exit_function, 'good bye.')
 
-                _out = self.keywords[text][1]
+                # _out = self.keywords[text][1]
                 # text to print when keyword triggered
 
                 self.keywords[text][0](imageName, text)
@@ -50,7 +56,6 @@ class WebDemoEnv(BaseEnv):
             else:
                 outputs = model.predict(imageName, text)
 
+            return {'output': outputs}
 
-            return {"output": outputs}
-
-        self.app.run(host="0.0.0.0", port=5050)
+        self.app.run(host='0.0.0.0', port=5050)

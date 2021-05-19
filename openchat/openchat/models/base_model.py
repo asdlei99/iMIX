@@ -14,8 +14,7 @@ class BaseModel(ABC):
 
     @abstractmethod
     def predict(self, user_id: str, text: str) -> str:
-        """
-        Predict output from histories and input text
+        """Predict output from histories and input text.
 
         Args:
             user_id (str): user's ID

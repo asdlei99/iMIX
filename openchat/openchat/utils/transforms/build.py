@@ -14,9 +14,7 @@ def build_transforms():
     hue = 0.0
 
     to_bgr255 = True
-    normalize_transform = T.Normalize(
-        mean=[102.9801, 115.9465, 122.7717], std=[1., 1., 1.], to_bgr255=to_bgr255
-    )
+    normalize_transform = T.Normalize(mean=[102.9801, 115.9465, 122.7717], std=[1., 1., 1.], to_bgr255=to_bgr255)
     color_jitter = T.ColorJitter(
         brightness=brightness,
         contrast=contrast,
@@ -24,14 +22,12 @@ def build_transforms():
         hue=hue,
     )
 
-    transform = T.Compose(
-        [
-            color_jitter,
-            T.Resize(min_size, max_size),
-            T.RandomHorizontalFlip(flip_horizontal_prob),
-            T.RandomVerticalFlip(flip_vertical_prob),
-            T.ToTensor(),
-            normalize_transform,
-        ]
-    )
+    transform = T.Compose([
+        color_jitter,
+        T.Resize(min_size, max_size),
+        T.RandomHorizontalFlip(flip_horizontal_prob),
+        T.RandomVerticalFlip(flip_vertical_prob),
+        T.ToTensor(),
+        normalize_transform,
+    ])
     return transform

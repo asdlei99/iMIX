@@ -1,10 +1,10 @@
 import sys
 from abc import abstractmethod, ABC
 from openchat.models.base_model import BaseModel
+
+
 class BaseEnv(ABC):
-    """
-    Base dialogue environment class
-    """
+    """Base dialogue environment class."""
 
     def __init__(self):
         self.histories = {
@@ -17,14 +17,14 @@ class BaseEnv(ABC):
         }
 
         self.keywords = {
-            ".exit": (self.exit, "good bye."),
-            ".clear": (self.clear, "histories cleared."),
+            '.exit': (self.exit, 'good bye.'),
+            '.clear': (self.clear, 'histories cleared.'),
             # .keyword: (function, message)
         }
 
     @abstractmethod
     def run(self, model: BaseModel):
-        """Start to dialogue"""
+        """Start to dialogue."""
 
         return NotImplemented
 
@@ -34,15 +34,14 @@ class BaseEnv(ABC):
         sys.exit(0)
 
     def clear(self, user_id: str, text: str) -> None:
-        """
-        clear all dialogue histories
+        """clear all dialogue histories.
 
         Args:
             user_id (str): user id to clear histories
             text (str): input text from user
         """
 
-        self.histories[user_id] = {"user": [], "bot": []}
+        self.histories[user_id] = {'user': [], 'bot': []}
 
     def add_keyword(
         self,
@@ -50,9 +49,8 @@ class BaseEnv(ABC):
         message: str,
         func,
     ) -> None:
-        """
-        Add new keywords with user-defined function
-        default keywords dictionary has two keywords: '/exit', '/clear'
+        """Add new keywords with user-defined function default keywords
+        dictionary has two keywords: '/exit', '/clear'.
 
         Args:
             keyword (str): keyword to trigger function
