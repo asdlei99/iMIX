@@ -1,92 +1,81 @@
 import copy
 import inspect
 import logging
-
 import torch
-
+from torch.optim import Optimizer, lr_scheduler
+from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
+from typing import List
 from ..utils_imix.registry import Registry, build_from_cfg
+from imix.utils_imix.config import imixEasyDict
+
 OPTIMIZERS = Registry('optimizer')
 OPTIMIZER_BUILDERS = Registry('optimizer builder')
 LR_SCHEDULERS = Registry('lr scheduler')
 
 
-def register_torch_optimizers():
+def register_torch_optimizers() -> List:
     torch_optimizers = []
-    for module_name in dir(torch.optim):
-        if module_name.startswith('__'):
+    for name in dir(torch.optim):
+        if name.startswith('__'):
             continue
-        _optim = getattr(torch.optim, module_name)
-        if inspect.isclass(_optim) and issubclass(_optim, torch.optim.Optimizer):
-            OPTIMIZERS.register_module()(_optim)
-            torch_optimizers.append(module_name)
+        else:
+            optim_cls = getattr(torch.optim, name)
+            if inspect.isclass(optim_cls) and issubclass(optim_cls, Optimizer):
+                OPTIMIZERS.register_module()(optim_cls)
+                torch_optimizers.append(optim_cls)
     return torch_optimizers
 
 
 TORCH_OPTIMIZERS = register_torch_optimizers()
 
 
-def register_torch_lr_schedulers():
-    torch_lr_scheduler = []
-    for module_name in dir(torch.optim.lr_scheduler):
-        if module_name.startswith('__'):
+def register_torch_lr_schedulers() -> List:
+    torch_lr_schedulers = []
+    for name in dir(lr_scheduler):
+        if name.startswith('__'):
             continue
-        _optim_lr = getattr(torch.optim.lr_scheduler, module_name)
-        if inspect.isclass(_optim_lr) and issubclass(_optim_lr, torch.optim.lr_scheduler._LRScheduler):
-            LR_SCHEDULERS.register_module()(_optim_lr)
-            torch_lr_scheduler.append(module_name)
-    return torch_lr_scheduler
+        else:
+            lr_cls = getattr(lr_scheduler, name)
+            if inspect.isclass(lr_cls) and issubclass(lr_cls, LRScheduler):
+                LR_SCHEDULERS.register_module()(lr_cls)
+                torch_lr_schedulers.append(lr_cls)
+    return torch_lr_schedulers
 
 
-TORCH_OPTIM_LR_SCHEDULERS = register_torch_lr_schedulers()
+TORCH_LR_SCHEDULERS = register_torch_lr_schedulers()
 
 
 def build_optimizer_constructor(cfg):
     return build_from_cfg(cfg, OPTIMIZER_BUILDERS)
 
 
-def build_optimizer(optimizer_config, model):
-    optimizer_cfg = copy.deepcopy(optimizer_config)
-    constructor_type = optimizer_cfg.pop('constructor', 'DefaultOptimizerConstructor')
-    paramwise_cfg = optimizer_cfg.pop('paramwise_cfg', None)
-    optim_constructor = build_optimizer_constructor(
-        dict(type=constructor_type, optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg))
-    optimizer = optim_constructor(model)
+def build_optimizer(cfg, model):
+
+    def get_param() -> imixEasyDict:
+        param = imixEasyDict()
+        param.optimizer_cfg = copy.deepcopy(cfg)
+        param.type = param.optimizer_cfg.pop('constructor', 'DefaultOptimizerConstructor')
+        param.paramwise_cfg = param.optimizer_cfg.pop('paramwise_cfg', None)
+        return param
+
+    obj = build_optimizer_constructor(cfg=get_param())
+    optimizer = obj(model)
     return optimizer
 
 
-def build_lr_scheduler(lr_config, optimizer):  # TODO(jinliang): The config file of LR does not match the code
-
+def build_lr_scheduler(lr_config, optimizer):
     logger = logging.getLogger(__name__)
     try:
         assert 'policy' in lr_config
-        policy_type = lr_config.pop('policy')
-        # lr_type = policy_type + ''
-        lr_config['type'] = policy_type
-        lr_config['optimizer'] = optimizer
-        # lr_config = modify_lr_config(lr_config, optimizer)#TODO(jinliang):modify
-
-        lr_scheduler = build_from_cfg(lr_config, LR_SCHEDULERS)
-    except AssertionError:
-        logger.error('policy is not in {}'.format(lr_config))
-    except Exception as e:  # TODO(jinliang) capture build_from_cfg exception
-        logger.error(e)
+        lr_cfg = copy.deepcopy(lr_config)
+        lr_cfg.type = lr_cfg.pop('policy')
+        lr_cfg.optimizer = optimizer
+        lr_scheduler = build_from_cfg(lr_cfg, LR_SCHEDULERS)
+    except Exception:
+        logger.exception('exception during build_lr_scheduler')
+        raise
     else:
-        # logger.info('Success in building learn rate scheduler')
+        logger.info('Success in building learn rate scheduler')
         return lr_scheduler
     finally:
-        # logger.info('build_lr_scheduler completion')
-        pass
-
-
-def modify_lr_config(lr_config, optimizer):
-    from imix.utils.config import ConfigDict
-
-    new_lr_config = ConfigDict()
-    new_lr_config['type'] = 'WarmupMultiStepLR'
-    new_lr_config['optimizer'] = optimizer
-    new_lr_config['milestones'] = lr_config.step
-    new_lr_config['warmup_factor'] = lr_config.warmup_ratio
-    new_lr_config['warmup_iters'] = lr_config.warmup_iters
-    new_lr_config['warmup_method'] = lr_config.warmup
-
-    return new_lr_config
+        logger.info('build_lr_scheduler completion')
