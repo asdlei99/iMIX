@@ -42,7 +42,7 @@ train_data = dict(
         reader=vqa_reader_train_cfg,
     ),
     pin_memory=True,
-    # sampler='RandomSampler',
+    # sampler='RandomSampler',  # DistributedSampler
 )
 
 test_data = dict(
@@ -50,6 +50,7 @@ test_data = dict(
     workers_per_gpu=4,
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg),
     pin_memory=True,
+    shuffle=False,
 )
 
 post_processor = dict(

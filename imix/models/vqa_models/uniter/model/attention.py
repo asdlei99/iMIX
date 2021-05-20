@@ -183,12 +183,20 @@ def multi_head_attention_forward(
                 attn_mask = torch.cat(
                     [attn_mask,
                      torch.zeros((attn_mask.size(0), 1), dtype=attn_mask.dtype, device=attn_mask.device)],
-                    dim=1)
+                    dim=1,
+                )
             if key_padding_mask is not None:
-                tmp = torch.zeros((key_padding_mask.size(0), 1),
-                                  dtype=key_padding_mask.dtype,
-                                  device=key_padding_mask.device)
-                key_padding_mask = torch.cat([key_padding_mask, tmp], dim=1)
+                key_padding_mask = torch.cat(
+                    [
+                        key_padding_mask,
+                        torch.zeros(
+                            (key_padding_mask.size(0), 1),
+                            dtype=key_padding_mask.dtype,
+                            device=key_padding_mask.device,
+                        )
+                    ],
+                    dim=1,
+                )
         else:
             assert static_k is None, 'bias cannot be added to static key.'
             assert static_v is None, 'bias cannot be added to static value.'
@@ -227,9 +235,17 @@ def multi_head_attention_forward(
                 [attn_mask,
                  torch.zeros((attn_mask.size(0), 1), dtype=attn_mask.dtype, device=attn_mask.device)], dim=1)
         if key_padding_mask is not None:
-            tmp = \
-                torch.zeros((key_padding_mask.size(0), 1), dtype=key_padding_mask.dtype, device=key_padding_mask.device)
-            key_padding_mask = torch.cat([key_padding_mask, tmp], dim=1)
+            key_padding_mask = torch.cat(
+                [
+                    key_padding_mask,
+                    torch.zeros(
+                        (key_padding_mask.size(0), 1),
+                        dtype=key_padding_mask.dtype,
+                        device=key_padding_mask.device,
+                    )
+                ],
+                dim=1,
+            )
 
     attn_output_weights = torch.bmm(q, k.transpose(1, 2))
     assert list(attn_output_weights.size()) == [bsz * num_heads, tgt_len, src_len]

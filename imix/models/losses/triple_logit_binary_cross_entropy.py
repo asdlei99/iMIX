@@ -72,12 +72,15 @@ class TripleLogitBinaryCrossEntropy(BaseLoss):
 @LOSSES.register_module()
 class BinaryCrossEntropyWithLogits(BaseLoss):
 
-    def __init__(self):
+    def __init__(self, params=None):
         super().__init__(loss_name=str(self))
+        if params is None:
+            params = {}
+        self.loss_fn = nn.CrossEntropyLoss(**params)
 
     def forward(self, model_output):
         predict_scores, target = model_output['scores'], model_output['target']
-        return F.binary_cross_entropy_with_logits(predict_scores, target)
+        return self.loss_fn(predict_scores, target)
 
     def __str__(self):
         return 'binary_cross_entropy_with_logits_loss'
@@ -334,8 +337,6 @@ class VILBERTMutilLoss(BaseLoss):
                 loss = loss.mean()
 
             loss = loss * self.loss_scale[task_id]
-            if self.gradient_accumulation_steps > 1:
-                loss = loss / self.gradient_accumulation_steps
 
         return loss
 
@@ -419,9 +420,6 @@ class OSCARLoss(BaseLoss):
             # if self.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
-            if self.gradient_accumulation_steps > 1:
-                loss = loss / self.gradient_accumulation_steps
-
         return loss
 
 
@@ -456,9 +454,6 @@ class OSCARBertCaptioningLoss(nn.Module):
             loss, _ = torch.topk(loss, k=int(loss.shape[0] * (1 - self.drop_worst_ratio)), largest=False)
 
         loss = loss.mean()
-
-        if args.gradient_accumulation_steps > 1:
-            loss = loss / args.gradient_accumulation_steps
 
         return loss
 

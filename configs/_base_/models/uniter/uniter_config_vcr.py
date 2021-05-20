@@ -1,18 +1,52 @@
 # model settings for VCR
 model = dict(
-    type='UNITERVCR',
-    embeddings=[
-        dict(
-            type='UniterTextEmbeddings',
-            vocab_size=28996,
-            hidden_size=768,
-            max_position_embeddings=512,
-            type_vocab_size=2,
-            hidden_dropout_prob=0.1),
-        dict(type='UniterImageEmbeddings', img_dim=2048, hidden_size=768, hidden_dropout_prob=0.1)
-    ],
-    encoder=dict(type='UniterEncoder', config_file='configs/_base_/models/uniter/uniter-base.json'),
-    head=dict(type='UNITERVCRHead', in_dim=768, out_dim=2),
-    pretrained_path='/home/datasets/UNITER/vcr/uniter-base-vcr_2nd_stage.pt',
-    dropout=0.1)
-loss = dict(type='UNITERCrossEntropyLoss', reduction='mean')
+    type='UNITER_VCR',
+    params=dict(
+        # num_labels=3129,
+        model_config='configs/_base_/models/uniter/uniter-base.json',
+        gradient_accumulation_steps=5,
+        dropout=0.1,
+        seed=42,
+        num_special_tokens=81,
+        img_dim=2048,
+        checkpoint_from='vcr_pretrain',
+        pretrained_path='/home/datasets/mix_data/UNITER/vcr/uniter-base-vcr_2nd_stage.pt',
+    ),
+)
+
+loss = dict(type='CrossEntropyLoss', params=dict(reduction='mean'))
+
+optimizer = dict(
+    type='TansformerAdamW',
+    constructor='UniterVQAOptimizerConstructor',
+    paramwise_cfg=dict(
+        weight_decay=0.01,
+        lr_mul=1.0,
+        key_named_param='vcr_output',
+    ),
+    lr=6e-5,
+    betas=[0.9, 0.98],
+    training_encoder_lr_multiply=1,
+)
+optimizer_config = dict(grad_clip=dict(max_norm=2.0))
+
+# fp16 = dict(
+#     init_scale=2.**16,
+#     growth_factor=2.0,
+#     backoff_factor=0.5,
+#     growth_interval=2000,
+# )
+
+lr_config = dict(
+    num_warmup_steps=800,
+    num_training_steps=8000,
+    policy='WarmupLinearSchedule',
+)
+
+total_epochs = 4
+
+eval_iter_period = 1000
+checkpoint_config = dict(iter_period=eval_iter_period)
+
+gradient_accumulation_steps = 5
+is_lr_accumulation = True

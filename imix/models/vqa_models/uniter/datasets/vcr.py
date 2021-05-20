@@ -8,12 +8,22 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from toolz.sandbox import unzip
 from cytoolz import concat
-from .data import (DetectFeatTxtTokDataset, TxtTokLmdb, DetectFeatLmdb, TxtLmdb, get_ids_and_lens, pad_tensors,
-                   ImageLmdbGroup, get_gather_index, ConcatDatasetWithLens)
-from ...builder import DATASETS
-import imix.utils_imix.distributed_info as comm
+from .data import (
+    DetectFeatTxtTokDataset,
+    TxtTokLmdb,
+    DetectFeatLmdb,
+    TxtLmdb,
+    get_ids_and_lens,
+    pad_tensors,
+    ImageLmdbGroup,
+    get_gather_index,
+    ConcatDatasetWithLens,
+)
+from imix.data.builder import DATASETS
 import logging
-from ...utils.stream import ItemFeature
+from imix.data.utils.stream import ItemFeature
+
+logger = logging.getLogger(__name__)
 
 
 class VcrTxtTokLmdb(TxtTokLmdb):
@@ -111,13 +121,11 @@ def load_img_feat(db_list, all_img_dbs, opts):
 
 
 @DATASETS.register_module()
-class VcrDataset(VcrDetectFeatTxtTokDataset):
+class UNITER_VcrDataset(VcrDetectFeatTxtTokDataset):
 
     def __init__(self, **kwargs):
-        if comm.is_main_process():
-            cls_name = self.__class__.__name__
-            logger = logging.getLogger(__name__)
-            logger.info('start loading' + cls_name)
+        cls_name = self.__class__.__name__
+        logger.info('start loading {}'.format(cls_name))
 
         # load DBs and image dirs
         opts = ItemFeature(kwargs['datacfg'])
@@ -142,8 +150,8 @@ class VcrDataset(VcrDetectFeatTxtTokDataset):
             self.dataset = VcrEvalDataset('val', val_txt_db, img_db=val_img_db, img_db_gt=val_img_db_gt)
 
         self.collate_fn = vcr_collate if train_or_val else vcr_eval_collate
-        if comm.is_main_process():
-            logger.info('load {} successfully'.format(cls_name))
+        logger.info('load {} successfully'.format(cls_name))
+        logger.info('Num examples = %d', len(self.dataset))
 
     def __len__(self):
         return len(self.dataset)
@@ -245,7 +253,6 @@ def vcr_collate(inputs):
     return batch
 
 
-@DATASETS.register_module()
 class VcrEvalDataset(VcrDetectFeatTxtTokDataset):
 
     def __init__(self, split, *args, **kwargs):
@@ -253,7 +260,6 @@ class VcrEvalDataset(VcrDetectFeatTxtTokDataset):
         self.split = split
         assert self.task == 'qa,qar', \
             'loading evaluation dataset with two tasks together'
-        self.collate_fn = vcr_eval_collate
 
     def _get_input_ids(self, txt_dump):
         # text input
@@ -283,26 +289,29 @@ class VcrEvalDataset(VcrDetectFeatTxtTokDataset):
 
         return input_ids_for_choices, type_ids_for_choices
 
+    def __getitem__(self, i):
+        qid = self.ids[i]
+        example = super().__getitem__(i)
+        img_feat, img_pos_feat, num_bb = self._get_img_feat(example['img_fname'][0], example['img_fname'][1])
 
-def __getitem__(self, i):
-    qid = self.ids[i]
-    example = super().__getitem__(i)
-    img_feat, img_pos_feat, num_bb = self._get_img_feat(example['img_fname'][0], example['img_fname'][1])
+        input_ids_for_choices, type_ids_for_choices = self._get_input_ids(example)
+        qa_target = torch.tensor([int(example['qa_target'])])
+        qar_target = torch.tensor([int(example['qar_target'])])
 
-    input_ids_for_choices, type_ids_for_choices = self._get_input_ids(example)
-    qa_target = torch.tensor([int(example['qa_target'])])
-    qar_target = torch.tensor([int(example['qar_target'])])
+        outs = []
+        for index, input_ids in enumerate(input_ids_for_choices):
+            attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
 
-    outs = []
-    for index, input_ids in enumerate(input_ids_for_choices):
-        attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
+            input_ids = torch.tensor(input_ids)
+            txt_type_ids = torch.tensor(type_ids_for_choices[index])
 
-        input_ids = torch.tensor(input_ids)
-        txt_type_ids = torch.tensor(type_ids_for_choices[index])
+            outs.append((input_ids, txt_type_ids, img_feat, img_pos_feat, attn_masks))
 
-        outs.append((input_ids, txt_type_ids, img_feat, img_pos_feat, attn_masks))
+        return tuple(outs), qid, qa_target, qar_target
 
-    return tuple(outs), qid, qa_target, qar_target
+    # for test
+    # def __len__(self):
+    #     return 64
 
 
 def vcr_eval_collate(inputs):

@@ -1,9 +1,6 @@
-dataset_type = 'VeDataset'
-data_root = '/home/datasets/UNITER/ve/'
-# train_datasets = ["train", "val", "visualgenome"]
-# train_datasets = ["train"]
-# test_datasets = ["oneval"]
-# test_datasets = ["test"]
+dataset_type = 'UNITER_VeDataset'
+
+data_root = '/home/datasets/mix_data/UNITER/ve/'
 
 train_datasets = ['train']
 test_datasets = ['minival']
@@ -39,20 +36,44 @@ ve_cfg = dict(
     n_workers=4,
     pin_mem=False)
 
+BUCKET_SIZE = 8192
+
 train_data = dict(
-    samples_per_gpu=ve_cfg['train_batch_size'],  # 16
+    samples_per_gpu=ve_cfg['train_batch_size'],
     workers_per_gpu=0,
-    batch_sampler='TokenBucketSampler',
-    data=dict(type=dataset_type, datacfg=ve_cfg, train_or_val=True),
+    batch_sampler=dict(
+        type='TokenBucketSampler',
+        bucket_size=BUCKET_SIZE,
+        batch_size=ve_cfg['train_batch_size'],
+        drop_last=True,
+        size_multiple=8,
+    ),
+    data=dict(
+        type=dataset_type,
+        datacfg=ve_cfg,
+        train_or_val=True,
+    ),
 )
 
 test_data = dict(
     samples_per_gpu=ve_cfg['val_batch_size'],
     workers_per_gpu=0,
-    batch_sampler='TokenBucketSampler',
-    data=dict(type=dataset_type, datacfg=ve_cfg, train_or_val=False),
+    batch_sampler=dict(
+        type='TokenBucketSampler',
+        bucket_size=BUCKET_SIZE,
+        batch_size=ve_cfg['val_batch_size'],
+        drop_last=False,
+        size_multiple=8,
+    ),
+    data=dict(
+        type=dataset_type,
+        datacfg=ve_cfg,
+        train_or_val=False,
+    ),
 )
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
-    type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])
+    type='Evaluator',
+    metrics=[dict(type='UNITER_AccuracyMetric')],
+    dataset_converters=[dict(type='UNITER_DatasetConverter')],
+)

@@ -1,11 +1,10 @@
-dataset_root_dir = '/home/datasets/UNITER/nlvr2/'
-# train_datasets = ["train", "val", "visualgenome"]
-# train_datasets = ["train"]
-# test_datasets = ["oneval"]
-# test_datasets = ["test"]
+dataset_type = 'UNITER_NLVR2Dataset'
+
+dataset_root_dir = '/home/datasets/mix_data/UNITER/nlvr2/'
 
 train_datasets = ['train']
-test_datasets = ['minival']
+test_datasets = ['minival']  # name not in use, but have defined one to run
+
 nlvr_cfg = dict(
     train_txt_db=dataset_root_dir + 'nlvr2_train.db',
     train_img_db=dataset_root_dir + 'nlvr2_train/',
@@ -33,27 +32,50 @@ nlvr_cfg = dict(
     grad_norm=2.0,
     warmup_steps=800,
     seed=77,
-    fp16=True,
+    # fp16=True,
     n_workers=4,
 )
-dataset_type = 'NLVR2Dataset'
+
+BUCKET_SIZE = 8192
+
 train_data = dict(
-    # samples_per_gpu=nlvr_cfg['train_batch_size'],  # 16
     samples_per_gpu=nlvr_cfg['train_batch_size'],
     workers_per_gpu=0,
-    pin_mem=True,
-    batch_sampler='TokenBucketSampler',
-    data=dict(type=dataset_type, datacfg=nlvr_cfg, train_or_val=True))
+    pin_memory=True,
+    batch_sampler=dict(
+        type='TokenBucketSampler',
+        bucket_size=BUCKET_SIZE,
+        batch_size=nlvr_cfg['train_batch_size'],
+        drop_last=True,
+        size_multiple=8,
+    ),
+    data=dict(
+        type=dataset_type,
+        datacfg=nlvr_cfg,
+        train_or_val=True,
+    ),
+)
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=nlvr_cfg['val_batch_size'],
     workers_per_gpu=0,
-    batch_sampler='TokenBucketSampler',
-    pin_mem=True,
-    # metric="",
-    data=dict(type=dataset_type, datacfg=nlvr_cfg, train_or_val=False))
+    batch_sampler=dict(
+        type='TokenBucketSampler',
+        bucket_size=BUCKET_SIZE,
+        batch_size=nlvr_cfg['val_batch_size'],
+        drop_last=False,
+        size_multiple=8,
+    ),
+    pin_memory=True,
+    data=dict(
+        type=dataset_type,
+        datacfg=nlvr_cfg,
+        train_or_val=False,
+    ),
+)
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
-    type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])
+    type='Evaluator',
+    metrics=[dict(type='UNITER_AccuracyMetric')],
+    dataset_converters=[dict(type='UNITER_DatasetConverter')],
+)

@@ -8,11 +8,19 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from toolz.sandbox import unzip
 from cytoolz import concat
-import imix.utils_imix.distributed_info as comm
 import logging
 
-from .data import (DetectFeatTxtTokDataset, TxtTokLmdb, DetectFeatLmdb, get_ids_and_lens, pad_tensors, get_gather_index)
-from ...builder import DATASETS
+from .data import (
+    DetectFeatTxtTokDataset,
+    TxtTokLmdb,
+    DetectFeatLmdb,
+    get_ids_and_lens,
+    pad_tensors,
+    get_gather_index,
+)
+from imix.data.builder import DATASETS
+
+logger = logging.getLogger(__name__)
 
 
 def create_dataloader(img_path, txt_path, is_train, dset_cls, opts):
@@ -22,25 +30,34 @@ def create_dataloader(img_path, txt_path, is_train, dset_cls, opts):
 
 
 @DATASETS.register_module()
-class NLVR2Dataset(DetectFeatTxtTokDataset):
+class UNITER_NLVR2Dataset(DetectFeatTxtTokDataset):
 
     def __init__(self, **kwargs):
-        if comm.is_main_process():
-            cls_name = self.__class__.__name__
-            logger = logging.getLogger(__name__)
-            logger.info('start loading' + cls_name)
+        cls_name = self.__class__.__name__
+        logger.info('start loading {}'.format(cls_name))
 
         opts = kwargs['datacfg'].copy()
         train_or_val = kwargs['train_or_val']
         assert train_or_val is not None
         if train_or_val:  # train
-            self.dataset = create_dataloader(opts['train_img_db'], opts['train_txt_db'], True, Nlvr2PairedDataset, opts)
+            self.dataset = create_dataloader(
+                opts['train_img_db'],
+                opts['train_txt_db'],
+                True,
+                Nlvr2PairedDataset,
+                opts,
+            )
         else:
-            self.dataset = create_dataloader(opts['val_img_db'], opts['val_txt_db'], False, Nlvr2PairedEvalDataset,
-                                             opts)
+            self.dataset = create_dataloader(
+                opts['val_img_db'],
+                opts['val_txt_db'],
+                False,
+                Nlvr2PairedEvalDataset,
+                opts,
+            )
         self.collate_fn = self.dataset.collate_fn
-        if comm.is_main_process():
-            logger.info('load {} successfully'.format(cls_name))
+        logger.info('load {} successfully'.format(cls_name))
+        logger.info('Num examples = %d', len(self.dataset))
 
     def __len__(self):
         return len(self.dataset)

@@ -1,4 +1,4 @@
-# eval_iter_period = 4000
+# eval_iter_period = 500
 # checkpoint_config = dict(iter_period=eval_iter_period)
 log_config = dict(period=5)  # PeriodicLogger parameter
 # yapf:enable
@@ -16,3 +16,6 @@ seed = 13
 CUDNN_BENCHMARK = False
 model_device = 'cuda'
 find_unused_parameters = True
+
+# gradient_accumulation_steps = 5
+# is_lr_accumulation = True

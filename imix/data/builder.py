@@ -68,24 +68,35 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
         params.pin_memory = getattr(data_cfg, 'pin_memory', False)
         params.sampler_cfg = getattr(data_cfg, 'sampler', None)
         params.batch_sampler_cfg = getattr(data_cfg, 'batch_sampler', None)
-        params.shuffle = getattr(data_cfg, 'shuffle', True if is_training else False)
+        params.shuffle = getattr(data_cfg, 'shuffle', False)
+        params.collate_fn = getattr(dataset, 'collate_fn', None)
 
         return params
 
     params = get_cfg_param(cfg.train_data if is_training else cfg.test_data)
-
-    dataloader_param = {'dataset': dataset, 'pin_memory': params.pin_memory, 'num_workers': params.num_workers}
     sampler_cfg, batch_sampler_cfg = params.sampler_cfg, params.batch_sampler_cfg
-    if sampler_cfg:
-        sampler_cfg = imixEasyDict({'type': sampler_cfg}) if isinstance(sampler_cfg, str) else sampler_cfg
-        sampler = build_sampler(sampler_cfg, default_args={'dataset': dataset})
-        dataloader_param.update({'batch_size': params.batch_size, 'sampler': sampler, 'drop_last': params.drop_last})
-    elif batch_sampler_cfg:
+
+    dataloader_param = {
+        'dataset': dataset,
+        'pin_memory': params.pin_memory,
+        'num_workers': params.num_workers,
+        'collate_fn': params.collate_fn,
+    }
+
+    if batch_sampler_cfg:
         batch_sampler = build_batch_sampler(batch_sampler_cfg, default_args={'dataset': dataset})
-        collate_fn = getattr(dataset, 'collate_fn', None)
-        dataloader_param.update({'batch_sampler': batch_sampler, 'collate_fn': collate_fn})
+        dataloader_param.update({'batch_sampler': batch_sampler})
     else:
-        dataloader_param.update({'batch_size': params.batch_size, 'drop_last': params.drop_last})
+        if sampler_cfg:
+            sampler_cfg = imixEasyDict({'type': sampler_cfg}) if isinstance(sampler_cfg, str) else sampler_cfg
+            sampler = build_sampler(sampler_cfg, default_args={'dataset': dataset})
+            dataloader_param.update({'sampler': sampler})
+
+        dataloader_param.update({
+            'batch_size': params.batch_size,
+            'drop_last': params.drop_last,
+            'shuffle': params.shuffle,
+        })
 
     return DataLoader(**dataloader_param)
 

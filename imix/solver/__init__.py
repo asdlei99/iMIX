@@ -10,9 +10,11 @@ from .default_constructor import (
     VilbertOptimizerConstructor,
     OscarOptimizerConstructor,
     DevlbertOptimizerConstructor,
+    UniterOptimizerConstructor,
+    UniterVQAOptimizerConstructor,
 )
 
-from .optimization import BertAdam, UniterAdamW
+from .optimization import BertAdam
 
 from .lr_scheduler import (
     WarmupCosineLR,
@@ -27,10 +29,28 @@ from .lr_scheduler import (
     WarmupCosineWithHardRestartsSchedule,
     WarmupPolynomialSchedule,
 )
+
 __all__ = [
-    'build_lr_scheduler', 'build_optimizer', 'OPTIMIZER_BUILDERS', 'OPTIMIZERS', 'build_optimizer',
-    'build_optimizer_constructor', 'WarmupCosineLR', 'WarmupMultiStepLR', 'PythiaScheduler', 'MultiStepScheduler',
-    'WarmupLinearScheduleNonZero', 'BertAdam', 'BertWarmupLinearLR', 'WarmupLinearScheduler', 'ConstantScheduler',
-    'WarmupConstantSchedule', 'WarmupCosineSchedule', 'WarmupCosineWithHardRestartsSchedule',
-    'WarmupPolynomialSchedule', 'BertAdamRaw', 'RAdam', 'PlainRAdam', 'UniterAdamW'
+    'build_lr_scheduler',
+    'build_optimizer',
+    'OPTIMIZER_BUILDERS',
+    'OPTIMIZERS',
+    'build_optimizer',
+    'build_optimizer_constructor',
+    'WarmupCosineLR',
+    'WarmupMultiStepLR',
+    'PythiaScheduler',
+    'MultiStepScheduler',
+    'WarmupLinearScheduleNonZero',
+    'BertAdam',
+    'BertWarmupLinearLR',
+    'WarmupLinearScheduler',
+    'ConstantScheduler',
+    'WarmupConstantSchedule',
+    'WarmupCosineSchedule',
+    'WarmupCosineWithHardRestartsSchedule',
+    'WarmupPolynomialSchedule',
+    'BertAdamRaw',
+    'RAdam',
+    'PlainRAdam',
 ]

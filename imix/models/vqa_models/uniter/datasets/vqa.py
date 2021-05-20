@@ -7,11 +7,12 @@ from torch.nn.utils.rnn import pad_sequence
 from toolz.sandbox import unzip
 
 from .data import DetectFeatTxtTokDataset, pad_tensors, get_gather_index
-from ...builder import DATASETS
-import imix.utils_imix.distributed_info as comm
+from imix.data.builder import DATASETS
 import logging
 from .data import (TxtTokLmdb, ImageLmdbGroup, ConcatDatasetWithLens)
 import json
+
+logger = logging.getLogger(__name__)
 
 
 def _get_vqa_target(example, num_answers):
@@ -24,20 +25,24 @@ def _get_vqa_target(example, num_answers):
 
 
 @DATASETS.register_module()
-class VqaDataset(DetectFeatTxtTokDataset):
+class UNITER_VqaDataset(DetectFeatTxtTokDataset):
 
     def __init__(self, **kwargs):
-        if comm.is_main_process():
-            cls_name = self.__class__.__name__
-            logger = logging.getLogger(__name__)
-            logger.info('start loading' + cls_name)
+        cls_name = self.__class__.__name__
+        logger.info('start loading {}'.format(cls_name))
 
         opts = kwargs['datacfg'].copy()
         train_or_val = kwargs['train_or_val']
         assert train_or_val is not None
 
         # load DBs and image dirs
-        all_img_dbs = ImageLmdbGroup(opts['conf_th'], opts['max_bb'], opts['min_bb'], opts['num_bb'], False)
+        all_img_dbs = ImageLmdbGroup(
+            opts['conf_th'],
+            opts['max_bb'],
+            opts['min_bb'],
+            opts['num_bb'],
+            False,
+        )
         ans2label = json.load(open(opts['ans2label_file']))
 
         if train_or_val:  # train
@@ -53,8 +58,8 @@ class VqaDataset(DetectFeatTxtTokDataset):
             self.dataset = VqaEvalDataset(len(ans2label), val_txt_db, val_img_db)
 
         self.collate_fn = vqa_collate if train_or_val else vqa_eval_collate
-        if comm.is_main_process():
-            logger.info('load {} successfully'.format(cls_name))
+        logger.info('load {} successfully'.format(cls_name))
+        logger.info('Num examples = %d', len(self.dataset))
 
     def __len__(self):
         return len(self.dataset)

@@ -248,8 +248,8 @@ class BertOptimizerConstructor(DefaultOptimizerConstructor):
 class VilbertOptimizerConstructor(DefaultOptimizerConstructor):
 
     def __init__(self, optimizer_cfg, paramwise_cfg=None):
-        self.language_weights_file = paramwise_cfg.pop('language_weights_file', None)
-        self.vision_scratch = paramwise_cfg.pop('vision_scratch', None)
+        self.language_weights_file = paramwise_cfg.pop('language_weights_file')
+        self.vision_scratch = paramwise_cfg.pop('vision_scratch')
         super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
         self.no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
 
@@ -299,7 +299,7 @@ class VilbertOptimizerConstructor(DefaultOptimizerConstructor):
 class OscarOptimizerConstructor(DefaultOptimizerConstructor):
 
     def __init__(self, optimizer_cfg, paramwise_cfg=None):
-        self.weight_decay = paramwise_cfg.pop('weight_decay', None)
+        self.weight_decay = paramwise_cfg.pop('weight_decay')
         super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
         self.no_decay = ['bias', 'LayerNorm.weight']
 
@@ -356,3 +356,43 @@ class DevlbertOptimizerConstructor(VilbertOptimizerConstructor):
 
         self.logger.info('len(model.named_parameters)={} len(params)={}'.format(
             len(list(model.named_parameters())), len(params)))
+
+
+@OPTIMIZER_BUILDERS.register_module()
+class UniterOptimizerConstructor(OscarOptimizerConstructor):
+
+    def __init__(self, optimizer_cfg, paramwise_cfg=None):
+        super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
+        self.no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+
+
+@OPTIMIZER_BUILDERS.register_module()
+class UniterVQAOptimizerConstructor(UniterOptimizerConstructor):
+
+    def __init__(self, optimizer_cfg, paramwise_cfg=None):
+        self.lr_mul = paramwise_cfg.pop('lr_mul')
+        self.key_named_param = paramwise_cfg.pop('key_named_param')
+        super().__init__(optimizer_cfg=optimizer_cfg, paramwise_cfg=paramwise_cfg)
+
+    def modify_params(self, params, optimizer_cfg, model, prefix=''):
+        base_lr = optimizer_cfg['lr']
+
+        param_optimizer = [(n, p) for n, p in model.named_parameters() if self.key_named_param not in n]
+        param_top = [(n, p) for n, p in model.named_parameters() if self.key_named_param in n]
+        params += [{
+            'params': [p for n, p in param_top if not any(nd in n for nd in self.no_decay)],
+            'lr': base_lr * self.lr_mul,
+            'weight_decay': self.weight_decay
+        }, {
+            'params': [p for n, p in param_top if any(nd in n for nd in self.no_decay)],
+            'lr': base_lr * self.lr_mul,
+            'weight_decay': 0.0
+        }, {
+            'params': [p for n, p in param_optimizer if not any(nd in n for nd in self.no_decay)],
+            'lr': base_lr,
+            'weight_decay': self.weight_decay
+        }, {
+            'params': [p for n, p in param_optimizer if any(nd in n for nd in self.no_decay)],
+            'lr': base_lr,
+            'weight_decay': 0.0
+        }]

@@ -1,4 +1,4 @@
-from .uniter_smapler import TokenBucketSampler
+from .uniter_sampler import TokenBucketSampler
 from .builder import build_batch_sampler, build_sampler
 
 __all__ = [

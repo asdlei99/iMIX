@@ -13,13 +13,35 @@ from .ban import BAN
 from .hgl import HGL
 from .resc import ReSC
 from .cmrin import CMRIN
-from imix.models.vqa_models.uniter.unitervqa import UNITERVQA
 from .visual_dialog_bert import VisDiaBERT
 from .lxmert import LXMERT
 from .devlbert import DEVLBERT
 from .oscar import OSCAR
+from .uniter import UNITER_NLVR
+from .uniter import UNITER_VQA
+from .uniter import UNITER_VCR
+from .uniter import UNITER_VE
 
 __all__ = [
-    'PYTHIA', 'LoRRA', 'MCAN', 'M4C', 'CAGRAPH', 'VisualBERT', 'LCGN', 'VILBERT', 'LXMERT', 'BAN', 'R2C', 'HGL', 'ReSC',
-    'CMRIN', 'UNITERVQA', 'VisDiaBERT', 'DEVLBERT', 'OSCAR'
+    'PYTHIA',
+    'LoRRA',
+    'MCAN',
+    'M4C',
+    'CAGRAPH',
+    'VisualBERT',
+    'LCGN',
+    'VILBERT',
+    'LXMERT',
+    'BAN',
+    'R2C',
+    'HGL',
+    'ReSC',
+    'CMRIN',
+    'VisDiaBERT',
+    'DEVLBERT',
+    'OSCAR',
+    'UNITER_NLVR',
+    'UNITER_VQA',
+    'UNITER_VCR',
+    'UNITER_VE',
 ]
