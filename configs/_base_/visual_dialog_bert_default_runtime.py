@@ -1,11 +1,7 @@
-checkpoint_config = dict(period=5000)
+eval_iter_period = 5
+checkpoint_config = dict(iter_period=eval_iter_period)
 # yapf:disable
-log_config = dict(
-    period=10,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
-    ])
+log_config = dict(period=5)
 # yapf:enable
 dist_params = dict(backend='nccl')
 log_level = 'INFO'

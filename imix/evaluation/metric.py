@@ -80,7 +80,7 @@ class VQAAccuracyMetric(BaseMetric):
 
 @METRICS.register_module()
 class VisDialMetric(BaseMetric):
-    metric_name = 'visdialMetric'
+    metric_name = 'visual_dialog_metric'
 
     def __init__(self, *args, **kwargs):
         self.all_metrics = {}
