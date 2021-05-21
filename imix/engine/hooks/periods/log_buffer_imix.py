@@ -285,7 +285,7 @@ class LogBufferStorage:
 
 
 class LogBufferWriter:
-    """将LogBufferStorage数据按照不同类型writer."""
+    """Used to write LogBufferStorage content."""
 
     def write(self):
         self.get_buffer_data()

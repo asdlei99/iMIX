@@ -1,5 +1,3 @@
-# TODO(jinliang):jinliang_imitate
-
 # import sys
 # import os
 #
@@ -11,17 +9,7 @@ from imix.utils_imix.imix_checkpoint import imixCheckpointer
 from imix.utils_imix.default_argument import default_argument_parser, default_setup
 from imix.utils_imix.launch import launch as ddp_launch
 
-from imix.utils_imix.config import Config as imix_config
-
-# def merge_args_to_cfg(cfg, args):  # TODO(jinliang):jinliang_copy
-#     for k, v in vars(args).items():
-#         if k == 'work_dir' and v is None:
-#             if cfg.get(k, None) is None:
-#                 cfg.work_dir = os.path.join(
-#                     os.path.splitext(os.path.basename(args.config))[0],
-#                     './work_dir')
-#         else:
-#             cfg[k] = v
+from imix.utils_imix.config import Config as iMIX_cfg
 
 
 def del_some_args(args):
@@ -48,13 +36,7 @@ def init_set(args):
       3. Itegration of command line parameters and arg.config file parameters
       4. setting logging.
       """
-
-    # cfg = Config.fromfile(args.config_file)
-    # cfg_imix = imix_config.fromfile(args.config_file)
-    # del cfg
-    # cfg = cfg_imix
-
-    cfg = imix_config.fromfile(args.config_file)
+    cfg = iMIX_cfg.fromfile(args.config_file)
     del_some_args(args)
     merge_args_to_cfg(args, cfg)
     default_setup(args, cfg)
@@ -66,17 +48,15 @@ def test(cfg):
     assert cfg.get('load_from', None), '--load-from is empty '
 
     model = Organizer.build_model(cfg)
-    imix_ck = imixCheckpointer(model, save_dir=cfg.work_dir)
-    imix_ck.resume_or_load(cfg.load_from, resume=False)
+    check_pointer = imixCheckpointer(model, save_dir=cfg.work_dir)
+    check_pointer.resume_or_load(cfg.load_from, resume=False)
 
-    result = []
-    # Organizer.build_test_result(cfg, model)
-    if 'test' in cfg.test_datasets:
-        Organizer.build_test_result(cfg, model)
-    else:
-        result = Organizer.test(cfg, model)
-    # if comm.is_main_process():
-    #     verify_results(cfg, result)
+    result = Organizer.test(cfg, model)
+
+    # if 'test' in cfg.test_datasets:
+    #     Organizer.build_test_result(cfg, model)
+    # else:
+    #     result = Organizer.test(cfg, model)
     return result
 
 

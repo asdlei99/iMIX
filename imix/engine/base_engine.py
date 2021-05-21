@@ -1,5 +1,3 @@
-# TODO(jinliang):jinliang_copy_and_imitate
-
 import weakref
 from abc import ABCMeta, abstractmethod
 from imix.engine.hooks import HookBase

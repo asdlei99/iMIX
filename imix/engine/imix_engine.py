@@ -29,7 +29,7 @@ class CommonEngine(EngineBase):
         if self.batch_processor is not None:
             self.output = self.batch_processor(batch_data)
         else:
-            with autocast(enabled=is_mixed_precision()):  # TODO(jinliang) autocast warp
+            with autocast(enabled=is_mixed_precision()):
                 self.model_output = self.model(
                     batch_data,
                     cur_epoch=getattr(self, 'epoch', None),
