@@ -1,9 +1,9 @@
 import torch
-from mmcv.utils import Registry, build_from_cfg  # TODO(jinliang) mmcv ?
+from imix.utils_imix.registry import Registry, build_from_cfg
 import os
-from ..builder import EMBEDDING
+from imix.models.builder import EMBEDDING
 from .baseprocessor import BaseProcessor
-from imix.utils.file_io import PathManager
+from imix.utils_imix.file_io import PathManager
 import re
 
 VOCAB = Registry('vocab')

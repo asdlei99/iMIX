@@ -208,7 +208,7 @@ class MCAN(BaseModel):
 
         batched_inputs['feature'] = feat
         batched_inputs['input_ids'] = input_ids
-        batched_inputs['input_mask'] = ~input_mask  # TODO(jinliang):lixiaochuan
+        batched_inputs['input_mask'] = ~input_mask
 
         if self.training:
             answers_scores = batched_inputs['answers_scores']
@@ -218,7 +218,7 @@ class MCAN(BaseModel):
         return batched_inputs
 
 
-def list2dict(batched_inputs: List) -> Dict:  # TODO(jinliang):
+def list2dict(batched_inputs: List) -> Dict:
     """turn data from list to dict.
 
     Args:

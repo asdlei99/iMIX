@@ -1,8 +1,6 @@
 from torch import nn
 import torch
 from imix.utils_imix.registry import Registry, build_from_cfg
-# from imix.data.parallel.distributed import MMDistributedDataParallel
-# from imix.data.parallel.data_parallel import MMDataParallel
 
 EMBEDDING = Registry('embedding')
 ENCODER = Registry('encoder')
@@ -78,23 +76,7 @@ def build_vqa_models(cfg):
 
 def build_model(cfg):
     """Build models based on different input type."""
-    model = build_vqa_models(cfg)  # TODO(jinliang)
-
-    # # put model on gpus
-    # if cfg.distributed:
-    #     find_unused_parameters = cfg.get('find_unused_parameters', False)
-    #     # Sets the `find_unused_parameters` parameter in
-    #     # torch.nn.parallel.DistributedDataParallel
-    #     model = MMDistributedDataParallel(
-    #         model.cuda(),
-    #         device_ids=[torch.cuda.current_device()],
-    #         broadcast_buffers=False,
-    #         find_unused_parameters=find_unused_parameters)
-    # else:
-    #     # model = MMDataParallel(
-    #     #     model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
-    #     model = model.cuda(cfg.gpu_ids[0])
-
+    model = build_vqa_models(cfg)
     model.to(torch.device(cfg.model_device))
 
     return model

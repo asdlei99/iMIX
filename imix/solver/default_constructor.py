@@ -10,70 +10,62 @@ from imix.utils_imix.config import imixEasyDict
 
 @OPTIMIZER_BUILDERS.register_module()
 class DefaultOptimizerConstructor:
-    """Default constructor for optimizers.
+    """Used for parameters setting related to gradient updating: such as
+    learning rate and delay. By default, the settings of every layer in the
+    model is shared configured in the configure file related to optimizer. If
+    argument ``paramwise_cfg`` is set, then everything can happened to every
+    layer in the model. Specifically, ``paramwise_cfg`` is a dict and contains
+    the following keys:
 
-    By default each parameter share the same optimizer settings, and we
-    provide an argument ``paramwise_cfg`` to specify parameter-wise settings.
-    It is a dict and may contain the following fields:
+        - ``custom_keys`` (dict): Use keys representing layers in model to specify
+          the configuration of somelayers. The key in the ``custom_keys``  is a substring
+          of the layer name in the model. Learning rate and decay will be adopted to the
+          spcified layer. If there are many names contain the specified key string, then the key
+          with lower alphabet order will be chosen.
+          ``custom_keys[key]`` should be a dict and may contain fields ``lr_mult``
+          and ``decay_mult``. See Example 2 below.
+        - ``bias_lr_mult`` (float): Used to be multiplied to the learning
+          rate for all bias parameters (except for those in normalization
+          layers).
+        - ``bias_decay_mult`` (float): Used to be multiplied to the weight
+          decay for all bias parameters (except for those in
+          normalization layers and depthwise conv layers).
+        - ``norm_decay_mult`` (float): Used be multiplied to the weight
+          decay for all weight and bias parameters of normalization
+          layers.
+        - ``dwconv_decay_mult`` (float): Used be multiplied to the weight
+          decay for all weight and bias parameters of depthwise conv
+          layers.
+        - ``bypass_duplicate`` (bool): If true, the duplicate parameters
+          are not added into optimizer. Default: False.
 
-    - ``custom_keys`` (dict): Specified parameters-wise settings by keys. If
-      one of the keys in ``custom_keys`` is a substring of the name of one
-      parameter, then the setting of the parameter will be specified by
-      ``custom_keys[key]`` and other setting like ``bias_lr_mult`` etc. will
-      be ignored. It should be noted that the aforementioned ``key`` is the
-      longest key that is a substring of the name of the parameter. If there
-      are multiple matched keys with the same length, then the key with lower
-      alphabet order will be chosen.
-      ``custom_keys[key]`` should be a dict and may contain fields ``lr_mult``
-      and ``decay_mult``. See Example 2 below.
-    - ``bias_lr_mult`` (float): It will be multiplied to the learning
-      rate for all bias parameters (except for those in normalization
-      layers).
-    - ``bias_decay_mult`` (float): It will be multiplied to the weight
-      decay for all bias parameters (except for those in
-      normalization layers and depthwise conv layers).
-    - ``norm_decay_mult`` (float): It will be multiplied to the weight
-      decay for all weight and bias parameters of normalization
-      layers.
-    - ``dwconv_decay_mult`` (float): It will be multiplied to the weight
-      decay for all weight and bias parameters of depthwise conv
-      layers.
-    - ``bypass_duplicate`` (bool): If true, the duplicate parameters
-      would not be added into optimizer. Default: False.
+        Args:
+            model (:obj:`nn.Module`): The model with parameters to be optimized.
+            optimizer_cfg (dict): The config dict for the optimizer.
+                Positional fields are
+                    - `type`: class name of the optimizer.
+                Optional fields are
+                    - any arguments of the corresponding optimizer type, e.g.,
+                      lr, weight_decay, momentum, etc.
+                      refer to: https://pytorch.org/docs/stable/optim.html#module-torch.optim
+            paramwise_cfg (dict, optional): Settings to specifiy configure to layers separately.
 
-    Args:
-        model (:obj:`nn.Module`): The model with parameters to be optimized.
-        optimizer_cfg (dict): The config dict of the optimizer.
-            Positional fields are
+        Example 1:
+            >>> model = torch.nn.modules.Conv1d(1, 1, 1)
+            >>> optimizer_cfg = dict(type='Adagrad', lr=0.01, lr_decay=0.9, weight_decay=0.0001)
+            >>> paramwise_cfg = dict(norm_decay_mult=0.)
+            >>> optim_builder = DefaultOptimizerConstructor(optimizer_cfg, paramwise_cfg)
+            >>> optimizer = optim_builder(model)
 
-                - `type`: class name of the optimizer.
-
-            Optional fields are
-
-                - any arguments of the corresponding optimizer type, e.g.,
-                  lr, weight_decay, momentum, etc.
-        paramwise_cfg (dict, optional): Parameter-wise options.
-
-    Example 1:
-        >>> model = torch.nn.modules.Conv1d(1, 1, 1)
-        >>> optimizer_cfg = dict(type='SGD', lr=0.01, momentum=0.9,
-        >>>                      weight_decay=0.0001)
-        >>> paramwise_cfg = dict(norm_decay_mult=0.)
-        >>> optim_builder = DefaultOptimizerConstructor(
-        >>>     optimizer_cfg, paramwise_cfg)
-        >>> optimizer = optim_builder(model)
-
-    Example 2:
-        >>> # assume model have attribute model.backbone and model.cls_head
-        >>> optimizer_cfg = dict(type='SGD', lr=0.01, weight_decay=0.95)
-        >>> paramwise_cfg = dict(custom_keys={
-                '.backbone': dict(lr_mult=0.1, decay_mult=0.9)})
-        >>> optim_builder = DefaultOptimizerConstructor(
-        >>>     optimizer_cfg, paramwise_cfg)
-        >>> optimizer = optim_builder(model)
-        >>> # Then the `lr` and `weight_decay` for model.backbone is
-        >>> # (0.01 * 0.1, 0.95 * 0.9). `lr` and `weight_decay` for
-        >>> # model.cls_head is (0.01, 0.95).
+        Example 2:
+            >>> # assume model have attribute model.extract_feature and model.object_detection
+            >>> optimizer_cfg = dict(type='SGD', lr=0.01, weight_decay=0.95)
+            >>> paramwise_cfg = dict(custom_keys={'.extract_feature': dict(lr_mult=0.1, decay_mult=0.9)})
+            >>> optim_builder = DefaultOptimizerConstructor(optimizer_cfg, paramwise_cfg)
+            >>> optimizer = optim_builder(model)
+            >>> # Then the `lr` and `weight_decay` for model.extract_feature is
+            >>> # (0.01 * 0.1, 0.95 * 0.9). `lr` and `weight_decay` for
+            >>> # model.object_detection is (0.01, 0.95).
     """
 
     def __init__(self, optimizer_cfg: imixEasyDict, paramwise_cfg: Optional[imixEasyDict] = {}):

@@ -20,7 +20,7 @@ class TextBertBase(nn.Module):
         hidden_size = kwargs['hidden_size']
         self.text_bert_config = BertConfig(**params)
 
-        # TEST FORWARD #################  TODO ZHANGRUNZE
+        # TEST FORWARD
         self.text_bert_config.hidden_dropout_prob = 0.0
         self.text_bert_config.attention_probs_dropout_prob = 0.0
         #

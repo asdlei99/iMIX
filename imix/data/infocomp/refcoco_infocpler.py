@@ -1,10 +1,4 @@
-"""
-author: lxc
-created time: 2021/1/11
-"""
-
 import re
-
 import numpy as np
 from torchvision import transforms as T
 
@@ -33,8 +27,8 @@ class RefCOCOInfoCpler(BaseInfoCpler):
         # if not line:
         #     break
         line = line.strip()
-        text_a = None
-        text_b = None
+        text_a, text_b = None, None
+
         m = re.match(r'^(.*) \|\|\| (.*)$', line)
         if m is None:
             text_a = line
@@ -59,10 +53,8 @@ class RefCOCOInfoCpler(BaseInfoCpler):
                 # Modifies `tokens_a` and `tokens_b` in place so that the total
                 # length is less than the specified length.
                 # Account for [CLS], [SEP], [SEP] with "- 3"
-
-                # FLAKE 8 TODO(JINLIANG)
-                print('flake 8 error unused')
                 # _truncate_seq_pair(tokens_a, tokens_b, seq_length - 3)
+                pass
             else:
                 # Account for [CLS] and [SEP] with "- 2"
                 if len(tokens_a) > seq_length - 2:

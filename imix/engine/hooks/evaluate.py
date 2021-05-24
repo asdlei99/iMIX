@@ -1,4 +1,3 @@
-# TODO(jinliang):jinliang_imitate
 from .base_hook import HookBase
 from .builder import HOOKS
 import imix.utils_imix.distributed_info as comm
@@ -18,26 +17,24 @@ from imix.utils_imix.distributed_info import master_only_run
 
 @HOOKS.register_module()
 class EvaluateHook(HookBase):
-    """Run an evaluation function periodically, and at the end of training.
+    """Run an evaluation function periodically or at the end of training.
 
-    It is executed every ``eval_period`` iterations and after the last iteration.
+    It is executed every ``eval_iter_period`` iterations if is_run_eval == True and after epoch or the last iteration.
     """
 
     def __init__(self, eval_function, eval_iter_period=None, is_run_eval=True, eval_json_file='eval_result.json'):
         """
         Args:
-            eval_period (int): the period to run `eval_function`.
+            eval_iter_period (int): the period to run `eval_function` if is_run_eval is True
             eval_function (callable): a function which takes no arguments, and
                 returns a nested dict of evaluation metrics.
-
-        Note:
-            This hook must be enabled in all or none workers.
-            If you would like only certain workers to perform evaluation,
-            give other workers a no-op function (`eval_function=lambda: None`).
+            is_run_eval(bool): when training based on epoch,if is_run_eval is True, eval_function will be run every
+                                eval_iter_period times
+            eval_json_file(str): the file used to save the evaluation metrics
         """
+
         super().__init__()
         self.is_run_eval = is_run_eval  # Dose it need to be evaluated when training ,if True, it will be evaluated
-        # self._level = PriorityStatus.LOW
         self._eval_iter_period = eval_iter_period
         self._func = eval_function
         self._file_handle = PathManager.open(os.path.join(get_imix_work_dir(), eval_json_file), 'w')
@@ -71,8 +68,6 @@ class EvaluateHook(HookBase):
             self._run_eval(is_epoch=True if self.trainer.by_epoch else False)
 
     def after_train(self):
-        # func is likely a closure that holds reference to the trainer
-        # therefore we clean it to avoid circular reference in the end
         if hasattr(self, '_file_handle'):
             self._file_handle.close()
         if len(self._all_eval_results):

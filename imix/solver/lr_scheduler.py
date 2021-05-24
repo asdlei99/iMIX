@@ -1,8 +1,7 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-# TODO(jinliang):jinliang_copy
 import math
 from bisect import bisect_right, bisect
 from typing import List
+from functools import lru_cache
 
 import torch
 from .builder import LR_SCHEDULERS
@@ -18,13 +17,6 @@ from transformers.optimization import (
     get_cosine_with_hard_restarts_schedule_with_warmup,
     get_polynomial_decay_schedule_with_warmup,
 )
-# NOTE: PyTorch's LR scheduler interface uses names that assume the LR changes
-# only on epoch boundaries. We typically use iteration based schedules instead.
-# As a result, "epoch" (e.g., as in self.last_epoch) should be understood to mean
-# "iteration" instead.
-
-# FIXME: ideally this would be achieved with a CombinedLRScheduler, separating
-# MultiStepLR with WarmupLR but the current LRScheduler design doesn't allow it.
 
 
 @LR_SCHEDULERS.register_module()
@@ -34,6 +26,7 @@ class WarmupMultiStepLR(_LRScheduler):
         self,
         optimizer: torch.optim.Optimizer,
         milestones: List[int],
+        *,
         gamma: float = 0.1,
         warmup_factor: float = 0.001,
         warmup_iters: int = 1000,
@@ -42,33 +35,37 @@ class WarmupMultiStepLR(_LRScheduler):
     ):
         if not list(milestones) == sorted(milestones):
             raise ValueError('Milestones should be a list of' ' increasing integers. Got {}', milestones)
+
         self.milestones = milestones
         self.gamma = gamma
         self.warmup_factor = warmup_factor
         self.warmup_iters = warmup_iters
         self.warmup_method = warmup_method
+
         super().__init__(optimizer, last_epoch)
 
     def get_lr(self) -> List[float]:
         warmup_factor = _get_warmup_factor_at_iter(self.warmup_method, self.last_epoch, self.warmup_iters,
                                                    self.warmup_factor)
-        return [
-            base_lr * warmup_factor * self.gamma**bisect_right(self.milestones, self.last_epoch)
-            for base_lr in self.base_lrs
-        ]
+
+        @lru_cache
+        def calculate_lr(base_lr):
+            return base_lr * warmup_factor * self.gamma**bisect_right(self.milestones, self.last_epoch)
+
+        return [calculate_lr(base_lr) for base_lr in self.base_lrs]
 
     def _compute_values(self) -> List[float]:
-        # The new interface
         return self.get_lr()
 
 
 @LR_SCHEDULERS.register_module()
-class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
+class WarmupCosineLR(_LRScheduler):
 
     def __init__(
         self,
         optimizer: torch.optim.Optimizer,
         max_iters: int,
+        *,
         warmup_factor: float = 0.001,
         warmup_iters: int = 1000,
         warmup_method: str = 'linear',
@@ -83,18 +80,14 @@ class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
     def get_lr(self) -> List[float]:
         warmup_factor = _get_warmup_factor_at_iter(self.warmup_method, self.last_epoch, self.warmup_iters,
                                                    self.warmup_factor)
-        # Different definitions of half-cosine with warmup are possible. For
-        # simplicity we multiply the standard half-cosine schedule by the warmup
-        # factor. An alternative is to start the period of the cosine at warmup_iters
-        # instead of at 0. In the case that warmup_iters << max_iters the two are
-        # very close to each other.
-        return [
-            base_lr * warmup_factor * 0.5 * (1.0 + math.cos(math.pi * self.last_epoch / self.max_iters))
-            for base_lr in self.base_lrs
-        ]
+
+        @lru_cache
+        def calculate_lr(base_lr):
+            return base_lr * warmup_factor * 0.5 * (1.0 + math.cos(math.pi * self.last_epoch / self.max_iters))
+
+        return [calculate_lr(base_lr) for base_lr in self.base_lrs]
 
     def _compute_values(self) -> List[float]:
-        # The new interface
         return self.get_lr()
 
 
@@ -111,7 +104,7 @@ class PythiaScheduler(LambdaLR):
 
 
 @LR_SCHEDULERS.register_module()
-class MultiStepScheduler(PythiaScheduler):  # TODO(jinliang): modify
+class MultiStepScheduler(PythiaScheduler):
 
     def __init__(self, optimizer, *args, **kwargs):
         self.use_warmup = kwargs['use_warmup']
@@ -129,7 +122,12 @@ class MultiStepScheduler(PythiaScheduler):  # TODO(jinliang): modify
 
             return [base_lr * lr_ratio for base_lr in self.base_lrs]
         else:
-            return [base_lr * self.lr_ratio**bisect_right(self.lr_steps, self.last_epoch) for base_lr in self.base_lrs]
+
+            @lru_cache
+            def calculate_lr(base_lr):
+                return base_lr * self.lr_ratio**bisect_right(self.lr_steps, self.last_epoch)
+
+            return [calculate_lr(base_lr) for base_lr in self.base_lrs]
 
 
 @LR_SCHEDULERS.register_module()
@@ -175,12 +173,17 @@ def _get_warmup_factor_at_iter(method: str, iter: int, warmup_iters: int, warmup
     """
     if iter >= warmup_iters:
         return 1.0
+    support_method = ['constant', 'linear']
 
-    if method == 'constant':
+    def constant_method():
         return warmup_factor
-    elif method == 'linear':
+
+    def linear_method():
         alpha = iter / warmup_iters
         return warmup_factor * (1 - alpha) + alpha
+
+    if method in support_method:
+        return eval(method + '_method')()
     else:
         raise ValueError('Unknown warmup method: {}'.format(method))
 

@@ -32,35 +32,14 @@ class GELU(nn.Module):
 @HEADS.register_module()
 class ClassifierHead(nn.Module, metaclass=ABCMeta):
 
-    def __init__(self, in_dim: int, out_dim: int):  # TODO(jinliang):add multiple loss
+    def __init__(self, in_dim: int, out_dim: int):
         super().__init__()
         self.in_dim = in_dim
         self.out_dim = out_dim
-        # self.loss_cls = build_loss(loss_cls)
 
     @abstractmethod
     def forward(self, *args, **kwargs):
         pass
-        # return self.modules(*args, **kwargs)
-        # return NotImplementedError
-
-    # def loss(self, cls_score, labels):
-    #     losses_dict = {}
-    #     if cls_score is not None:
-    #         losses_dict['loss_cls'] = self.loss_cls(cls_score, labels)
-    #
-    #     return losses_dict
-    #
-    # def forward_train(self, *args, **kwargs):
-    #     labels = kwargs.pop('labels')
-    #     model_out = self.forward(*args, **kwargs)
-    #     losses_dict = self.loss(model_out, labels)
-    #
-    #     return losses_dict
-    #
-    # def forward_test(self, *args, **kwargs):
-    #     model_out = self.forward(*args, **kwargs)
-    #     return model_out
 
 
 @HEADS.register_module()
@@ -72,7 +51,7 @@ class BertClassifierHead(ClassifierHead):
             from transformers.configuration_bert import BertConfig
             config = BertConfig.from_pretrained('bert-base-uncased')
             assert config.hidden_size == self.in_dim
-        from transformers.modeling_albert import BertPredictionHeadTransform
+        from transformers.modeling_bert import BertPredictionHeadTransform
         self.module = nn.Sequential(
             nn.Dropout(config.hidden_dropout_prob),
             BertPredictionHeadTransform(config),

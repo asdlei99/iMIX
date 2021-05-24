@@ -39,7 +39,7 @@ class VisDiaBERT(BaseModel):
         self.bert_pretrained.train()
 
         self.sample_size = config.sample_size
-        self.n_gpus = config.get('n_gpus', 1)  # TODO(jinliang): evaluation
+        self.n_gpus = config.get('n_gpus', 1)
 
         self.is_dense = config.get('is_dense', False)
 
@@ -87,7 +87,7 @@ class VisDiaBERT(BaseModel):
         image_target = None
         image_label = None
 
-        if not evaluation:  # TODO(jinliang): -> self.training
+        if not evaluation:  # self.training
             next_sentence_labels = batch['next_sentence_labels']
             next_sentence_labels = next_sentence_labels.view(-1)
             next_sentence_labels = next_sentence_labels[sample_indices]
@@ -506,7 +506,6 @@ class VisDiaBERT(BaseModel):
             output.append(nsp_probs[:, 0])
         output = torch.cat(output, 0).view(eval_batch_size, num_rounds, num_options)
         return {'nsp_scores': output}
-        # return output  # TODO(jinliang+chaoyinyin): Dict
 
     def preprocess_data(self, data):
         data = self.process_image_data(data)

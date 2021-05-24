@@ -15,12 +15,8 @@ img_feature_reader = dict(type='ImageFeaturesH5Reader', )
 
 vqa_reader_train_cfg = dict(
     type='VisDiaReader',
-    mix_features=dict(train=data_root + feature_path +
-                      'visdial_img_feat.lmdb', ),  # TODO(jinliang) mix_features  -> image_feature
-    mix_annotations=dict(
-        train=data_root + annotation_path + 'visdial_1.0_train_processed.npy',
-        # val=data_root + annotation_path + '',
-    ),  # TODO(jinliang) mix_annotations  -> annotations
+    mix_features=dict(train=data_root + feature_path + 'visdial_img_feat.lmdb', ),
+    mix_annotations=dict(train=data_root + annotation_path + 'visdial_1.0_train_processed.npy', ),
     image_feature_max_regions=37,
     datasets=train_datasets,  # used datasets
     image_feature_reader=img_feature_reader,
@@ -28,12 +24,10 @@ vqa_reader_train_cfg = dict(
 
 vqa_reader_test_cfg = dict(
     type='VisDiaReader',
-    mix_features=dict(val=data_root + feature_path +
-                      'visdial_img_feat.lmdb', ),  # TODO(jinliang) mix_features  -> image_feature
+    mix_features=dict(val=data_root + feature_path + 'visdial_img_feat.lmdb', ),
     mix_annotations=dict(
         val=data_root + annotation_path + 'visdial_1.0_val_processed.npy',
-        dense=data_root + annotation_path +
-        'visdial_1.0_val_dense_annotations_processed.json'),  # TODO(jinliang) mix_annotations  -> annotations
+        dense=data_root + annotation_path + 'visdial_1.0_val_dense_annotations_processed.json'),
     image_feature_max_regions=37,
     datasets=test_datasets,  # used datasets
     image_feature_reader=img_feature_reader,
@@ -58,14 +52,11 @@ train_data = dict(
     workers_per_gpu=2,
     data=dict(type=dataset_type, reader=vqa_reader_train_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=None))
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=2,
     workers_per_gpu=0,
-    # metric="",
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=None),
 )
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
     type='Evaluator', metrics=[dict(type='VisDialMetric')], dataset_converters=[dict(type='VisDialDatasetConverter')])

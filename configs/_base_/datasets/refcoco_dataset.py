@@ -52,15 +52,11 @@ train_data = dict(
     workers_per_gpu=1,
     data=dict(type=dataset_type, reader=reader_train_cfg, info_cpler=info_cpler_cfg, limit_nums=800))
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=8,  # 16
     workers_per_gpu=1,
-
-    # metric="",
     data=dict(type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
 )
 
-# evaluator_type = 'RefCOCO'  # TODO(jinliang)
 post_processor = dict(
     type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])

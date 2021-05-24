@@ -125,7 +125,5 @@ train_data = dict(
 test_data = dict(
     samples_per_gpu=16,
     workers_per_gpu=1,
-
-    # metric="",
     data=dict(type=dataset_type, reader=textvqa_reader_test_cfg, info_cpler=textvqa_info_cpler_cfg),
 )

@@ -14,9 +14,8 @@ class PriorityStatus(enum.Enum):
 
 
 class HookBase:
-    """HookBase是所有hook的基类，在EngineBase类中进行注册.
-
-    每个Hook实现一下6中方法，按照一下的方式进行调用：
+    """HookBase is the base class of all hook and is registered in EngineBase class.
+    The subclasses of HookBase implement the following six methods according to needed.
     ::
         hook.before_train()
         for iter in range(start_iter,max_iter):
@@ -25,8 +24,6 @@ class HookBase:
             hook.after_train_iter()
         hook.after_epoch()
         hook.after_train()
-    Notes:
-        1. 在hook方法中，用户可以通过self.trainer获取更多的信息
     """
 
     def __init__(self):

@@ -83,7 +83,7 @@ class RetreivalDataset(Dataset):
         self._max_region_num = max_region_num
         self._max_seq_length = max_seq_length
 
-        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
+        clean_train = '_cleaned_tolist' if clean_datasets else ''
 
         if self._split == 'train':
             image_info = cPickle.load(open(os.path.join(dataroot, 'hard_negative' + clean_train + '.pkl'), 'rb'))

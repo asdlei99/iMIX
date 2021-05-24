@@ -789,7 +789,7 @@ class BertConnectionLayer(nn.Module):
 
 
 @ENCODER.register_module()
-class BertEncoder(nn.Module):  # TODO(jinliang):BertEncoder
+class BertEncoder(nn.Module):
 
     def __init__(self, config):
         super(BertEncoder, self).__init__()

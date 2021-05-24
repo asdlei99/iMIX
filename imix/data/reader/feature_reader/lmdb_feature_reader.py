@@ -41,7 +41,7 @@ class LMDBFeatureReader(FeatureReader):
         if self.env_db is None:
             self._init_env_db()
 
-        if self.dataset_type == 'TEXTVQAREADER':  # TODO(jinliang)
+        if self.dataset_type == 'TEXTVQAREADER':
             dataset_name = img_annotation.get('set_name', None)
             img_name = img_annotation.get('image_name', None)
             if None in [dataset_name, img_name]:
@@ -54,6 +54,9 @@ class LMDBFeatureReader(FeatureReader):
                 return None
             else:
                 key = img_name
+        else:
+            self.logger.warning(f'please add support for {self.dataset_type} type')
+            raise TypeError('no support dataset type')
 
         return self.read_by_path(img_feat_path=key)
 

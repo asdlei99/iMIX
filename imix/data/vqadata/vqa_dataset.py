@@ -49,7 +49,6 @@ class VQADATASET(Dataset):
         item_feature = self.reader[idx]
         item_feature = self.infocpler.completeInfo(item_feature)
 
-        # TODO(jinliang)
         item = {
             'feature': item_feature.feature,
             'input_ids': item_feature.input_ids,

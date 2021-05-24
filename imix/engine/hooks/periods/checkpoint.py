@@ -12,7 +12,6 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
         self.iter_period = kwargs.get('iter_period', None)
         HookBase.__init__(self)
         PeriodicCheckpointer.__init__(self, *args, **kwargs)
-        # self._level = PriorityStatus.LOW
         self.curr_checkpoint_name = None
 
     def before_train(self):
@@ -20,7 +19,7 @@ class CheckPointHook(PeriodicCheckpointer, HookBase):
         if self.trainer.by_epoch:
             self.max_epoch = self.trainer.max_epoch
 
-    def after_train_iter(self):  # TODO(jinliang):modify
+    def after_train_iter(self):
         if self.trainer.by_epoch:
             if self._is_save_epoch_state():
                 self._save_epoch_state()

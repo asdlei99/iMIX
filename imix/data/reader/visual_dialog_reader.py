@@ -98,39 +98,6 @@ class BaseDatasetReader:
                     self.features_pathes[split + '_' + name.split('.pth')[0]] = os.path.join(img_feature_dir, name)
 
 
-# class VisDiaReader(BaseDatasetReader):
-#
-#     def __init__(self, cfg):
-#         super().__init__(cfg)
-#         self.image_features_reader = ImageFeaturesH5Reader(
-#             self.image_features_dir[0])  # TODO(jinliang)  temporary treatement
-#
-#     def __len__(self):
-#         return len(self.annotations)
-#
-#     def __getitem__(self, idx):
-#         annoation = self.annotations[idx]
-#         # split = self.item_splits[idx]
-#         item_feature = ItemFeature(init_dict=annoation)
-#         item_feature.error = False
-#         item_feature.update(self.get_image_feature_info(annoation['image_id']))
-#
-#         return item_feature
-#
-#     def get_image_feature_info(self, idx):
-#         features, num_boxes, boxes, _, image_target = self.image_features_reader[idx]
-#         features, spatials, image_mask, image_target, image_label = encode_image_input(
-#             features, num_boxes, boxes, image_target, max_regions=self.image_feature_max_regions)
-#         image_feature_info = {}
-#         image_feature_info['image_feat'] = features
-#         image_feature_info['image_loc'] = spatials
-#         image_feature_info['image_mask'] = image_mask
-#         image_feature_info['image_target'] = image_target
-#         image_feature_info['image_label'] = image_label
-
-# return image_feature_info
-
-
 class VisDiaReader(IMIXDataReader):
 
     def __init__(self, cfg):

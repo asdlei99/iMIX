@@ -11,7 +11,6 @@ class VQA2Dataset(torch.utils.data.Dataset):
     def __init__(self, path):
         super().__init__()
         self._load_npy(path)
-        print('tt')
 
     def _load_npy(self, path):
         self.db = np.load(path, allow_pickle=True)

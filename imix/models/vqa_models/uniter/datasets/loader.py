@@ -44,7 +44,6 @@ class MetaLoader(object):
                 if self.distributed:
                     # make sure all process is training same task
                     # task = any_broadcast(task, 0)
-                    # TODO SHIHZH
                     pass
             self.step += 1
             iter_ = self.name2iter[task]

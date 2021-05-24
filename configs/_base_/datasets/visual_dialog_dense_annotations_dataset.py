@@ -12,11 +12,11 @@ vqa_reader_train_cfg = dict(
     image_features=dict(
         train=data_root + feature_path + 'visdial_img_feat.lmdb',
         # val=data_root + feature_path + '',
-    ),  # TODO(jinliang) mix_features  -> image_feature
+    ),
     annotations=dict(
         train=data_root + annotation_path + 'visdial_1.0_train_processed.npy',
         # val=data_root + annotation_path + '',
-    ),  # TODO(jinliang) mix_annotations  -> annotations
+    ),
     image_feature_max_regions=37,
     datasets=train_datasets,  # used datasets
     is_global=False,
@@ -27,12 +27,11 @@ vqa_reader_test_cfg = dict(
     card='default',
     image_features=dict(
         # train=data_root + feature_path + '',
-        val=data_root + feature_path + 'visdial_img_feat.lmdb', ),  # TODO(jinliang) mix_features  -> image_feature
+        val=data_root + feature_path + 'visdial_img_feat.lmdb', ),
     annotations=dict(
         # train=data_root + annotation_path + '',
         val=data_root + annotation_path + 'visdial_1.0_val_processed.npy',
-        dense=data_root + annotation_path +
-        'visdial_1.0_val_dense_annotations_processed.json'),  # TODO(jinliang) mix_annotations  -> annotations
+        dense=data_root + annotation_path + 'visdial_1.0_val_dense_annotations_processed.json'),
     image_feature_max_regions=37,
     datasets=test_datasets,  # used datasets
     is_global=False,
@@ -59,14 +58,10 @@ train_data = dict(
     sampler_name='DistributedSampler',
     data=dict(type=dataset_type))
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=2,
     workers_per_gpu=1,
-
-    # metric="",
     data=dict(type=dataset_type, reader=vqa_reader_test_cfg, info_cpler=visual_dialog_info_cpler_cfg, limit_nums=10))
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
     type='Evaluator', metrics=[dict(type='VisDialMetric')], dataset_converters=[dict(type='VisDialDatasetConverter')])
