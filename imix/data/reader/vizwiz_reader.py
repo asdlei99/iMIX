@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/18
-"""
-
 import numpy as np
 import torch
 
@@ -23,19 +18,6 @@ class VizWizReader(IMIXDataReader):
         split = self.item_splits[item]
         item_feature = ItemFeature(annotation)
         item_feature.error = False
-        # for k, v in annotation.items():
-        #    item_feature[k] = v
-
-        # TODO(jinliang)
-        # item_feature.tokens = annotation["question_tokens"]
-        # item_feature.answers = annotation["answers"]
-        # item_feature.all_answers = annotation["all_answers"]
-        # print(item)
-        # item_feature.ocr_tokens = annotation["ocr_tokens"]
-
-        # if split != 'test':
-        #    item_feature.answers = annotation.get('answers')
-        #    item_feature.all_answers = annotation.get('all_answers')
 
         item_feature.tokens = annotation.get('question_tokens')
         item_feature.img_id = annotation.get('image_id')
@@ -47,8 +29,6 @@ class VizWizReader(IMIXDataReader):
                 return item_feature
             for k, v in feature_info.items():
                 item_feature[k] = item_feature.get(k, v)
-                # item_feature[k] = v if item_feature.get(
-                #    k) is None else item_feature[k]
             return item_feature
         feature_path = self.features_pathes[split + '_' + str(item_feature.img_id)]
         item_feature.feature = torch.load(feature_path)[0]

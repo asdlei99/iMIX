@@ -31,13 +31,6 @@ class VQADATASETUNITER(Dataset):
             logger.info('start loading vqadata')
 
         self.reader = VQAReaderUNITER(reader)
-        '''
-        self.infocpler = VQAInfoCpler(info_cpler)
-        self._limit_sample_nums = limit_nums
-        self.splits = reader.datasets
-        if comm.is_main_process():
-          logger.info('load vqadata {} successfully'.format(reader.datasets))
-        '''
 
     def __len__(self):
         return len(self.reader.ids)
@@ -46,7 +39,6 @@ class VQADATASETUNITER(Dataset):
 
         item_feature = self.reader[idx]
 
-        # TODO(jinliang+ce@lxc)
         item = {
             'feature': item_feature.features,  # feature - feature
             'feature_global': item_feature.global_features,  # feature - global_features

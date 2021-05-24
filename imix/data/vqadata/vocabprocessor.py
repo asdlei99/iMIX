@@ -55,10 +55,10 @@ class VocabProcessor(BaseProcessor):
 
         # self.vocab = Vocab(*args, **config.vocab, **kwargs)
         # self.vocab = build_vocab(vocab)
-        self.vocab = None  # (TODO jinliang)
+        self.vocab = None
         self.max_length = self.MAX_LENGTH_DEFAULT
         # self.preprocessor = build_preprocessor(preprocessor)
-        self.preprocessor = None  # (TODO jinliang)
+        self.preprocessor = None
 
         # self._init_extras(config)
 

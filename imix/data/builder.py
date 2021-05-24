@@ -109,6 +109,6 @@ def build_imix_train_loader(cfg):
     return build_data_loader_by_epoch(dataset, cfg, is_training=True)
 
 
-def build_imix_test_loader(cfg, dataset_name: Optional[str] = ''):  # TODO(jinliang)
+def build_imix_test_loader(cfg, dataset_name: Optional[str] = ''):
     dataset = build_dataset(cfg.test_data.data)
     return build_data_loader_by_epoch(dataset, cfg, is_training=False)

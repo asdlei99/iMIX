@@ -34,7 +34,7 @@ class VisDialDataset(Dataset):
 
 
 @DATASETS.register_module()
-class VisdialDatasetDense(Dataset):  # TODO(jinliang)
+class VisdialDatasetDense(Dataset):
     params = {
         'num_train_samples':
         0,

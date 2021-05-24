@@ -25,32 +25,13 @@ class GQADATASET(BaseLoader):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
         super().__init__(Reader, reader, InfoCpler, info_cpler, limit_nums)
-        '''
-        if comm.is_main_process():
-            logger = logging.getLogger(__name__)
-            logger.info('start loading vqadata')
-
-        self.reader = GQAReader(reader)
-        self.infocpler = GQAInfoCpler(info_cpler)
-        self._limit_sample_nums = limit_nums
-        self.splits = reader.datasets
-        if comm.is_main_process():
-            logger.info('load vqadata {} successfully'.format(reader.datasets))
-        '''
-
-    '''
-    def __len__(self):
-        if self._limit_sample_nums and self._limit_sample_nums > 0:
-            return min(len(self.reader), self._limit_sample_nums)
-        return len(self.reader)
-    '''
 
     def __getitem__(self, idx):
         # idx = 0
         item_feature = self.reader[idx]
         item_feature = self.infocpler.completeInfo(item_feature)
 
-        # Only test for GQA LCGN ########## TODO zhangrunze
+        # Only test for GQA LCGN
         feature = torch.zeros([36, 2048], dtype=torch.float)
         bbox = torch.zeros([36, 4], dtype=torch.float)
         for idx in range(item_feature.features.shape[0]):
@@ -58,9 +39,7 @@ class GQADATASET(BaseLoader):
             feature[idx] = torch.tensor(item_feature.features[idx])
         item_feature.bbox = bbox
         item_feature.features = feature
-        ###################################################
 
-        # TODO(jinliang+ce@lxc)
         item = {
             'feature': item_feature.features,  # feature - feature
             'cls_prob': item_feature.cls_prob,  # 1601 cls_prob
@@ -83,5 +62,3 @@ class GQADATASET(BaseLoader):
             item['quesid2ans'] = self.infocpler.qa_id2ans
 
         return remove_None_value_elements(item)
-
-        # return item_feature

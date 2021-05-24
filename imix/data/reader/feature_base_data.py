@@ -5,12 +5,15 @@ from pathlib import Path
 from collections import Counter
 from imix.utils_imix.config import imixEasyDict
 from .feature_reader import build_feature_reader, LMDBFeatureReader, PthFeatureReader
+import logging
 
 
 class FeatureBaseData(Dataset):
     feature_support_type = ['lmdb', 'pth', 'pt', 'pkl', 'csv']
 
     def __init__(self, cfg, splits, feature_cfg, annotation_bd, *args, **kwargs):
+        self.logger = logging.getLogger(__name__)
+
         self.cfg = cfg
         self.splits = splits
         self.dataset_type = self.cfg.type
@@ -23,7 +26,6 @@ class FeatureBaseData(Dataset):
     def _add_feature_reader(self):
         feat_paths = set(self.feature_cfg[d] for d in self.splits)
         for feat_path in feat_paths:
-            # feat_reader = build_feature_reader()  # TODO(jinliang)
             if self.is_specify_feat_reader:
                 feat_reader_obj = build_feature_reader(
                     self.cfg.image_feature_reader, default_args={'features_path': feat_path})
@@ -40,10 +42,9 @@ class FeatureBaseData(Dataset):
             obj = LMDBFeatureReader(dataset_type=self.dataset_type, feat_path=feat_path, max_features=max_features)
         elif feature_format in ['pth', 'pt']:
             obj = PthFeatureReader(dataset_type=self.dataset_type, feat_path=feat_path, max_features=max_features)
-        elif feature_format == 'pkl':
-            pass
-        elif feature_format == 'csv':
-            pass
+        elif feature_format in ['pkl', 'csv']:
+            self.logger.warning(f'please add support for {feature_format} format')
+            raise TypeError('no support feature format')
 
         return obj
 

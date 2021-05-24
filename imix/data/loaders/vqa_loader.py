@@ -3,23 +3,6 @@ from ..infocomp.vqa_infocpler import VQAInfoCpler as InfoCpler
 from ..builder import DATASETS
 from .base_loader import BaseLoader
 
-# VQA_PATH_CONFIG = yaml.load(open("datasets/dataset_vqa.yaml"))["dataset_configs"]
-
-# @DATASETS.register_module()
-# class VQADATASET(Dataset):
-#     def __init__(self, splits):
-#         self.reader = VQAReader(VQA_PATH_CONFIG, splits)
-#         self.infocpler = VQAInfoCpler(VQA_PATH_CONFIG)
-#
-#     def __len__(self):
-#         return len(self.reader)
-#
-#     def __getitem__(self, item):
-#
-#         item_feature = self.reader[item]
-#         item_feature = self.infocpler.completeInfo(item_feature)
-#         return item_feature.feature, item_feature.input_ids, item_feature.answers_scores, item_feature.input_mask
-
 
 def remove_None_value_elements(input_dict):
     if type(input_dict) is not dict:
@@ -41,32 +24,12 @@ class VQADATASET(BaseLoader):
 
     def __init__(self, reader, info_cpler, limit_nums=None):
         super().__init__(Reader, reader, InfoCpler, info_cpler, limit_nums)
-        '''
-        if comm.is_main_process():
-            logger = logging.getLogger(__name__)
-            logger.info('start loading vqadata')
-
-        self.reader = VQAReader(reader)
-        self.infocpler = VQAInfoCpler(info_cpler)
-        self._limit_sample_nums = limit_nums
-        self.splits = reader.datasets
-        if comm.is_main_process():
-            logger.info('load vqadata {} successfully'.format(reader.datasets))
-        '''
-
-    '''
-    def __len__(self):
-        if self._limit_sample_nums and self._limit_sample_nums > 0:
-            return min(len(self.reader), self._limit_sample_nums)
-        return len(self.reader)
-    '''
 
     def __getitem__(self, idx):
         # idx = 0
         item_feature = self.reader[idx]
         item_feature = self.infocpler.completeInfo(item_feature)
 
-        # TODO(jinliang+ce@lxc)
         item = {
             'features': item_feature.features,  # feature - feature
             'feature_global': item_feature.global_features,  # feature - global_features
@@ -91,5 +54,3 @@ class VQADATASET(BaseLoader):
             item['quesid2ans'] = self.infocpler.qa_id2ans
         item = remove_None_value_elements(item)
         return item
-
-        # return item_feature
