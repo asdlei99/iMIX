@@ -20,7 +20,7 @@ TASKS = dict(
         val_split='minval',
         num_labels=3129,
         lr=0.00004,
-        per_gpu_train_batch_size=32,  # 128
+        per_gpu_train_batch_size=128,  # 128
         per_gpu_eval_batch_size=1024,  # 1024
         num_warmup_steps=8472,  # warmup_proportion=0.1
         num_training_steps=84720,  # ceil(totoal 443753 / batch size 32/ GPUS ) * epoch size
