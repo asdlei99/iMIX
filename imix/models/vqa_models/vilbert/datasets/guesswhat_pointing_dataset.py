@@ -77,7 +77,7 @@ class GuessWhatPointingDataset(Dataset):
 
         self.max_region_num = max_region_num
 
-        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
+        clean_train = '_cleaned_tolist' if clean_datasets else ''
 
         if 'roberta' in bert_model:
             cache_path = os.path.join(

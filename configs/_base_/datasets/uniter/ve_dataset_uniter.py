@@ -53,6 +53,5 @@ test_data = dict(
     data=dict(type=dataset_type, datacfg=ve_cfg, train_or_val=False),
 )
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
     type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])

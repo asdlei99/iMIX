@@ -40,15 +40,12 @@ train_data = dict(
     batch_sampler='TokenBucketSampler',
     data=dict(type=dataset_type, datacfg=vcr_cfg, train_or_val=True))
 
-# evaluation = dict(metric=["bbox", "segm"]) TODO(jinliang) imix-evaluation
 test_data = dict(
     samples_per_gpu=vcr_cfg['val_batch_size'],
     workers_per_gpu=0,
     pin_mem=True,
-    # metric="",
     batch_sampler='TokenBucketSampler',
     data=dict(type=dataset_val_type, datacfg=vcr_cfg, train_or_val=False))
 
-# evaluator_type = 'VQA'  # TODO(jinliang)
 post_processor = dict(
     type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])

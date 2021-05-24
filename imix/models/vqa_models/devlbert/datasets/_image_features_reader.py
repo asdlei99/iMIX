@@ -19,7 +19,7 @@ class ImageFeaturesH5Reader(object):
        |--- "features" [shape: (num_images, num_proposals, feature_size)]
        +--- .attrs ("split", "train")
     ```
-    # TODO (kd): Add support to read boxes, classes and scores.
+    # TODO: Add support to read boxes, classes and scores.
 
     Parameters
     ----------

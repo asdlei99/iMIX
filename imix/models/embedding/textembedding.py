@@ -326,7 +326,7 @@ class SAEmbedding(nn.Module):
         return out, vec
 
 
-# TODO(vedanuj): Remove this and use torch.nn.MultiHeadAttention
+# Remove this and use torch.nn.MultiHeadAttention
 class MovieMcanMultiHeadAttention(nn.Module):
     """Multi-Head Attention implementation from
     https://arxiv.org/abs/1706.03762 used for Movie+MCAN."""

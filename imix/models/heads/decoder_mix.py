@@ -13,23 +13,12 @@ from torch.nn.utils import weight_norm
 @HEADS.register_module()
 class VisualDialogueHead(nn.Module, metaclass=ABCMeta):  # VISDIALPRINCIPLES_HEAD  reanme --> VisualDialogueHead
 
-    def __init__(self, loss_cls: Dict):  # if it has a loss_cls  TODO(jinliang)
+    def __init__(self, loss_cls: Dict):  # if it has a loss_cls
         super().__init__()
-        # self.loss_cls = build_loss(loss_cls)
 
     @abstractmethod
     def forward(self, encoder_output, data):
-        # return NotImplementedError
         pass
-
-    # def loss(self):
-    #     pass
-    #
-    # def forward_train(self, *args, **kwargs):
-    #     pass
-    #
-    # def forward_test(self, *args, **kwargs):
-    #     pass
 
 
 @HEADS.register_module()
@@ -155,9 +144,9 @@ class DiscByRoundDecoderHead(VisualDialogueHead):
 
 
 @HEADS.register_module()
-class LanguageDecoderHead(nn.Module):  # VISDIALPRINCIPLES_HEAD  reanme --> VisualDialogueHead
+class LanguageDecoderHead(nn.Module):
 
-    def __init__(self, loss_cls: Dict):  # if it has a loss_cls  TODO(jinliang)
+    def __init__(self, loss_cls: Dict):
         super().__init__()
         self.loss_cls = build_loss(loss_cls)
 

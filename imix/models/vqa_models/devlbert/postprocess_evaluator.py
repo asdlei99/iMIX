@@ -21,7 +21,6 @@ class DEVLBERT_DatasetConverter(BaseDatasetConverter):
 
         return [{'batch_score': model_outputs['batch_score']}], [{'batch_size': model_outputs['batch_size']}]
 
-    # TODO modify
     def submit(self, batch_data, model_outputs, *args, **kwargs):
         pass
 
