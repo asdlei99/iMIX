@@ -13,14 +13,10 @@ from imix.utils_imix.config import Config as iMIX_cfg
 
 
 def del_some_args(args):
-    if args.seed is None:
-        del args.seed
-    if args.work_dir is None:
-        del args.work_dir
-    if not args.load_from:
-        del args.load_from
-    if not args.resume_from:
-        del args.resume_from
+    del_args = ['seed', 'work_dir', 'load_from', 'resume_from']
+    for name in del_args:
+        if not getattr(args, name, None):
+            delattr(args, name)
 
 
 def merge_args_to_cfg(args, cfg):

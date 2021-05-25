@@ -1,11 +1,10 @@
-import random
-import numpy as np
 from torch import nn
 from torch.utils.data import DataLoader
-from imix.utils_imix.config import seed_all_rng, imixEasyDict
+from imix.utils_imix.config import imixEasyDict, seed_all_rng
 from imix.utils_imix.registry import Registry, build_from_cfg
 from .sampler import build_sampler, build_batch_sampler
 from typing import Optional
+import torch
 
 VOCAB = Registry('vocab')
 PREPROCESSOR = Registry('preprocessor')
@@ -49,14 +48,6 @@ def build_dataset(dataset_cfg, default_args=None):
     return dataset
 
 
-def worker_init_fn(worker_id, num_workers, rank, seed):
-    # The seed of each worker equals to
-    # num_worker * rank + worker_id + user_seed
-    worker_seed = num_workers * rank + worker_id + seed
-    np.random.seed(worker_seed)
-    random.seed(worker_seed)
-
-
 def build_data_loader_by_epoch(dataset, cfg, is_training=True):
 
     def get_cfg_param(data_cfg):
@@ -70,6 +61,7 @@ def build_data_loader_by_epoch(dataset, cfg, is_training=True):
         params.batch_sampler_cfg = getattr(data_cfg, 'batch_sampler', None)
         params.shuffle = getattr(data_cfg, 'shuffle', False)
         params.collate_fn = getattr(dataset, 'collate_fn', None)
+        params.worker_init_fn = worker_init_fn
 
         return params
 
@@ -105,8 +97,9 @@ def batch_collate_fn(batch):
     return batch
 
 
-def worker_init_reset_seed(worker_id):
-    return seed_all_rng(np.random.randint(2**31) + worker_id)
+def worker_init_fn(worker_id):
+    initial_seed = torch.initial_seed() % 2**31
+    return seed_all_rng(initial_seed + worker_id)
 
 
 def build_imix_train_loader(cfg):
