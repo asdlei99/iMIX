@@ -13,6 +13,9 @@ import random
 
 import regex
 from easydict import EasyDict
+import logging
+
+logger = logging.getLogger(__name__)
 
 BASE_KEY = '_base_'
 DELETE_KEY = '_delete_'
@@ -165,7 +168,8 @@ class Config:
                     common_base = [base_dict[k] for k in common_keys]
                     common_dl = [dl[k] for k in common_keys]
                     if common_base != common_dl:
-                        raise KeyError('base_dict and dl have the same key, but different values!')
+                        logger.info('hold the same key {} with value{}'.format(common_keys, common_base))
+                        # raise KeyError('base_dict and dl have the same key, but different values!')
                     for k in common_keys:
                         dl.pop(k)
                 base_dict.update(dl)

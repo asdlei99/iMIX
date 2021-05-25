@@ -24,7 +24,14 @@ logger = logging.getLogger(__name__)
 
 
 def create_dataloader(img_path, txt_path, is_train, dset_cls, opts):
-    img_db = DetectFeatLmdb(img_path, opts['conf_th'], opts['max_bb'], opts['min_bb'], opts['num_bb'], False)
+    img_db = DetectFeatLmdb(
+        img_path,
+        opts['conf_th'],
+        opts['max_bb'],
+        opts['min_bb'],
+        opts['num_bb'],
+        False,
+    )
     txt_db = TxtTokLmdb(txt_path, opts['max_txt_len'] if is_train else -1)
     return dset_cls(txt_db, img_db, opts['use_img_type'])
 
@@ -47,6 +54,7 @@ class UNITER_NLVR2Dataset(DetectFeatTxtTokDataset):
                 Nlvr2PairedDataset,
                 opts,
             )
+            self.collate_fn = nlvr2_paired_collate
         else:
             self.dataset = create_dataloader(
                 opts['val_img_db'],
@@ -55,7 +63,8 @@ class UNITER_NLVR2Dataset(DetectFeatTxtTokDataset):
                 Nlvr2PairedEvalDataset,
                 opts,
             )
-        self.collate_fn = self.dataset.collate_fn
+            self.collate_fn = nlvr2_paired_eval_collate
+
         logger.info('load {} successfully'.format(cls_name))
         logger.info('Num examples = %d', len(self.dataset))
 
@@ -80,7 +89,6 @@ class Nlvr2PairedDataset(DetectFeatTxtTokDataset):
         self.lens = [
             2 * tl + sum(self.img_db.name2nbb[img] for img in txt2img[id_]) for tl, id_ in zip(txt_lens, self.ids)
         ]
-        self.collate_fn = nlvr2_paired_collate
         self.use_img_type = use_img_type
 
     def __getitem__(self, i):
@@ -152,7 +160,6 @@ class Nlvr2PairedEvalDataset(Nlvr2PairedDataset):
 
     def __init__(self, txt_db, img_db, use_img_type=True):
         super().__init__(txt_db, img_db, use_img_type=use_img_type)
-        self.collate_fn = nlvr2_paired_eval_collate
 
     def __getitem__(self, i):
         qid = self.ids[i]

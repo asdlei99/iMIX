@@ -44,3 +44,5 @@ checkpoint_config = dict(iter_period=eval_iter_period)
 
 # gradient_accumulation_steps = 1
 # is_lr_accumulation = True
+
+seed = 77

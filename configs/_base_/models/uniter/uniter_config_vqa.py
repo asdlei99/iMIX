@@ -41,10 +41,12 @@ lr_config = dict(
     policy='WarmupLinearSchedule',
 )
 
-total_epochs = 2
+total_epochs = 7
 
 eval_iter_period = 500
 checkpoint_config = dict(iter_period=eval_iter_period)
 
 gradient_accumulation_steps = 5
 is_lr_accumulation = True
+
+seed = 42
