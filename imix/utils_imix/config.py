@@ -13,6 +13,7 @@ import random
 
 import regex
 from easydict import EasyDict
+import logging
 
 BASE_KEY = '_base_'
 DELETE_KEY = '_delete_'
@@ -274,9 +275,19 @@ def get_imix_work_dir():
     return _iMIX_WORK_DIR
 
 
-def seed_all_rng(seed=None) -> None:
+def seed_all_rng(seed=None):
+    logger = logging.getLogger(__name__)
+
     if seed is None:
-        seed = (os.getpid() + int(datetime.now().strftime('%S%f')) + int.from_bytes(os.urandom(2), 'big'))
+        dt = datetime.now()
+        seed = int(dt.strftime('%S%f'))
+        seed += os.getpid()
+
+        logger.info(f'Using a generated random seed {seed}')
+
     np.random.seed(seed)
-    torch.set_rng_state(torch.manual_seed(seed).get_state())
     random.seed(seed)
+    torch.manual_seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)  # a fixed seed for generating the hash()
+
+    logger.info(f'seed : {seed}')

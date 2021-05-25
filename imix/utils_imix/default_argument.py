@@ -2,65 +2,38 @@ import imix.utils_imix.distributed_info as dist_info
 import torch
 import os
 import random
-import numpy as np
-from datetime import datetime
 from imix.utils_imix.file_io import PathManager
 
 from imix.utils_imix.logger import setup_logger
 from imix.utils_imix.collect_running_env import collect_env_info
 import argparse
 import json
-from imix.utils_imix.config import set_imix_work_dir
+from imix.utils_imix.config import set_imix_work_dir, seed_all_rng
 import pprint
 
-random.seed(datetime.now())
 
-
-def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argument()
-    """
-
-      :return:
-      """
-    if epilog is None:  # TODO(jinliang):copy
+def default_argument_parser(epilog=None):
+    if epilog is None:
         epilog = """
         imix framework running example:
         single machine:
-        ${sys.argv[0]} --nproc_per_node 8 --config-file cfg.py MODEL.WEIGHTS /path/weight.pth
         ${sys.argv[0]} --gpus 8 --config-file cfg.py MODEL.WEIGHTS /path/weight.pth
 
         multiple machines:
-        (machine0)$ {sys.argv[0]} --node-rank 0 --nnodes 2 --dist-url <URL> [--other-flags]
-        (machine1)$ {sys.argv[0]} --node-rank 1 --nnodes 2 --dist-url <URL> [--other-flags]
-
         (machine0)$ {sys.argv[0]} --gpus 8 --node-rank 0 --machines 2 --dist-url <URL> [--other-flags]
         (machine1)$ {sys.argv[0]} --gpus 8 --node-rank 1 --machines 2 --dist-url <URL> [--other-flags]
         """
     parser = argparse.ArgumentParser(epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
+
     parser.add_argument('--config-file', metavar='FILE', help='train config file path')
-    parser.add_argument('--resume-from', default='', help='resume from the checkpoint file')
-    parser.add_argument('--load-from', default='', help='load from the checkpoint file')
+    parser.add_argument('--resume-from', default=None, help='resume from the checkpoint file')
+    parser.add_argument('--load-from', default=None, help='load from the checkpoint file')
     parser.add_argument('--eval-only', action='store_true', help='just run evaluation')
     parser.add_argument('--build-submit', action='store_true', help='generate submission results')
-    # parser.add_argument(
-    #     '--nproc_per_node',
-    #     type=int,
-    #     default=1,
-    #     help='the number of processes to launch on each node ')
-
-    # parser.add_argument(
-    #     '--nnodes',
-    #     type=int,
-    #     default=1,
-    #     help='the number of nodes to use for distributed training')
-
-    parser.add_argument('--gpus', type=int, default=1, help='the number of gpus on each machine ')  # --nproc_per_node
-    parser.add_argument('--machines', type=int, default=1, help='the total number of machine to use')  # nnodes
-
+    parser.add_argument('--gpus', type=int, default=1, help='the number of gpus on each machine ')
+    parser.add_argument('--machines', type=int, default=1, help='the total number of machine to use')
     parser.add_argument('--node-rank', type=int, default=0, help='the rank of current node(unique per machine)')
-
     parser.add_argument('--work-dir', help='the dir to save logs and models')
-    parser.add_argument(
-        '--options', default=None, nargs=argparse.REMAINDER, help='modify config file options through the command line')
     parser.add_argument('--seed', type=int, default=None, help='random seed')
     parser.add_argument(
         '--master-port',
@@ -73,7 +46,7 @@ def default_argument_parser(epilog=None):  # TODO(jinliang): rename: parse_argum
     return parser
 
 
-def default_setup(args, cfg):  # DODO(jinliang):modify
+def default_setup(args, cfg):
     output_dir = cfg.work_dir
     set_imix_work_dir(output_dir)
     if output_dir and dist_info.is_main_process():
@@ -95,23 +68,8 @@ def default_setup(args, cfg):  # DODO(jinliang):modify
             f.write(json.dumps({k: v for k, v in cfg.items()}, indent=4, separators=(',', ':')))
             logger.info('full config file saved to {}'.format(cfg_path))
 
-    if cfg.seed < 0:
-        seed = None
-    else:
-        seed = cfg.seed + rank
-    seed_all_rng(seed)
+    seed = getattr(cfg, 'seed', None)
+    seed_all_rng(seed=None if seed is None else seed + rank)
 
-    # torch.backends.cudnn.deterministic  = True
-    torch.backends.cudnn.benchmark = False
-
-
-def seed_all_rng(seed=None):  # TODO(jinliang): rename set_all_rng_seed
-    if seed is None:
-        dt = datetime.now()
-        seed = int(dt.strftime('%S%f'))
-
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.set_rng_state(torch.manual_seed(seed).get_state())
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    if not (hasattr(cfg, 'eval_only') and getattr(cfg, 'eval_only', False)):
+        torch.backends.cudnn.benchmark = getattr(cfg, 'CUDNN_BENCHMARK', False)
