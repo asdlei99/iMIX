@@ -93,14 +93,18 @@ class UNITER_VCR(BaseModel):
         else:
             qar_scores = scores[:, 4:]
 
-        curr_qa_score, curr_qar_score, curr_score = self.compute_accuracies(scores[:, :4], qa_targets, qar_scores,
-                                                                            qar_targets)
+        curr_qa_score, curr_qar_score, curr_score = self.compute_accuracies(
+            scores[:, :4],
+            qa_targets,
+            qar_scores,
+            qar_targets,
+        )
 
         batch_size = len(qids)
 
         model_output = {
             'qa_batch_score': curr_qa_score,
-            'qar_batch_score': curr_score,
+            'qar_batch_score': curr_qar_score,
             'batch_score': curr_score,
             'batch_size': batch_size,
         }
