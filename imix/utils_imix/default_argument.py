@@ -10,18 +10,30 @@ import argparse
 import json
 from imix.utils_imix.config import set_imix_work_dir, seed_all_rng
 import pprint
+import sys
 
 
 def default_argument_parser(epilog=None):
     if epilog is None:
-        epilog = """
-        imix framework running example:
-        single machine:
-        ${sys.argv[0]} --gpus 8 --config-file cfg.py MODEL.WEIGHTS /path/weight.pth
+        epilog = f"""
+iMIX framework running example:
+Run on single machine:
+1. Training on a multiple GPUs
+${sys.argv[0]} --gpus 8 --config-file cfg.py --load-from /path/weight.pth
+${sys.argv[0]} --gpus 8 --config-file cfg.py --resume-from /path/weight.pth
 
-        multiple machines:
-        (machine0)$ {sys.argv[0]} --gpus 8 --node-rank 0 --machines 2 --dist-url <URL> [--other-flags]
-        (machine1)$ {sys.argv[0]} --gpus 8 --node-rank 1 --machines 2 --dist-url <URL> [--other-flags]
+2. Training on a single GPU
+${sys.argv[0]} --gpus 1 --config-file cfg.py --load-from /path/weight.pth
+or
+${sys.argv[0]}  --config-file cfg.py --load-from /path/weight.pth
+
+3. testing on a single GPU or multiple GPUS
+${sys.argv[0]} --gpus 1 --config-file cfg.py --load-from /path/weight.pth  --eval-only
+${sys.argv[0]} --gpus 4 --config-file cfg.py --load-from /path/weight.pth  --eval-only
+
+Run on multiple machines:
+(machine0)$ {sys.argv[0]} --gpus 8 --node-rank 0 --machines 2 --master-addr 'tcp://' --master-port  8889 [--other-flags]
+(machine1)$ {sys.argv[0]} --gpus 8 --node-rank 1 --machines 2 --master-addr 'tcp://' --master-port  8889 [--other-flags]
         """
     parser = argparse.ArgumentParser(epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
 
