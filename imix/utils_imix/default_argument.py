@@ -16,25 +16,25 @@ import sys
 def default_argument_parser(epilog=None):
     if epilog is None:
         epilog = f"""
-iMIX framework running example:
-Run on single machine:
-1. Training on a multiple GPUs
-${sys.argv[0]} --gpus 8 --config-file cfg.py --load-from /path/weight.pth
-${sys.argv[0]} --gpus 8 --config-file cfg.py --resume-from /path/weight.pth
+        iMIX framework running example:
+        1.Run on single machine:
+            a. Training on a multiple GPUs
+            ${sys.argv[0]} --gpus 8 --config-file cfg.py --load-from /path/weight.pth
+            ${sys.argv[0]} --gpus 8 --config-file cfg.py --resume-from /path/weight.pth
 
-2. Training on a single GPU
-${sys.argv[0]} --gpus 1 --config-file cfg.py --load-from /path/weight.pth
-or
-${sys.argv[0]}  --config-file cfg.py --load-from /path/weight.pth
+            b. Training on a single GPU
+            ${sys.argv[0]} --gpus 1 --config-file cfg.py --load-from /path/weight.pth
+            or
+            ${sys.argv[0]}  --config-file cfg.py --load-from /path/weight.pth
 
-3. testing on a single GPU or multiple GPUS
-${sys.argv[0]} --gpus 1 --config-file cfg.py --load-from /path/weight.pth  --eval-only
-${sys.argv[0]} --gpus 4 --config-file cfg.py --load-from /path/weight.pth  --eval-only
+            c. testing on a single GPU or multiple GPUS
+            ${sys.argv[0]} --gpus 1 --config-file cfg.py --load-from /path/weight.pth  --eval-only
+            ${sys.argv[0]} --gpus 4 --config-file cfg.py --load-from /path/weight.pth  --eval-only
 
-Run on multiple machines:
-(machine0)$ {sys.argv[0]} --gpus 8 --node-rank 0 --machines 2 --master-addr 'tcp://' --master-port  8889 [--other-flags]
-(machine1)$ {sys.argv[0]} --gpus 8 --node-rank 1 --machines 2 --master-addr 'tcp://' --master-port  8889 [--other-flags]
-        """
+        2.Run on multiple machines:
+        (machine0)$ {sys.argv[0]} --gpus 8 --node-rank 0 --machines 2 --master-addr 'tcp://127.0.0.1' --master-port  8889 [--other-flags]
+        (machine1)$ {sys.argv[0]} --gpus 8 --node-rank 1 --machines 2 --master-addr 'tcp://127.0.0.1' --master-port  8889 [--other-flags]
+        """ # noqa
     parser = argparse.ArgumentParser(epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('--config-file', metavar='FILE', help='train config file path')

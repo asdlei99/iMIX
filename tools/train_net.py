@@ -1,8 +1,3 @@
-# import sys
-# import os
-#
-# sys.path.append(os.path.abspath('.'))
-
 from imix.engine.imix_engine import imixEngine
 from imix.engine.organizer import Organizer
 from imix.utils_imix.imix_checkpoint import imixCheckpointer

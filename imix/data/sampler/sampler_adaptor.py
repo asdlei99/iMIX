@@ -37,3 +37,8 @@ class SamplerAdaptor:
     def _adaptor_distributed_sampler(cls, cfg: imixEasyDict, default_args: Optional[Dict] = None):
         if 'world_size' in default_args.keys():
             default_args['num_replicas'] = default_args.pop('world_size')
+
+    @classmethod
+    def _adaptor_sequential_sampler(cls, cfg: imixEasyDict, default_args: Optional[Dict] = None):
+        if 'dataset' in default_args.keys():
+            default_args['data_source'] = default_args.pop('dataset')
