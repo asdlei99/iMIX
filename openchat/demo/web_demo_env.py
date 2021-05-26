@@ -5,8 +5,8 @@ from flask_cors import CORS
 from openchat.envs import BaseEnv
 from openchat.models import BaseModel
 from werkzeug.utils import secure_filename
+import openchat.config as cfg
 
-IMAGE_PATH = '/home/zyj/openchat_v2/openchat/demo/static/image'
 questions = []
 
 
@@ -37,7 +37,7 @@ class WebDemoEnv(BaseEnv):
             f = request.files['file']
             print(f)
             fname = secure_filename(f.filename)
-            f.save(IMAGE_PATH + '/' + fname)
+            f.save(cfg.image_path + '/' + fname)
             return {'output': 'ok! let\'s start'}
 
         @self.app.route('/send/<imageName>/<text>', methods=['GET'])
@@ -58,4 +58,4 @@ class WebDemoEnv(BaseEnv):
 
             return {'output': outputs}
 
-        self.app.run(host='0.0.0.0', port=5050)
+        self.app.run(host='0.0.0.0', port=8080)

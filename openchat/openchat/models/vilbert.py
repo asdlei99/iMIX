@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, '/home/datasets/mix_data/openchat/scene_graph_benchmark-main')
 
 
-class LxmertBot(BaseModel):
+class VilbertBot(BaseModel):
 
     def __init__(self, env, device, max_context_length):
         super().__init__('imagemodel', env)
