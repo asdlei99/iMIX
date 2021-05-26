@@ -57,7 +57,7 @@ function greet() {
 
 function requestChat(imageName, messageText) {
     $.ajax({
-        url: "http://127.0.0.1:5050/send/" + imageName + "/" + messageText ,
+        url: "http://127.0.0.1:8080/send/" + imageName + "/" + messageText ,
         type: "GET",
         dataType: "json",
         success: function (data) {

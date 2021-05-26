@@ -35,17 +35,33 @@ class OpenChat(object):
         assert model in self.available_models(), \
             f'Unsupported model. available models: {self.available_models()}'
 
-        if model == 'vqa_model':
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        print(device)
 
-            device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-            print(device)
+        model_map = {
+            'vqa_model_lxmert': LxmertBot,
+            # 'vqa_model_vilbert':VilbertBot,
+            # 'vqa_model_oscar':OscarBot,
+            # 'vqa_model_vinvl':VinvlBot,
+            # 'vqa_model_devlbert':DevlbertBot,
+            # 'vqa_model_uniter':UniterBot,
+        }
 
-            model = LxmertBot(
-                env=self.env,
-                max_context_length=self.max_context_length,
-                device=self.device,
-            )
-            return model
+        vqa_model = model_map[model](
+            env=self.env,
+            max_context_length=self.max_context_length,
+            device=self.device,
+        )
+
+        return vqa_model
 
     def available_models(self):
-        return ['dialogpt', 'vqa_model']
+        return [
+            'dialogpt',
+            'vqa_model_lxmert',
+            'vqa_model_vilbert',
+            'vqa_model_oscar',
+            'vqa_model_vinvl',
+            'vqa_model_devlbert',
+            'vqa_model_uniter',
+        ]

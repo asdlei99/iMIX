@@ -181,3 +181,12 @@ class EvaluateHook(HookBase):
 
         # copy ck file
         copyfile(src=absolute_path(best_model_name), dst=absolute_path('best_result.pth'))
+
+        if hasattr(self.trainer.model, 'module'):
+            model = self.trainer.model.module
+        else:
+            model = self.trainer.model
+
+        model_best_name = 'model_best.pth'
+        logger.info('Saving the best model checkpoint to {}'.format(model_best_name))
+        torch.save(model, absolute_path(model_best_name))
