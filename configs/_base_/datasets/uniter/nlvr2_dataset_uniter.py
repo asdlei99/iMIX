@@ -12,7 +12,6 @@ nlvr_cfg = dict(
     val_img_db=dataset_root_dir + 'nlvr2_dev/',
     test_txt_db=dataset_root_dir + 'nlvr2_test1.db',
     test_img_db=dataset_root_dir + 'nlvr2_test/',
-    checkpoint=dataset_root_dir + '../uniter-base.pt',
     use_img_type=True,
     max_txt_len=60,
     conf_th=0.2,
@@ -21,19 +20,6 @@ nlvr_cfg = dict(
     num_bb=36,
     train_batch_size=10240,
     val_batch_size=10240,
-    gradient_accumulation_steps=1,
-    learning_rate=3e-05,
-    valid_steps=500,
-    num_train_steps=8000,
-    optim='UNITERadamw',
-    betas=[0.9, 0.98],
-    dropout=0.1,
-    weight_decay=0.01,
-    grad_norm=2.0,
-    warmup_steps=800,
-    seed=77,
-    # fp16=True,
-    n_workers=4,
 )
 
 BUCKET_SIZE = 8192

@@ -3,9 +3,7 @@ model = dict(
     type='UNITER_VE',
     params=dict(
         model_config='configs/_base_/models/uniter/uniter-base.json',
-        gradient_accumulation_steps=4,
         dropout=0.1,
-        seed=42,
         img_dim=2048,
         pretrained_path='/home/datasets/mix_data/UNITER/uniter-base.pt',
     ),

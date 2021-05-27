@@ -301,7 +301,6 @@ class VILBERTMutilLoss(BaseLoss):
         self.loss_scale = {}
         self.task_cfg = task_cfg
         self.task_losses = self.LoadLosses()
-        self.gradient_accumulation_steps = task_cfg.gradient_accumulation_steps
 
     def __str__(self):
         return 'vilbert_mutil_loss'
@@ -381,8 +380,6 @@ class OSCARLoss(BaseLoss):
         super().__init__(loss_name=str(self))
         self.loss_type = cfg.loss_type
         self.num_labels = cfg.num_labels
-        # self.n_gpu = cfg.ngpu
-        self.gradient_accumulation_steps = cfg.gradient_accumulation_steps
 
     def __str__(self):
         return 'oscar_mutil_loss'
@@ -417,7 +414,6 @@ class OSCARLoss(BaseLoss):
                     loss_fct = nn.CrossEntropyLoss()
                     loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
 
-            # if self.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
         return loss

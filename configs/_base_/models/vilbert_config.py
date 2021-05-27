@@ -63,7 +63,6 @@ model = dict(
         # forward every n iteration is the validation score is not improving over the last 3 epoch, -1 means will stop
         train_iter_gap=4,
         do_lower_case=True,
-        seed=0,
         gradient_accumulation_steps=1,
         freeze=-1,  # till which layer of textual stream of vilbert need to fixed
         vision_scratch=False,  # whether pre-trained the image or not.
@@ -76,7 +75,6 @@ model = dict(
 loss = dict(
     type='VILBERTMutilLoss', task_cfg=dict(
         tasks=task_ids,
-        gradient_accumulation_steps=1,
         TASKS=TASKS,
     ))
 
@@ -107,3 +105,5 @@ fp16 = dict(
     growth_interval=2000,
 )
 '''
+
+seed = 0

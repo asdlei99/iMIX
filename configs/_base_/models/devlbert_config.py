@@ -54,7 +54,6 @@ model = dict(
         from_pretrained='/home/datasets/mix_data/DeVLBert/pytorch_model_11.bin',
         train_iter_multiplier=1,  # multiplier for the multi-task training
         do_lower_case=True,
-        seed=0,
         gradient_accumulation_steps=1,
         freeze=-1,  # till which layer of textual stream of vilbert need to fixed
         vision_scratch=False,  # whether pre-trained the image or not.
@@ -67,7 +66,6 @@ model = dict(
 loss = dict(
     type='VILBERTMutilLoss', task_cfg=dict(
         tasks=task_ids,
-        gradient_accumulation_steps=1,
         TASKS=TASKS,
     ))
 
@@ -99,3 +97,5 @@ lr_config = dict(
 
 # by_iter = True
 total_epochs = TASKS['TASK' + task_ids]['num_epoch']
+
+seed = 0

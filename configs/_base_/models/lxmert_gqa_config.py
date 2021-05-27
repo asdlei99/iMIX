@@ -27,7 +27,6 @@ model = dict(
         visual_pos_dim=4,
         freeze_base=False,
         max_seq_length=20,
-        seed=9595,
         model='bert',
         training_head_type='gqa',
         bert_model_name='bert-base-uncased',
@@ -36,3 +35,5 @@ model = dict(
     ))
 
 loss = dict(type='LogitBinaryCrossEntropy')
+
+seed = 9595

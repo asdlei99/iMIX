@@ -7,7 +7,6 @@ model = dict(
         model_type='bert',
         model_name_or_path='/home/datasets/mix_data/model/oscar/base-vg-labels/ep_107_1192087',
         task_name='vqa_text',
-        seed=88,
         drop_out=0.3,
         loss_type='bce',
         img_feat_format='pt',
@@ -23,7 +22,6 @@ model = dict(
         # fp16_opt_level='O1',
         # local_rank=-1,
         # no_cuda=False,
-        # gradient_accumulation_steps=1,
         # adjust_dp=False,
         # adjust_loss=False,
         # adjust_loss_epoch=-1,
@@ -33,7 +31,6 @@ loss = dict(
     type='OSCARLoss', cfg=dict(
         loss_type='bce',
         num_labels=3129,
-        gradient_accumulation_steps=1,
     ))
 
 optimizer = dict(
@@ -54,3 +51,5 @@ lr_config = dict(
 
 # by_iter = True
 total_epochs = 25
+
+seed = 88

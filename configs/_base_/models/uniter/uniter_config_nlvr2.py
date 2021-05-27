@@ -4,10 +4,7 @@ model = dict(
     params=dict(
         model_config='configs/_base_/models/uniter/uniter-base.json',
         model='paired-attn',
-        use_img_type=True,
-        gradient_accumulation_steps=1,
         dropout=0.1,
-        seed=77,
         img_dim=2048,
         pretrained_path='/home/datasets/mix_data/UNITER/uniter-base.pt',
     ))

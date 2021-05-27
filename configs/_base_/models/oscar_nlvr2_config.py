@@ -12,7 +12,6 @@ model = dict(
         model_name_or_path='/home/datasets/mix_data/model/oscar/base-vg-labels/ep_107_1192087',
         model_type='bert',
         num_choice=2,
-        seed=88,
         task_name='nlvr',
         tokenizer_name=None,
         use_layernorm=False,
@@ -24,7 +23,6 @@ model = dict(
         bert_model_name='bert-base-uncased',
         # fp16=False,
         # fp16_opt_level='O1',
-        # gradient_accumulation_steps=1,
         # local_rank=-1,
         # no_cuda=False,
     ))
@@ -33,7 +31,6 @@ loss = dict(
     type='OSCARLoss', cfg=dict(
         loss_type='xe',
         num_labels=2,
-        gradient_accumulation_steps=1,
     ))
 
 optimizer = dict(
@@ -54,3 +51,5 @@ lr_config = dict(
 
 # by_iter = True
 total_epochs = 20
+
+seed = 88

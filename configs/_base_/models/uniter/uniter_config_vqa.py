@@ -4,9 +4,7 @@ model = dict(
     params=dict(
         num_labels=3129,
         model_config='configs/_base_/models/uniter/uniter-base.json',
-        gradient_accumulation_steps=5,
         dropout=0.1,
-        seed=42,
         img_dim=2048,
         pretrained_path='/home/datasets/mix_data/UNITER/uniter-base.pt',
     ),

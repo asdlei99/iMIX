@@ -12,7 +12,6 @@ vcr_cfg = dict(
     ],  # two dbs concatenate one string
     val_txt_db=dataset_root_dir + 'vcr_val.db/',
     val_img_db='{}vcr_gt_val/;{}vcr_val/'.format(dataset_root_dir, dataset_root_dir),
-    # checkpoint=dataset_root_dir + 'uniter-base-vcr_2nd_stage.pt',
     max_txt_len=220,
     conf_th=0.2,
     max_bb=100,
@@ -20,21 +19,6 @@ vcr_cfg = dict(
     num_bb=36,
     train_batch_size=16000,  # 4000
     val_batch_size=40,  # 10
-    # gradient_accumulation_steps=5,
-    # learning_rate=6e-05,
-    # lr_mul=1.0,
-    # valid_steps=1000,
-    # num_train_steps=8000,
-    # optim='UNITERadamw',
-    # betas=[0.9, 0.98],
-    # dropout=0.1,
-    # weight_decay=0.01,
-    # grad_norm=2.0,
-    # warmup_steps=800,
-    # seed=42,
-    # fp16=True,
-    # n_workers=4,
-    # pin_mem=True,
 )
 
 BUCKET_SIZE = 8192

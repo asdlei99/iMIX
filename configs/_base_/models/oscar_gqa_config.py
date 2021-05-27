@@ -13,7 +13,6 @@ model = dict(
         loss_type='xe',
         model_name_or_path='/home/datasets/mix_data/model/oscar/base-vg-labels/ep_107_1192087',
         model_type='bert',
-        seed=88,
         spatial_dim=6,
         task_name='gqa',
         tokenizer_name=None,
@@ -22,7 +21,6 @@ model = dict(
         # code_level='top',
         # fp16=False,
         # fp16_opt_level='O1',
-        # gradient_accumulation_steps=1,
         # local_rank=-1,
         # no_cuda=False,
     ))
@@ -31,7 +29,6 @@ loss = dict(
     type='OSCARLoss', cfg=dict(
         loss_type='xe',
         num_labels=1853,
-        gradient_accumulation_steps=1,
     ))
 
 optimizer = dict(
@@ -52,3 +49,5 @@ lr_config = dict(
 
 # by_iter = True
 total_epochs = 5
+
+seed = 88
