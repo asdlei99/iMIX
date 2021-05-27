@@ -1,6 +1,5 @@
 import inspect
-from typing import Dict, Optional
-
+from typing import Dict, Optional, Any
 from tabulate import tabulate
 
 
@@ -62,12 +61,28 @@ class Registry:
         return len(self._module_dict)
 
 
-def build_from_cfg(cfg: Dict, registry: Registry, default_args: Optional[Dict] = None) -> object:
-    if 'type' not in cfg:
-        raise KeyError('The cfg must contain the key type!')
+def check_var_type(var: Any, var_name: str, desired_var_type: Any) -> None:
+    msg = f'{var_name} should be a {desired_var_type.__name__} type ,but got {type(var).__name__} type'
+    assert isinstance(var, desired_var_type), TypeError(msg)
 
-    args = cfg.copy()
+
+def build_from_cfg(cfg: Dict, registry: Registry, default_args: Optional[Dict] = None) -> object:
+    check_var_type(cfg, 'cfg', dict)
+    check_var_type(registry, 'registry', Registry)
+    if 'type' not in cfg:
+        if default_args is None or 'type' not in default_args:
+            raise KeyError('The cfg or default_args  must contain the key type!')
+
+    def collect_all_args():
+        args = cfg.copy()
+        if default_args is not None:
+            for k, v in default_args.items():
+                args.setdefault(k, v)
+        return args
+
+    args = collect_all_args()
     object_type = args.pop('type')
+
     if isinstance(object_type, str):
         object_class = registry.get(object_type)
     elif inspect.isclass(object_type):
@@ -75,8 +90,7 @@ def build_from_cfg(cfg: Dict, registry: Registry, default_args: Optional[Dict] =
     else:
         raise TypeError('The type in cfg must be a string or class type, but got{}'.format(type(object_type)))
 
-    if default_args is not None:
-        for k, v in default_args.items():
-            args.setdefault(k, v)
-
-    return object_class(**args)
+    try:
+        return object_class(**args)
+    except Exception as e:
+        raise type(e)(f'{object_class.__name__}: {e}')
