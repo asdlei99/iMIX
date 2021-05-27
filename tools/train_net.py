@@ -58,10 +58,8 @@ def train(cfg):
 
 def main(args):
     cfg = init_set(args)
-    if cfg.eval_only:
-        return test(cfg)
-    else:
-        return train(cfg)
+    runner_mode = 'test' if cfg.eval_only else 'train'
+    return eval(runner_mode)(cfg)
 
 
 if __name__ == '__main__':

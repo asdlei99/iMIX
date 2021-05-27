@@ -65,5 +65,6 @@ class Fp16OptimizerHook(OptimizerHook):
             self._clip_grad_norm()
 
         if (self.trainer.iter + 1) % self.trainer.gradient_accumulation_steps == 0:
+            self.trainer.optimizer.step()
             self._scaler.step(self.trainer.optimizer)
             self._scaler.update()

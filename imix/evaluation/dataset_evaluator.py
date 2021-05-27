@@ -18,8 +18,8 @@ class BaseDatasetConverter(metaclass=ABCMeta):
             run_func = getattr(self, self.CONVERTER_TO_FUNC[self.post_process_type])
             return run_func(batch_data, model_outputs, *args, **kwargs)
         except KeyError:
-            self.logger.info('The expected type are {},but got type is {}'.format(self.CONVERTER_TO_FUNC.keys(),
-                                                                                  self.post_process_type))
+            msg = f'The expected type are {self.CONVERTER_TO_FUNC.keys()},but got type is {self.post_process_type}'
+            self.logger.info(msg)
             raise KeyError
         except Exception as e:
             self.logger.info(e)
