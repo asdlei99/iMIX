@@ -40,7 +40,7 @@ BUCKET_SIZE = 8192
 
 train_data = dict(
     samples_per_gpu=ve_cfg['train_batch_size'],
-    workers_per_gpu=0,
+    workers_per_gpu=4,
     batch_sampler=dict(
         type='TokenBucketSampler',
         bucket_size=BUCKET_SIZE,
@@ -57,7 +57,7 @@ train_data = dict(
 
 test_data = dict(
     samples_per_gpu=ve_cfg['val_batch_size'],
-    workers_per_gpu=0,
+    workers_per_gpu=4,
     batch_sampler=dict(
         type='TokenBucketSampler',
         bucket_size=BUCKET_SIZE,
