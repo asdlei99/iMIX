@@ -1,4 +1,4 @@
-from configs._base_.datasets.devlbert_task_config import (
+from configs._base_.datasets.devlbert.devlbert_task_config import (
     task_ids,
     TASKS,
 )

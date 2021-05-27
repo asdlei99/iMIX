@@ -47,7 +47,7 @@ nlvr_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=8,  # 72
+    samples_per_gpu=72,  # 72
     workers_per_gpu=4,
     data=dict(
         type=dataset_type,
@@ -57,7 +57,7 @@ train_data = dict(
 )
 
 test_data = dict(
-    samples_per_gpu=8,  # 64
+    samples_per_gpu=64,  # 64
     workers_per_gpu=4,
     data=dict(
         type=dataset_type,

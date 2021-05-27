@@ -3,7 +3,7 @@ model = dict(
     type='LXMERT',
     params=dict(
         random_initialize=False,
-        num_labels=3129,
+        num_labels=1842,
         # BertConfig
         vocab_size=30522,
         hidden_size=768,
@@ -28,22 +28,41 @@ model = dict(
         freeze_base=False,
         max_seq_length=20,
         model='bert',
-        training_head_type='vqa2',
+        training_head_type='gqa',
         bert_model_name='bert-base-uncased',
         pretrained_path='/home/datasets/mix_data/iMIX/data/models/model_LXRT.pth',
-        label2ans_path='/home/datasets/mix_data/lxmert/vqa/trainval_label2ans.json',
-        # for pretraining
-        # gqa_label=1534,
-        # task_matched=False,
-        # task_mask_lm=False,
-        # task_obj_predict=False,
-        # task_qa=False,
-        # word_mask_rate=0.15,
-        # obj_mask_rate=0.15,
-        # qa_sets=None,
-        # visual_losses='obj,attr,feat',
+        label2ans_path='/home/datasets/mix_data/lxmert/gqa/trainval_label2ans.json',
     ))
 
 loss = dict(type='LogitBinaryCrossEntropy')
+
+optimizer = dict(
+    type='BertAdam',
+    lr=1e-5,
+    weight_decay=0.01,
+    eps=1e-6,
+    betas=[0.9, 0.999],
+    max_grad_norm=-1,
+    training_encoder_lr_multiply=1,
+)
+optimizer_config = dict(grad_clip=dict(max_norm=5))
+# optimizer_config = dict(grad_clip=None)
+'''
+fp16 = dict(
+    init_scale=2.**16,
+    growth_factor=2.0,
+    backoff_factor=0.5,
+    growth_interval=2000,
+)
+'''
+lr_config = dict(
+    warmup=0.1,
+    warmup_method='warmup_linear',
+    # max_iters=117876,  # ceil(totoal 942999 / batch size 32) * epoch size datasets: train
+    max_iters=134380,  # floor(totoal 1075062 / batch size 32) * epoch size datasets: train, valid
+    policy='BertWarmupLinearLR')
+
+# by_iter = True
+total_epochs = 4
 
 seed = 9595

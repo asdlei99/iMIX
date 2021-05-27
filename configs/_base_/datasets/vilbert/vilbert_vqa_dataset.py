@@ -1,4 +1,4 @@
-from configs._base_.datasets.vilbert_task_config import (
+from configs._base_.datasets.vilbert.vilbert_task_config import (
     task_ids,
     TASKS,
 )

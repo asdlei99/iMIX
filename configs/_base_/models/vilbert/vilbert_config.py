@@ -1,10 +1,11 @@
-from configs._base_.datasets.devlbert_task_config import (
+from configs._base_.datasets.vilbert.vilbert_task_config import (
     task_ids,
     TASKS,
 )
 
+# model settings
 model = dict(
-    type='DEVLBERT',
+    type='VILBERT',
     params=dict(
         # below from bert_base_6layer_6conect.json
         bi_hidden_size=1024,
@@ -12,14 +13,19 @@ model = dict(
         bi_intermediate_size=1024,
         bi_attention_type=1,
         pooling_method='mul',
-        predict_feature=False,
+        visual_target=0,  # which target to use for visual branch 0: soft label, 1: regress the feature, 2: NCE loss."
         fast_mode=False,
         fixed_v_layer=0,
         fixed_t_layer=0,
         in_batch_pairs=False,
         fusion_method='mul',
-        intra_gate=False,
+        dynamic_attention=False,
         with_coattention=True,
+        objective=0,
+        num_negative=128,
+        model='bert',
+        task_specific_tokens=True,
+        visualization=False,
         t_config=dict(
             attention_probs_dropout_prob=0.1,
             hidden_act='gelu',
@@ -34,6 +40,7 @@ model = dict(
             vocab_size=30522,
             biattention_id=[6, 7, 8, 9, 10, 11],
             layer_norm_eps=1e-12,
+            task_specific_tokens=True,
         ),
         v_config=dict(
             feature_size=2048,
@@ -50,9 +57,11 @@ model = dict(
         ),
         # below from parse argument
         tasks=task_ids,  # '1-2-3...' training task separate by -
-        bert_model='bert-base-uncased',
-        from_pretrained='/home/datasets/mix_data/DeVLBert/pytorch_model_11.bin',
+        bert_model='bert-base-uncased',  # 'roberta'
+        from_pretrained='/home/datasets/mix_data/model/vilbert/multi_task_model.bin',
         train_iter_multiplier=1,  # multiplier for the multi-task training
+        # forward every n iteration is the validation score is not improving over the last 3 epoch, -1 means will stop
+        train_iter_gap=4,
         do_lower_case=True,
         gradient_accumulation_steps=1,
         freeze=-1,  # till which layer of textual stream of vilbert need to fixed
@@ -70,32 +79,31 @@ loss = dict(
     ))
 
 optimizer = dict(
-    type='BertAdam',
-    constructor='DevlbertOptimizerConstructor',
+    type='TansformerAdamW',
+    constructor='VilbertOptimizerConstructor',
     paramwise_cfg=dict(
-        language_weights_file='/home/datasets/mix_data/DeVLBert/bert_file/bert-base-uncased_weight_name.json',
+        language_weights_file='/home/datasets/mix_data/model/vilbert/config/bert-base-uncased_weight_name.json',
         vision_scratch=False,  # whether pre-trained the image or not.
     ),
     lr=TASKS['TASK' + task_ids]['lr'],
-    training_encoder_lr_multiply=1,
-)
+    correct_bias=False,
+    training_encoder_lr_multiply=1)
 optimizer_config = dict(grad_clip=None)
 
-iters_in_epoch = max([TASKS['TASK' + task_id]['iters_in_epoch'] for task_id in task_ids.split('-')])
-lr_reduce_list = [12, 16]  # epoch
-warmup_constant_lr_task = ['TASK2', 'TASK3']
 lr_config = dict(
     num_warmup_steps=TASKS['TASK' + task_ids]['num_warmup_steps'],
-    policy='WarmupConstantSchedule',
-) if any('TASK' + task_id in warmup_constant_lr_task for task_id in task_ids.split('-')) else dict(
-    milestones=[iters_in_epoch * k for k in lr_reduce_list],
-    gamma=0.1,
-    warmup_factor=0,
-    warmup_iters=TASKS['TASK' + task_ids]['num_warmup_steps'],
-    policy='WarmupMultiStepLR',
-)
+    num_training_steps=TASKS['TASK' + task_ids]['num_training_steps'],
+    policy='WarmupLinearSchedule')
 
 # by_iter = True
-total_epochs = TASKS['TASK' + task_ids]['num_epoch']
+total_epochs = 20
+'''
+fp16 = dict(
+    init_scale=2.**16,
+    growth_factor=2.0,
+    backoff_factor=0.5,
+    growth_interval=2000,
+)
+'''
 
 seed = 0
