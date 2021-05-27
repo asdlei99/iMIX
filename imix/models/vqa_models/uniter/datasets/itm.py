@@ -12,8 +12,15 @@ from toolz.sandbox import unzip
 from cytoolz import concat
 import numpy as np
 
-from .data import (DetectFeatTxtTokDataset, DetectFeatLmdb, TxtTokLmdb, pad_tensors, get_gather_index, get_ids_and_lens)
-from .sampler import TokenBucketSampler
+from .data import (
+    DetectFeatTxtTokDataset,
+    DetectFeatLmdb,
+    TxtTokLmdb,
+    pad_tensors,
+    get_gather_index,
+    get_ids_and_lens,
+)
+from imix.data.sampler.uniter_sampler import TokenBucketSampler
 
 
 class TokenBucketSamplerForItm(TokenBucketSampler):

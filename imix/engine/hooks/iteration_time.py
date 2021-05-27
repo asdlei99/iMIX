@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from imix.utils_imix.Timer import Timer
+from imix.utils.Timer import Timer
 from .base_hook import HookBase
 from .builder import HOOKS
 

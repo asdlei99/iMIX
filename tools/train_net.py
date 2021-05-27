@@ -1,10 +1,10 @@
 from imix.engine.imix_engine import imixEngine
 from imix.engine.organizer import Organizer
-from imix.utils_imix.imix_checkpoint import imixCheckpointer
-from imix.utils_imix.default_argument import default_argument_parser, default_setup
-from imix.utils_imix.launch import launch as ddp_launch
+from imix.utils.imix_checkpoint import imixCheckpointer
+from imix.utils.default_argument import default_argument_parser, default_setup
+from imix.utils.launch import launch as ddp_launch
 
-from imix.utils_imix.config import Config as iMIX_cfg
+from imix.utils.config import Config as iMIX_cfg
 
 
 def del_some_args(args):

@@ -4,7 +4,7 @@ from typing import NamedTuple, Optional
 
 import torch
 
-from imix.utils_imix.Timer import Timer
+from imix.utils.Timer import Timer
 from .log_buffer_imix import LogBufferWriter, get_log_buffer
 
 _RecorderTime = NamedTuple(

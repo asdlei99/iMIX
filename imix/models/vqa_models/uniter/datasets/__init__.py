@@ -4,7 +4,6 @@ from .data import (
     ImageLmdbGroup,
     ConcatDatasetWithLens,
 )
-from .sampler import TokenBucketSampler
 from .loader import PrefetchLoader, MetaLoader
 from .vqa import (
     VqaEvalDataset,

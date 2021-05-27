@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import os
-from imix.utils_imix.config import ToExpanduser
+from imix.utils.config import ToExpanduser
 from transformers import BertTokenizer
 from transformers.modeling_bert import (
     ACT2FN,

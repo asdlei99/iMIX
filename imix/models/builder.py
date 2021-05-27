@@ -1,6 +1,6 @@
 from torch import nn
 import torch
-from imix.utils_imix.registry import Registry, build_from_cfg
+from imix.utils.registry import Registry, build_from_cfg
 
 EMBEDDING = Registry('embedding')
 ENCODER = Registry('encoder')

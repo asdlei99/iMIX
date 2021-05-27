@@ -3,7 +3,7 @@ from .annotation_reader import AnnotationBaseData
 from torch.utils.data import Dataset
 from pathlib import Path
 from collections import Counter
-from imix.utils_imix.config import imixEasyDict
+from imix.utils.config import imixEasyDict
 from .feature_reader import build_feature_reader, LMDBFeatureReader, PthFeatureReader
 import logging
 

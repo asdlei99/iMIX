@@ -5,7 +5,7 @@ from .base_engine import EngineBase
 from .hooks.periods import write_metrics
 from .organizer import Organizer, is_mixed_precision
 from imix.engine.hooks.periods import LogBufferStorage
-from imix.utils_imix.Timer import batch_iter
+from imix.utils.Timer import batch_iter
 
 
 class CommonEngine(EngineBase):

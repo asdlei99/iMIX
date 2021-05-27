@@ -12,7 +12,7 @@ from imix.models.builder import VQA_MODELS
 from transformers.modeling_bert import BertConfig
 from ..base_model import BaseModel
 from .task_utils import compute_score_with_logits
-import imix.utils_imix.distributed_info as comm
+import imix.utils.distributed_info as comm
 import logging
 
 logger = logging.getLogger(__name__)

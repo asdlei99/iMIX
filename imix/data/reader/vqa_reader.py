@@ -1,7 +1,7 @@
 import numpy as np
 from ..utils.stream import ItemFeature
 from .base_reader import IMIXDataReader
-from imix.utils_imix.common_function import update_d1_with_d2
+from imix.utils.common_function import update_d1_with_d2
 
 
 class VQAReader(IMIXDataReader):

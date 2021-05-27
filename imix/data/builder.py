@@ -1,7 +1,7 @@
 from torch import nn
 from torch.utils.data import DataLoader
-from imix.utils_imix.config import imixEasyDict, seed_all_rng
-from imix.utils_imix.registry import Registry, build_from_cfg
+from imix.utils.config import imixEasyDict, seed_all_rng
+from imix.utils.registry import Registry, build_from_cfg
 from .sampler import build_sampler, build_batch_sampler
 from typing import Optional
 import torch

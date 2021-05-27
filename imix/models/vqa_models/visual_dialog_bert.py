@@ -2,7 +2,7 @@ import torch
 from .base_model import BaseModel
 from ..builder import VQA_MODELS  # build_embedding, build_encoder, build_head, build_pooler
 from ..visual_dialog_model.vilbert_dialog import BertForMultiModalPreTraining, BertConfig
-from imix.utils_imix.data_utils import sequence_mask
+from imix.utils.data_utils import sequence_mask
 
 # @VQA_MODELS.register_module()
 # class VisDiaBERT(BaseModel):

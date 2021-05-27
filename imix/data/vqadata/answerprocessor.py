@@ -1,9 +1,9 @@
 import torch
-from imix.utils_imix.registry import Registry, build_from_cfg
+from imix.utils.registry import Registry, build_from_cfg
 import os
 from imix.models.builder import EMBEDDING
 from .baseprocessor import BaseProcessor
-from imix.utils_imix.file_io import PathManager
+from imix.utils.file_io import PathManager
 import re
 
 VOCAB = Registry('vocab')
@@ -57,7 +57,7 @@ class SimpleWordProcessor(BaseProcessor):
     """
 
     def __init__(self, *args, **kwargs):
-        from imix.utils_imix.text import word_tokenize
+        from imix.utils.text import word_tokenize
 
         self.tokenizer = word_tokenize
 

@@ -1,5 +1,5 @@
-import imix.utils_imix.distributed_info as comm
-from imix.utils_imix.checkpoint import PeriodicCheckpointer
+import imix.utils.distributed_info as comm
+from imix.utils.checkpoint import PeriodicCheckpointer
 from ..base_hook import HookBase
 from ..builder import HOOKS
 

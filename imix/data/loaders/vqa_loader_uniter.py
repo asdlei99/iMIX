@@ -2,7 +2,7 @@ import logging
 
 from torch.utils.data import Dataset
 
-import imix.utils_imix.distributed_info as comm
+import imix.utils.distributed_info as comm
 from ..builder import DATASETS
 from ..reader.vqa_reader_uniter import VQAReaderUNITER
 

@@ -17,9 +17,9 @@ import sys
 import msgpack
 import msgpack_numpy
 # prevent printing 'Failed to import tensorflow'
-from imix.utils_imix import disable_ouput
+from imix.utils import disable_ouput
 import tensorpack.dataflow as td
-from imix.utils_imix import enable_ouput
+from imix.utils import enable_ouput
 
 disable_ouput
 enable_ouput

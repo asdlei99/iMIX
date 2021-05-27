@@ -7,7 +7,7 @@ import torch
 from .builder import LR_SCHEDULERS
 from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
 from .optimization import BertAdam
-import imix.utils_imix.distributed_info as comm
+import imix.utils.distributed_info as comm
 import logging
 from transformers.optimization import (
     get_constant_schedule,

@@ -5,8 +5,8 @@ import torch
 from torch.optim import Optimizer, lr_scheduler
 from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 from typing import List
-from ..utils_imix.registry import Registry, build_from_cfg
-from imix.utils_imix.config import imixEasyDict
+from ..utils.registry import Registry, build_from_cfg
+from imix.utils.config import imixEasyDict
 
 OPTIMIZERS = Registry('optimizer')
 OPTIMIZER_BUILDERS = Registry('optimizer builder')

@@ -2,10 +2,10 @@ import torch
 import json
 from torch.nn import GroupNorm, LayerNorm, Module
 from .builder import OPTIMIZER_BUILDERS, OPTIMIZERS
-from ..utils_imix.registry import build_from_cfg
+from ..utils.registry import build_from_cfg
 import logging
 from typing import Optional, Any
-from imix.utils_imix.config import imixEasyDict
+from imix.utils.config import imixEasyDict
 
 
 @OPTIMIZER_BUILDERS.register_module()

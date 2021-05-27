@@ -9,8 +9,8 @@ from typing import Dict, Optional
 
 import torch
 
-from ..utils_imix import distributed_info as comm
-from ..utils_imix.registry import Registry, build_from_cfg
+from ..utils import distributed_info as comm
+from ..utils.registry import Registry, build_from_cfg
 
 METRICS = Registry('metric')
 DATASET_CONVERTER = Registry('DatasetConverter')

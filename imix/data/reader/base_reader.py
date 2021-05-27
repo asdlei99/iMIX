@@ -1,4 +1,4 @@
-from imix.utils_imix.config import imixEasyDict
+from imix.utils.config import imixEasyDict
 from .annotation_reader import build_annotations
 from .feature_base_data import build_features
 

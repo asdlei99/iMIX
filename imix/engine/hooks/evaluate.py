@@ -1,7 +1,7 @@
 from .base_hook import HookBase
 from .builder import HOOKS
-import imix.utils_imix.distributed_info as comm
-from imix.utils_imix.file_io import PathManager
+import imix.utils.distributed_info as comm
+from imix.utils.file_io import PathManager
 import logging
 import json
 import os
@@ -10,9 +10,9 @@ import torch
 from operator import itemgetter
 from shutil import copyfile
 import copy
-from imix.utils_imix.config import get_imix_work_dir
+from imix.utils.config import get_imix_work_dir
 from .periods.checkpoint import CheckPointHook
-from imix.utils_imix.distributed_info import master_only_run
+from imix.utils.distributed_info import master_only_run
 
 
 @HOOKS.register_module()

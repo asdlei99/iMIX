@@ -6,11 +6,11 @@ import torch
 from torch.nn.parallel import DistributedDataParallel
 
 import imix.engine.hooks as hooks
-import imix.utils_imix.distributed_info as comm
+import imix.utils.distributed_info as comm
 from imix.models import build_loss, build_model
 from imix.solver import build_lr_scheduler, build_optimizer
-from imix.utils_imix.imix_checkpoint import imixCheckpointer
-from imix.utils_imix.logger import setup_logger
+from imix.utils.imix_checkpoint import imixCheckpointer
+from imix.utils.logger import setup_logger
 from ..data import build_imix_test_loader, build_imix_train_loader
 from ..models.losses.base_loss import Losser
 from ..evaluation import inference_on_dataset

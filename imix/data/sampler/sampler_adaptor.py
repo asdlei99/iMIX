@@ -1,5 +1,5 @@
 from typing import Dict, Optional
-from imix.utils_imix.config import imixEasyDict
+from imix.utils.config import imixEasyDict
 import re
 
 

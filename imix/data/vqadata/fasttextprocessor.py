@@ -7,7 +7,7 @@ import numpy as np
 from ..builder import EMBEDDING
 from .vocabprocessor import VocabProcessor
 from imix.utils.file_io import PathManager
-from imix.utils_imix.config import get_imix_cache_dir
+from imix.utils.config import get_imix_cache_dir
 
 VOCAB = Registry('vocab')
 
@@ -105,8 +105,8 @@ class FastTextProcessor(VocabProcessor):
         synchronize()
 
     def _download_model(self):
-        from imix.utils_imix.distributed_info import is_main_process
-        from imix.utils_imix.config import get_imix_cache_dir
+        from imix.utils.distributed_info import is_main_process
+        from imix.utils.config import get_imix_cache_dir
         _is_master = is_main_process()
         model_file_path = os.path.join(get_imix_cache_dir(), 'wiki.en.bin')
 

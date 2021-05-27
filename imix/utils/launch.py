@@ -3,7 +3,7 @@ from torch.distributed import init_process_group, new_group  # destroy_process_g
 import torch.multiprocessing.spawn as spawn
 import logging
 import random
-import imix.utils_imix.distributed_info as dist_info
+import imix.utils.distributed_info as dist_info
 import os
 
 __all__ = ['launch']

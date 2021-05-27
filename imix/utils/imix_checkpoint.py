@@ -3,8 +3,8 @@ from typing import Any
 
 from torch.nn import Module
 
-import imix.utils_imix.distributed_info as comm
-from imix.utils_imix.checkpoint import Checkpointer
+import imix.utils.distributed_info as comm
+from imix.utils.checkpoint import Checkpointer
 
 
 class imixCheckpointer(Checkpointer):

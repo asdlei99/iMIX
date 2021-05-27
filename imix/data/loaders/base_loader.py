@@ -5,7 +5,7 @@ created time: 2021/3/20
 
 from torch.utils.data import Dataset
 import logging
-import imix.utils_imix.distributed_info as comm
+import imix.utils.distributed_info as comm
 
 
 class BaseLoader(Dataset):

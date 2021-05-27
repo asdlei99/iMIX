@@ -1,5 +1,5 @@
-from imix.utils_imix.registry import Registry, build_from_cfg
-import imix.utils_imix.distributed_info as dist_info
+from imix.utils.registry import Registry, build_from_cfg
+import imix.utils.distributed_info as dist_info
 import logging
 import torch
 import inspect

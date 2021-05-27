@@ -257,7 +257,7 @@ class VisualBERTForClassification(nn.Module):
                 output_hidden_states=self.config['output_hidden_states'],
             )
         else:
-            from imix.utils_imix.config import ToExpanduser
+            from imix.utils.config import ToExpanduser
             cache_dir = os.path.join('~/.cache/torch', 'transformers')
             cache_dir = ToExpanduser.modify_path(cache_dir)
 

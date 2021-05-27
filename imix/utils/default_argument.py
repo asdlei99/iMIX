@@ -1,14 +1,14 @@
-import imix.utils_imix.distributed_info as dist_info
+import imix.utils.distributed_info as dist_info
 import torch
 import os
 import random
-from imix.utils_imix.file_io import PathManager
+from imix.utils.file_io import PathManager
 
-from imix.utils_imix.logger import setup_logger
-from imix.utils_imix.collect_running_env import collect_env_info
+from imix.utils.logger import setup_logger
+from imix.utils.collect_running_env import collect_env_info
 import argparse
 import json
-from imix.utils_imix.config import set_imix_work_dir, seed_all_rng
+from imix.utils.config import set_imix_work_dir, seed_all_rng
 import pprint
 import sys
 

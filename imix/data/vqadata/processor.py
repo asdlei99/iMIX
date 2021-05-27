@@ -1,5 +1,5 @@
 import torch
-from imix.utils_imix.registry import Registry, build_from_cfg
+from imix.utils.registry import Registry, build_from_cfg
 from imix.models.builder import EMBEDDING
 from .baseprocessor import BaseProcessor
 
@@ -28,7 +28,7 @@ class Processor(BaseProcessor):
     """
 
     def __init__(self, *args, **kwargs):
-        from imix.utils_imix.text import tokenize
+        from imix.utils.text import tokenize
 
         self.tokenizer = tokenize
 
