@@ -6,7 +6,7 @@ import logging
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from pytorch_pretrained_bert.tokenization import BertTokenizer
+from transformers import BertTokenizer
 
 from ._image_features_reader import ImageFeaturesH5Reader
 

@@ -369,25 +369,7 @@ class ImageBertForSequenceClassification(BertPreTrainedModel):
         logits = self.classifier(pooled_output)
 
         outputs = (logits, ) + outputs[2:]  # add hidden states and attention if they are here
-        # if labels is not None:
-        #     if self.num_labels == 1: #  doing regression
-        #         loss_fct = MSELoss()
-        #         labels = labels.to(torch.float)
-        #         loss = loss_fct(logits.view(-1), labels.view(-1))
-        #     else:
-        #         if self.loss_type == 'kl':
-        #             # KL Loss: https://github.com/uclanlp/visualbert/blob/master/pytorch_pretrained_bert/modeling.py
-        #             loss_fct = torch.nn.KLDivLoss(reduction="batchmean")
-        #             log_softmax = torch.nn.LogSoftmax(dim=-1)
-        #             reshaped_logits = logits.contiguous().view(-1, 3129)
-        #             reshaped_logits = log_softmax(reshaped_logits)
-        #             loss = loss_fct(reshaped_logits, labels.contiguous())
-        #         elif self.loss_type == 'bce': # [VQA]
-        #             loss = instance_bce_with_logits(logits, labels)
-        #         else: # cross_entropy [GQA, Retrieval, Captioning]
-        #             loss_fct = CrossEntropyLoss()
-        #             loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
-        #     outputs = (loss,) + outputs
+
         return outputs
 
 
@@ -472,13 +454,6 @@ class ImageBertForMultipleChoice(BertPreTrainedModel):
 
         outputs = (logits, ) + outputs[2:]  # add hidden states and attention if they are here
 
-        # if labels is not None:
-        #     if self.loss_type == 'bce':
-        #         loss = instance_bce_with_logits(logits, labels.view(-1, self.config.num_labels))
-        #     else:
-        #         loss_fct = CrossEntropyLoss()
-        #         loss = loss_fct(logits, labels)
-        #     outputs = (loss, ) + outputs
         return outputs
 
 

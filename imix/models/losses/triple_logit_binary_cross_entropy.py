@@ -402,7 +402,6 @@ class OSCARLoss(BaseLoss):
                 loss = loss_fct(logits.view(-1), labels.view(-1))
             else:
                 if self.loss_type == 'kl':
-                    # KL Loss: https://github.com/uclanlp/visualbert/blob/master/pytorch_pretrained_bert/modeling.py
                     loss_fct = nn.KLDivLoss(reduction='batchmean')
                     log_softmax = nn.LogSoftmax(dim=-1)
                     reshaped_logits = logits.contiguous().view(-1, 3129)

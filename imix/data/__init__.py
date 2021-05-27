@@ -19,8 +19,6 @@ from .loaders.visual_dialog_dataset import VisDialDataset, VisdialDatasetDense
 from .loaders.vqa_loader import VQADATASET
 from .loaders.vizwiz_loader import VizWizDATASET
 
-from .loaders.devlbert_vqa_loader import DeVLBertVQADATASET
-
 __all__ = [
     'VQADATASET',
     'GQADATASET',
@@ -39,6 +37,5 @@ __all__ = [
     'build_imix_train_loader',
     'build_imix_test_loader',
     'VisDialDataset',
-    'DeVLBertVQADATASET',
     'VisdialDatasetDense',
 ]

@@ -57,7 +57,6 @@ model = dict(
         gradient_accumulation_steps=1,
         freeze=-1,  # till which layer of textual stream of vilbert need to fixed
         vision_scratch=False,  # whether pre-trained the image or not.
-        baseline=False,  # whether use single stream baseline
         fp16=False,  # Whether to use 16-bit float precision instead of 32-bit
         TASKS=TASKS,
         training_head_type='vqa2',

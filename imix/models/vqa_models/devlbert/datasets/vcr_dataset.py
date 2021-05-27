@@ -8,7 +8,7 @@ import numpy as np
 import _pickle as cPickle
 import json_lines
 
-from pytorch_pretrained_bert.tokenization import BertTokenizer
+from transformers import BertTokenizer
 from ._image_features_reader import ImageFeaturesH5Reader
 import pdb
 import csv

@@ -13,6 +13,7 @@ from imix.models.builder import VQA_MODELS
 from transformers.modeling_bert import BertConfig
 from ..base_model import BaseModel
 from .task_utils import compute_score_with_logits
+from .vilbert import VILBertForVLTasks
 
 
 @VQA_MODELS.register_module()
@@ -24,11 +25,6 @@ class VILBERT(BaseModel):
         self.config = config = kwargs['params']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.root_path = os.path.dirname(__file__)
-
-        if config.baseline:
-            from .basebert import BaseBertForVLTasks
-        else:
-            from .vilbert import VILBertForVLTasks
 
         # task_lr = []
         task_ids = []
@@ -76,18 +72,11 @@ class VILBERT(BaseModel):
         if 'roberta' in config.bert_model:
             bertconfig.model = 'roberta'
 
-        if config.baseline:
-            self.model = BaseBertForVLTasks.from_pretrained(
-                config.from_pretrained,
-                config=bertconfig,
-                num_labels=num_labels,
-            )
-        else:
-            self.model = VILBertForVLTasks.from_pretrained(
-                config.from_pretrained,
-                config=bertconfig,
-                num_labels=num_labels,
-            )
+        self.model = VILBertForVLTasks.from_pretrained(
+            config.from_pretrained,
+            config=bertconfig,
+            num_labels=num_labels,
+        )
 
         if config.freeze != -1:
             bert_weight_name = json.load(
