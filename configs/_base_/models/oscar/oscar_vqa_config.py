@@ -52,4 +52,7 @@ lr_config = dict(
 # by_iter = True
 total_epochs = 25
 
+eval_iter_period = 4000
+checkpoint_config = dict(iter_period=eval_iter_period)
+
 seed = 88
