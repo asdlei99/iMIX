@@ -37,12 +37,11 @@ gqa_reader_test_cfg = dict(
     ))
 
 train_data = dict(
-    samples_per_gpu=32,  # 16
+    samples_per_gpu=32,
     workers_per_gpu=1,
     data=dict(
         type=dataset_type,
         reader=gqa_reader_train_cfg,
-        # limit_nums=400,
     ),
     drop_last=True,
     shuffle=True,

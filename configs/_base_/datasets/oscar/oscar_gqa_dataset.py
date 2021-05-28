@@ -14,7 +14,7 @@ gqa_reader_train_cfg = dict(
     label2ans_file=data_root + '/questions1.2/trainval_testdev_all_label2ans.pk',
     img_feature_type='faster_r-cnn',
     img_feature_dim=2054,
-    img_feature_is_folder=True,  # jinliang add
+    img_feature_is_folder=True,
     tokenizer_name=None,
     model_name_or_path='/home/datasets/mix_data/model/oscar/base-vg-labels/ep_107_1192087',
     load_fast=False,
@@ -38,7 +38,7 @@ gqa_reader_test_cfg = dict(
     label2ans_file=data_root + '/questions1.2/trainval_testdev_all_label2ans.pk',
     img_feature_type='faster_r-cnn',
     img_feature_dim=2054,
-    img_feature_is_folder=True,  # jinliang add
+    img_feature_is_folder=True,
     tokenizer_name=None,
     model_name_or_path='/home/datasets/mix_data/model/oscar/base-vg-labels/ep_107_1192087',
     load_fast=False,
@@ -53,17 +53,17 @@ gqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=48,  # 48
+    samples_per_gpu=48,
     workers_per_gpu=4,
     data=dict(
         type=dataset_type,
         reader=gqa_reader_train_cfg,
     ),
-    sampler='RandomSampler',
+    sampler='DistributedSampler',
 )
 
 test_data = dict(
-    samples_per_gpu=256,  # 256
+    samples_per_gpu=256,
     workers_per_gpu=4,
     data=dict(
         type=dataset_type,

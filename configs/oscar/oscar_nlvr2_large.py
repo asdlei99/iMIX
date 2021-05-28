@@ -23,6 +23,7 @@ nlvr_reader_test_cfg = dict(model_name_or_path='/home/datasets/mix_data/model/os
 train_data = dict(
     samples_per_gpu=24,
     data=dict(reader=nlvr_reader_train_cfg, ),
+    sampler='DistributedSampler',
 )
 
 test_data = dict(data=dict(reader=nlvr_reader_test_cfg, ), )

@@ -12,7 +12,7 @@ vqa_reader_train_cfg = dict(
     img_feature_type='faster_r-cnn',
     img_feat_format='pt',
     img_feature_dim=2054,
-    img_feature_is_folder=True,  # jinliang add
+    img_feature_is_folder=True,
     data_dir=data_root + '/2k',
     label_file=data_root + '/cache/trainval_ans2label.pkl',
     label2ans_file=None,
@@ -37,7 +37,7 @@ vqa_reader_test_cfg = dict(
     img_feature_type='faster_r-cnn',
     img_feat_format='pt',
     img_feature_dim=2054,
-    img_feature_is_folder=True,  # jinliang add
+    img_feature_is_folder=True,
     data_dir=data_root + '/2k',
     label_file=data_root + '/cache/trainval_ans2label.pkl',
     label2ans_file=None,
@@ -55,17 +55,17 @@ vqa_reader_test_cfg = dict(
 )
 
 train_data = dict(
-    samples_per_gpu=32,  # 32,
+    samples_per_gpu=32,
     workers_per_gpu=4,
     data=dict(
         type=dataset_type,
         reader=vqa_reader_train_cfg,
     ),
-    sampler='RandomSampler',
+    sampler='DistributedSampler',
 )
 
 test_data = dict(
-    samples_per_gpu=256,  # 256,
+    samples_per_gpu=256,
     workers_per_gpu=4,
     data=dict(
         type=dataset_type,

@@ -8,7 +8,7 @@ dataset_type = 'DevlbertLoadDatasets'
 # test mode directly read this data set
 test_datasets = [TASKS['TASK' + task_ids]['val_split']]
 
-limit_nums = 512
+# limit_nums = 512
 
 vqa_reader_train_cfg = dict(
     tasks=task_ids,
@@ -17,7 +17,7 @@ vqa_reader_train_cfg = dict(
     in_memory=False,  # whether use chunck for parallel training
     clean_datasets=True,  # whether clean train sets for multitask data
     is_train=True,
-    limit_nums=limit_nums,
+    # limit_nums=limit_nums,
     TASKS=TASKS,
 )
 
@@ -28,7 +28,7 @@ vqa_reader_test_cfg = dict(
     in_memory=False,
     clean_datasets=True,
     is_train=False,
-    limit_nums=limit_nums,
+    # limit_nums=limit_nums,
     TASKS=TASKS,
 )
 
@@ -40,8 +40,7 @@ train_data = dict(
         reader=vqa_reader_train_cfg,
     ),
     pin_memory=True,
-    # sampler='RandomSampler',  # DistributedSampler
-)
+    sampler=TASKS['TASK' + task_ids]['sampler'])
 
 test_data = dict(
     samples_per_gpu=TASKS['TASK' + task_ids]['per_gpu_eval_batch_size'],

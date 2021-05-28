@@ -8,7 +8,7 @@ dataset_type = 'LoadDatasets'
 # test mode directly read this data set
 test_datasets = [TASKS['TASK' + task_ids]['val_split']]
 
-limit_nums = None
+# limit_nums = None
 
 vqa_reader_train_cfg = dict(
     tasks=task_ids,
@@ -40,7 +40,7 @@ train_data = dict(
         reader=vqa_reader_train_cfg,
     ),
     pin_memory=True,
-    sampler='RandomSampler',
+    sampler=TASKS['TASK' + task_ids]['sampler'],
 )
 
 test_data = dict(
