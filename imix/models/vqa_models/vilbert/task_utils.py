@@ -7,7 +7,7 @@ import logging
 
 import torch
 from torch.utils.data import Dataset
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from transformers.tokenization_bert import BertTokenizer
 from .datasets import DatasetMapTrain
 from .datasets._image_features_reader import ImageFeaturesH5Reader
 from imix.data.builder import DATASETS

@@ -21,6 +21,7 @@ from transformers.modeling_bert import (
     BertOnlyMLMHead,
     BertLMPredictionHead,
     BertConfig,
+    BertModel,
     load_tf_weights_in_bert,
 )
 

@@ -11,7 +11,7 @@ import logging
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from transformers.tokenization_bert import BertTokenizer
 import random
 from ._image_features_reader import ImageFeaturesH5Reader
 import sys

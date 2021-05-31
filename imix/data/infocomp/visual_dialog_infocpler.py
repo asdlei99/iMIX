@@ -1,5 +1,5 @@
 # from ..utils.tokenization import BertTokenizer
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from transformers.tokenization_bert import BertTokenizer
 from ..utils.data_utils import encode_input
 import random
 import torch
