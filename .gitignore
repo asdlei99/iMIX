@@ -123,7 +123,7 @@ work_dirs/
 *.swp
 
 #sphinx
-*.rst
+#*.rst
 
 imix/models/vqa_models/vilbert/tools/
 imix/models/vqa_models/oscar/coco_caption/

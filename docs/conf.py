@@ -12,16 +12,18 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
-
+sys.path.insert(0, os.path.abspath('../'))
+# sys.path.append(os.path.abspath('../imix'))
+# sys.path.insert(0, '/home/cyy/iMIX-copy/imix/imix')
+# sys.path.append('/home/cyy/iMIX-copy/imix/imix')
 # -- Project information -----------------------------------------------------
 
-project = 'IMIX'
+project = 'iMIX'
 copyright = '2021, imix inspur'
 author = 'imix inspur'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -42,16 +44,18 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    # 'myst_parser',
 ]
 
 autodoc_default_flags = ['members']
 autosummary_generate = True
 
-autodoc_mock_imports = [
-    'matplotlib', 'pycocotools', 'terminaltables', 'mmdet.version', 'mmdet.ops.dcn', 'mmdet.ops.masked_conv',
-    'mmdet.ops.nms', 'mmdet.ops.roi_align', 'mmdet.ops.roi_pool', 'mmdet.ops.sigmoid_focal_loss', 'mmdet.ops.carafe',
-    'mmdet.ops.utils'
-]
+# autodoc_mock_imports = [
+#     'matplotlib', 'pycocotools', 'terminaltables', 'mmdet.version', 'mmdet.ops.dcn', 'mmdet.ops.masked_conv',
+#     'mmdet.ops.nms', 'mmdet.ops.roi_align', 'mmdet.ops.roi_pool', 'mmdet.ops.sigmoid_focal_loss', 'mmdet.ops.carafe',
+#     'mmdet.ops.utils'
+# ]
+autodoc_mock_imports = ['imix.engine']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -61,9 +65,10 @@ templates_path = ['_templates']
 #
 source_suffix = {
     '.rst': 'restructuredtext',
+    # '.txt': 'markdown',
     '.md': 'markdown',
 }
-
+# source_parsers = {'.md': 'recommonmark.parser.CommonMarkParser'}
 # The master toctree document.
 master_doc = 'index'
 
