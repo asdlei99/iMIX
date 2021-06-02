@@ -11,7 +11,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import _pickle as cPickle
 
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from transformers.tokenization_bert import BertTokenizer
 from ._image_features_reader import ImageFeaturesH5Reader
 import jsonlines
 import sys

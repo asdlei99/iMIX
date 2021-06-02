@@ -5,7 +5,7 @@ from imix.data.builder import DATASETS
 import torch
 
 import json
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from transformers.tokenization_bert import BertTokenizer
 from imix.data.reader.feature_reader.image_features_reader import ImageFeaturesH5Reader
 from ..utils.data_utils import encode_input, encode_image_input
 import os

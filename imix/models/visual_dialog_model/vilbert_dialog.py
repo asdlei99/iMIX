@@ -30,7 +30,7 @@ from torch import nn
 from torch.nn import CrossEntropyLoss
 # import torch.nn.functional as F
 from torch.nn.utils.weight_norm import weight_norm
-# from pytorch_transformers.modeling_bert import BertEmbeddings
+# from transformers.modeling_bert import BertEmbeddings
 # from utils.data_utils import sequence_mask
 
 from pytorch_pretrained_bert.file_utils import cached_path
