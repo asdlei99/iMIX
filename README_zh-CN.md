@@ -78,7 +78,7 @@ iMIX 是一款由浪潮集团的研发人员共同参与贡献的开源项目。
 
 ```
 @misc{fan2021iMIX,
-  author =       {Baoyu Fan, Hongzhi Shi, Runze Zhang, Xiaochuan Li, Liang Jin, Jian Zhao, Binqiang Wang, Yinyin Chao, Yingjie Zhang},
+  author =       {Baoyu Fan, Liang Jin, Runze Zhang, Xiaochuan Li, Cong Xu, Hongzhi Shi, Jian Zhao, Yinyin Chao, Yingjie Zhang, Binqiang Wang, Zhenhua Guo, Yaqian Zhao, Rengang Li},
   title =        {iMIX: A multimodal framework for vision and language research},
   howpublished = {\url{https://github.com/inspur-hsslab/iMIX}},
   year =         {2021}
