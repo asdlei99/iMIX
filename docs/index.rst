@@ -31,7 +31,7 @@ Welcome to iMIX's documentation!
 .. toctree::
    :caption: API Reference
 
-   source/imix.rst
+   sources/imix.rst
 
 
 Indices and tables

@@ -13,14 +13,11 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-# sys.path.append(os.path.abspath('../imix'))
-# sys.path.insert(0, '/home/cyy/iMIX-copy/imix/imix')
-# sys.path.append('/home/cyy/iMIX-copy/imix/imix')
 # -- Project information -----------------------------------------------------
 
 project = 'iMIX'
-copyright = '2021, imix inspur'
-author = 'imix inspur'
+copyright = '2021, iMIX inspur'
+author = 'iMIX inspur'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
@@ -32,30 +29,14 @@ release = '1.0.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'recommonmark',
     'sphinx_markdown_tables',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    # 'myst_parser',
 ]
 
 autodoc_default_flags = ['members']
 autosummary_generate = True
-
-# autodoc_mock_imports = [
-#     'matplotlib', 'pycocotools', 'terminaltables', 'mmdet.version', 'mmdet.ops.dcn', 'mmdet.ops.masked_conv',
-#     'mmdet.ops.nms', 'mmdet.ops.roi_align', 'mmdet.ops.roi_pool', 'mmdet.ops.sigmoid_focal_loss', 'mmdet.ops.carafe',
-#     'mmdet.ops.utils'
-# ]
-autodoc_mock_imports = ['imix.engine']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -83,8 +64,3 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
