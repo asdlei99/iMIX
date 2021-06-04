@@ -243,33 +243,3 @@ class R2CHead(ClassifierHead):
     def forward(self, x):
         logits = self.main(x)
         return logits
-
-
-@HEADS.register_module()
-class UNITERVQAHead(ClassifierHead):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.vqa_output = nn.Sequential(
-            nn.Linear(self.in_dim, self.in_dim * 2), GELU(), nn.LayerNorm(self.in_dim * 2, eps=1e-12),
-            nn.Linear(self.in_dim * 2, self.out_dim))
-
-    def forward(self, x):
-        logits = self.vqa_output(x)
-        return logits
-
-
-@HEADS.register_module()
-class UNITERVCRHead(ClassifierHead):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.output = nn.Sequential(
-            nn.Linear(self.in_dim, self.in_dim * 2),
-            nn.ReLU(),
-            nn.LayerNorm(self.in_dim * 2, eps=1e-12),
-            nn.Linear(self.in_dim * 2, 2)  # out_dim == 2
-        )
-
-    def forward(self, x):
-        return self.output(x)

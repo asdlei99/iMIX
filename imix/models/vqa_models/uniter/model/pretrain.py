@@ -7,11 +7,14 @@ from collections import defaultdict
 import torch
 from torch import nn
 from torch.nn import functional as F
-from apex.normalization.fused_layer_norm import FusedLayerNorm as LayerNorm
-
 from .layer import GELU, BertOnlyMLMHead
 from .model import UniterModel, UniterPreTrainedModel
 from .ot import optimal_transport_dist
+try:
+    from apex.normalization.fused_layer_norm import FusedLayerNorm as LayerNorm
+except ImportError:
+    logger.info('Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex .')
+    from torch.nn import LayerNorm
 
 
 class RegionFeatureRegression(nn.Module):

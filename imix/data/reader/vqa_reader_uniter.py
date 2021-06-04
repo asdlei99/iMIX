@@ -14,7 +14,6 @@ import torch
 from lz4.frame import compress, decompress
 from tqdm import tqdm
 from collections import defaultdict
-from .base_reader import BaseDataReader
 
 msgpack_numpy.patch()
 
@@ -199,59 +198,3 @@ class TxtTokLmdb(object):
     def img2txts(self):
         img2txts = json.load(open(f'{self.db_dir}/img2txts.json'))
         return img2txts
-
-
-class VQAReaderUNITER(BaseDataReader):
-
-    def __init__(self, cfg):
-        super().__init__(cfg)
-        self.conf_th = cfg.get('conf_th', 0.2)
-        self.max_bb = cfg.get('max_bb', 100)
-        self.min_bb = cfg.get('min_bb', 10)
-        self.num_bb = cfg.get('num_bb', 36)
-        self.compress = cfg.get('compress', False)
-        self.max_txt_len = cfg.get('max_txt_len', 60)
-        path = cfg.mix_features.train
-        txt_path = cfg.mix_annotations.train
-        self.img_db = DetectFeatLmdb(path, self.conf_th, self.max_bb, self.min_bb, self.num_bb, self.compress)
-        self.txt_db = TxtTokLmdb(txt_path, self.max_txt_len)
-        txt_lens, self.ids = self.get_ids_and_lens(self.txt_db)
-
-        txt2img = self.txt_db.txt2img
-        self.lens = [tl + self.img_db.name2nbb[txt2img[id_]] for tl, id_ in zip(txt_lens, self.ids)]
-
-    def __len__(self):
-        return len(self.ids)
-
-    def get_ids_and_lens(self, db):
-        assert isinstance(db, TxtTokLmdb)
-        lens = []
-        ids = []
-        # for id_ in list(db.id2len.keys())[hvd.rank()::hvd.size()]:
-        for id_ in list(db.id2len.keys()):
-            lens.append(db.id2len[id_])
-            ids.append(id_)
-        return lens, ids
-
-    def __getitem__(self, item):
-
-        id_ = self.ids[item]
-        example = self.txt_db[id_]
-        img_feat, img_pos_feat, num_bb = self._get_img_feat(example['img_fname'])
-
-        # text input
-        input_ids = example['input_ids']
-        input_ids = self.txt_db.combine_inputs(input_ids)
-
-        target = _get_vqa_target(example, self.num_answers)
-
-        attn_masks = torch.ones(len(input_ids) + num_bb, dtype=torch.long)
-        # item_feature = ItemFeature()
-
-        return input_ids, img_feat, img_pos_feat, attn_masks, target
-
-    def _get_img_feat(self, fname):
-        img_feat, bb = self.img_db[fname]
-        img_bb = torch.cat([bb, bb[:, 4:5] * bb[:, 5:]], dim=-1)
-        num_bb = img_feat.size(0)
-        return img_feat, img_bb, num_bb

@@ -8,10 +8,14 @@ import torch
 from torch import nn
 import random
 import numpy as np
-from apex.normalization.fused_layer_norm import FusedLayerNorm as LayerNorm
-
 from .layer import GELU
 from .model import UniterPreTrainedModel, UniterModel
+
+try:
+    from apex.normalization.fused_layer_norm import FusedLayerNorm as LayerNorm
+except ImportError:
+    logger.info('Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex .')
+    from torch.nn import LayerNorm
 
 
 class UniterForReferringExpressionComprehension(UniterPreTrainedModel):

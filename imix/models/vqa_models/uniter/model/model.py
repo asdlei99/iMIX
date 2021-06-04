@@ -9,9 +9,13 @@ from io import open
 
 import torch
 from torch import nn
-from apex.normalization.fused_layer_norm import FusedLayerNorm
-
 from .layer import BertLayer, BertPooler
+
+try:
+    from apex.normalization.fused_layer_norm import FusedLayerNorm as BertLayerNorm
+except ImportError:
+    logger.info('Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex .')
+    from torch.nn import LayerNorm as BertLayerNorm
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +134,7 @@ class UniterPreTrainedModel(nn.Module):
             # truncated_normal for initialization
             # cf https://github.com/pytorch/pytorch/pull/5617
             module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-        elif isinstance(module, FusedLayerNorm):
+        elif isinstance(module, BertLayerNorm):
             module.bias.data.zero_()
             module.weight.data.fill_(1.0)
         if isinstance(module, nn.Linear) and module.bias is not None:
@@ -209,7 +213,7 @@ class UniterTextEmbeddings(nn.Module):
 
         # self.LayerNorm is not snake-cased to stick with TensorFlow model
         # variable name and be able to load any TensorFlow checkpoint file
-        self.LayerNorm = FusedLayerNorm(config.hidden_size, eps=1e-12)
+        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, input_ids, position_ids, token_type_ids=None):
@@ -231,13 +235,13 @@ class UniterImageEmbeddings(nn.Module):
     def __init__(self, config, img_dim):
         super().__init__()
         self.img_linear = nn.Linear(img_dim, config.hidden_size)
-        self.img_layer_norm = FusedLayerNorm(config.hidden_size, eps=1e-12)
-        self.pos_layer_norm = FusedLayerNorm(config.hidden_size, eps=1e-12)
+        self.img_layer_norm = BertLayerNorm(config.hidden_size, eps=1e-12)
+        self.pos_layer_norm = BertLayerNorm(config.hidden_size, eps=1e-12)
         self.pos_linear = nn.Linear(7, config.hidden_size)
         self.mask_embedding = nn.Embedding(2, img_dim, padding_idx=0)
 
         # tf naming convention for layer norm
-        self.LayerNorm = FusedLayerNorm(config.hidden_size, eps=1e-12)
+        self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, img_feat, img_pos_feat, type_embeddings, img_masks=None):

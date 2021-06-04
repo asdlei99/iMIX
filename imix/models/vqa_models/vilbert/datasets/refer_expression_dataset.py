@@ -4,15 +4,22 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
-
 import torch
 from torch.utils.data import Dataset
 import numpy as np
-
 from transformers.tokenization_bert import BertTokenizer
 from ._image_features_reader import ImageFeaturesH5Reader
 import _pickle as cPickle
-from ..tools.refer.refer import REFER
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    from tools.refer.refer import REFER
+except ImportError:
+    logger.info('you should git clone refer from https://www.github.com/lichenggunc/refer \
+        into tools/ then replace the refer.py with tools/refer_python3.py to will run \
+            in python3, then install it as the readme said in refer repository')
 
 
 def iou(anchors, gt_boxes):

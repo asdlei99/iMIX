@@ -125,6 +125,6 @@ work_dirs/
 #sphinx
 #*.rst
 
-imix/models/vqa_models/vilbert/tools/
+tools/refer/
 imix/models/vqa_models/oscar/coco_caption/
 master.code-workspace
