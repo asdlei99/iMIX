@@ -28,7 +28,7 @@ class Processor(BaseProcessor):
     """
 
     def __init__(self, *args, **kwargs):
-        from imix.utils.text import tokenize
+        from imix.utils.third_party_libs import tokenize
 
         self.tokenizer = tokenize
 

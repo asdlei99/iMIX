@@ -4,9 +4,9 @@ from torch import distributed as dist
 import torch
 from mmcv.utils import Registry, build_from_cfg
 import numpy as np
-from ..builder import EMBEDDING
+from imix.models.builder import EMBEDDING
 from .vocabprocessor import VocabProcessor
-from imix.utils.file_io import PathManager
+from imix.utils.third_party_libs import PathManager
 from imix.utils.config import get_imix_cache_dir
 
 VOCAB = Registry('vocab')

@@ -1,7 +1,7 @@
 from .base_hook import HookBase
 from .builder import HOOKS
 import imix.utils.distributed_info as comm
-from imix.utils.file_io import PathManager
+from imix.utils.third_party_libs import PathManager
 import logging
 import json
 import os

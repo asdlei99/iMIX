@@ -6,7 +6,7 @@ import atexit
 
 from termcolor import colored
 
-from imix.utils.file_io import PathManager
+from imix.utils.third_party_libs import PathManager
 
 
 class _ColoredMessage(logging.Formatter):

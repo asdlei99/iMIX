@@ -2,7 +2,7 @@ import imix.utils.distributed_info as dist_info
 import torch
 import os
 import random
-from imix.utils.file_io import PathManager
+from imix.utils.third_party_libs import PathManager
 
 from imix.utils.logger import setup_logger
 from imix.utils.collect_running_env import collect_env_info

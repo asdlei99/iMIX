@@ -1,6 +1,6 @@
 import json
 import os
-from imix.utils.file_io import PathManager
+from imix.utils.third_party_libs import PathManager
 from ..builder import HOOKS
 from .log_buffer_imix import LogBufferWriter
 import logging

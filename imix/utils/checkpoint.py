@@ -10,9 +10,7 @@ import torch
 from torch.nn.modules import Module
 from torch.nn.parallel import DataParallel, DistributedDataParallel
 
-from imix.utils.file_io import PathManager
-
-# from iopath.common.file_io import PathManager
+from imix.utils.third_party_libs import PathManager
 
 __all__ = ['Checkpointer', 'PeriodicCheckpointer']
 
