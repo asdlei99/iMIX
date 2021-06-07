@@ -1,15 +1,8 @@
 dataset_type = 'GQADATASET'
 data_root = '~/.cache/torch/iMIX/'
-# feature_path = "data/datasets/gqa/grid_features/features/"
-# annotation_path = "data/datasets/gqa/grid_features/annotations/"
 feature_default_path = 'data/datasets/gqa/defaults/features/'
 annotation_default_path = 'data/datasets/gqa/defaults/annotations/'
 vocab_path = 'data/datasets/gqa/defaults/extras/vocabs/'
-
-# train_datasets = ["train", "val", "visualgenome"]
-# train_datasets = ["train"]
-# test_datasets = ["oneval"]
-# test_datasets = ["test"]
 
 train_datasets = ['train', 'val']
 test_datasets = ['val']

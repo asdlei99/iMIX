@@ -32,16 +32,6 @@ model = dict(
         bert_model_name='bert-base-uncased',
         pretrained_path='/home/datasets/mix_data/iMIX/data/models/model_LXRT.pth',
         label2ans_path='/home/datasets/mix_data/lxmert/vqa/trainval_label2ans.json',
-        # for pretraining
-        # gqa_label=1534,
-        # task_matched=False,
-        # task_mask_lm=False,
-        # task_obj_predict=False,
-        # task_qa=False,
-        # word_mask_rate=0.15,
-        # obj_mask_rate=0.15,
-        # qa_sets=None,
-        # visual_losses='obj,attr,feat',
     ))
 
 loss = dict(type='LogitBinaryCrossEntropy')
@@ -71,8 +61,6 @@ lr_config = dict(
     # max_iters=55472,  # ceil(totoal 443753 / batch size 32) * epoch size  datasets: train
     max_iters=79012,  # floor(totoal 632117 / batch size 32) * epoch size  datasets: train, nominival
     policy='BertWarmupLinearLR')
-
-# by_iter = True
 total_epochs = 4
 
 seed = 9595

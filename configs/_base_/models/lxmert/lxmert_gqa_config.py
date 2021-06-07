@@ -62,7 +62,5 @@ lr_config = dict(
     max_iters=134380,  # floor(totoal 1075062 / batch size 32) * epoch size datasets: train, valid
     policy='BertWarmupLinearLR')
 
-# by_iter = True
 total_epochs = 4
-
 seed = 9595

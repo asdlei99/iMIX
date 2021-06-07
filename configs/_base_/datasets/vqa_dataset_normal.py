@@ -6,11 +6,6 @@ feature_default_path = 'data/datasets/vqa2/defaults/features/'
 annotation_default_path = 'data/datasets/vqa2/defaults/annotations/'
 vocab_path = 'data/datasets/vqa2/defaults/extras/vocabs/'
 
-# train_datasets = ["train", "val", "visualgenome"]
-# train_datasets = ["train"]
-# test_datasets = ["oneval"]
-# test_datasets = ["test"]
-
 train_datasets = ['train']
 test_datasets = ['minival']
 

@@ -4,7 +4,7 @@ model = dict(
     embedding=[
         dict(
             type='WordEmbedding',
-            vocab_file='/home/zrz/.cache/torch/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
+            vocab_file='/home/datasets/mix_data/iMIX/data/datasets/textvqa/defaults/extras/vocabs/vocabulary_100k.txt',
             embedding_dim=300),
         dict(
             type='TextEmbedding',
@@ -23,8 +23,8 @@ model = dict(
             type='ImageFeatureEncoder',
             encoder_type='finetune_faster_rcnn_fpn_fc7',
             in_dim=2048,
-            weights_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_w.pkl',
-            bias_file='/home/zrz/.cache/torch/iMIX/data/models/detectron.vmb_weights/fc7_b.pkl',
+            weights_file='/home/datasets/mix_data/iMIX/data/models/detectron.vmb_weights/fc7_w.pkl',
+            bias_file='/home/datasets/mix_data/iMIX/data/models/detectron.vmb_weights/fc7_b.pkl',
         ),
         dict(type='ImageFeatureEncoder', encoder_type='default'),
         dict(type='ImageFeatureEncoder', encoder_type='default'),

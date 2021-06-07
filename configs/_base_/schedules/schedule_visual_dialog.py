@@ -6,7 +6,7 @@ optimizer = dict(
     lr=1e-5,  # 2e-5
     image_lr=1e-5,  # learning rate for vision params
     training_encoder_lr_multiply=1)
-optimizer_config = dict(grad_clip=None)  # ??
+optimizer_config = dict(grad_clip=None)
 
 lr_config = dict(
     policy='WarmupLinearScheduleNonZero',
