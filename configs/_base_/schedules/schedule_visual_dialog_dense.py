@@ -1,13 +1,3 @@
-# optimizer  transform.AdamW
-# optimizer = dict(
-#     type='AdamW',
-#     lr=0.00005,
-#     weight_decay=0,
-#     eps=1e-9,
-#     betas=[0.9, 0.98],
-#     training_encoder_lr_multiply=1
-# )
-
 optimizer = dict(
     type='AdamW',
     constructor='BertOptimizerConstructor',
@@ -19,7 +9,7 @@ optimizer = dict(
     # eps=1e-9,
     # betas=[0.9, 0.98],
     training_encoder_lr_multiply=1)
-optimizer_config = dict(grad_clip=None)  # ??
+optimizer_config = dict(grad_clip=None)
 
 lr_config = dict(
     policy='WarmupLinearScheduleNonZero',

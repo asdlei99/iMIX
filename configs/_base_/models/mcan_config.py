@@ -34,10 +34,7 @@ model = dict(
     combine_model=dict(type='BranchCombineLayer', img_dim=1024, ques_dim=1024),
     head=dict(
         type='TripleLinearHead',
-        # type='ClassifierLayer',
-        # classifier_type='triple_linear',
         in_dim=2048,
         out_dim=3129,
-        # loss_cls=dict(type='TripleLogitBinaryCrossEntropy')
     ))
 loss = dict(type='TripleLogitBinaryCrossEntropy')

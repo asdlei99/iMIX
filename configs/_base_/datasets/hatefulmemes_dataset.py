@@ -71,4 +71,4 @@ test_data = dict(
     data=dict(type=dataset_type, reader=reader_test_cfg, info_cpler=info_cpler_cfg),
 )
 
-evaluator_type = 'VQA'  # TODO(jinliang)
+evaluator_type = 'VQA'

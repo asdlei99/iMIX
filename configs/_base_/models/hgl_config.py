@@ -21,6 +21,5 @@ model = dict(
         in_dim=1536,
         out_dim=1024,
         dropout=0.3,
-        # loss_cls=dict(type='LogitBinaryCrossEntropy')
     ))
 loss = [dict(type='CrossEntropyLoss'), dict(type='OBJCrossEntropyLoss')]
