@@ -50,9 +50,7 @@ Supported backbones:
 | refcocog          |        |        | √       |          |       |       |      |      |      |      |              |
 | refcoco           |        |        | √       |          |       |       |      |      |      |      |              |
 | refcoco+          |        |        | √       | √        |       |       |      |      |      |      |              |
-| w/cc+vqa          |        |        |         |          |       |       |      |      |      |      | √            |
-| CE                |        |        |         |          |       |       |      |      |      |      | √            |
-| CE+NSP            |        |        |         |          |       |       |      |      |      |      | √            |
+| VisDial           |        |        |         |          |       |       |      |      |      |      | √            |
 
 ## Installation
 

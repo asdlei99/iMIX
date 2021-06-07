@@ -13,7 +13,7 @@
 
 ## Results and Models
 
-|   Task   |  Style  |      NDCG      |
+|   Model   |  Style  |      NDCG      |
 | :------: | :-----: | :------------: |
 | w/cc+vqa | pytorch | 64.95%(64.94%) |
 |    CE    | pytorch | 75.24%(75.24%) |
