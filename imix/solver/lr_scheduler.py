@@ -57,6 +57,7 @@ class WarmupMultiStepLR(_LRScheduler):
     def _compute_values(self) -> List[float]:
         return self.get_lr()
 
+
 @LR_SCHEDULERS.register_module()
 class ReduceOnPlateauSchedule(torch.optim.lr_scheduler.ReduceLROnPlateau):
 
@@ -76,6 +77,7 @@ class ReduceOnPlateauSchedule(torch.optim.lr_scheduler.ReduceLROnPlateau):
 
     def get_lr(self):
         return self.get_last_lr()
+
 
 @LR_SCHEDULERS.register_module()
 class WarmupCosineLR(_LRScheduler):

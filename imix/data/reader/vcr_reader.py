@@ -52,8 +52,6 @@ class VCRReader(IMIXDataReader):
             self.annotations_idx_split.extend(copy.copy([split] * len(annotations_now)))
 
         self.default_answer_idx = cfg.default_answer_idx
-        self.annotations = self.annotations[:20]
-        # flag = True
 
     def _load_jsonl(self, annotation_path):
         with open(annotation_path, 'r') as f:

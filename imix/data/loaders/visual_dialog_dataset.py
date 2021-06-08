@@ -10,7 +10,7 @@ from imix.data.reader.feature_reader.image_features_reader import ImageFeaturesH
 from ..utils.data_utils import encode_input, encode_image_input
 import os
 
-dataset_root_path = '/home/datasets/mix_data/mmf/data/datasets/visdial_data/'
+dataset_root_path = '/home/datasets/mix_data/iMIX/data/datasets/visdial_data/'
 
 
 @DATASETS.register_module()

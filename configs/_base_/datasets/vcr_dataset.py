@@ -76,7 +76,7 @@ vcr_info_cpler_cfg = dict(
 train_data = dict(
     samples_per_gpu=4,  # 16
     workers_per_gpu=1,
-    data=dict(type=dataset_type, reader=vcr_reader_train_cfg, info_cpler=vcr_info_cpler_cfg, limit_nums=800))
+    data=dict(type=dataset_type, reader=vcr_reader_train_cfg, info_cpler=vcr_info_cpler_cfg, limit_nums=None))
 
 test_data = dict(
     samples_per_gpu=16,
@@ -85,4 +85,4 @@ test_data = dict(
 )
 
 post_processor = dict(
-    type='Evaluator', metrics=[dict(type='VQAAccuracyMetric')], dataset_converters=[dict(type='VQADatasetConverter')])
+    type='Evaluator', metrics=[dict(type='VCRAccuracyMetric')], dataset_converters=[dict(type='VCRDatasetConverter')])
