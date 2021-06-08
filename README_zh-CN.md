@@ -1,6 +1,7 @@
 <div align="center">
   <img src=".\resources\iMIX-LOGO.png" width="600"/>
 </div>
+
 ## 简介
 
 [English](readme.md) | 简体中文
@@ -25,7 +26,7 @@ iMIX主要工作是基于PyTorch。
 
 ## 基准测试和模型库
 
-测试结果和模型可以在[模型库](imix/docs/getstarted/model_zoo.md)中找到。
+测试结果和模型可以在[模型库](docs/getstart/model_zoo.md)中找到。
 
 所有支持的模型和任务如下表所示：
 
@@ -52,13 +53,13 @@ iMIX主要工作是基于PyTorch。
 
 ## 安装
 
-请参考[快速入门文档](imix/docs/getstarted/get_started.md)进行安装。
+请参考[快速入门文档](docs/getstart/get_started.md)进行安装。
 
 ## 快速入门
 
-请参考[新手使用指南](imix/docs/quickrun/1_exist_data_model.md)学习 iMIX 的基本使用和可视化推理界面。
+请参考[新手使用指南](docs/Quickrun/1_exist_data_model.md)学习 iMIX 的基本使用和可视化推理界面。
 
-我们提供了框架核心功能 [engine介绍](docs/tutorials/Tutorial-engine.md)，基本配置[config介绍](docs/tutorials/Tutorial1-config.md)，以及包含的所有[模型和精度介绍](imix/docs/getstarted/model_zoo.md)。
+我们提供了框架核心功能 [engine介绍](docs/tutorials/Tutorial-engine.md)，基本配置[config介绍](docs/tutorials/Tutorial1-config.md)，以及包含的所有[模型和精度介绍](docs/getstart/model_zoo.md)。
 
 我们也提供了一些进阶教程，内容覆盖了 [finetune 模型](docs/tutorials/Tutorial6-finetune.md)，[增加新数据集支持](docs/tutorials/Tutorial2-customize_dataset.md)，[增加自定义模型](docs/tutorials/Tutorial3-customize_models.md)，[增加自定义的运行时配置](docs/tutorials/Tutorial4-customize_Schedule_and_Runtime_Settings.md)，[常用工具](docs/log_visualization.md)。
 
