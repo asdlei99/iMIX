@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/19
-"""
-
 from ..utils.stream import ItemFeature
 from .base_reader import IMIXDataReader
 from imix.utils.common_function import update_d1_with_d2

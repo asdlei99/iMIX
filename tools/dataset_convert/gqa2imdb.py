@@ -3,10 +3,14 @@ import pickle
 
 import lmdb
 import numpy as np
+from imix.utils.config import ToExpanduser
 
-feats_dir = '/home/zrz/.cache/torch/iMIX/data/datasets/gqa/defaults/features/new_output'
+feats_dir = '~/.cache/torch/iMIX/data/datasets/gqa/defaults/features/new_output'
+feats_dir = ToExpanduser.modify_path(feats_dir)
 
-env = lmdb.open('/home/zrz/.cache/torch/iMIX/data/datasets/gqa/defaults/features/gqa', map_size=1099511627776)
+lmdb_dir = '~/.cache/torch/iMIX/data/datasets/gqa/defaults/features/gqa'
+lmdb_dir = ToExpanduser.modify_path(lmdb_dir)
+env = lmdb.open(lmdb_dir, map_size=1099511627776)
 
 txn = env.begin(write=True)
 max_num_bbox = 0
@@ -27,4 +31,3 @@ for file in os.listdir(feats_dir):
 txn.commit()
 env.close()
 print(max_num_bbox)
-print('haha')

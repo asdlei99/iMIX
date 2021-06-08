@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/17
-"""
-
 import collections
 from collections import OrderedDict
 

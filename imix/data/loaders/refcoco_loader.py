@@ -1,7 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/21
-"""
 from .base_loader import BaseLoader
 from ..builder import DATASETS
 from ..infocomp import RefCOCOInfoCpler as InfoCpler

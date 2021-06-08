@@ -323,7 +323,7 @@ class VisDiaBERT(BaseModel):
         image_target = None
         image_label = None
 
-        if not evaluation:  # TODO(jinliang): -> self.training
+        if not evaluation:  # TODO: self.training
             next_sentence_labels = batch['next_sentence_labels']
             next_sentence_labels = next_sentence_labels.view(-1)
             next_sentence_labels = next_sentence_labels[sample_indices]

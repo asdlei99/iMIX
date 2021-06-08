@@ -1,7 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/14
-"""
 from ..reader import OCRVQAReader as Reader
 from ..infocomp import OCRVQAInfoCpler as InfoCpler
 from ..builder import DATASETS

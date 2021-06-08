@@ -1,7 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/20
-"""
 import logging
 import os
 

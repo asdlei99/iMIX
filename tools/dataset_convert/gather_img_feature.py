@@ -34,7 +34,7 @@ if __name__ == '__main__':
     datasets = ['train2014', 'test2015', 'val2014', 'visualgenome']
 
     for dataset in datasets:
-        save_name = '/home/jinliang/{}.pt'.format(dataset)
+        save_name = '{}.pt'.format(dataset)
         feature_dir = os.path.join(dataset_root, data_dir, dataset)
         print(f'processing {feature_dir}')
 

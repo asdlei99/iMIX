@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/26
-"""
-
 from .refcoco2_reader import RefCOCOReader
 
 

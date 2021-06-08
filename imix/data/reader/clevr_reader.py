@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/18
-"""
-
 import numpy as np
 import torch
 
@@ -22,23 +17,7 @@ class ClevrReader(IMIXDataReader):
         annotation = self.mix_annotations[item]
         split = self.item_splits[item]
         item_feature = ItemFeature(annotation)
-        # item_feature = ItemFeature()
         item_feature.error = False
-        '''
-        for k, v in annotation.items():
-            item_feature[k] = v
-
-        # TODO(jinliang)
-         item_feature.tokens = annotation["question_tokens"]
-         item_feature.answers = annotation["answers"]
-         item_feature.all_answers = annotation["all_answers"]
-         print(item)
-         item_feature.ocr_tokens = annotation["ocr_tokens"]
-
-        if split != 'test':
-            item_feature.answers = annotation['answers']
-            item_feature.all_answers = annotation['all_answers']
-        '''
         item_feature.tokens = annotation['question_tokens']
         item_feature.img_id = annotation['image_id']
         if self.default_feature:

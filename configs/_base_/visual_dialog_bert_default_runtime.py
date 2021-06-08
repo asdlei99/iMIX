@@ -4,7 +4,7 @@ log_config = dict(period=5)
 work_dir = './work_dirs'  # the dir to save logs and models
 
 # load_from = '/home/datasets/mix_data/model/visdial_model_imix/vqa_weights.pth'
-# load_from = '/home/jinliang/iMIX/imix/work_dirs/epoch18_model.pth'
+# load_from = '~/iMIX/imix/work_dirs/epoch18_model.pth'
 # seed = 13
 CUDNN_BENCHMARK = False
 model_device = 'cuda'

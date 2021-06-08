@@ -302,7 +302,7 @@ class OSCAR_GQADataset(Dataset):
                 input_mask = input_mask + [1 if mask_padding_with_zero else 0] * img_feat.shape[0]
         else:
             # img_feat = self.img_features[example.img_key]  # [:, 0:self.args.img_feature_dim]  # torch
-            img_feat_path = self.img_features[example.img_key]  # jinliang modify
+            img_feat_path = self.img_features[example.img_key]
             img_feat = torch.load(img_feat_path)
 
             if img_feat.shape[0] > self.args.max_img_seq_length:
@@ -384,7 +384,7 @@ class OSCAR_GQADataset(Dataset):
     #
     #     return img_features
 
-    def _load_img_features(self, args):  # jinliang modify
+    def _load_img_features(self, args):
         t_start = time.time()
         if args.img_feature_type == 'faster_r-cnn':
             if args.img_feature_dim == 2048:  # object features

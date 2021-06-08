@@ -7,13 +7,14 @@ import torch
 import torch.distributed as dist
 
 _LOCAL_PROCESS_GROUP = None
-G_NCCL = 'nccl'
-G_GLOO = 'gloo'
-G_CUDA = 'cuda'
 """
 A torch process group which only includes processes that on the same machine as the current process.
 This variable is set when processes are spawned by `launch()` in "engine/launch.py".
 """
+
+G_NCCL = 'nccl'
+G_GLOO = 'gloo'
+G_CUDA = 'cuda'
 
 
 class DistributedStatus(enum.Enum):
@@ -56,9 +57,9 @@ def get_rank() -> int:
 
 def get_local_rank() -> int:
     """
-          Returns:
-              The rank of the current process within the local (per-machine) process group.
-      """
+    Returns:
+        The rank of the current process within the local (per-machine) process group.
+    """
     status = get_dist_status()
     if status in (DistributedStatus.AVAILABLE, DistributedStatus.INITIALIZED):
         return 0
@@ -69,10 +70,10 @@ def get_local_rank() -> int:
 
 def get_local_size() -> int:
     """
-          Returns:
-              The size of the per-machine process group,
-              i.e. the number of processes per machine.
-      """
+    Returns:
+        The size of the per-machine process group,
+          i.e. the number of processes per machine.
+    """
     status = get_dist_status()
     if status in (DistributedStatus.AVAILABLE, DistributedStatus.INITIALIZED):
         return 0
@@ -109,7 +110,7 @@ def synchronize() -> None:
 
 
 @functools.lru_cache()
-def _get_global_gloo_group():  # TODO(jinliang):COPY
+def _get_global_gloo_group():
     """Return a process group based on gloo backend, containing all the ranks
     The result is cached."""
     if dist.get_backend() == G_NCCL:
@@ -118,7 +119,7 @@ def _get_global_gloo_group():  # TODO(jinliang):COPY
         return dist.group.WORLD
 
 
-def _serialize_to_tensor(data, group):  # TODO(jinliang):serialize2tensor -> is_serialize ???
+def _serialize_to_tensor(data, group):  # serialize2tensor -> is_serialize
     backend = dist.get_backend(group=group)
     assert backend in [G_GLOO, G_NCCL]
     device = torch.device('cpu' if backend is G_GLOO else 'cuda')
@@ -128,12 +129,12 @@ def _serialize_to_tensor(data, group):  # TODO(jinliang):serialize2tensor -> is_
     return s2t
 
 
-def _pad_to_largest_tensor(tensor: torch.Tensor, group) -> tuple:  # TODO(jinliang):alignment_tensor
+def _pad_to_largest_tensor(tensor: torch.Tensor, group) -> tuple:
     """
           Returns:
               list[int]: size of the tensor, on each rank
               Tensor: padded tensor that has the max size
-      """
+    """
 
     world_size = dist.get_world_size(group=group)
     if world_size < 1:
@@ -186,13 +187,6 @@ def all_gather(data, group=None) -> list:
     if group is None:
         group = _get_global_gloo_group()
 
-    # if get_world_size() == 1:
-    #     return [data]
-    # if group is None:
-    #     group = _get_global_gloo_group()
-    # if dist.get_world_size(group=group) == 1:
-    #     return [data]
-
     tensor = _serialize_to_tensor(data, group)
     tensor, tensor_sizes = _pad_to_largest_tensor(tensor, group)
     max_tensor_size = max(tensor_sizes)
@@ -207,7 +201,7 @@ def all_gather(data, group=None) -> list:
     return datum
 
 
-def gather(data, *, dst_rank=0, group=None) -> list:  # TODO(jinliang): gather --> gather_data
+def gather(data, *, dst_rank=0, group=None) -> list:
     """Run gather on arbitrary picklable data (not necessarily tensors).
 
     Args:
@@ -225,13 +219,6 @@ def gather(data, *, dst_rank=0, group=None) -> list:  # TODO(jinliang): gather -
         return [data]
     if group is None:
         group = _get_global_gloo_group()
-
-    # if get_world_size() == 1:
-    #     return [data]
-    # if group is None:
-    #     group = _get_global_gloo_group()
-    # if dist.get_world_size(group=group) == 1:
-    #     return [data]
 
     tensor = _serialize_to_tensor(data, group)
     tensor, tensor_sizes = _pad_to_largest_tensor(tensor, group)
@@ -252,15 +239,15 @@ def gather(data, *, dst_rank=0, group=None) -> list:  # TODO(jinliang): gather -
         return []
 
 
-def shared_random_seed(low=2**31, select_idx=0) -> int:  # TODO(jinliang): get_common_random_seed
+def shared_random_seed(low=2**31, select_idx=0) -> int:
     """
-          Returns:
-              int: a random number that is the same across all workers.
-                  If workers need a shared RNG, they can use this shared seed to
-                  create one.
+    Returns:
+      int: a random number that is the same across all workers.
+          If workers need a shared RNG, they can use this shared seed to
+          create one.
 
-          All workers must call this function, otherwise it will deadlock.
-          """
+    All workers must call this function, otherwise it will deadlock.
+    """
     random_ints = np.random.randint(low)
     all_random_ints = all_gather(random_ints)
     if len(all_random_ints) < select_idx:

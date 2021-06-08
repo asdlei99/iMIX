@@ -103,7 +103,7 @@ class VisualEntailmentDataset(Dataset):
         self._tokenizer = tokenizer
         self._padding_index = padding_index
 
-        clean_train = '_cleaned_tolist' if clean_datasets else ''  # TODO(jinliang): _cleaned  --> _cleaned_tolist
+        clean_train = '_cleaned_tolist' if clean_datasets else ''  # cleaned  --> _cleaned_tolist
 
         if 'roberta' in bert_model:
             cache_path = os.path.join(

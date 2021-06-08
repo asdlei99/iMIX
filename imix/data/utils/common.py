@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/20
-"""
-
 import unicodedata
 import re
 SENTENCE_SPLIT_REGEX = re.compile(r'(\W+)')

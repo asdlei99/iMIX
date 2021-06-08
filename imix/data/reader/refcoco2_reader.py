@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/26
-"""
-
 import json
 import os
 import pickle

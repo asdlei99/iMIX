@@ -1,7 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/11
-"""
 import os.path as osp
 import random
 

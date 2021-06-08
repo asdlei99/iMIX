@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2020/8/18
-"""
-
 import base64
 import copy
 import csv

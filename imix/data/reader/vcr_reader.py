@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/19
-"""
-
 import copy
 import json
 import os

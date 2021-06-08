@@ -270,7 +270,7 @@ class OSCAR_NLVR2Dataset(Dataset):
 
             # img
             img_key = example.img_key[choice_key]
-            # img_feat = self.img_features[img_key]  #jinliang
+            # img_feat = self.img_features[img_key]
             img_feat_path = self.img_features[img_key]
             img_feat = torch.load(img_feat_path)
 

@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/11
-"""
-
 import numpy as np
 from torchvision import transforms as T
 

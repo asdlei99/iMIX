@@ -112,7 +112,7 @@ class OSCAR_VQADataset(Dataset):
         else:
             self.img_features = torch.load(os.path.join(args.data_dir, '{}_img_feats.pt'.format(name)))
 
-        if args.img_feature_is_folder:  # jinliang add
+        if args.img_feature_is_folder:
             from pathlib import Path
             img_feat_path = self.img_features
             self.img_features = {}
@@ -218,7 +218,6 @@ class OSCAR_VQADataset(Dataset):
             assert len(input_mask) == self.args.max_seq_length
             assert len(segment_ids) == self.args.max_seq_length
 
-            # jinliang
             # self.init_torch_pth_file()
             #
             # # image features
@@ -346,8 +345,6 @@ class OSCAR_VQADataset(Dataset):
         else:
             if self.args.img_feat_format == 'pt':
                 # img_feat = self.img_features[example.img_key]  # [:, 0:self.args.img_feature_dim]  # torch
-
-                # jinliang add
                 img_feat_path = self.img_features[example.img_key]
                 img_feat = torch.load(img_feat_path)
             elif self.args.img_feat_format == 'tsv':

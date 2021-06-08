@@ -1,8 +1,3 @@
-"""
-author: lxc
-created time: 2021/1/11
-"""
-
 from .refcoco2_infocpler import RefCOCOInfoCpler
 
 
