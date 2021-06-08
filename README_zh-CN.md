@@ -10,7 +10,7 @@
 
 iMIX主要工作是基于PyTorch。
 
-文档: https://iMIX.readthedocs.io/
+Documentation: https://imix-docs.readthedocs.io/en/latest/
 
 ![demo_image](resources/0.png)
 

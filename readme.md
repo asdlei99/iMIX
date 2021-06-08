@@ -10,7 +10,7 @@ Inspur Multimodal Artificial Intelligence Framework (iMIX) is an open source mul
 
 The master branch works based on PyTorch.
 
-Documentation: https://iMIX.readthedocs.io/
+Documentation: https://imix-docs.readthedocs.io/en/latest/
 
 ![demo_image](resources/0.png)
 
