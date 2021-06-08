@@ -57,6 +57,25 @@ class WarmupMultiStepLR(_LRScheduler):
     def _compute_values(self) -> List[float]:
         return self.get_lr()
 
+@LR_SCHEDULERS.register_module()
+class ReduceOnPlateauSchedule(torch.optim.lr_scheduler.ReduceLROnPlateau):
+
+    def __init__(self, optimizer: torch.optim.Optimizer, **kwargs):
+        self.factor = kwargs['factor']
+        self.mode = kwargs['mode']
+        self.patience = kwargs['patience']
+        self.verbose = kwargs['verbose']
+        self.cooldown = kwargs['cooldown']
+        super().__init__(
+            optimizer,
+            mode=self.mode,
+            factor=self.factor,
+            patience=self.patience,
+            verbose=self.verbose,
+            cooldown=self.cooldown)
+
+    def get_lr(self):
+        return self.get_last_lr()
 
 @LR_SCHEDULERS.register_module()
 class WarmupCosineLR(_LRScheduler):
