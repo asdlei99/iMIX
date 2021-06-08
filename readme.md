@@ -1,6 +1,7 @@
 <div align="center">
   <img src=".\resources\iMIX-LOGO.png" width="600"/>
 </div>
+
 ## Introduction
 
 English | [简体中文](README_zh-CN.md)
@@ -25,7 +26,7 @@ iMIX's subsequent version will optimize the framework further. We will add more 
 
 ## Benchmark and model zoo
 
-Results and models are available in the [model zoo](imix/docs/getstarted/model_zoo.md).
+Results and models are available in the [model zoo](docs/getstart/model_zoo.md).
 
 All supported models and tasks are shown in the table below.
 
@@ -54,12 +55,12 @@ Supported backbones:
 
 ## Installation
 
-Please refer to [get_started.md](imix/docs/getstarted/get_started.md) for installation.
+Please refer to [get_started.md](docs/getstart/get_started.md) for installation.
 
 ## Getting Started
 
-Please see [quickrun](imix/docs/quickrun/1_exist_data_model.md) for the basic usage of iMIX and visual interface for inference.
-We provide basic introduction of iMIX core module [engine](docs/tutorials/Tutorial-engine.md), full guidance for [configuration](docs/tutorials/Tutorial1-config.md), and all the [results and model](imix/docs/getstarted/model_zoo.md).
+Please see [quickrun](docs/Quickrun/1_exist_data_model.md) for the basic usage of iMIX and visual interface for inference.
+We provide basic introduction of iMIX core module [engine](docs/tutorials/Tutorial-engine.md), full guidance for [configuration](docs/tutorials/Tutorial1-config.md), and all the [results and model](docs/getstart/model_zoo.md).
 There are also tutorials for [finetuning models](docs/tutorials/Tutorial6-finetune.md), [adding new dataset](docs/tutorials/Tutorial2-customize_dataset.md), [customizing models](docs/tutorials/Tutorial3-customize_models.md), [customizing runtime settings](docs/tutorials/Tutorial4-customize_Schedule_and_Runtime_Settings.md) and [useful tools](docs/log_visualization.md).
 
 ## Contributing
