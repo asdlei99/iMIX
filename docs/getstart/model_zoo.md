@@ -44,4 +44,4 @@ Please refer to [R2C](https://github.com/inspur-hsslab/iMIX/tree/master/configs/
 
 ### VisDial-BERT
 
-Please refer to [VisDial-BERT](https://github.com/inspur-hsslab/iMIX/tree/master/configs/visualbert) for details.
+Please refer to [VisDial-BERT](https://github.com/inspur-hsslab/iMIX/tree/master/configs/visual_dialog_bert) for details.
